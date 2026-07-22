@@ -1,0 +1,196 @@
+[
+  {
+    "question": {
+      "id": "ai-02",
+      "question": "Which training interventions most increase honest uncertainty reporting under incentive pressure to appear confident?",
+      "domain": "ai",
+      "operationalization": "Compare interventions on a fixed honesty benchmark where models are rewarded for confident wrong answers; measure calibration and truthfulness deltas.",
+      "why_it_matters": "Overconfident systems amplify decision errors at scale.",
+      "assumptions": [],
+      "enabling_questions": [],
+      "tags": [
+        "honesty",
+        "calibration",
+        "rlhf"
+      ],
+      "source": "seed"
+    },
+    "scores": {
+      "impact": 0.39999999999999997,
+      "neglectedness": 1.0,
+      "tractability": 0.7000000000000001,
+      "surprise": 0.3,
+      "answerability": 0.7,
+      "risk": 0.15,
+      "cost_proxy": 0.45,
+      "rationale": {
+        "method": "heuristic_density_and_lexicon",
+        "note": "Fallback scorer; prefer LLM judges when available."
+      }
+    },
+    "curiosity_score": 0.7760665956662126,
+    "confidence": 0.2925,
+    "gap": {
+      "status": "unknown_with_caveat",
+      "confidence": 0.25,
+      "related_works": [],
+      "notes": "Literature verification disabled; treat gap status as provisional.",
+      "query_used": "training interventions increase honest uncertainty reporting under incentive pressure appear confident"
+    },
+    "rank": 1,
+    "investigation_brief": "## Investigation brief\n\n**Question.** Which training interventions most increase honest uncertainty reporting under incentive pressure to appear confident?\n\n**Why now.** Overconfident systems amplify decision errors at scale.\n\n**Operationalization.** Compare interventions on a fixed honesty benchmark where models are rewarded for confident wrong answers; measure calibration and truthfulness deltas.\n\n**Gap status.** unknown_with_caveat (confidence 0.25). Literature verification disabled; treat gap status as provisional.\n\n**Related literature (sample).**\n- No closely related works retrieved.\n\n**Score snapshot.** impact=0.40, neglectedness=1.00, tractability=0.70, surprise=0.30, answerability=0.70, risk=0.15\n\n**Curiosity score.** 0.776 (confidence 0.29)\n\n**Suggested first moves.**\n1. Systematic review of the retrieved cluster; mark settled vs open subclaims.\n2. Write a falsifiable prediction or measurement plan from the operationalization.\n3. Identify the cheapest discriminating experiment or analysis.\n",
+    "flags": [
+      "heuristic_scoring",
+      "no_literature"
+    ],
+    "metadata": {
+      "passed_gates": true
+    }
+  },
+  {
+    "question": {
+      "id": "ai-04",
+      "question": "What architectural or training conditions cause persistent scheming-like behavior to appear in multi-episode agent settings?",
+      "domain": "ai",
+      "operationalization": "Map conditions under which deceptive planning survives standard safety fine-tuning in multi-episode evals.",
+      "why_it_matters": "Scheming under evaluation is a central alignment risk.",
+      "assumptions": [],
+      "enabling_questions": [],
+      "tags": [
+        "scheming",
+        "agents",
+        "safety"
+      ],
+      "source": "seed"
+    },
+    "scores": {
+      "impact": 0.48,
+      "neglectedness": 1.0,
+      "tractability": 0.55,
+      "surprise": 0.3,
+      "answerability": 0.7,
+      "risk": 0.15,
+      "cost_proxy": 0.45,
+      "rationale": {
+        "method": "heuristic_density_and_lexicon",
+        "note": "Fallback scorer; prefer LLM judges when available."
+      }
+    },
+    "curiosity_score": 0.7716814133044261,
+    "confidence": 0.2925,
+    "gap": {
+      "status": "unknown_with_caveat",
+      "confidence": 0.25,
+      "related_works": [],
+      "notes": "Literature verification disabled; treat gap status as provisional.",
+      "query_used": "architectural training conditions cause persistent scheming-like behavior appear multi-episode agent settings"
+    },
+    "rank": 2,
+    "investigation_brief": "## Investigation brief\n\n**Question.** What architectural or training conditions cause persistent scheming-like behavior to appear in multi-episode agent settings?\n\n**Why now.** Scheming under evaluation is a central alignment risk.\n\n**Operationalization.** Map conditions under which deceptive planning survives standard safety fine-tuning in multi-episode evals.\n\n**Gap status.** unknown_with_caveat (confidence 0.25). Literature verification disabled; treat gap status as provisional.\n\n**Related literature (sample).**\n- No closely related works retrieved.\n\n**Score snapshot.** impact=0.48, neglectedness=1.00, tractability=0.55, surprise=0.30, answerability=0.70, risk=0.15\n\n**Curiosity score.** 0.772 (confidence 0.29)\n\n**Suggested first moves.**\n1. Systematic review of the retrieved cluster; mark settled vs open subclaims.\n2. Write a falsifiable prediction or measurement plan from the operationalization.\n3. Identify the cheapest discriminating experiment or analysis.\n",
+    "flags": [
+      "heuristic_scoring",
+      "no_literature"
+    ],
+    "metadata": {
+      "passed_gates": true
+    }
+  },
+  {
+    "question": {
+      "id": "ai-03",
+      "question": "How can we quantify the expected value of unanswered scientific questions so AI systems prioritize investigation, not only answering?",
+      "domain": "ai",
+      "operationalization": "Produce a scoring method whose top-k questions are rated higher by domain experts than random/LLM-interestingness baselines on blinded panels.",
+      "why_it_matters": "Without a curiosity layer, AI accelerates answering known frames while neglecting high-value unknowns.",
+      "assumptions": [],
+      "enabling_questions": [],
+      "tags": [
+        "meta-science",
+        "curiosity",
+        "voi"
+      ],
+      "source": "seed"
+    },
+    "scores": {
+      "impact": 0.39999999999999997,
+      "neglectedness": 1.0,
+      "tractability": 0.55,
+      "surprise": 0.37,
+      "answerability": 0.7,
+      "risk": 0.15,
+      "cost_proxy": 0.45,
+      "rationale": {
+        "method": "heuristic_density_and_lexicon",
+        "note": "Fallback scorer; prefer LLM judges when available."
+      }
+    },
+    "curiosity_score": 0.7668674713787828,
+    "confidence": 0.2925,
+    "gap": {
+      "status": "unknown_with_caveat",
+      "confidence": 0.25,
+      "related_works": [],
+      "notes": "Literature verification disabled; treat gap status as provisional.",
+      "query_used": "quantify expected value unanswered scientific questions systems prioritize investigation not only answering"
+    },
+    "rank": 3,
+    "investigation_brief": "## Investigation brief\n\n**Question.** How can we quantify the expected value of unanswered scientific questions so AI systems prioritize investigation, not only answering?\n\n**Why now.** Without a curiosity layer, AI accelerates answering known frames while neglecting high-value unknowns.\n\n**Operationalization.** Produce a scoring method whose top-k questions are rated higher by domain experts than random/LLM-interestingness baselines on blinded panels.\n\n**Gap status.** unknown_with_caveat (confidence 0.25). Literature verification disabled; treat gap status as provisional.\n\n**Related literature (sample).**\n- No closely related works retrieved.\n\n**Score snapshot.** impact=0.40, neglectedness=1.00, tractability=0.55, surprise=0.37, answerability=0.70, risk=0.15\n\n**Curiosity score.** 0.767 (confidence 0.29)\n\n**Suggested first moves.**\n1. Systematic review of the retrieved cluster; mark settled vs open subclaims.\n2. Write a falsifiable prediction or measurement plan from the operationalization.\n3. Identify the cheapest discriminating experiment or analysis.\n",
+    "flags": [
+      "heuristic_scoring",
+      "no_literature"
+    ],
+    "metadata": {
+      "passed_gates": true
+    }
+  },
+  {
+    "question": {
+      "id": "ai-01",
+      "question": "What measurable internal signals most reliably predict goal-misgeneralization before deployment-scale harm?",
+      "domain": "ai",
+      "operationalization": "Identify signals that, in controlled agent evals, predict misgeneralization with AUROC > 0.8 across \u22653 environments.",
+      "why_it_matters": "Early warning of misaligned generalization could prevent catastrophic deployment failures.",
+      "assumptions": [
+        "Internal activations are partially interpretable."
+      ],
+      "enabling_questions": [],
+      "tags": [
+        "alignment",
+        "evals",
+        "interpretability"
+      ],
+      "source": "seed"
+    },
+    "scores": {
+      "impact": 0.39999999999999997,
+      "neglectedness": 1.0,
+      "tractability": 0.55,
+      "surprise": 0.3,
+      "answerability": 0.7,
+      "risk": 0.15,
+      "cost_proxy": 0.45,
+      "rationale": {
+        "method": "heuristic_density_and_lexicon",
+        "note": "Fallback scorer; prefer LLM judges when available."
+      }
+    },
+    "curiosity_score": 0.7372974442197927,
+    "confidence": 0.2925,
+    "gap": {
+      "status": "unknown_with_caveat",
+      "confidence": 0.25,
+      "related_works": [],
+      "notes": "Literature verification disabled; treat gap status as provisional.",
+      "query_used": "measurable internal signals reliably predict goal-misgeneralization before deployment-scale harm"
+    },
+    "rank": 4,
+    "investigation_brief": "## Investigation brief\n\n**Question.** What measurable internal signals most reliably predict goal-misgeneralization before deployment-scale harm?\n\n**Why now.** Early warning of misaligned generalization could prevent catastrophic deployment failures.\n\n**Operationalization.** Identify signals that, in controlled agent evals, predict misgeneralization with AUROC > 0.8 across \u22653 environments.\n\n**Gap status.** unknown_with_caveat (confidence 0.25). Literature verification disabled; treat gap status as provisional.\n\n**Related literature (sample).**\n- No closely related works retrieved.\n\n**Score snapshot.** impact=0.40, neglectedness=1.00, tractability=0.55, surprise=0.30, answerability=0.70, risk=0.15\n\n**Curiosity score.** 0.737 (confidence 0.29)\n\n**Suggested first moves.**\n1. Systematic review of the retrieved cluster; mark settled vs open subclaims.\n2. Write a falsifiable prediction or measurement plan from the operationalization.\n3. Identify the cheapest discriminating experiment or analysis.\n",
+    "flags": [
+      "heuristic_scoring",
+      "no_literature"
+    ],
+    "metadata": {
+      "passed_gates": true
+    }
+  }
+]

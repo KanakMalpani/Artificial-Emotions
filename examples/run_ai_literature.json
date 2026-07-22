@@ -1,0 +1,484 @@
+[
+  {
+    "question": {
+      "id": "ai-01",
+      "question": "What measurable internal signals most reliably predict goal-misgeneralization before deployment-scale harm?",
+      "domain": "ai",
+      "operationalization": "Identify signals that, in controlled agent evals, predict misgeneralization with AUROC > 0.8 across \u22653 environments.",
+      "why_it_matters": "Early warning of misaligned generalization could prevent catastrophic deployment failures.",
+      "assumptions": [
+        "Internal activations are partially interpretable."
+      ],
+      "enabling_questions": [],
+      "tags": [
+        "alignment",
+        "evals",
+        "interpretability"
+      ],
+      "source": "seed"
+    },
+    "scores": {
+      "impact": 0.39999999999999997,
+      "neglectedness": 0.6976125000000001,
+      "tractability": 0.55,
+      "surprise": 0.3,
+      "answerability": 0.7,
+      "risk": 0.15,
+      "cost_proxy": 0.45,
+      "rationale": {
+        "method": "heuristic_density_and_lexicon",
+        "note": "Fallback scorer; prefer LLM judges when available."
+      }
+    },
+    "curiosity_score": 0.6738237152260453,
+    "confidence": 0.55,
+    "gap": {
+      "status": "partially_answered",
+      "confidence": 0.8,
+      "related_works": [
+        {
+          "title": "Current cases of AI misalignment and their implications for future risks",
+          "year": 2023,
+          "doi": "https://doi.org/10.1007/s11229-023-04367-0",
+          "openalex_id": "https://openalex.org/W4388198642",
+          "cited_by_count": 49,
+          "abstract_snippet": "Abstract How can one build AI systems such that they pursue the goals their designers want them to pursue? This is the alignment problem . Numerous authors have raised concerns that, as research advances and systems become more powerful over time, misalignment might lead to catastrophic outcomes, perhaps even to the extinction or permanent disempowerment of humanity. In this paper,",
+          "url": "https://openalex.org/W4388198642"
+        },
+        {
+          "title": "Navigating the landscape of concept-supported XAI: Challenges, innovations, and future directions",
+          "year": 2024,
+          "doi": "https://doi.org/10.1007/s11042-023-17666-y",
+          "openalex_id": "https://openalex.org/W4391089346",
+          "cited_by_count": 14,
+          "abstract_snippet": "Abstract This comprehensive review of concept-supported interpretation methods in Explainable Artificial Intelligence (XAI) navigates the multifaceted landscape. As machine learning models become more complex, there is a greater need for interpretation methods that deconstruct their decision-making processes. Traditional interpretation techniques frequently emphasise lower-level attributes, resulting in a schism between complex algorithms and human cognition. To bridge this gap, our research",
+          "url": "https://openalex.org/W4391089346"
+        },
+        {
+          "title": "Ethical perspectives on deployment of large language model agents in biomedicine: a survey",
+          "year": 2025,
+          "doi": "https://doi.org/10.1007/s43681-025-00847-w",
+          "openalex_id": "https://openalex.org/W4416986173",
+          "cited_by_count": 2,
+          "abstract_snippet": "Abstract Large language models (LLMs) and their integration into agentic and embodied systems are reshaping artificial intelligence (AI), enabling powerful cross-domain generation and reasoning while introducing new risks. Key concerns include hallucination and misinformation, embedded and amplified biases, privacy leakage, and susceptibility to adversarial manipulation. Ensuring trustworthy and responsible generative AI requires technical reliability, transparency, accountability, and attention to societal",
+          "url": "https://openalex.org/W4416986173"
+        },
+        {
+          "title": "Large Language Model Alignment: A Survey",
+          "year": 2023,
+          "doi": "https://doi.org/10.48550/arxiv.2309.15025",
+          "openalex_id": "https://openalex.org/W4387156634",
+          "cited_by_count": 36,
+          "abstract_snippet": "Recent years have witnessed remarkable progress made in large language models (LLMs). Such advancements, while garnering significant attention, have concurrently elicited various concerns. The potential of these models is undeniably vast; however, they may yield texts that are imprecise, misleading, or even detrimental. Consequently, it becomes paramount to employ alignment techniques to ensure these models to exhibit behaviors consistent with",
+          "url": "https://openalex.org/W4387156634"
+        },
+        {
+          "title": "Catch Me If You Can: Rogue AI Detection and Correction at Scale",
+          "year": 2025,
+          "doi": "https://doi.org/10.3390/electronics14204122",
+          "openalex_id": "https://openalex.org/W4415401063",
+          "cited_by_count": 1,
+          "abstract_snippet": "Modern AI systems can strategically misreport information when incentives diverge from truthfulness, posing risks for oversight and deployment. Prior studies often examine this behavior within a single paradigm; systematic, cross-architecture evidence under a unified protocol has been limited. We introduce the Strategy Elicitation Battery (SEB), a standardized probe suite for measuring deceptive reporting across large language models (LLMs), reinforcement-learning agents,",
+          "url": "https://openalex.org/W4415401063"
+        },
+        {
+          "title": "Phase Transitions in Artificial General Intelligence: Scaling Laws, Predictability Limits, and Singularity",
+          "year": 2026,
+          "doi": "https://doi.org/10.21203/rs.3.rs-9055490/v1",
+          "openalex_id": "https://openalex.org/W7134953105",
+          "cited_by_count": 1,
+          "abstract_snippet": null,
+          "url": "https://openalex.org/W7134953105"
+        },
+        {
+          "title": "The Singapore Consensus on Global AI Safety Research Priorities",
+          "year": 2025,
+          "doi": "https://doi.org/10.70777/si.v2i5.15503",
+          "openalex_id": "https://openalex.org/W4413130428",
+          "cited_by_count": 4,
+          "abstract_snippet": "Rapidly improving AI capabilities and autonomy hold significant promise of transformation, but are also driving vigorous debate on how to ensure that AI is safe, i.e., trustworthy, reliable, and secure. Building a trusted ecosystem is therefore essential \u2013 it helps people embrace AI with confidence and gives maximal space for innovation while avoiding backlash. This requires policymakers, industry, researchers and",
+          "url": "https://openalex.org/W4413130428"
+        },
+        {
+          "title": "Towards trustworthy agentic AI: a comprehensive survey of safety, robustness, privacy, and system security",
+          "year": 2026,
+          "doi": "https://doi.org/10.20935/acadai8260",
+          "openalex_id": "https://openalex.org/W7159965625",
+          "cited_by_count": 1,
+          "abstract_snippet": "Agentic AI systems\u2014Large Language Models (LLMs) augmented with planning, tool use, memory, and long-horizon interactions\u2014can execute complex tasks autonomously, but their multi-step trajectories introduce new failure modes that challenge trustworthiness. This survey provides a focused examination of trustworthy agentic AI through two core dimensions that are critical for high-risk deployments: Safety and Robustness and Privacy and System Security. For each",
+          "url": "https://openalex.org/W7159965625"
+        }
+      ],
+      "notes": "Found 10 related works; top title overlap=0.04; avg citations=11.0.",
+      "query_used": "measurable internal signals reliably predict goal-misgeneralization before deployment-scale harm"
+    },
+    "rank": 1,
+    "investigation_brief": "## Investigation brief\n\n**Question.** What measurable internal signals most reliably predict goal-misgeneralization before deployment-scale harm?\n\n**Why now.** Early warning of misaligned generalization could prevent catastrophic deployment failures.\n\n**Operationalization.** Identify signals that, in controlled agent evals, predict misgeneralization with AUROC > 0.8 across \u22653 environments.\n\n**Gap status.** partially_answered (confidence 0.80). Found 10 related works; top title overlap=0.04; avg citations=11.0.\n\n**Related literature (sample).**\n- Current cases of AI misalignment and their implications for future risks (2023; cites=49)\n- Navigating the landscape of concept-supported XAI: Challenges, innovations, and future directions (2024; cites=14)\n- Ethical perspectives on deployment of large language model agents in biomedicine: a survey (2025; cites=2)\n\n**Score snapshot.** impact=0.40, neglectedness=0.70, tractability=0.55, surprise=0.30, answerability=0.70, risk=0.15\n\n**Curiosity score.** 0.674 (confidence 0.55)\n\n**Suggested first moves.**\n1. Systematic review of the retrieved cluster; mark settled vs open subclaims.\n2. Write a falsifiable prediction or measurement plan from the operationalization.\n3. Identify the cheapest discriminating experiment or analysis.\n",
+    "flags": [
+      "heuristic_scoring"
+    ],
+    "metadata": {
+      "passed_gates": true
+    }
+  },
+  {
+    "question": {
+      "id": "ai-02",
+      "question": "Which training interventions most increase honest uncertainty reporting under incentive pressure to appear confident?",
+      "domain": "ai",
+      "operationalization": "Compare interventions on a fixed honesty benchmark where models are rewarded for confident wrong answers; measure calibration and truthfulness deltas.",
+      "why_it_matters": "Overconfident systems amplify decision errors at scale.",
+      "assumptions": [],
+      "enabling_questions": [],
+      "tags": [
+        "honesty",
+        "calibration",
+        "rlhf"
+      ],
+      "source": "seed"
+    },
+    "scores": {
+      "impact": 0.39999999999999997,
+      "neglectedness": 0.48780000000000007,
+      "tractability": 0.7000000000000001,
+      "surprise": 0.3,
+      "answerability": 0.7,
+      "risk": 0.15,
+      "cost_proxy": 0.45,
+      "rationale": {
+        "method": "heuristic_density_and_lexicon",
+        "note": "Fallback scorer; prefer LLM judges when available."
+      }
+    },
+    "curiosity_score": 0.6485738577213298,
+    "confidence": 0.55,
+    "gap": {
+      "status": "partially_answered",
+      "confidence": 0.8,
+      "related_works": [
+        {
+          "title": "Interventions to support the resilience and mental health of frontline health and social care professionals during and after a disease outbreak, epidemic or pandemic: a mixed methods systematic review",
+          "year": 2020,
+          "doi": "https://doi.org/10.1002/14651858.cd013779",
+          "openalex_id": "https://openalex.org/W3096168896",
+          "cited_by_count": 653,
+          "abstract_snippet": "BACKGROUND: Evidence from disease epidemics shows that healthcare workers are at risk of developing short- and long-term mental health problems. The World Health Organization (WHO) has warned about the potential negative impact of the COVID-19 crisis on the mental well-being of health and social care professionals. Symptoms of mental health problems commonly include depression, anxiety, stress, and additional cognitive and",
+          "url": "https://openalex.org/W3096168896"
+        },
+        {
+          "title": "CONSORT 2010 statement: extension to randomised pilot and feasibility trials",
+          "year": 2016,
+          "doi": "https://doi.org/10.1136/bmj.i5239",
+          "openalex_id": "https://openalex.org/W3162993738",
+          "cited_by_count": 3524,
+          "abstract_snippet": "The Consolidated Standards of Reporting Trials (CON-SORT) statement (www.consort-statement.org) is a guideline designed to improve the transparency and quality of the reporting of randomised trials.",
+          "url": "https://openalex.org/W3162993738"
+        },
+        {
+          "title": "Saving Mothers\u2019 Lives: Reviewing maternal deaths to make motherhood safer: 2006\u20132008",
+          "year": 2011,
+          "doi": "https://doi.org/10.1111/j.1471-0528.2010.02847.x",
+          "openalex_id": "https://openalex.org/W1558095504",
+          "cited_by_count": 2996,
+          "abstract_snippet": "In the triennium 2006-2008, 261 women in the UK died directly or indirectly related to pregnancy. The overall maternal mortality rate was 11.39 per 100,000 maternities. Direct deaths decreased from 6.24 per 100,000 maternities in 2003-2005 to 4.67 per 100,000 maternities in 2006\u20132008 (p = 0.02). This decline is predominantly due to the reduction in deaths from thromboembolism and, to",
+          "url": "https://openalex.org/W1558095504"
+        },
+        {
+          "title": "CONSORT 2010 statement: extension to randomised pilot and feasibility trials",
+          "year": 2016,
+          "doi": "https://doi.org/10.1186/s40814-016-0105-8",
+          "openalex_id": "https://openalex.org/W2534656414",
+          "cited_by_count": 2996,
+          "abstract_snippet": "The Consolidated Standards of Reporting Trials (CONSORT) statement is a guideline designed to improve the transparency and quality of the reporting of randomised controlled trials (RCTs). In this article we present an extension to that statement for randomised pilot and feasibility trials conducted in advance of a future definitive RCT. The checklist applies to any randomised study in which a",
+          "url": "https://openalex.org/W2534656414"
+        },
+        {
+          "title": "Interventions to improve antimicrobial prescribing of doctors in training (IMPACT): a realist review",
+          "year": 2018,
+          "doi": "https://doi.org/10.3310/hsdr06100",
+          "openalex_id": "https://openalex.org/W2789288632",
+          "cited_by_count": 62,
+          "abstract_snippet": "Background Interventions to improve the antimicrobial prescribing practices of doctors have been implemented widely to curtail the emergence and spread of antimicrobial resistance, but have been met with varying levels of success. Objectives This study aimed to generate an in-depth understanding of how antimicrobial prescribing interventions \u2018work\u2019 (or do not work) for doctors in training by taking into account the",
+          "url": "https://openalex.org/W2789288632"
+        },
+        {
+          "title": "Social Norms and Economic Theory",
+          "year": 1989,
+          "doi": "https://doi.org/10.1257/jep.3.4.99",
+          "openalex_id": "https://openalex.org/W2081314276",
+          "cited_by_count": 2044,
+          "abstract_snippet": "One of the most persistent cleavages in the social sciences is the opposition between two lines of thought conveniently associated with Adam Smith and Emile Durkheim, between homo economicus and homo sociologicus. Of these, the former is supposed to be guided by instrumental rationality, while the behavior of the latter is dictated by social norms. In this paper I characterize",
+          "url": "https://openalex.org/W2081314276"
+        },
+        {
+          "title": "Against Financial Literacy Education",
+          "year": 2008,
+          "doi": null,
+          "openalex_id": "https://openalex.org/W1554208063",
+          "cited_by_count": 385,
+          "abstract_snippet": "The dominant model of regulation in the United States for consumer credit, insurance, and investment products is disclosure and unfettered choice. As these products have become increasingly complex, consumers\u2019 inability to understand them has become increasingly apparent, and the consequences of this inability more dire. In response, policymakers have embraced financial literacy education as a necessary corollary to the disclosure",
+          "url": "https://openalex.org/W1554208063"
+        },
+        {
+          "title": "The effectiveness and cost-effectiveness of behavioural interventions for the prevention of sexually transmitted infections in young people aged 13\u201319: a systematic review and economic evaluation",
+          "year": 2010,
+          "doi": "https://doi.org/10.3310/hta14070",
+          "openalex_id": "https://openalex.org/W2041151035",
+          "cited_by_count": 177,
+          "abstract_snippet": "OBJECTIVES: To assess the effectiveness and cost-effectiveness of schools-based skills-building behavioural interventions to encourage young people to adopt and maintain safer sexual behaviour and to prevent them from acquiring sexually transmitted infections (STIs). DATA SOURCES: Electronic bibliographic databases (e.g. MEDLINE, MEDLINE In-Process & Other Non-Indexed Citations, EMBASE, CINAHL, PsycINFO, CCRCT, NHS EED and DARE) were searched for the period 1985",
+          "url": "https://openalex.org/W2041151035"
+        }
+      ],
+      "notes": "Found 10 related works; top title overlap=0.12; avg citations=1480.3.",
+      "query_used": "training interventions increase honest uncertainty reporting under incentive pressure appear confident"
+    },
+    "rank": 2,
+    "investigation_brief": "## Investigation brief\n\n**Question.** Which training interventions most increase honest uncertainty reporting under incentive pressure to appear confident?\n\n**Why now.** Overconfident systems amplify decision errors at scale.\n\n**Operationalization.** Compare interventions on a fixed honesty benchmark where models are rewarded for confident wrong answers; measure calibration and truthfulness deltas.\n\n**Gap status.** partially_answered (confidence 0.80). Found 10 related works; top title overlap=0.12; avg citations=1480.3.\n\n**Related literature (sample).**\n- Interventions to support the resilience and mental health of frontline health and social care professionals during and after a disease outbreak, epidemic or pandemic: a mixed methods systematic review (2020; cites=653)\n- CONSORT 2010 statement: extension to randomised pilot and feasibility trials (2016; cites=3524)\n- Saving Mothers\u2019 Lives: Reviewing maternal deaths to make motherhood safer: 2006\u20132008 (2011; cites=2996)\n\n**Score snapshot.** impact=0.40, neglectedness=0.49, tractability=0.70, surprise=0.30, answerability=0.70, risk=0.15\n\n**Curiosity score.** 0.649 (confidence 0.55)\n\n**Suggested first moves.**\n1. Systematic review of the retrieved cluster; mark settled vs open subclaims.\n2. Write a falsifiable prediction or measurement plan from the operationalization.\n3. Identify the cheapest discriminating experiment or analysis.\n",
+    "flags": [
+      "heuristic_scoring"
+    ],
+    "metadata": {
+      "passed_gates": true
+    }
+  },
+  {
+    "question": {
+      "id": "ai-04",
+      "question": "What architectural or training conditions cause persistent scheming-like behavior to appear in multi-episode agent settings?",
+      "domain": "ai",
+      "operationalization": "Map conditions under which deceptive planning survives standard safety fine-tuning in multi-episode evals.",
+      "why_it_matters": "Scheming under evaluation is a central alignment risk.",
+      "assumptions": [],
+      "enabling_questions": [],
+      "tags": [
+        "scheming",
+        "agents",
+        "safety"
+      ],
+      "source": "seed"
+    },
+    "scores": {
+      "impact": 0.48,
+      "neglectedness": 0.48780000000000007,
+      "tractability": 0.55,
+      "surprise": 0.3,
+      "answerability": 0.7,
+      "risk": 0.15,
+      "cost_proxy": 0.45,
+      "rationale": {
+        "method": "heuristic_density_and_lexicon",
+        "note": "Fallback scorer; prefer LLM judges when available."
+      }
+    },
+    "curiosity_score": 0.6449090760426984,
+    "confidence": 0.55,
+    "gap": {
+      "status": "partially_answered",
+      "confidence": 0.8,
+      "related_works": [
+        {
+          "title": "Toward an Integration of Deep Learning and Neuroscience",
+          "year": 2016,
+          "doi": "https://doi.org/10.3389/fncom.2016.00094",
+          "openalex_id": "https://openalex.org/W2951065015",
+          "cited_by_count": 697,
+          "abstract_snippet": "Neuroscience has focused on the detailed implementation of computation, studying neural codes, dynamics and circuits. In machine learning, however, artificial neural networks tend to eschew precisely designed codes, dynamics or circuits in favor of brute force optimization of a cost function, often using simple and relatively uniform initial architectures. Two recent developments have emerged within machine learning that create an",
+          "url": "https://openalex.org/W2951065015"
+        },
+        {
+          "title": "Derivation of Research Diagnostic Criteria for Insomnia: Report of an American Academy of Sleep Medicine Work Group",
+          "year": 2004,
+          "doi": "https://doi.org/10.1093/sleep/27.8.1567",
+          "openalex_id": "https://openalex.org/W1555600854",
+          "cited_by_count": 1044,
+          "abstract_snippet": "Insomnia is a highly prevalent, often debilitating, and economically burdensome form of sleep disturbance caused by various situational, medical, emotional, environmental and behavioral factors. Although several consensually-derived nosologies have described numerous insomnia phenotypes, research concerning these phenotypes has been greatly hampered by a lack of widely accepted operational research diagnostic criteria (RDC) for their definition. The lack of RDC has,",
+          "url": "https://openalex.org/W1555600854"
+        },
+        {
+          "title": "Health-Related Behaviors by Urban-Rural County Classification \u2014 United States, 2013",
+          "year": 2017,
+          "doi": "https://doi.org/10.15585/mmwr.ss6605a1",
+          "openalex_id": "https://openalex.org/W2585010757",
+          "cited_by_count": 338,
+          "abstract_snippet": "PROBLEM/CONDITION: Persons living in rural areas are recognized as a health disparity population because the prevalence of disease and rate of premature death are higher than for the overall population of the United States. Surveillance data about health-related behaviors are rarely reported by urban-rural status, which makes comparisons difficult among persons living in metropolitan and nonmetropolitan counties. REPORTING PERIOD: 2013.",
+          "url": "https://openalex.org/W2585010757"
+        },
+        {
+          "title": "Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training",
+          "year": 2024,
+          "doi": "https://doi.org/10.48550/arxiv.2401.05566",
+          "openalex_id": "https://openalex.org/W4390833079",
+          "cited_by_count": 37,
+          "abstract_snippet": "Humans are capable of strategically deceptive behavior: behaving helpfully in most situations, but then behaving very differently in order to pursue alternative objectives when given the opportunity. If an AI system learned such a deceptive strategy, could we detect it and remove it using current state-of-the-art safety training techniques? To study this question, we construct proof-of-concept examples of deceptive behavior",
+          "url": "https://openalex.org/W4390833079"
+        },
+        {
+          "title": "Banishing the Control Homunculi in Studies of Action Control and Behavior Change",
+          "year": 2014,
+          "doi": "https://doi.org/10.1177/1745691614526414",
+          "openalex_id": "https://openalex.org/W2102870618",
+          "cited_by_count": 223,
+          "abstract_snippet": "For centuries, human self-control has fascinated scientists and nonscientists alike. Current theories often attribute it to an executive control system. But even though executive control receives a great deal of attention across disciplines, most aspects of it are still poorly understood. Many theories rely on an ill-defined set of \"homunculi\" doing jobs like \"response inhibition\" or \"updating\" without explaining how",
+          "url": "https://openalex.org/W2102870618"
+        },
+        {
+          "title": "AGENT-BASED MODELS OF ORGANIZATIONS *",
+          "year": 2004,
+          "doi": null,
+          "openalex_id": "https://openalex.org/W1518996865",
+          "cited_by_count": 93,
+          "abstract_snippet": "An organization is a collection of agents that interact and produce some form of output. Formal organizations - such as corporations and governments - are typically constructed for an explicit purpose though this purpose needn\u2019t be shared by all organizational members. An entrepreneur who creates a firm may do so in order to generate personal wealth but the worker she",
+          "url": "https://openalex.org/W1518996865"
+        },
+        {
+          "title": "Spurious normativity enhances learning of compliance and enforcement behavior in artificial agents",
+          "year": 2022,
+          "doi": "https://doi.org/10.1073/pnas.2106028118",
+          "openalex_id": "https://openalex.org/W4205912589",
+          "cited_by_count": 35,
+          "abstract_snippet": "How do societies learn and maintain social norms? Here we use multiagent reinforcement learning to investigate the learning dynamics of enforcement and compliance behaviors. Artificial agents populate a foraging environment and need to learn to avoid a poisonous berry. Agents learn to avoid eating poisonous berries better when doing so is taboo, meaning the behavior is punished by other agents.",
+          "url": "https://openalex.org/W4205912589"
+        },
+        {
+          "title": "A Critical Review Of Emergency Evacuation Simulation Models",
+          "year": 2004,
+          "doi": null,
+          "openalex_id": "https://openalex.org/W2185629336",
+          "cited_by_count": 242,
+          "abstract_snippet": "The paper presents a critical review of selected simulation models including (1) flow based, (2) cellular automata, (3) agent-based, and (4) activity-based models, as well as of three simulation models that incorporate social scientific processes--FIRESCAP, EXODUS, and the Multi-Agent Simulation for Crisis Management. It concludes by pointing out the so far ignored insights that could be derived from the fields",
+          "url": "https://openalex.org/W2185629336"
+        }
+      ],
+      "notes": "Found 10 related works; top title overlap=0.08; avg citations=468.3.",
+      "query_used": "architectural training conditions cause persistent scheming-like behavior appear multi-episode agent settings"
+    },
+    "rank": 3,
+    "investigation_brief": "## Investigation brief\n\n**Question.** What architectural or training conditions cause persistent scheming-like behavior to appear in multi-episode agent settings?\n\n**Why now.** Scheming under evaluation is a central alignment risk.\n\n**Operationalization.** Map conditions under which deceptive planning survives standard safety fine-tuning in multi-episode evals.\n\n**Gap status.** partially_answered (confidence 0.80). Found 10 related works; top title overlap=0.08; avg citations=468.3.\n\n**Related literature (sample).**\n- Toward an Integration of Deep Learning and Neuroscience (2016; cites=697)\n- Derivation of Research Diagnostic Criteria for Insomnia: Report of an American Academy of Sleep Medicine Work Group (2004; cites=1044)\n- Health-Related Behaviors by Urban-Rural County Classification \u2014 United States, 2013 (2017; cites=338)\n\n**Score snapshot.** impact=0.48, neglectedness=0.49, tractability=0.55, surprise=0.30, answerability=0.70, risk=0.15\n\n**Curiosity score.** 0.645 (confidence 0.55)\n\n**Suggested first moves.**\n1. Systematic review of the retrieved cluster; mark settled vs open subclaims.\n2. Write a falsifiable prediction or measurement plan from the operationalization.\n3. Identify the cheapest discriminating experiment or analysis.\n",
+    "flags": [
+      "heuristic_scoring"
+    ],
+    "metadata": {
+      "passed_gates": true
+    }
+  },
+  {
+    "question": {
+      "id": "ai-03",
+      "question": "How can we quantify the expected value of unanswered scientific questions so AI systems prioritize investigation, not only answering?",
+      "domain": "ai",
+      "operationalization": "Produce a scoring method whose top-k questions are rated higher by domain experts than random/LLM-interestingness baselines on blinded panels.",
+      "why_it_matters": "Without a curiosity layer, AI accelerates answering known frames while neglecting high-value unknowns.",
+      "assumptions": [],
+      "enabling_questions": [],
+      "tags": [
+        "meta-science",
+        "curiosity",
+        "voi"
+      ],
+      "source": "seed"
+    },
+    "scores": {
+      "impact": 0.39999999999999997,
+      "neglectedness": 0.48780000000000007,
+      "tractability": 0.55,
+      "surprise": 0.37,
+      "answerability": 0.7,
+      "risk": 0.15,
+      "cost_proxy": 0.45,
+      "rationale": {
+        "method": "heuristic_density_and_lexicon",
+        "note": "Fallback scorer; prefer LLM judges when available."
+      }
+    },
+    "curiosity_score": 0.6408859717073281,
+    "confidence": 0.55,
+    "gap": {
+      "status": "partially_answered",
+      "confidence": 0.8,
+      "related_works": [
+        {
+          "title": "An investigation of the Therac-25 accidents",
+          "year": 1993,
+          "doi": "https://doi.org/10.1109/mc.1993.274940",
+          "openalex_id": "https://openalex.org/W2100505193",
+          "cited_by_count": 1229,
+          "abstract_snippet": "Between June 1985 and January 1987, the Therac-25 medical electron accelerator was involved in six massive radiation overdoses. As a result, several people died and others were seriously injured. A detailed investigation of the factors involved in the software-related overdoses and attempts by users, manufacturers, and government agencies to deal with the accidents is presented. The authors demonstrate the complex",
+          "url": "https://openalex.org/W2100505193"
+        },
+        {
+          "title": "OSIRIS \u2013 The Scientific Camera System Onboard Rosetta",
+          "year": 2007,
+          "doi": "https://doi.org/10.1007/s11214-006-9128-4",
+          "openalex_id": "https://openalex.org/W2004878030",
+          "cited_by_count": 335,
+          "abstract_snippet": null,
+          "url": "https://openalex.org/W2004878030"
+        },
+        {
+          "title": "Five Reasons to Consider <i>Phytophthora infestans</i> a Reemerging Pathogen",
+          "year": 2015,
+          "doi": "https://doi.org/10.1094/phyto-01-15-0005-fi",
+          "openalex_id": "https://openalex.org/W805154366",
+          "cited_by_count": 351,
+          "abstract_snippet": "Phytophthora infestans has been a named pathogen for well over 150 years and yet it continues to \"emerge\", with thousands of articles published each year on it and the late blight disease that it causes. This review explores five attributes of this oomycete pathogen that maintain this constant attention. First, the historical tragedy associated with this disease (Irish potato famine)",
+          "url": "https://openalex.org/W805154366"
+        },
+        {
+          "title": "Requirements Prioritization Based on Benefit and Cost Prediction: An Agenda for Future Research",
+          "year": 2008,
+          "doi": "https://doi.org/10.1109/re.2008.48",
+          "openalex_id": "https://openalex.org/W2163518963",
+          "cited_by_count": 126,
+          "abstract_snippet": "In early phases of the software cycle, requirements prioritization necessarily relies on the specified requirements and on predictions of benefit and cost of individual requirements. This paper presents results of a systematic review of literature, which investigates how existing methods approach the problem of requirements prioritization based on benefit and cost. From this review, it derives a set of under-researched",
+          "url": "https://openalex.org/W2163518963"
+        },
+        {
+          "title": "Frozen out: unanswered questions about winter biology",
+          "year": 2021,
+          "doi": "https://doi.org/10.1139/er-2020-0127",
+          "openalex_id": "https://openalex.org/W3209313837",
+          "cited_by_count": 37,
+          "abstract_snippet": "Winter conditions impose dramatic constraints on temperate, boreal, and polar ecosystems, and shape the abiotic and biotic interactions underpinning these systems. At high latitudes, winter can last longer than the growing season and may have a disproportionately large impact on organisms and ecosystems. Even so, our understanding of the ecological implications of winter is often lacking. Indeed, even what exactly",
+          "url": "https://openalex.org/W3209313837"
+        },
+        {
+          "title": "2016 European Guidelines on cardiovascular disease prevention in clinical practice",
+          "year": 2016,
+          "doi": "https://doi.org/10.1093/eurheartj/ehw106",
+          "openalex_id": "https://openalex.org/W2402599050",
+          "cited_by_count": 6521,
+          "abstract_snippet": "No abstract available.",
+          "url": "https://openalex.org/W2402599050"
+        },
+        {
+          "title": "Data Feminism",
+          "year": 2020,
+          "doi": "https://doi.org/10.7551/mitpress/11805.001.0001",
+          "openalex_id": "https://openalex.org/W4242918116",
+          "cited_by_count": 1547,
+          "abstract_snippet": "A new way of thinking about data science and data ethics that is informed by the ideas of intersectional feminism. Today, data science is a form of power. It has been used to expose injustice, improve health outcomes, and topple governments. But it has also been used to discriminate, police, and surveil. This potential for good, on the one hand,",
+          "url": "https://openalex.org/W4242918116"
+        },
+        {
+          "title": "Development and application of the SSD approach in scientific case studies for ecological risk assessment",
+          "year": 2016,
+          "doi": "https://doi.org/10.1002/etc.3474",
+          "openalex_id": "https://openalex.org/W2443529121",
+          "cited_by_count": 128,
+          "abstract_snippet": "Species sensitivity distributions (SSDs) are used in ecological risk assessment for extrapolation of the results of toxicity tests with single species to a toxicity threshold considered protective of ecosystem structure and functioning. The attention to and importance of the SSD approach has increased in scientific and regulatory communities since the 1990s. Discussion and criticism have been triggered on the concept",
+          "url": "https://openalex.org/W2443529121"
+        }
+      ],
+      "notes": "Found 10 related works; top title overlap=0.13; avg citations=1048.2.",
+      "query_used": "quantify expected value unanswered scientific questions systems prioritize investigation not only answering"
+    },
+    "rank": 4,
+    "investigation_brief": "## Investigation brief\n\n**Question.** How can we quantify the expected value of unanswered scientific questions so AI systems prioritize investigation, not only answering?\n\n**Why now.** Without a curiosity layer, AI accelerates answering known frames while neglecting high-value unknowns.\n\n**Operationalization.** Produce a scoring method whose top-k questions are rated higher by domain experts than random/LLM-interestingness baselines on blinded panels.\n\n**Gap status.** partially_answered (confidence 0.80). Found 10 related works; top title overlap=0.13; avg citations=1048.2.\n\n**Related literature (sample).**\n- An investigation of the Therac-25 accidents (1993; cites=1229)\n- OSIRIS \u2013 The Scientific Camera System Onboard Rosetta (2007; cites=335)\n- Five Reasons to Consider <i>Phytophthora infestans</i> a Reemerging Pathogen (2015; cites=351)\n\n**Score snapshot.** impact=0.40, neglectedness=0.49, tractability=0.55, surprise=0.37, answerability=0.70, risk=0.15\n\n**Curiosity score.** 0.641 (confidence 0.55)\n\n**Suggested first moves.**\n1. Systematic review of the retrieved cluster; mark settled vs open subclaims.\n2. Write a falsifiable prediction or measurement plan from the operationalization.\n3. Identify the cheapest discriminating experiment or analysis.\n",
+    "flags": [
+      "heuristic_scoring"
+    ],
+    "metadata": {
+      "passed_gates": true
+    }
+  }
+]
