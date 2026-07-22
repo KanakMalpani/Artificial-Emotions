@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "artificial-curiosity"
+version = "0.1.0"
+description = "A curiosity layer for AI: generate and rank valuable unanswered questions"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Artificial Curiosity" }]
+dependencies = [
+  "pydantic>=2.6",
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "httpx>=0.27", "ruff>=0.6"]
+
+[project.scripts]
+curiosity = "artificial_curiosity.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/artificial_curiosity"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/artificial_curiosity" = "artificial_curiosity"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
