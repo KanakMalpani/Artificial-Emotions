@@ -23,12 +23,24 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--candidates", type=int, default=16)
     p.add_argument("--llm", action="store_true", help="Use any OpenAI-compatible LLM")
     p.add_argument("--no-literature", action="store_true")
+    p.add_argument(
+        "--literature-backend",
+        default="openalex",
+        choices=["openalex", "semantic_scholar", "both"],
+        help="Literature adapter (default openalex; both merges OpenAlex+S2)",
+    )
     p.add_argument("--json", action="store_true", help="Emit JSON")
     p.add_argument("--model", default="gpt-4o-mini", help="Generator model")
     p.add_argument(
         "--judge-model",
         default=None,
         help="Separate judge/gap-reader model (default: same as --model / LLM_JUDGE_MODEL)",
+    )
+    p.add_argument(
+        "--judge-ensemble",
+        type=int,
+        default=1,
+        help="Multi-judge ensemble size (W15); >1 flags disagreement",
     )
     p.add_argument("--base-url", default=None, help="OpenAI-compatible API base URL")
     p.add_argument(
@@ -41,6 +53,16 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         default="jaccard",
         choices=["jaccard", "embedding"],
         help="Near-dup backend (embedding needs pip install '.[embeddings]')",
+    )
+    p.add_argument(
+        "--preference-log",
+        default=None,
+        help="Opt-in JSONL path for preference / ranking snapshots (W13)",
+    )
+    p.add_argument(
+        "--lit-cache",
+        default=None,
+        help="Optional directory for literature response cache",
     )
 
 
@@ -68,7 +90,7 @@ def build_parser() -> argparse.ArgumentParser:
     spark_p.add_argument(
         "--literature",
         action="store_true",
-        help="Ground gaps in OpenAlex (slower)",
+        help="Ground gaps in literature (slower)",
     )
     spark_p.add_argument("--llm", action="store_true")
     spark_p.add_argument("--json", action="store_true")
@@ -88,6 +110,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     profiles_p = sub.add_parser("profiles", help="List ValueProfile presets")
     profiles_p.add_argument("--json", action="store_true")
+
+    eval_p = sub.add_parser(
+        "eval",
+        help="Offline expert-eval / spot-check harness (W10; no vanity accuracy %)",
+    )
+    eval_p.add_argument(
+        "--fixtures",
+        default=None,
+        help="Path to fixture JSON or directory (default: evals/fixtures)",
+    )
+    eval_p.add_argument("--json", action="store_true")
     return p
 
 
@@ -100,11 +133,15 @@ def _run_engine(args: argparse.Namespace) -> int:
         n_return=args.n,
         use_llm=args.llm,
         use_literature=not args.no_literature,
+        literature_backend=args.literature_backend,
+        literature_cache_dir=args.lit_cache,
         llm_model=args.model,
         judge_model=args.judge_model,
+        judge_ensemble_n=args.judge_ensemble,
         llm_base_url=args.base_url,
         value_profile=profile,
         diversity_backend=args.diversity,
+        preference_log_path=args.preference_log,
     )
     results = CuriosityEngine(config).run()
 
@@ -114,6 +151,7 @@ def _run_engine(args: argparse.Namespace) -> int:
 
     print(f"\nArtificial Curiosity - domain={args.domain}")
     print(f"ValueProfile: {profile.name}")
+    print(f"Literature backend: {args.literature_backend if not args.no_literature else 'none'}")
     print("What should we investigate next?\n")
     for r in results:
         band = ""
@@ -189,6 +227,32 @@ def _profiles(args: argparse.Namespace) -> int:
     return 0
 
 
+def _eval(args: argparse.Namespace) -> int:
+    from artificial_curiosity.evals import (
+        already_answered_fail_rate,
+        load_fixtures,
+        run_spotcheck,
+    )
+
+    cases = load_fixtures(args.fixtures) if args.fixtures else load_fixtures()
+    report = run_spotcheck(cases)
+    payload = report.to_dict()
+    payload["already_answered_fail_rate"] = already_answered_fail_rate(report)
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print("Expert-eval spot-check (offline fixtures)")
+        print(f"  cases={report.n_cases}  match={report.n_match}  "
+              f"match_rate={report.match_rate}")
+        print(f"  already_answered_gold={report.n_already_answered_gold}  "
+              f"missed_answered={report.n_missed_answered}")
+        print(f"  methodology: {report.methodology}")
+        for r in report.results:
+            mark = "OK" if r.match else "MISS"
+            print(f"  [{mark}] {r.case_id}: gold={r.gold_status} pred={r.predicted_status}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     parser = build_parser()
@@ -199,6 +263,7 @@ def main(argv: list[str] | None = None) -> int:
         "serve",
         "spark",
         "profiles",
+        "eval",
         "-h",
         "--help",
     ):
@@ -212,6 +277,8 @@ def main(argv: list[str] | None = None) -> int:
         return _spark(args)
     if args.command == "profiles":
         return _profiles(args)
+    if args.command == "eval":
+        return _eval(args)
     return _run_engine(args)
 
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "artificial-curiosity"
-version = "0.2.0"
+version = "0.3.0"
 description = "A curiosity layer for AI: generate and rank valuable unanswered questions"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -53,11 +53,15 @@ packages = ["src/artificial_curiosity"]
 [tool.hatch.build.targets.wheel.sources]
 "src/artificial_curiosity" = "artificial_curiosity"
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/artificial_curiosity/packs" = "artificial_curiosity/packs"
+
 [tool.hatch.build.targets.sdist]
 include = [
   "/src",
   "/tests",
   "/docs",
+  "/evals",
   "/examples",
   "/README.md",
   "/pyproject.toml",

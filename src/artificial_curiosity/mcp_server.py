@@ -16,7 +16,12 @@ import traceback
 from typing import Any, TextIO
 
 from artificial_curiosity import __version__
-from artificial_curiosity.agent_tools import dispatch_tool, mcp_tool_list
+from artificial_curiosity.agent_tools import (
+    dispatch_tool,
+    mcp_resource_list,
+    mcp_resource_read,
+    mcp_tool_list,
+)
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "artificial-curiosity"
@@ -80,7 +85,10 @@ def handle_message(msg: dict[str, Any]) -> dict[str, Any] | None:
             id_,
             {
                 "protocolVersion": PROTOCOL_VERSION,
-                "capabilities": {"tools": {}},
+                "capabilities": {
+                    "tools": {},
+                    "resources": {},
+                },
                 "serverInfo": {
                     "name": SERVER_NAME,
                     "version": __version__,
@@ -90,7 +98,9 @@ def handle_message(msg: dict[str, Any]) -> dict[str, Any] | None:
                     "Use provoke_curiosity/spark for an instant inject pack; "
                     "rank_unknowns/run_curiosity for the full pipeline; "
                     "list_domains for supported domains. Scores are decision aids "
-                    "with an explicit ValueProfile — not oracles."
+                    "with an explicit ValueProfile — not oracles. "
+                    "Resources: curiosity://domains, curiosity://profiles, "
+                    "curiosity://limits."
                 ),
             },
         )
@@ -100,6 +110,22 @@ def handle_message(msg: dict[str, Any]) -> dict[str, Any] | None:
 
     if method == "tools/list":
         return _ok(id_, {"tools": mcp_tool_list()})
+
+    if method == "resources/list":
+        return _ok(id_, {"resources": mcp_resource_list()})
+
+    if method == "resources/read":
+        if not isinstance(params, dict):
+            return _err(id_, INVALID_PARAMS, "params must be an object")
+        uri = params.get("uri")
+        if not isinstance(uri, str) or not uri:
+            return _err(id_, INVALID_PARAMS, "uri is required")
+        try:
+            return _ok(id_, mcp_resource_read(uri))
+        except KeyError:
+            return _err(id_, INVALID_PARAMS, f"Unknown resource: {uri}")
+        except Exception as exc:  # noqa: BLE001
+            return _err(id_, INTERNAL_ERROR, str(exc))
 
     if method == "tools/call":
         if not isinstance(params, dict):
@@ -189,6 +215,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if argv and argv[0] == "--list-tools":
         print(json.dumps(mcp_tool_list(), indent=2))
+        return 0
+    if argv and argv[0] == "--list-resources":
+        print(json.dumps(mcp_resource_list(), indent=2))
         return 0
     run_stdio()
     return 0

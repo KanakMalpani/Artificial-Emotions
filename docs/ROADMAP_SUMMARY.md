@@ -1,6 +1,6 @@
 # Artificial Curiosity — Roadmap Summary
 
-**Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `0.1.0`
+**Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `0.3.0`
 
 > Agents: when stuck, open the full roadmap **§0 → §3 → §2**. This page is the executive skim only.
 
@@ -8,19 +8,19 @@
 
 A **curiosity layer** for AI and research orgs: generate → verify → score → diversify → brief — ranked *unanswered* questions with explicit `ValueProfile`, gap evidence, and uncertainty. Decision aids, not oracles. Not Q&A, not an end-to-end AI Scientist.
 
-## Now (v0.1) — do not rebuild
+## Now (v0.3) — do not rebuild
 
-Pipeline + OpenAlex gap gate + multi-axis scores + MCP/HTTP/CLI/web + offline seeds. Limits: heuristic scoring, phrase-level gaps, keyword dual-use, no outcome calibration, no PyPI yet. Details: roadmap §1 + [`LIMITS.md`](LIMITS.md).
+Pipeline + OpenAlex/S2 gap gate + multi-axis scores + MCP/HTTP/CLI/web + offline seeds + eval harness + preference JSONL + dual-use heuristic + multi-judge flags. Limits: heuristic scoring, phrase-level gaps, dual-use residual risk, no outcome calibration, no PyPI yet. Details: roadmap §1 + [`LIMITS.md`](LIMITS.md).
 
 ## Top next wedges (pick first unfinished)
 
-1. Optional embedding diversity (Jaccard stays default)  
-2. ValueProfile presets on API/CLI/MCP  
-3. Separate `judge_model` from generator  
-4. Multi-provider LLM smoke notes (no secrets)  
-5. Expand F7/F13 adversarial tests  
+1. Owner-gated **PyPI publish** (blocks calling v1.0)  
+2. Live multi-provider LLM smoke with real keys (private notes; no secrets in repo)  
+3. WO-0.4.4 neglectedness / cost proxy research spike (optional)  
+4. WO-0.4.6 optional HTTP API auth  
+5. Preference *learning* / longitudinal calibration (v1.x)  
 
-Full queue with files / success tests / done-when: roadmap **§2**.
+P2 W10–W15 are ✅. Full queue: roadmap **§2**.
 
 ## Agent ops (one-liners)
 
@@ -37,9 +37,9 @@ Full queue with files / success tests / done-when: roadmap **§2**.
 
 | Horizon | Versions | Intent |
 |---------|----------|--------|
-| **Near** | v0.2 | Embeddings optional, multi-provider proofs, presets, UX honesty, PyPI |
-| **Mid** | v0.3→v1.0 | Eval harness, multi-literature, stronger dual-use, multi-judge → **credible v1** |
-| **Long** | v1.x→v2+ | Flywheel, preference learning, domain packs, enterprise, AI-Scientist upstream |
+| **Near** | v0.2 | ✅ Embeddings optional, multi-provider notes, presets, UX honesty, packaging prep |
+| **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge; remaining: PyPI → **credible v1** |
+| **Long** | v1.x→v2+ | Flywheel, preference learning, enterprise, AI-Scientist upstream |
 | **Moonshots** | — | Approximate VOI, surprise search, lab closed-loop — not default backlog |
 
 Phased **work-order checklists**: roadmap **§7**.
@@ -50,4 +50,4 @@ Explicit values · related ≠ answered · answerability/risk gates · anti-McNa
 
 ## Proof rule
 
-Do not claim “calibrated,” “works on every host,” “dual-use solved,” or “v1.0” until matching **proof gates** (roadmap §10) are met.
+Do not claim “calibrated,” “works on every host,” “dual-use solved,” or “v1.0” until matching **proof gates** (roadmap §10) are met. PyPI remains the main open v1.0 gate.

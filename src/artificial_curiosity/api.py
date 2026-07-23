@@ -26,7 +26,7 @@ app = FastAPI(
         "questions. Designed so any human or AI model/provider can download this "
         "repo, start the server, and instantly ask: what should we investigate next?"
     ),
-    version="0.2.0",
+    version="0.3.0",
 )
 
 app.add_middleware(
@@ -45,8 +45,14 @@ class RunRequest(BaseModel):
     n_candidates: int = Field(16, ge=4, le=64)
     use_llm: bool = False
     use_literature: bool = True
+    literature_backend: str = Field(
+        "openalex",
+        pattern="^(openalex|semantic_scholar|both)$",
+        description="Literature adapter (W11)",
+    )
     llm_model: str | None = None
     judge_model: str | None = None
+    judge_ensemble_n: int = Field(1, ge=1, le=5)
     llm_base_url: str | None = None
     profile_name: str | None = Field(
         None,
@@ -54,6 +60,8 @@ class RunRequest(BaseModel):
     )
     value_profile: ValueProfile | None = None
     diversity_backend: str = Field("jaccard", pattern="^(jaccard|embedding)$")
+    preference_log_path: str | None = None
+    literature_cache_dir: str | None = None
 
 
 class ProvokeRequest(BaseModel):
@@ -263,16 +271,21 @@ def run_curiosity(req: RunRequest) -> dict:
         n_candidates=req.n_candidates,
         use_llm=req.use_llm,
         use_literature=req.use_literature,
+        literature_backend=req.literature_backend,
+        literature_cache_dir=req.literature_cache_dir,
         value_profile=profile,
         llm_model=req.llm_model or "gpt-4o-mini",
         judge_model=req.judge_model,
+        judge_ensemble_n=req.judge_ensemble_n,
         llm_base_url=req.llm_base_url,
         diversity_backend=req.diversity_backend,
+        preference_log_path=req.preference_log_path,
     )
     results = CuriosityEngine(config).run_dict()
     return {
         "query": req.model_dump(),
         "value_profile": profile.model_dump(mode="json"),
+        "literature_backend": req.literature_backend if req.use_literature else "none",
         "count": len(results),
         "questions": results,
         "note": "Scores are decision aids with explicit ValueProfile weights — not oracles.",

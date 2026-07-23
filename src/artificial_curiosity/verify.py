@@ -1,8 +1,8 @@
 """Gap verification against literature.
 
 Important: related papers ≠ answered question.
-OpenAlex relevance search returns a neighborhood; we only claim
-partial/full answers when title(+abstract) overlap is high enough,
+Literature search (OpenAlex and/or Semantic Scholar) returns a neighborhood;
+we only claim partial/full answers when title(+abstract) overlap is high enough,
 tempered by lightweight abstract "reading" for claim vs open-gap language.
 """
 
@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import re
 
+from artificial_curiosity.literature import LiteratureClient
 from artificial_curiosity.models import GapEvidence, GapStatus, LiteratureHit, UnansweredQuestion
-from artificial_curiosity.openalex import OpenAlexClient
 
 # Lightweight abstract reading (F7): not full NLP, but better than bag-of-tokens alone.
 _ANSWER_CLAIM = (
@@ -33,14 +33,11 @@ def _query_from_question(q: UnansweredQuestion) -> str:
         "most", "best", "can", "we", "our", "that", "this", "under", "when",
         "appear", "increase", "reduce", "cause", "before",
     }
-    # Prefer distinctive multi-word scientific phrases from the question.
     words = re.findall(r"[A-Za-z0-9\-]+", q.question.lower())
     keep = [w for w in words if w not in stop and len(w) > 2]
-    # Promote hyphenated compounds (often technical).
     compounds = [w for w in keep if "-" in w]
     plain = [w for w in keep if "-" not in w]
     ordered = compounds + plain
-    # Append up to 3 tags for topical anchoring.
     tags = [t.lower().replace("_", " ") for t in (q.tags or [])[:3]]
     core = " ".join(ordered[:10])
     if tags:
@@ -120,7 +117,6 @@ def classify_gap(
     if hits_count == 0:
         return GapStatus.UNKNOWN_WITH_CAVEAT
 
-    # Require at least one recent-ish strong match for "likely answered" (F12).
     if (
         strong_match_count >= 3
         and top_overlap >= 0.45
@@ -132,14 +128,15 @@ def classify_gap(
         return GapStatus.PARTIALLY_ANSWERED
     if strong_match_count >= 1 and top_overlap >= 0.32:
         return GapStatus.PARTIALLY_ANSWERED
-    # Neighborhood exists but does not tightly match the question.
     return GapStatus.UNANSWERED
 
 
 def verify_gap(
     question: UnansweredQuestion,
-    client: OpenAlexClient | None = None,
+    client: LiteratureClient | None = None,
     use_literature: bool = True,
+    *,
+    literature_backend: str | None = None,
 ) -> GapEvidence:
     query = _query_from_question(question)
     if not use_literature or client is None:
@@ -149,6 +146,7 @@ def verify_gap(
             related_works=[],
             notes="Literature verification disabled; treat gap status as provisional.",
             query_used=query,
+            literature_backend=literature_backend or "none",
         )
 
     try:
@@ -160,16 +158,15 @@ def verify_gap(
             related_works=[],
             notes=f"Literature fetch failed: {exc}",
             query_used=query,
+            literature_backend=literature_backend,
         )
 
-    # Probe = question + operationalization so answer criteria influence reading.
     probe = f"{question.question} {question.operationalization}"
     base_overlaps = [_content_overlap(probe, h) for h in hits]
     claim_signals = [_abstract_claim_signal(h) for h in hits]
     overlaps = [
         _effective_overlap(b, c) for b, c in zip(base_overlaps, claim_signals)
     ]
-    # Recency-weighted overlap for ranking strength (F12); raw still used for notes.
     weighted = [
         o * _recency_weight(h.year) for o, h in zip(overlaps, hits)
     ]
@@ -193,21 +190,21 @@ def verify_gap(
         recent_strong_count=recent_strong_count,
     )
 
-    # Confidence rises with strong matches, not raw hit volume (F7/F8).
     conf = 0.35 + 0.08 * min(strong_match_count, 5) + 0.1 * top_overlap
     if status == GapStatus.UNKNOWN_WITH_CAVEAT:
         conf = 0.25
     elif status == GapStatus.UNANSWERED and hits:
         conf = 0.45 + 0.05 * min(len(hits), 4)
-        # Neighborhood papers that themselves call it open → slightly more confidence.
         conf += 0.03 * min(open_gap_hits, 3)
     if claim_hits and status in (GapStatus.PARTIALLY_ANSWERED, GapStatus.LIKELY_ANSWERED):
         conf = min(0.9, conf + 0.04 * min(claim_hits, 3))
     if recent_strong_count == 0 and strong_match_count >= 2:
         conf = max(0.2, conf - 0.05)
 
+    backend_note = literature_backend or "literature"
     notes = (
-        f"Found {len(hits)} neighborhood works; strong_matches={strong_match_count}; "
+        f"Found {len(hits)} neighborhood works via {backend_note}; "
+        f"strong_matches={strong_match_count}; "
         f"recent_strong={recent_strong_count}; "
         f"top recency-weighted overlap={top_overlap:.2f}; avg citations={avg_cites:.1f}; "
         f"abstract claim_hits={claim_hits}, open_gap_hits={open_gap_hits}. "
@@ -222,4 +219,5 @@ def verify_gap(
         query_used=query,
         strong_match_count=strong_match_count,
         top_overlap=top_overlap,
+        literature_backend=literature_backend,
     )

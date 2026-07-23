@@ -40,12 +40,37 @@ def generate_candidates(config: CuriosityConfig) -> list[UnansweredQuestion]:
         limit=config.n_candidates,
     )
 
+    # Optional versioned domain packs (WO-0.3.6).
+    if config.domain_pack_paths or config.load_bundled_packs:
+        from artificial_curiosity.packs import default_packs_dir, load_domain_packs
+
+        pack_qs = load_domain_packs(
+            list(config.domain_pack_paths) or None,
+            packs_dir=default_packs_dir() if config.load_bundled_packs else None,
+        )
+        domain_key = str(config.domain).lower()
+        for pq in pack_qs:
+            if domain_key in ("general", str(Domain.GENERAL.value)) or str(
+                pq.domain
+            ).lower() in (domain_key, "general"):
+                base.append(pq)
+        # De-dupe by question text, keep order.
+        seen: set[str] = set()
+        deduped: list[UnansweredQuestion] = []
+        for q in base:
+            key = q.question.strip().lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(q)
+        base = deduped[: max(config.n_candidates, len(deduped))]
+
     if not config.use_llm:
-        return base
+        return base[: config.n_candidates] if len(base) > config.n_candidates else base
 
     client = _llm_for_config(config)
     if client is None:
-        return base
+        return base[: config.n_candidates]
 
     user = (
         f"Domain: {config.domain}\n"
@@ -57,7 +82,7 @@ def generate_candidates(config: CuriosityConfig) -> list[UnansweredQuestion]:
     try:
         raw = client.chat_json(GENERATE_SYSTEM, user)
     except Exception:
-        return base
+        return base[: config.n_candidates]
 
     out: list[UnansweredQuestion] = []
     for i, item in enumerate(raw.get("questions", [])):
@@ -78,7 +103,4 @@ def generate_candidates(config: CuriosityConfig) -> list[UnansweredQuestion]:
             )
         except Exception:
             continue
-
-    # Prefer LLM outputs but keep seeds for diversity if short.
-    merged = out + [q for q in base if q.question not in {x.question for x in out}]
-    return merged[: max(config.n_candidates, len(out))]
+    return (out + base)[: config.n_candidates] if out else base[: config.n_candidates]

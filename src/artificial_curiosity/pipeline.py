@@ -5,12 +5,14 @@ from __future__ import annotations
 from artificial_curiosity.brief import write_brief
 from artificial_curiosity.diversity import diversify
 from artificial_curiosity.generate import generate_candidates
-from artificial_curiosity.judge import llm_refine_gap, llm_score
+from artificial_curiosity.judge import llm_refine_gap, llm_score_ensemble
+from artificial_curiosity.literature import build_literature_client
 from artificial_curiosity.models import CuriosityConfig, RankedQuestion
-from artificial_curiosity.openalex import OpenAlexClient
+from artificial_curiosity.preferences import PreferenceEvent, append_preference_event
 from artificial_curiosity.scoring import (
     aggregate_curiosity,
     confidence_from_signals,
+    dual_use_flags,
     heuristic_score,
     passes_gates,
     score_uncertainty_band,
@@ -21,21 +23,28 @@ from artificial_curiosity.verify import verify_gap
 class CuriosityEngine:
     def __init__(self, config: CuriosityConfig | None = None):
         self.config = config or CuriosityConfig()
-        self._client = (
-            OpenAlexClient(timeout_s=self.config.literature_timeout_s)
-            if self.config.use_literature
-            else None
-        )
+        self._client = None
+        if self.config.use_literature:
+            self._client = build_literature_client(
+                self.config.literature_backend,
+                timeout_s=self.config.literature_timeout_s,
+                cache_dir=self.config.literature_cache_dir,
+                cache_ttl_s=self.config.literature_cache_ttl_s,
+            )
 
     def run(self) -> list[RankedQuestion]:
         candidates = generate_candidates(self.config)
         scored: list[RankedQuestion] = []
+        rejected_for_log: list[RankedQuestion] = []
 
         for q in candidates:
             gap = verify_gap(
                 q,
                 client=self._client,
                 use_literature=self.config.use_literature,
+                literature_backend=self.config.literature_backend
+                if self.config.use_literature
+                else "none",
             )
             refined = llm_refine_gap(q, gap, self.config)
             if refined is not None:
@@ -48,7 +57,7 @@ class CuriosityEngine:
                 else 0.0
             )
 
-            llm_axes = llm_score(q, gap, self.config)
+            llm_axes, judge_members, disagree = llm_score_ensemble(q, gap, self.config)
             axes = llm_axes or heuristic_score(
                 q,
                 gap.status,
@@ -59,23 +68,36 @@ class CuriosityEngine:
             )
 
             ok, flags = passes_gates(axes, gap.status, self.config.value_profile)
+            text_blob = f"{q.question} {q.why_it_matters} {q.operationalization}"
+            flags = list(set(flags + dual_use_flags(text_blob, self.config.value_profile)))
+
             curiosity = aggregate_curiosity(axes, self.config.value_profile)
             conf = confidence_from_signals(
-                [axes] if llm_axes else None,
+                judge_members if judge_members else ([axes] if llm_axes else None),
                 gap.confidence,
                 related_count,
                 heuristic=llm_axes is None,
                 gap_status=gap.status,
+                disagreement_entropy=disagree,
             )
             if llm_axes is None:
                 flags = list(set(flags + ["heuristic_scoring"]))
             if refined is not None:
                 flags = list(set(flags + ["llm_gap_reader"]))
+                if gap.llm_grounded is False:
+                    flags = list(set(flags + ["llm_gap_ungrounded"]))
+                elif gap.llm_grounded is True:
+                    flags = list(set(flags + ["llm_gap_grounded"]))
             if not self.config.use_literature:
                 flags = list(set(flags + ["no_literature"]))
+            if disagree >= 0.35:
+                flags = list(set(flags + ["judge_disagreement"]))
 
             score_low, score_high = score_uncertainty_band(
-                curiosity, conf, heuristic=llm_axes is None
+                curiosity,
+                conf,
+                heuristic=llm_axes is None,
+                disagreement_entropy=disagree,
             )
 
             item = RankedQuestion(
@@ -85,7 +107,13 @@ class CuriosityEngine:
                 confidence=conf,
                 gap=gap,
                 flags=flags,
-                metadata={"passed_gates": ok},
+                metadata={
+                    "passed_gates": ok,
+                    "judge_disagreement_entropy": disagree,
+                    "n_judges": len(judge_members),
+                    "literature_backend": gap.literature_backend
+                    or self.config.literature_backend,
+                },
                 score_low=score_low,
                 score_high=score_high,
             )
@@ -96,15 +124,39 @@ class CuriosityEngine:
                 # Keep rejected for transparency but do not rank in top set.
                 item.flags = list(set(item.flags + ["gate_failed"]))
                 item.metadata["rejected"] = True
+                rejected_for_log.append(item)
 
         scored.sort(key=lambda r: r.curiosity_score, reverse=True)
         backend = self.config.diversity_backend  # type: ignore[assignment]
-        return diversify(
+        result = diversify(
             scored,
             threshold=self.config.diversity_threshold,
             n_return=self.config.n_return,
             backend=backend if backend in ("jaccard", "embedding") else "jaccard",
         )
+
+        # Opt-in preference JSONL snapshot (W13) — ranks only, unlabeled.
+        if self.config.preference_log_path:
+            for r in result:
+                append_preference_event(
+                    self.config.preference_log_path,
+                    PreferenceEvent(
+                        event_type="note",
+                        profile_name=self.config.value_profile.name,
+                        domain=str(q.domain) if (q := r.question) else None,
+                        question_id=getattr(r.question, "id", None),
+                        question_text=getattr(r.question, "question", None),
+                        rank=r.rank,
+                        curiosity_score=r.curiosity_score,
+                        notes="auto_snapshot_from_run",
+                        metadata={
+                            "flags": r.flags,
+                            "literature_backend": r.metadata.get("literature_backend"),
+                        },
+                    ),
+                )
+
+        return result
 
     def run_dict(self) -> list[dict]:
         return [r.model_dump(mode="json") for r in self.run()]
