@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import json
-import os
 import re
-import urllib.request
-from typing import Any
 
+from artificial_curiosity.llm import LLMClient
 from artificial_curiosity.models import CuriosityConfig, Domain, UnansweredQuestion
 from artificial_curiosity.seeds import seeds_for
 
@@ -28,36 +25,12 @@ def _slug(text: str, prefix: str) -> str:
     return f"{prefix}-{s or 'q'}"
 
 
-class LLMClient:
-    def __init__(self, api_key: str, model: str, base_url: str | None = None):
-        self.api_key = api_key
-        self.model = model
-        self.base_url = (base_url or "https://api.openai.com/v1").rstrip("/")
-
-    def chat_json(self, system: str, user: str) -> dict[str, Any]:
-        payload = {
-            "model": self.model,
-            "temperature": 0.7,
-            "response_format": {"type": "json_object"},
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-        }
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            f"{self.base_url}/chat/completions",
-            data=data,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}",
-            },
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=90) as resp:
-            body = json.loads(resp.read().decode("utf-8"))
-        content = body["choices"][0]["message"]["content"]
-        return json.loads(content)
+def _llm_for_config(config: CuriosityConfig) -> LLMClient | None:
+    return LLMClient.from_env(
+        model=config.llm_model,
+        base_url=config.llm_base_url or config.openai_base_url,
+        api_key_env=config.llm_api_key_env or config.openai_api_key_env,
+    )
 
 
 def generate_candidates(config: CuriosityConfig) -> list[UnansweredQuestion]:
@@ -70,11 +43,10 @@ def generate_candidates(config: CuriosityConfig) -> list[UnansweredQuestion]:
     if not config.use_llm:
         return base
 
-    api_key = os.environ.get(config.openai_api_key_env, "")
-    if not api_key:
+    client = _llm_for_config(config)
+    if client is None:
         return base
 
-    client = LLMClient(api_key, config.llm_model, config.openai_base_url)
     user = (
         f"Domain: {config.domain}\n"
         f"Topic focus: {config.topic or 'open'}\n"

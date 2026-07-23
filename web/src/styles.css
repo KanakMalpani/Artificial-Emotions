@@ -76,7 +76,7 @@ body::before {
 
 .controls {
   display: grid;
-  grid-template-columns: 1.2fr 1.4fr auto;
+  grid-template-columns: 1fr 1.2fr 1.4fr auto;
   gap: 0.75rem;
   align-items: end;
   margin-bottom: 2rem;
@@ -209,10 +209,56 @@ button:disabled {
   font-size: 0.95rem;
 }
 
+.brief {
+  margin: 0.75rem 0 0.35rem;
+  padding: 0.75rem 0.9rem;
+  border-left: 3px solid var(--amber);
+  background: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.profile-note {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
 .why strong,
-.ops strong {
+.ops strong,
+.brief strong {
   color: var(--ink);
   font-weight: 600;
+}
+
+.lit {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-left: 3px solid var(--line);
+  background: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.lit strong {
+  color: var(--ink);
+}
+
+.lit-note {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.lit ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.lit a {
+  color: var(--amber-deep);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .bars {

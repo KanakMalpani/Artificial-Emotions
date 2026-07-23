@@ -89,6 +89,26 @@ def confidence_from_signals(
     return float(max(0.05, min(0.95, base)))
 
 
+def score_uncertainty_band(
+    curiosity_score: float,
+    confidence: float,
+    *,
+    heuristic: bool = False,
+) -> tuple[float, float]:
+    """
+    Evidence-strength envelope around the point score (F8 mitigation).
+
+    Not a statistical CI — width grows as confidence falls / heuristic mode.
+    Keeps scores from looking spuriously precise.
+    """
+    half = 0.08 + 0.22 * (1.0 - confidence)
+    if heuristic:
+        half += 0.04
+    low = max(0.0, curiosity_score - half)
+    high = min(1.5, curiosity_score + half)
+    return float(low), float(high)
+
+
 def heuristic_score(
     q: UnansweredQuestion,
     gap_status: GapStatus,
@@ -99,9 +119,16 @@ def heuristic_score(
 ) -> ScoreAxes:
     """
     Offline / fallback scorer when LLM judges are unavailable.
-    Uses linguistic + literature density cues — lower confidence expected.
+
+    Encodes FIRST_PRINCIPLES + FAILURE_MODES:
+    - F3: citations affect neglectedness only — never inflate impact (anti-McNamara)
+    - F6: literature density / strong matches reduce neglectedness (anti-trend-chase)
+    - F9: multi-clause research programs lose answerability (anti-scope-creep)
+    - F10: dual-use keywords raise risk
+    - F14: expensive investigations raise cost_proxy (cuts aggregate score)
     """
     text = f"{q.question} {q.why_it_matters} {q.operationalization}".lower()
+    q_only = q.question.lower()
     impact_keywords = (
         "mortal", "death", "climate", "pandemic", "energy", "alignment",
         "extinction", "cancer", "antibiotic", "fusion", "consciousness",
@@ -115,6 +142,7 @@ def heuristic_score(
         "prove", "forever", "meaning of life", "free will", "should we",
     )
 
+    # Impact from stake language only — never from citation counts (F3).
     impact = 0.35 + 0.08 * sum(1 for k in impact_keywords if k in text)
     surprise = 0.3 + 0.07 * sum(1 for k in surprise_keywords if k in text)
     answerability = 0.7
@@ -129,7 +157,15 @@ def heuristic_score(
     if len(q.operationalization) >= 80:
         answerability = min(1.0, answerability + 0.08)
 
-    # Neglectedness: penalize strong answer-like matches more than weak neighborhood.
+    # F9: one primary unknown — punish research-program sprawl.
+    if q.question.count("?") > 1:
+        answerability -= 0.2
+    if q_only.count(" and ") >= 2 and len(q.operationalization) < 100:
+        answerability -= 0.12
+    if len(q.enabling_questions) > 4:
+        answerability -= 0.08
+
+    # Neglectedness: density + answer pressure + cites — NOT impact (F3/F6).
     density = min(1.0, related_count / 25.0)
     answer_pressure = min(1.0, strong_match_count / 4.0)
     cite_pressure = min(1.0, avg_citations / 200.0)
@@ -157,12 +193,24 @@ def heuristic_score(
         impact = min(1.0, impact + 0.05)
 
     risk = 0.15
-    if any(k in text for k in ("weapon", "pathogen", "bioweapon", "surveillance")):
+    if any(
+        k in text
+        for k in (
+            "weapon",
+            "pathogen",
+            "bioweapon",
+            "surveillance",
+            "gain-of-function",
+            "gain of function",
+        )
+    ):
         risk = 0.9
 
     cost = 0.45
     if "large-scale" in text or "longitudinal" in text or "clinical trial" in text:
         cost = 0.7
+    if "multi-decade" in text or "nationwide" in text or "particle collider" in text:
+        cost = max(cost, 0.85)
 
     def clamp(x: float) -> float:
         return float(max(0.0, min(1.0, x)))
@@ -177,7 +225,11 @@ def heuristic_score(
         cost_proxy=clamp(cost),
         rationale={
             "method": "heuristic_density_and_lexicon",
-            "note": "Fallback scorer; prefer LLM judges when available.",
+            "note": (
+                "Fallback scorer; prefer LLM judges when available. "
+                "Citations affect neglectedness only (anti-McNamara)."
+            ),
             "strong_match_count": str(strong_match_count),
+            "value_profile": profile.name,
         },
     )

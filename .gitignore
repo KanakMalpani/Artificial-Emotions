@@ -1,6 +1,18 @@
+# Secrets / local env (never commit real keys)
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# Virtualenvs
 .venv/
 venv/
+env/
+
+# Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -9,10 +21,27 @@ __pycache__/
 dist/
 build/
 *.egg-info/
-web/node_modules/
-web/dist/
+.coverage
+htmlcov/
+.tox/
+
+# Local / editor
 .DS_Store
 .idea/
 .vscode/
+*.local.json
+.git_status_tmp.txt
+*.swp
+*~
+
+# Web
+web/node_modules/
+web/dist/
+
+# Local experiment dumps (keep committed examples/*.json that are intentional)
 examples/*.local.json
 examples/eval_offline_summary.json
+
+# OS junk
+Thumbs.db
+Desktop.ini

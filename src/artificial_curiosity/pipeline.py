@@ -5,7 +5,7 @@ from __future__ import annotations
 from artificial_curiosity.brief import write_brief
 from artificial_curiosity.diversity import diversify
 from artificial_curiosity.generate import generate_candidates
-from artificial_curiosity.judge import llm_score
+from artificial_curiosity.judge import llm_refine_gap, llm_score
 from artificial_curiosity.models import CuriosityConfig, RankedQuestion
 from artificial_curiosity.openalex import OpenAlexClient
 from artificial_curiosity.scoring import (
@@ -13,6 +13,7 @@ from artificial_curiosity.scoring import (
     confidence_from_signals,
     heuristic_score,
     passes_gates,
+    score_uncertainty_band,
 )
 from artificial_curiosity.verify import verify_gap
 
@@ -36,6 +37,10 @@ class CuriosityEngine:
                 client=self._client,
                 use_literature=self.config.use_literature,
             )
+            refined = llm_refine_gap(q, gap, self.config)
+            if refined is not None:
+                gap = refined
+
             related_count = len(gap.related_works)
             avg_cites = (
                 sum((h.cited_by_count or 0) for h in gap.related_works) / related_count
@@ -64,8 +69,14 @@ class CuriosityEngine:
             )
             if llm_axes is None:
                 flags = list(set(flags + ["heuristic_scoring"]))
+            if refined is not None:
+                flags = list(set(flags + ["llm_gap_reader"]))
             if not self.config.use_literature:
                 flags = list(set(flags + ["no_literature"]))
+
+            score_low, score_high = score_uncertainty_band(
+                curiosity, conf, heuristic=llm_axes is None
+            )
 
             item = RankedQuestion(
                 question=q,
@@ -75,6 +86,8 @@ class CuriosityEngine:
                 gap=gap,
                 flags=flags,
                 metadata={"passed_gates": ok},
+                score_low=score_low,
+                score_high=score_high,
             )
             if ok:
                 item.investigation_brief = write_brief(item)
@@ -85,10 +98,12 @@ class CuriosityEngine:
                 item.metadata["rejected"] = True
 
         scored.sort(key=lambda r: r.curiosity_score, reverse=True)
+        backend = self.config.diversity_backend  # type: ignore[assignment]
         return diversify(
             scored,
             threshold=self.config.diversity_threshold,
             n_return=self.config.n_return,
+            backend=backend if backend in ("jaccard", "embedding") else "jaccard",
         )
 
     def run_dict(self) -> list[dict]:

@@ -5,8 +5,11 @@ from artificial_curiosity.models import (
     RankedQuestion,
     UnansweredQuestion,
     ValueProfile,
+    get_profile,
+    list_profile_names,
 )
 from artificial_curiosity.pipeline import CuriosityEngine
+from artificial_curiosity.provoke import provoke
 
 __all__ = [
     "CuriosityConfig",
@@ -14,6 +17,9 @@ __all__ = [
     "RankedQuestion",
     "UnansweredQuestion",
     "ValueProfile",
+    "get_profile",
+    "list_profile_names",
+    "provoke",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

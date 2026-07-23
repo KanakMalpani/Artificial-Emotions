@@ -1,0 +1,532 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "provoke_curiosity",
+      "description": "Curiosity spark (NOT Q&A): ranked *unanswered* questions plus an `inject` pack for any model. Uses an explicit ValueProfile \u2014 rankings are never value-free. Default is fast (no network). Alias: spark.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "biology",
+              "physics",
+              "ai",
+              "climate",
+              "medicine",
+              "materials",
+              "social",
+              "energy",
+              "general"
+            ],
+            "default": "ai",
+            "description": "Scientific / research domain"
+          },
+          "topic": {
+            "type": "string",
+            "default": "",
+            "description": "Optional topic focus within the domain"
+          },
+          "n": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16,
+            "default": 5,
+            "description": "How many ranked unknowns to return"
+          },
+          "fast": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true (default), skip OpenAlex for an instant local spark. Set false for literature-grounded gap checks."
+          },
+          "use_llm": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use configured OpenAI-compatible LLM if available"
+          },
+          "profile_name": {
+            "type": "string",
+            "enum": [
+              "alignment_lab",
+              "basic_science",
+              "climate_adaptation",
+              "funder_10y",
+              "humanity_default",
+              "near_term_ops"
+            ],
+            "description": "Named ValueProfile preset (F11). Prefer over inventing weights."
+          },
+          "value_profile": {
+            "type": "object",
+            "description": "Explicit stakeholder values \u2014 rankings are never value-free. Prefer profile_name for named presets; or pass a full object.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "weight_impact": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_neglectedness": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_tractability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_surprise": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "max_risk": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "min_answerability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "prefer_interdisciplinary": {
+                "type": "boolean"
+              },
+              "time_horizon_years": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "additionalProperties": false
+          },
+          "judge_model": {
+            "type": "string",
+            "description": "Optional judge/gap-reader model distinct from generator"
+          },
+          "diversity_backend": {
+            "type": "string",
+            "enum": [
+              "jaccard",
+              "embedding"
+            ],
+            "default": "jaccard",
+            "description": "Near-dup backend; embedding needs optional extras"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "spark",
+      "description": "Alias of provoke_curiosity \u2014 instant ranked unknowns + inject pack.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "biology",
+              "physics",
+              "ai",
+              "climate",
+              "medicine",
+              "materials",
+              "social",
+              "energy",
+              "general"
+            ],
+            "default": "ai",
+            "description": "Scientific / research domain"
+          },
+          "topic": {
+            "type": "string",
+            "default": "",
+            "description": "Optional topic focus within the domain"
+          },
+          "n": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16,
+            "default": 5,
+            "description": "How many ranked unknowns to return"
+          },
+          "fast": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true (default), skip OpenAlex for an instant local spark. Set false for literature-grounded gap checks."
+          },
+          "use_llm": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use configured OpenAI-compatible LLM if available"
+          },
+          "profile_name": {
+            "type": "string",
+            "enum": [
+              "alignment_lab",
+              "basic_science",
+              "climate_adaptation",
+              "funder_10y",
+              "humanity_default",
+              "near_term_ops"
+            ],
+            "description": "Named ValueProfile preset (F11). Prefer over inventing weights."
+          },
+          "value_profile": {
+            "type": "object",
+            "description": "Explicit stakeholder values \u2014 rankings are never value-free. Prefer profile_name for named presets; or pass a full object.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "weight_impact": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_neglectedness": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_tractability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_surprise": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "max_risk": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "min_answerability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "prefer_interdisciplinary": {
+                "type": "boolean"
+              },
+              "time_horizon_years": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "additionalProperties": false
+          },
+          "judge_model": {
+            "type": "string",
+            "description": "Optional judge/gap-reader model distinct from generator"
+          },
+          "diversity_backend": {
+            "type": "string",
+            "enum": [
+              "jaccard",
+              "embedding"
+            ],
+            "default": "jaccard",
+            "description": "Near-dup backend; embedding needs optional extras"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "rank_unknowns",
+      "description": "Full Artificial Curiosity pipeline: generate candidates, optionally verify gaps in OpenAlex, multi-axis score with an explicit ValueProfile, diversify, and return investigation briefs. Alias: run_curiosity. Scores are decision aids, not oracles.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "biology",
+              "physics",
+              "ai",
+              "climate",
+              "medicine",
+              "materials",
+              "social",
+              "energy",
+              "general"
+            ],
+            "default": "ai"
+          },
+          "topic": {
+            "type": "string",
+            "default": ""
+          },
+          "n_return": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32,
+            "default": 8
+          },
+          "n_candidates": {
+            "type": "integer",
+            "minimum": 4,
+            "maximum": 64,
+            "default": 16
+          },
+          "use_literature": {
+            "type": "boolean",
+            "default": true,
+            "description": "Ground gaps via OpenAlex (no API key required)"
+          },
+          "use_llm": {
+            "type": "boolean",
+            "default": false
+          },
+          "profile_name": {
+            "type": "string",
+            "enum": [
+              "alignment_lab",
+              "basic_science",
+              "climate_adaptation",
+              "funder_10y",
+              "humanity_default",
+              "near_term_ops"
+            ]
+          },
+          "value_profile": {
+            "type": "object",
+            "description": "Explicit stakeholder values \u2014 rankings are never value-free. Prefer profile_name for named presets; or pass a full object.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "weight_impact": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_neglectedness": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_tractability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_surprise": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "max_risk": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "min_answerability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "prefer_interdisciplinary": {
+                "type": "boolean"
+              },
+              "time_horizon_years": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "additionalProperties": false
+          },
+          "judge_model": {
+            "type": "string"
+          },
+          "diversity_backend": {
+            "type": "string",
+            "enum": [
+              "jaccard",
+              "embedding"
+            ],
+            "default": "jaccard"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "run_curiosity",
+      "description": "Alias of rank_unknowns \u2014 full curiosity ranking pipeline.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "biology",
+              "physics",
+              "ai",
+              "climate",
+              "medicine",
+              "materials",
+              "social",
+              "energy",
+              "general"
+            ],
+            "default": "ai"
+          },
+          "topic": {
+            "type": "string",
+            "default": ""
+          },
+          "n_return": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32,
+            "default": 8
+          },
+          "n_candidates": {
+            "type": "integer",
+            "minimum": 4,
+            "maximum": 64,
+            "default": 16
+          },
+          "use_literature": {
+            "type": "boolean",
+            "default": true,
+            "description": "Ground gaps via OpenAlex (no API key required)"
+          },
+          "use_llm": {
+            "type": "boolean",
+            "default": false
+          },
+          "profile_name": {
+            "type": "string",
+            "enum": [
+              "alignment_lab",
+              "basic_science",
+              "climate_adaptation",
+              "funder_10y",
+              "humanity_default",
+              "near_term_ops"
+            ]
+          },
+          "value_profile": {
+            "type": "object",
+            "description": "Explicit stakeholder values \u2014 rankings are never value-free. Prefer profile_name for named presets; or pass a full object.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "weight_impact": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_neglectedness": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_tractability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "weight_surprise": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "max_risk": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "min_answerability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "prefer_interdisciplinary": {
+                "type": "boolean"
+              },
+              "time_horizon_years": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "additionalProperties": false
+          },
+          "judge_model": {
+            "type": "string"
+          },
+          "diversity_backend": {
+            "type": "string",
+            "enum": [
+              "jaccard",
+              "embedding"
+            ],
+            "default": "jaccard"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "list_domains",
+      "description": "List supported research domains for curiosity tools.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "list_profiles",
+      "description": "List named ValueProfile presets (funder_10y, alignment_lab, \u2026). Rankings are never value-free.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  }
+]
