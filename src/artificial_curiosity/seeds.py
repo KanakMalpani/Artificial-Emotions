@@ -407,6 +407,21 @@ SEED_QUESTIONS: dict[str, list[UnansweredQuestion]] = {
             tags=["synthesizability", "ml"],
             source="seed",
         ),
+        UnansweredQuestion(
+            id="mat-03",
+            question=(
+                "Which polymer recycling pathways maximize retained mechanical "
+                "performance for mixed post-consumer plastics at scale?"
+            ),
+            domain=Domain.MATERIALS,
+            operationalization=(
+                "Compare chemical and mechanical recycling routes on retained "
+                "tensile/impact properties and yield under realistic mixed feeds."
+            ),
+            why_it_matters="Circular plastics fail if recycled material underperforms.",
+            tags=["recycling", "polymers", "circularity"],
+            source="seed",
+        ),
     ],
     Domain.SOCIAL.value: [
         UnansweredQuestion(
@@ -437,6 +452,21 @@ SEED_QUESTIONS: dict[str, list[UnansweredQuestion]] = {
             ),
             why_it_matters="Epistemic health of democracies depends on this tradeoff.",
             tags=["polarization", "epistemics", "media"],
+            source="seed",
+        ),
+        UnansweredQuestion(
+            id="soc-03",
+            question=(
+                "What early warning indicators most reliably predict cascading "
+                "failures in critical infrastructure under compound climate stress?"
+            ),
+            domain=Domain.SOCIAL,
+            operationalization=(
+                "Validate indicator sets that improve lead time for cascading "
+                "outage prediction versus baseline weather-only alerts."
+            ),
+            why_it_matters="Compound climate shocks hit interdependent social systems.",
+            tags=["resilience", "infrastructure", "climate"],
             source="seed",
         ),
     ],

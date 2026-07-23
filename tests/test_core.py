@@ -6,14 +6,24 @@ from artificial_curiosity.diversity import diversify, jaccard
 from artificial_curiosity.models import (
     CuriosityConfig,
     GapStatus,
+    LiteratureHit,
     RankedQuestion,
     ScoreAxes,
     UnansweredQuestion,
     ValueProfile,
 )
 from artificial_curiosity.pipeline import CuriosityEngine
-from artificial_curiosity.scoring import aggregate_curiosity, heuristic_score, passes_gates
-from artificial_curiosity.verify import classify_gap
+from artificial_curiosity.scoring import (
+    aggregate_curiosity,
+    heuristic_score,
+    passes_gates,
+    score_uncertainty_band,
+)
+from artificial_curiosity.verify import (
+    _abstract_claim_signal,
+    _effective_overlap,
+    classify_gap,
+)
 
 
 def test_aggregate_prefers_balanced_high_axes():
@@ -156,3 +166,149 @@ def test_heuristic_score_bounds():
         axes.cost_proxy,
     ):
         assert 0.0 <= v <= 1.0
+
+
+def test_score_uncertainty_band_widens_when_low_confidence():
+    low_c = score_uncertainty_band(0.8, 0.2, heuristic=True)
+    high_c = score_uncertainty_band(0.8, 0.9, heuristic=False)
+    assert low_c[0] < high_c[0]
+    assert low_c[1] > high_c[1]
+    assert low_c[0] <= 0.8 <= low_c[1]
+
+
+def test_abstract_claim_vs_open_gap_reading():
+    claim = LiteratureHit(
+        title="A solved case",
+        abstract_snippet="We show that the mechanism is X. Our results demonstrate Y.",
+    )
+    open_q = LiteratureHit(
+        title="An open problem",
+        abstract_snippet="This remains unknown and is an open question for further research.",
+    )
+    assert _abstract_claim_signal(claim) > 0
+    assert _abstract_claim_signal(open_q) < 0
+    # Open-gap language should dampen effective overlap vs claim language.
+    dampened = _effective_overlap(0.3, _abstract_claim_signal(open_q))
+    boosted = _effective_overlap(0.3, _abstract_claim_signal(claim))
+    assert dampened < boosted
+
+
+def test_offline_results_include_score_band():
+    results = CuriosityEngine(
+        CuriosityConfig(domain="ai", use_llm=False, use_literature=False, n_return=2)
+    ).run()
+    assert results[0].score_low is not None
+    assert results[0].score_high is not None
+    assert results[0].score_low <= results[0].curiosity_score <= results[0].score_high
+
+
+def test_all_primary_domains_have_seeds():
+    from artificial_curiosity.models import Domain
+    from artificial_curiosity.seeds import SEED_QUESTIONS
+
+    primary = [
+        Domain.AI,
+        Domain.BIOLOGY,
+        Domain.PHYSICS,
+        Domain.CLIMATE,
+        Domain.MEDICINE,
+        Domain.MATERIALS,
+        Domain.SOCIAL,
+        Domain.ENERGY,
+    ]
+    for d in primary:
+        qs = SEED_QUESTIONS.get(d.value, [])
+        assert len(qs) >= 2, f"{d.value} needs curated seeds"
+        for q in qs:
+            assert q.question.strip()
+            assert q.operationalization.strip()
+
+
+def test_spark_works_across_domains():
+    from artificial_curiosity.provoke import provoke
+
+    for domain in ("biology", "materials", "social", "energy"):
+        pack = provoke(domain=domain, n=2, fast=True)
+        assert pack["count"] >= 1
+        assert pack["unknowns"][0]["question"]
+
+
+def test_value_profile_presets_exist():
+    from artificial_curiosity.models import get_profile, list_profile_names
+
+    names = list_profile_names()
+    assert "humanity_default" in names
+    assert "funder_10y" in names
+    assert "alignment_lab" in names
+    assert "climate_adaptation" in names
+    p = get_profile("alignment_lab")
+    assert p.name == "alignment_lab"
+    assert p.max_risk <= 0.85
+
+
+def test_embedding_backend_falls_back_without_extra():
+    """Optional embedding path must not break offline Jaccard default (W1)."""
+    from artificial_curiosity.diversity import diversify, embedding_available, similarity
+
+    a = "What signals predict goal misgeneralization before deployment harm?"
+    b = "What signals predict goal-misgeneralization before deployment-scale harm?"
+    # Jaccard always works.
+    assert similarity(a, b, backend="jaccard") > 0.5
+    # Requesting embedding without extras still returns a usable similarity
+    # (Jaccard fallback inside similarity / diversify).
+    sim = similarity(a, b, backend="embedding")
+    assert 0.0 <= sim <= 1.0
+    if not embedding_available():
+        assert sim == similarity(a, b, backend="jaccard")
+
+    def rq(text: str, score: float) -> RankedQuestion:
+        q = UnansweredQuestion(
+            id=text[:8],
+            question=text,
+            domain="ai",
+            operationalization="Measure X in experiment Y with success criterion Z.",
+            why_it_matters="It matters a lot for safety.",
+        )
+        return RankedQuestion(
+            question=q,
+            scores=ScoreAxes(
+                impact=0.7,
+                neglectedness=0.7,
+                tractability=0.7,
+                surprise=0.7,
+                answerability=0.8,
+                risk=0.1,
+                cost_proxy=0.4,
+            ),
+            curiosity_score=score,
+            confidence=0.5,
+            gap=__import__(
+                "artificial_curiosity.models", fromlist=["GapEvidence"]
+            ).GapEvidence(
+                status=GapStatus.UNANSWERED,
+                confidence=0.5,
+            ),
+        )
+
+    out = diversify(
+        [rq(a, 0.9), rq(b, 0.85)],
+        threshold=0.55,
+        n_return=5,
+        backend="embedding",
+    )
+    assert len(out) == 1
+
+
+def test_judge_model_config_field_accepted():
+    cfg = CuriosityConfig(
+        domain="ai",
+        use_llm=False,
+        use_literature=False,
+        llm_model="gen-model",
+        judge_model="judge-model",
+        n_return=2,
+    )
+    assert cfg.judge_model == "judge-model"
+    # Offline path still runs with distinct judge_model set.
+    results = CuriosityEngine(cfg).run()
+    assert results

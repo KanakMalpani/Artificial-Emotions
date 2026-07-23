@@ -4,29 +4,65 @@ build-backend = "hatchling.build"
 
 [project]
 name = "artificial-curiosity"
-version = "0.1.0"
+version = "0.2.0"
 description = "A curiosity layer for AI: generate and rank valuable unanswered questions"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "Artificial Curiosity" }]
+keywords = [
+  "curiosity",
+  "research",
+  "mcp",
+  "openai-tools",
+  "scientific-discovery",
+  "openalex",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
   "pydantic>=2.6",
   "fastapi>=0.115",
   "uvicorn[standard]>=0.30",
 ]
 
+[project.urls]
+Homepage = "https://github.com/KanakMalpani/Artificial-Curiosity"
+Repository = "https://github.com/KanakMalpani/Artificial-Curiosity"
+Issues = "https://github.com/KanakMalpani/Artificial-Curiosity/issues"
+Documentation = "https://github.com/KanakMalpani/Artificial-Curiosity#readme"
+
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "httpx>=0.27", "ruff>=0.6"]
+embeddings = ["sentence-transformers>=3.0"]
 
 [project.scripts]
 curiosity = "artificial_curiosity.cli:main"
+curiosity-mcp = "artificial_curiosity.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/artificial_curiosity"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src/artificial_curiosity" = "artificial_curiosity"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/docs",
+  "/examples",
+  "/README.md",
+  "/pyproject.toml",
+  "/CONTRIBUTING.md",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

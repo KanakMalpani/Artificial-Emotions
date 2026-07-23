@@ -1,34 +1,15 @@
-# Research Index
+# Docs
 
-Everything for this project is under:
+Product documentation for Artificial Curiosity. Start at the root [README](../README.md).
 
-`<local-clone>`
-
-## Docs (research + design)
-
-| File | Contents |
-|------|----------|
-| [FIRST_PRINCIPLES.md](FIRST_PRINCIPLES.md) | Decision-theoretic definition of curiosity; scoring axes; invariants |
-| [RESEARCH.md](RESEARCH.md) | Full research report + competitive landscape |
-| [SOURCES.md](SOURCES.md) | Annotated bibliography with code mapping |
-| [FAILURE_MODES.md](FAILURE_MODES.md) | F1–F15 failures and mitigations |
-| [LIMITS.md](LIMITS.md) | Verified working vs known gaps |
+| Doc | Purpose |
+|-----|---------|
+| [PLUGINS.md](PLUGINS.md) | MCP / HTTP / OpenAI tools / CLI install |
+| [LIMITS.md](LIMITS.md) | Honest bounds — what works, what doesn’t |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Pipeline modules and trust boundaries |
-| [CAPABILITY.md](CAPABILITY.md) | Implementation-ready capability contract |
-| [INDEX.md](INDEX.md) | This file |
+| [PROOFS.md](PROOFS.md) | Demo commands for verified behaviors |
+| [DESIGN.md](DESIGN.md) | Short invariants + pointer to research |
+| [ROADMAP.md](ROADMAP.md) | Agent playbook + roadmap — stuck? start §0→§3→§2 |
+| [ROADMAP_SUMMARY.md](ROADMAP_SUMMARY.md) | 1-page summary + top wedges |
 
-## Code (implements the research)
-
-| Path | Role |
-|------|------|
-| `src/artificial_curiosity/` | Curiosity engine (generate → verify → score → rank → brief) |
-| `tests/` | Unit + failure-mode adversarial tests |
-| `examples/` | Offline/literature experiment JSON + eval harness |
-| `web/` | UI for ranked unknowns |
-
-## Experiment artifacts already in-repo
-
-- `examples/run_ai_offline.json`
-- `examples/run_ai_literature.json`
-- `examples/_run_compare.py`
-- `examples/eval_harness.py`
+**Design rationale (optional):** [`research/`](../research/) — first principles, failure modes, sources. Research informed the code; it is not the homepage.

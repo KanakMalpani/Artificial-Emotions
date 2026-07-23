@@ -45,6 +45,107 @@ class ValueProfile(BaseModel):
     time_horizon_years: int = Field(10, ge=1, le=100)
 
 
+# Named presets — never a "neutral / value-free" mode (F11).
+VALUE_PROFILE_PRESETS: dict[str, ValueProfile] = {
+    "humanity_default": ValueProfile(),
+    "funder_10y": ValueProfile(
+        name="funder_10y",
+        description=(
+            "Prefer tractable, high-impact unknowns with clear operationalization "
+            "within a ~10-year funding horizon."
+        ),
+        weight_impact=1.2,
+        weight_neglectedness=0.9,
+        weight_tractability=1.3,
+        weight_surprise=0.6,
+        time_horizon_years=10,
+        min_answerability=0.5,
+    ),
+    "alignment_lab": ValueProfile(
+        name="alignment_lab",
+        description=(
+            "Prefer neglected alignment / control unknowns with strong operationalization "
+            "and strict dual-use risk ceiling."
+        ),
+        weight_impact=1.1,
+        weight_neglectedness=1.3,
+        weight_tractability=1.0,
+        weight_surprise=0.9,
+        max_risk=0.7,
+        min_answerability=0.5,
+        time_horizon_years=15,
+    ),
+    "climate_adaptation": ValueProfile(
+        name="climate_adaptation",
+        description=(
+            "Prefer climate adaptation / resilience unknowns that unlock downstream "
+            "mitigation or adaptation decisions."
+        ),
+        weight_impact=1.3,
+        weight_neglectedness=1.1,
+        weight_tractability=1.0,
+        weight_surprise=0.7,
+        time_horizon_years=20,
+    ),
+    "basic_science": ValueProfile(
+        name="basic_science",
+        description=(
+            "Prefer surprising, understudied fundamental unknowns even when near-term "
+            "applications are unclear."
+        ),
+        weight_impact=0.8,
+        weight_neglectedness=1.2,
+        weight_tractability=0.7,
+        weight_surprise=1.4,
+        time_horizon_years=30,
+    ),
+    "near_term_ops": ValueProfile(
+        name="near_term_ops",
+        description=(
+            "Prefer answerable, low-cost unknowns that can inform operations within "
+            "1–3 years."
+        ),
+        weight_impact=0.9,
+        weight_neglectedness=0.7,
+        weight_tractability=1.5,
+        weight_surprise=0.5,
+        min_answerability=0.55,
+        time_horizon_years=3,
+    ),
+}
+
+
+def list_profile_names() -> list[str]:
+    return sorted(VALUE_PROFILE_PRESETS.keys())
+
+
+def get_profile(name: str | None = None) -> ValueProfile:
+    """Resolve a named preset. Unknown names raise ValueError (no silent laundering)."""
+    if not name or not str(name).strip():
+        return ValueProfile()
+    key = str(name).strip().lower()
+    if key not in VALUE_PROFILE_PRESETS:
+        known = ", ".join(list_profile_names())
+        raise ValueError(f"Unknown ValueProfile preset '{name}'. Known: {known}")
+    # Return a copy so callers can mutate safely.
+    return VALUE_PROFILE_PRESETS[key].model_copy(deep=True)
+
+
+def resolve_value_profile(
+    profile: ValueProfile | dict[str, Any] | None = None,
+    *,
+    profile_name: str | None = None,
+) -> ValueProfile:
+    """Prefer explicit profile object; else named preset; else humanity_default."""
+    if isinstance(profile, ValueProfile):
+        return profile
+    if isinstance(profile, dict):
+        return ValueProfile.model_validate(profile)
+    if profile_name:
+        return get_profile(profile_name)
+    return ValueProfile()
+
+
 class ScoreAxes(BaseModel):
     impact: float = Field(..., ge=0.0, le=1.0)
     neglectedness: float = Field(..., ge=0.0, le=1.0)
@@ -110,6 +211,9 @@ class RankedQuestion(BaseModel):
     investigation_brief: str = ""
     flags: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # Soft calibration band (F8): not a true CI — evidence-strength envelope.
+    score_low: float | None = None
+    score_high: float | None = None
 
 
 class CuriosityConfig(BaseModel):
@@ -122,7 +226,15 @@ class CuriosityConfig(BaseModel):
     use_literature: bool = True
     literature_timeout_s: float = 12.0
     diversity_threshold: float = Field(0.82, ge=0.5, le=0.99)
+    # "jaccard" (default, offline) | "embedding" (optional extras; falls back if missing)
+    diversity_backend: str = Field("jaccard", pattern="^(jaccard|embedding)$")
     seed: int = 42
     llm_model: str = "gpt-4o-mini"
+    # Separate judge/gap-reader model when set (F5). Falls back to llm_model / env.
+    judge_model: str | None = None
+    # Provider-agnostic (preferred). Any OpenAI-compatible /chat/completions host.
+    llm_base_url: str | None = None
+    llm_api_key_env: str = "LLM_API_KEY"
+    # Backward-compatible aliases (still honored).
     openai_base_url: str | None = None
     openai_api_key_env: str = "OPENAI_API_KEY"
