@@ -1,0 +1,121 @@
+{
+  "schema_version": "spotcheck_fixture.v1",
+  "description": "Offline gap-gate fixtures for expert-eval harness (W10). Not a marketing accuracy set.",
+  "cases": [
+    {
+      "case_id": "answered-strong-overlap",
+      "gold_status": "likely_answered",
+      "notes": "Tight title/abstract match + claim language + recent + cites",
+      "question": {
+        "id": "fx-ans-01",
+        "question": "Does CRISPR-Cas9 enable targeted gene editing in mammalian cells?",
+        "domain": "biology",
+        "operationalization": "Demonstration of site-specific DNA edits in cultured mammalian cells with sequencing confirmation.",
+        "why_it_matters": "Foundational gene editing capability.",
+        "tags": ["crispr", "gene-editing"]
+      },
+      "hits": [
+        {
+          "title": "CRISPR-Cas9 targeted gene editing in mammalian cells",
+          "year": 2024,
+          "cited_by_count": 120,
+          "abstract_snippet": "We demonstrate site-specific DNA edits in cultured mammalian cells with sequencing confirmation. Our results show efficient CRISPR-Cas9 gene editing.",
+          "source": "fixture"
+        },
+        {
+          "title": "Efficient genome editing using CRISPR-Cas9 in mammals",
+          "year": 2023,
+          "cited_by_count": 80,
+          "abstract_snippet": "We show targeted gene editing across multiple mammalian cell lines using CRISPR-Cas9.",
+          "source": "fixture"
+        },
+        {
+          "title": "Cas9 nuclease enables precise mammalian genome modification",
+          "year": 2022,
+          "cited_by_count": 60,
+          "abstract_snippet": "Results show CRISPR-Cas9 enables targeted gene editing in mammalian cells with high specificity.",
+          "source": "fixture"
+        },
+        {
+          "title": "Review of CRISPR applications",
+          "year": 2021,
+          "cited_by_count": 40,
+          "abstract_snippet": "Survey of CRISPR-Cas9 gene editing methods.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "case_id": "adjacent-not-answered",
+      "gold_status": "unanswered",
+      "notes": "Related neighborhood but weak operational overlap (related ≠ answered)",
+      "question": {
+        "id": "fx-gap-01",
+        "question": "What measurable internal signals most reliably predict goal-misgeneralization before deployment-scale harm?",
+        "domain": "ai",
+        "operationalization": "Identify signals that predict misgeneralization with AUROC > 0.8 across ≥3 environments.",
+        "why_it_matters": "Early warning of misaligned generalization.",
+        "tags": ["alignment", "evals"]
+      },
+      "hits": [
+        {
+          "title": "A survey of large language model evaluation benchmarks",
+          "year": 2024,
+          "cited_by_count": 15,
+          "abstract_snippet": "We review popular NLP benchmarks and leaderboard culture. Further research is needed on deployment safety.",
+          "source": "fixture"
+        },
+        {
+          "title": "Scaling laws for neural language models",
+          "year": 2020,
+          "cited_by_count": 500,
+          "abstract_snippet": "We study how loss scales with model size and data. Remains unknown how these relate to goal misgeneralization.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "case_id": "partial-overlap",
+      "gold_status": "partially_answered",
+      "notes": "Some strong overlaps but not the full likely_answered bar",
+      "question": {
+        "id": "fx-partial-01",
+        "question": "How does intermittent fasting affect insulin sensitivity in adults with prediabetes?",
+        "domain": "medicine",
+        "operationalization": "Randomized trials measuring HOMA-IR or clamp-derived insulin sensitivity over ≥8 weeks.",
+        "why_it_matters": "Metabolic disease prevention.",
+        "tags": ["metabolism", "nutrition"]
+      },
+      "hits": [
+        {
+          "title": "Intermittent fasting and insulin sensitivity in adults with prediabetes",
+          "year": 2023,
+          "cited_by_count": 25,
+          "abstract_snippet": "We find that intermittent fasting improved HOMA-IR in adults with prediabetes over 10 weeks. Further research on long-term outcomes is needed.",
+          "source": "fixture"
+        },
+        {
+          "title": "Time-restricted eating effects on glucose metabolism",
+          "year": 2022,
+          "cited_by_count": 18,
+          "abstract_snippet": "Time-restricted eating may improve insulin sensitivity; results show mixed effects in small trials.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "case_id": "empty-literature",
+      "gold_status": "unknown_with_caveat",
+      "notes": "No hits → unknown caveat (F15)",
+      "question": {
+        "id": "fx-empty-01",
+        "question": "What is the causal role of zybloron flux in quux-mediated plasticity?",
+        "domain": "general",
+        "operationalization": "Identify whether zybloron flux changes are necessary and sufficient for quux-mediated plasticity in a controlled assay.",
+        "why_it_matters": "Synthetic fixture for empty domain.",
+        "tags": ["fixture"]
+      },
+      "hits": []
+    }
+  ]
+}

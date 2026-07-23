@@ -80,7 +80,57 @@ curiosity spark --domain social --n 3
 
 ```bash
 curiosity-mcp --list-tools
+curiosity-mcp --list-resources
 python -c "from artificial_curiosity.agent_tools import dispatch_tool; print(dispatch_tool('list_profiles'))"
+```
+
+## Expert-eval / spot-check harness (W10)
+
+```bash
+curiosity eval
+curiosity eval --json
+pytest tests/test_mid_horizon.py -q
+# Methodology: evals/METHODOLOGY.md — report case-level match + F1 miss rate; no vanity accuracy %
+```
+
+## Second literature backend (W11)
+
+```bash
+# Default remains OpenAlex. Semantic Scholar / merge are config switches.
+curiosity run --domain ai --n 3 --literature-backend openalex --json
+# Optional (network): --literature-backend semantic_scholar | both
+# Offline path unchanged:
+curiosity run --domain ai --n 3 --no-literature --json
+```
+
+## Grounded LLM gap reader (W12)
+
+When `use_llm=True`, the gap reader must cite titles from retrieved papers only.
+Ungrounded / invented titles are rejected (heuristic gap kept; `llm_gap_ungrounded` flag).
+Verified offline via `tests/test_mid_horizon.py::test_w12_gap_reader_rejects_ungrounded_titles`.
+Live LLM smoke is optional (keys often absent).
+
+## Preference JSONL (W13)
+
+```bash
+curiosity run --domain ai --n 3 --no-literature --preference-log prefs.jsonl
+# Appends PreferenceEvent rows (schema preference_event.v1); no DB required
+```
+
+## Dual-use uplift (W14)
+
+```bash
+pytest tests/test_mid_horizon.py::test_w14_dual_use_beyond_keywords -q
+# Weighted patterns + combos + human_review_risk; LIMITS still lists residual evasion risk
+```
+
+## Multi-judge disagreement (W15)
+
+```bash
+# Offline unit: disagreement entropy widens bands
+pytest tests/test_mid_horizon.py::test_w15_multi_judge_disagreement_widens_bands -q
+# Live (optional keys): --judge-ensemble 2 or LLM_JUDGE_MODELS=a,b
+curiosity run --domain ai --n 3 --no-literature --llm --judge-ensemble 2
 ```
 
 ## Multi-provider LLM smoke matrix (ops)

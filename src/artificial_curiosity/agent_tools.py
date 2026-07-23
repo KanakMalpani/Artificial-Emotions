@@ -126,7 +126,13 @@ RANK_SCHEMA: dict[str, Any] = {
         "use_literature": {
             "type": "boolean",
             "default": True,
-            "description": "Ground gaps via OpenAlex (no API key required)",
+            "description": "Ground gaps via literature adapters (OpenAlex / Semantic Scholar)",
+        },
+        "literature_backend": {
+            "type": "string",
+            "enum": ["openalex", "semantic_scholar", "both"],
+            "default": "openalex",
+            "description": "Literature backend (W11). Offline path ignores this.",
         },
         "use_llm": {
             "type": "boolean",
@@ -138,10 +144,21 @@ RANK_SCHEMA: dict[str, Any] = {
         },
         "value_profile": _VALUE_PROFILE_SCHEMA,
         "judge_model": {"type": "string"},
+        "judge_ensemble_n": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 1,
+            "description": "Multi-judge ensemble size; disagreement widens bands (W15)",
+        },
         "diversity_backend": {
             "type": "string",
             "enum": ["jaccard", "embedding"],
             "default": "jaccard",
+        },
+        "preference_log_path": {
+            "type": "string",
+            "description": "Opt-in JSONL path for preference snapshots (W13)",
         },
     },
     "additionalProperties": False,
@@ -202,15 +219,23 @@ def handle_rank_unknowns(
     n_return: int = 8,
     n_candidates: int = 16,
     use_literature: bool = True,
+    literature_backend: str = "openalex",
     use_llm: bool = False,
     value_profile: Any = None,
     profile_name: str | None = None,
     judge_model: str | None = None,
+    judge_ensemble_n: int = 1,
     diversity_backend: str = "jaccard",
+    preference_log_path: str | None = None,
     **_extra: Any,
 ) -> dict[str, Any]:
     """Full curiosity pipeline: generate → verify → score → diversify → brief."""
     profile = _parse_value_profile(value_profile, profile_name=profile_name)
+    backend = literature_backend if literature_backend in (
+        "openalex",
+        "semantic_scholar",
+        "both",
+    ) else "openalex"
     config = CuriosityConfig(
         domain=domain,
         topic=topic,
@@ -218,11 +243,14 @@ def handle_rank_unknowns(
         n_candidates=int(n_candidates),
         use_llm=bool(use_llm),
         use_literature=bool(use_literature),
+        literature_backend=backend,
         value_profile=profile,
         judge_model=judge_model,
+        judge_ensemble_n=int(judge_ensemble_n or 1),
         diversity_backend=diversity_backend
         if diversity_backend in ("jaccard", "embedding")
         else "jaccard",
+        preference_log_path=preference_log_path,
     )
     results = CuriosityEngine(config).run_dict()
     return {
@@ -235,6 +263,7 @@ def handle_rank_unknowns(
         "topic": topic,
         "count": len(results),
         "mode": "literature" if use_literature else "offline",
+        "literature_backend": backend if use_literature else "none",
         "value_profile": config.value_profile.model_dump(mode="json"),
         "questions": results,
         "note": (
@@ -295,7 +324,8 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "name": "rank_unknowns",
         "description": (
             "Full Artificial Curiosity pipeline: generate candidates, optionally "
-            "verify gaps in OpenAlex, multi-axis score with an explicit "
+            "verify gaps via literature adapters (OpenAlex / optional Semantic Scholar), "
+            "multi-axis score with an explicit "
             "ValueProfile, diversify, and return investigation briefs. "
             "Alias: run_curiosity. Scores are decision aids, not oracles."
         ),
@@ -363,3 +393,61 @@ def dispatch_tool(name: str, arguments: dict[str, Any] | None = None) -> dict[st
 
 def tools_as_json() -> str:
     return json.dumps(openai_tools(), indent=2)
+
+
+# ---------------------------------------------------------------------------
+# MCP resources (WO-0.3.7): domains, presets, LIMITS snippet
+# ---------------------------------------------------------------------------
+
+_LIMITS_SNIPPET = (
+    "Scores are decision aids with explicit ValueProfile weights — not oracles. "
+    "Related literature ≠ answered. Gap reading is phrase/overlap (optional grounded "
+    "LLM reader). Dual-use uses weighted_heuristic_v1 — residual risk remains. "
+    "Default literature backend: OpenAlex; Semantic Scholar optional. "
+    "Offline demos work without LLM keys. See docs/LIMITS.md."
+)
+
+
+def mcp_resource_list() -> list[dict[str, Any]]:
+    return [
+        {
+            "uri": "curiosity://domains",
+            "name": "domains",
+            "description": "Supported research domains",
+            "mimeType": "application/json",
+        },
+        {
+            "uri": "curiosity://profiles",
+            "name": "profiles",
+            "description": "Named ValueProfile presets (never value-free)",
+            "mimeType": "application/json",
+        },
+        {
+            "uri": "curiosity://limits",
+            "name": "limits",
+            "description": "Honesty bounds / confidence caps (snippet)",
+            "mimeType": "text/plain",
+        },
+    ]
+
+
+def mcp_resource_read(uri: str) -> dict[str, Any]:
+    if uri == "curiosity://domains":
+        text = json.dumps(handle_list_domains(), indent=2)
+    elif uri == "curiosity://profiles":
+        text = json.dumps(handle_list_profiles(), indent=2)
+    elif uri == "curiosity://limits":
+        text = _LIMITS_SNIPPET
+    else:
+        raise KeyError(uri)
+    return {
+        "contents": [
+            {
+                "uri": uri,
+                "mimeType": "application/json"
+                if uri != "curiosity://limits"
+                else "text/plain",
+                "text": text,
+            }
+        ]
+    }

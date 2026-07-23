@@ -1,28 +1,35 @@
 # Known Limits (verified)
 
-Honest bounds for **v0.2.0** — do not overclaim.
+Honest bounds for **v0.3.0** — do not overclaim.
 
 ## Verified working (2026-07-23)
 
 - Offline seed → score → rank → brief pipeline
-- Literature neighborhood fetch via OpenAlex
+- Literature neighborhood fetch via **OpenAlex** (default) and optional **Semantic Scholar** (`literature_backend=semantic_scholar|both`)
+- Optional literature disk cache (`literature_cache_dir`) for rate-limit softening
 - Gap gate: related papers ≠ answered (overlap-gated + phrase-level abstract reading)
+- LLM gap reader (optional): **rejects ungrounded / invented paper titles**; keeps heuristic gap when evidence missing (W12)
 - Acceptance gates: answerability, risk, likely-answered
 - Near-duplicate suppression: **normalized Jaccard is the default** (hyphen-safe)
 - Optional embedding diversity behind `pip install '.[embeddings]'` (`diversity_backend=embedding`); falls back to Jaccard if extras missing — **not** default intelligence
-- Score uncertainty bands (`score_low` / `score_high`) — evidence envelopes, not true CIs
+- Score uncertainty bands (`score_low` / `score_high`) — evidence envelopes, not true CIs; widen on multi-judge disagreement
 - Optional LLM judge + LLM gap reader when `use_llm=True` and any OpenAI-compatible provider is configured (`LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`)
 - Separate `judge_model` / `LLM_JUDGE_MODEL` from generator model (F5) — config + CLI/API/MCP flags
+- Multi-judge ensemble (`judge_ensemble_n` / `LLM_JUDGE_MODELS`): disagreement entropy flag + wider bands (W15) — requires live LLM; offline path uses heuristic
 - Named **ValueProfile presets** (`humanity_default`, `funder_10y`, `alignment_lab`, `climate_adaptation`, `basic_science`, `near_term_ops`) via `curiosity profiles`, `GET /v1/profiles`, MCP `list_profiles`, `--profile` / `profile_name`
 - Instant spark for any agent/model: `GET|POST /v1/curiosity/provoke`, CLI `curiosity spark`, `curiosity serve`
 - Agent manifest: `GET /v1/agent`
 - OpenAI-compatible tool schemas: `GET /v1/agent/tools` + `examples/openai_tools.json`
-- MCP stdio server: `curiosity-mcp` / `python -m artificial_curiosity.mcp_server` (tools list + call handlers; no MCP SDK)
+- MCP stdio server: `curiosity-mcp` (tools + resources: `curiosity://domains|profiles|limits`)
 - Plugin install docs: `docs/PLUGINS.md` (Cursor, Claude Desktop, Claude Code, VS Code Copilot, Continue, Windsurf, HTTP, OpenAI tools)
 - Demo proofs: `docs/PROOFS.md` (includes multi-provider smoke matrix notes — no secrets)
 - CLI, Python API, FastAPI (`:8000`), Vite UI (`:5173`) — UI shows briefs, `[low–high]` bands, and profile name
-- Automated tests: core, failure-mode (incl. expanded F7/F13), provoke/API, MCP — **61 passed** (`pytest -q`, 2026-07-23)
-- Smoke: `curiosity spark`, `curiosity profiles`, `curiosity-mcp --list-tools`, `import artificial_curiosity.mcp_server`
+- Expert-eval / spot-check harness: `curiosity eval` + `evals/fixtures/` + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**)
+- Opt-in preference JSONL schema (`preference_log_path` / `--preference-log`) — no DB required (W13)
+- Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
+- Versioned domain packs (`artificial_curiosity/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`)
+- Automated tests: core, failure-mode, provoke/API, MCP, mid-horizon (W10–W15) — **71 passed** (`pytest -q`, 2026-07-23)
+- Smoke: `curiosity spark`, `curiosity profiles`, `curiosity eval`, `curiosity-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
 - Failure-mode suite: `tests/test_failure_modes.py` encodes F1–F15 from `research/FAILURE_MODES.md`
@@ -35,21 +42,23 @@ Honest bounds for **v0.2.0** — do not overclaim.
 | Limit | Why | Mitigation path |
 |-------|-----|-----------------|
 | Heuristic scoring is lexicon/density based | No LLM required for demos | Set `use_llm=True` + API key |
-| Gap reading is phrase/overlap, not full-text comprehension | OpenAlex abstracts are partial | LLM gap reader (shipped optional) or full-text APIs |
-| OpenAlex neighborhoods can be topically noisy | Relevance search ≠ semantic match | Low overlap keeps `unanswered`; query uses tags + compounds |
-| Seed set is curated, not open-ended | Offline reliability | LLM generation expands candidates; see CONTRIBUTING |
+| Gap reading is phrase/overlap, not full-text comprehension | Abstracts are partial | Grounded LLM reader (optional) or full-text APIs later |
+| OpenAlex / S2 neighborhoods can be topically noisy | Relevance search ≠ semantic match | Low overlap keeps `unanswered`; `both` merges sources |
+| Seed set is curated (+ optional packs) | Offline reliability | LLM generation + CONTRIBUTING pack bar |
 | Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile` |
-| No longitudinal outcome calibration yet | Need impact follow-up data | Log rankings → later impact; bands are provisional |
+| No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL is the breadcrumb; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |
-| Dual-use filter is keyword-level | Easy to evade | Stronger classifier + human review |
+| Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains | Human review hook + LIMITS residual risk; stronger models later |
 | LLM paths untested live in CI | `LLM_API_KEY` often unset | Local multi-provider smoke per PROOFS; no secrets in repo |
-| MCP is tools-only (no resources/prompts) | Keep stdlib surface small | Add later if hosts need them |
+| Multi-judge ensemble needs live LLM | Offline uses single heuristic | Documented; disagreement flag only when ≥2 judges return |
 | Not on PyPI yet | Owner publish gate | `python -m build` locally; publish when tagged |
+| Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — not claimed done |
 
 ## Confidence interpretation
 
 - `~0.25–0.35`: no literature / unknown caveat
 - `~0.45–0.58`: heuristic + literature neighborhood (cap while heuristic)
 - Higher: requires LLM judges and/or stronger evidence
+- Bands widen further when `judge_disagreement` fires
 
 Scores are **decision aids**, not oracles. Displayed `[low–high]` bands widen when confidence is low.

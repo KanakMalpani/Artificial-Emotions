@@ -1,0 +1,105 @@
+"""Opt-in preference / ranking feedback JSONL (F11 flywheel prep).
+
+No database required. Callers append PreferenceEvent records when a human
+or agent expresses preference among ranked unknowns.
+"""
+
+from __future__ import annotations
+
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Iterable, Iterator
+
+from pydantic import BaseModel, Field
+
+
+SCHEMA_VERSION = "preference_event.v1"
+
+
+class PreferenceEvent(BaseModel):
+    """One preference / spot-check / outcome breadcrumb."""
+
+    schema_version: str = SCHEMA_VERSION
+    ts: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
+        description="ISO-8601 UTC timestamp",
+    )
+    event_type: str = Field(
+        ...,
+        description="prefer | reject | already_answered | keep | outcome | note",
+    )
+    profile_name: str = "humanity_default"
+    domain: str | None = None
+    question_id: str | None = None
+    question_text: str | None = None
+    rank: int | None = None
+    curiosity_score: float | None = None
+    preferred_over_ids: list[str] = Field(default_factory=list)
+    labels: dict[str, str] = Field(default_factory=dict)
+    notes: str = ""
+    run_id: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+def append_preference_event(
+    path: str | Path,
+    event: PreferenceEvent | dict[str, Any],
+) -> PreferenceEvent:
+    """Append one JSONL line. Creates parent dirs as needed."""
+    if isinstance(event, dict):
+        event = PreferenceEvent.model_validate(event)
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("a", encoding="utf-8") as f:
+        f.write(event.model_dump_json() + "\n")
+    return event
+
+
+def read_preference_events(path: str | Path) -> Iterator[PreferenceEvent]:
+    """Yield PreferenceEvent rows from a JSONL file (skips blank/corrupt lines)."""
+    p = Path(path)
+    if not p.exists():
+        return
+        yield  # pragma: no cover — makes this a generator
+    with p.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                yield PreferenceEvent.model_validate(json.loads(line))
+            except Exception:  # noqa: BLE001
+                continue
+
+
+def load_preference_events(path: str | Path) -> list[PreferenceEvent]:
+    return list(read_preference_events(path))
+
+
+def events_from_ranked(
+    ranked: Iterable[Any],
+    *,
+    event_type: str = "note",
+    profile_name: str = "humanity_default",
+    run_id: str | None = None,
+    notes: str = "",
+) -> list[PreferenceEvent]:
+    """Helper: snapshot ranked questions into PreferenceEvent shells (caller labels later)."""
+    out: list[PreferenceEvent] = []
+    for item in ranked:
+        q = getattr(item, "question", None)
+        out.append(
+            PreferenceEvent(
+                event_type=event_type,
+                profile_name=profile_name,
+                domain=str(getattr(q, "domain", None) or ""),
+                question_id=getattr(q, "id", None),
+                question_text=getattr(q, "question", None),
+                rank=getattr(item, "rank", None),
+                curiosity_score=getattr(item, "curiosity_score", None),
+                run_id=run_id,
+                notes=notes,
+            )
+        )
+    return out

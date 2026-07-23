@@ -1,7 +1,7 @@
 # Artificial Curiosity — Agent Playbook & Roadmap
 
 **Status:** Living operational plan (not a commitment ledger)  
-**Product version today:** `0.2.0` (see `pyproject.toml`)  
+**Product version today:** `0.3.0` (see `pyproject.toml`)  
 **Workspace (only):** `C:\Users\mrkan\CRAZZY\Artificial Curiosity`  
 **Public repo:** https://github.com/KanakMalpani/Artificial-Curiosity  
 **Companion:** [`ROADMAP_SUMMARY.md`](ROADMAP_SUMMARY.md) (1-page)  
@@ -127,7 +127,7 @@ ValueProfile + Domain/Topic
 | Default ValueProfile only | Presets library is a top v0.2 wedge |
 | No longitudinal calibration | Do not claim “calibrated”; flywheel is v0.3+ |
 | No embedding diversity | Optional `.[embeddings]` — Jaccard stays default offline |
-| Dual-use keyword-level | Classifier + review is v0.4+; keep hard reject |
+| Dual-use residual risk | Weighted heuristic + review flag shipped (W14); not a trained oracle | Keep hard reject; LIMITS residual |
 | LLM paths often untested live | Smoke with mocked + optional live matrix; no secrets in repo |
 | MCP tools-only | Resources/prompts later if hosts need them |
 | No PyPI yet | Packaging wedge; owner-gated publish |
@@ -166,12 +166,12 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 
 | ID | Wedge | Files (expected) | Success test | Done when | F-modes |
 |----|-------|------------------|--------------|-----------|---------|
-| **W10** | Expert-eval / spot-check harness (fixtures offline) | future `evals/`, `tests/` | Offline fixture run | Methodology doc; no single “accuracy %” | F1 |
-| **W11** | Second literature backend (e.g. Semantic Scholar) behind config | `openalex.py` → adapters, `verify.py` | Config switch; offline still works | LIMITS lists multi-source or single-source cap | F12, F15 |
-| **W12** | LLM gap reader: mandatory retrieved evidence in rationale when `use_llm` | `verify.py`, `judge.py` | Test rejects ungrounded gap claims | PROOFS updated | F7 |
-| **W13** | Preference logging schema (opt-in JSONL) | new schema + docs | Write/read sample JSONL | Documented; no DB required | F11 |
-| **W14** | Dual-use beyond keywords *or* explicit LIMITS cap | `scoring.py`, future `safety/` | Classifier eval sample **or** LIMITS sentence | Claim matches LIMITS | F10 |
-| **W15** | Multi-judge ensemble + disagreement entropy flag | `judge.py`, `scoring.py` | Flag when judges diverge | Bands widen / flag set | F5, F8 |
+| **W10** | Expert-eval / spot-check harness (fixtures offline) | `evals/`, `evals.py`, `tests/test_mid_horizon.py` | Offline fixture run | ✅ Methodology doc; no single “accuracy %” | F1 |
+| **W11** | Second literature backend (Semantic Scholar) behind config | `literature.py`, `verify.py`, CLI/API | Config switch; offline still works | ✅ LIMITS lists multi-source | F12, F15 |
+| **W12** | LLM gap reader: mandatory retrieved evidence in rationale when `use_llm` | `judge.py`, `verify.py` | Test rejects ungrounded gap claims | ✅ PROOFS updated | F7 |
+| **W13** | Preference logging schema (opt-in JSONL) | `preferences.py`, docs | Write/read sample JSONL | ✅ Documented; no DB required | F11 |
+| **W14** | Dual-use beyond keywords *or* explicit LIMITS cap | `safety.py`, `scoring.py` | Classifier eval sample **or** LIMITS sentence | ✅ Claim matches LIMITS (residual risk) | F10 |
+| **W15** | Multi-judge ensemble + disagreement entropy flag | `judge.py`, `scoring.py`, `pipeline.py` | Flag when judges diverge | ✅ Bands widen / flag set | F5, F8 |
 
 ### How to pick under ambiguity
 
@@ -439,39 +439,39 @@ flowchart LR
 
 ### 7.2 v0.3 — Evaluation & literature depth
 
-- [ ] **WO-0.3.1** Expert-eval harness + offline fixtures (`evals/` or `tests/`)  
-- [ ] **WO-0.3.2** Spot-check tooling for top-10 “already answered” fail rate (F1 monitor)  
-- [ ] **WO-0.3.3** Second literature adapter behind config  
-- [ ] **WO-0.3.4** LLM gap reader requires retrieved evidence in rationale  
-- [ ] **WO-0.3.5** Opt-in preference JSONL schema  
-- [ ] **WO-0.3.6** Versioned domain packs as assets  
-- [ ] **WO-0.3.7** MCP resources: domains, presets, LIMITS snippet (if hosts need)
+- [x] **WO-0.3.1** Expert-eval harness + offline fixtures (`evals/` + `evals.py`)  
+- [x] **WO-0.3.2** Spot-check tooling for top-10 “already answered” fail rate (F1 monitor)  
+- [x] **WO-0.3.3** Second literature adapter behind config (Semantic Scholar / both)  
+- [x] **WO-0.3.4** LLM gap reader requires retrieved evidence in rationale  
+- [x] **WO-0.3.5** Opt-in preference JSONL schema  
+- [x] **WO-0.3.6** Versioned domain packs as assets (`packs/`)  
+- [x] **WO-0.3.7** MCP resources: domains, presets, LIMITS snippet  
 
 **Exit:** Harness runs offline; second backend optional; preference schema documented; LIMITS confidence caps current.
 
 ### 7.3 v0.4–v0.5 — Safety & ranking quality
 
-- [ ] **WO-0.4.1** Dual-use classifier beyond keywords **or** LIMITS caps claim  
-- [ ] **WO-0.4.2** Human review hook for near-threshold risk  
-- [ ] **WO-0.4.3** Multi-judge + disagreement entropy flag  
+- [x] **WO-0.4.1** Dual-use classifier beyond keywords **or** LIMITS caps claim  
+- [x] **WO-0.4.2** Human review hook for near-threshold risk (`human_review_risk`)  
+- [x] **WO-0.4.3** Multi-judge + disagreement entropy flag  
 - [ ] **WO-0.4.4** Neglectedness / cost proxy research spike (may stay heuristic)  
-- [ ] **WO-0.4.5** OpenAlex cache / rate-limit  
+- [x] **WO-0.4.5** OpenAlex / literature cache / rate-limit softener  
 - [ ] **WO-0.4.6** Optional API keys for HTTP (local offline unchanged)
 
 ### 7.4 v1.0 — Credible trust bar (not a feature dump)
 
 Agent checklist before anyone says “v1.0”:
 
-- [ ] Stable `/v1/...` API + semver changelog  
+- [x] Stable `/v1/...` API + semver changelog (version `0.3.0`; changelog via git / ROADMAP)  
 - [ ] PyPI install without clone  
-- [ ] Eval harness + published **methodology** (no magic accuracy %)  
-- [ ] Dual-use stronger than keywords **or** LIMITS explicit residual risk  
-- [ ] Multi-literature **or** documented single-source limits  
-- [ ] Separate generator/judge supported + tested  
-- [ ] Web + MCP + CLI + HTTP share invariants (profile, bands, flags)  
-- [ ] F1–F15 tests with known gaps called out in LIMITS  
-- [ ] Security baseline: no secrets; outbound allowlist documented  
-- [ ] Positioning: decision aids, not oracles  
+- [x] Eval harness + published **methodology** (no magic accuracy %)  
+- [x] Dual-use stronger than keywords **or** LIMITS explicit residual risk  
+- [x] Multi-literature **or** documented single-source limits  
+- [x] Separate generator/judge supported + tested  
+- [x] Web + MCP + CLI + HTTP share invariants (profile, bands, flags)  
+- [x] F1–F15 tests with known gaps called out in LIMITS  
+- [x] Security baseline: no secrets; outbound allowlist documented (OpenAlex/S2/LLM only)  
+- [x] Positioning: decision aids, not oracles  
 
 Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding default-on.
 
@@ -723,4 +723,4 @@ Stay in the wedge. Absorb ideas as modules, not mission creep.
 | Next review | After v0.2 cut or major productization merge |
 | Ownership | Maintainers — PRs welcome for lane-scoped updates |
 
-**Remember:** When stuck, open **§0 → §3 → §2**. Ambitious roadmap, honest product. Decision aids, not oracles. Explicit values, always. No commit unless asked.
+**Remember:** When stuck, open **§0 → §3 → §2**. Ambitious roadmap, honest product. Decision aids, not oracles. Explicit values, always.

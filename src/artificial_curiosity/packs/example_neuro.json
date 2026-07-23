@@ -1,0 +1,17 @@
+{
+  "schema_version": "domain_pack.v1",
+  "name": "example_neuro_pack",
+  "version": "0.1.0",
+  "domain": "biology",
+  "description": "Example versioned domain pack (WO-0.3.6). Quality bar: operationalization + one primary unknown.",
+  "questions": [
+    {
+      "id": "neuro-pack-01",
+      "question": "Which synaptic plasticity rules best explain credit assignment across multi-area cortical loops?",
+      "operationalization": "Compare candidate plasticity rules in a multi-area network model against measured credit-assignment signatures in at least two cortical datasets.",
+      "why_it_matters": "Credit assignment across areas constrains theories of learning and neuromodulation.",
+      "tags": ["neuroscience", "plasticity", "credit-assignment"],
+      "assumptions": ["Partial observability of inter-area synapses is acceptable."]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ from artificial_curiosity.models import (
     UnansweredQuestion,
     ValueProfile,
 )
+from artificial_curiosity.safety import DualUseAssessment, assess_dual_use
 
 
 def aggregate_curiosity(
@@ -64,6 +65,7 @@ def confidence_from_signals(
     *,
     heuristic: bool = False,
     gap_status: GapStatus | None = None,
+    disagreement_entropy: float = 0.0,
 ) -> float:
     """Lower confidence when judges disagree or literature is thin."""
     base = 0.35 + 0.25 * gap_confidence
@@ -83,6 +85,9 @@ def confidence_from_signals(
         spread = statistics.pstdev(impacts) if len(impacts) > 1 else 0.0
         base -= min(0.25, spread * 0.6)
 
+    if disagreement_entropy > 0:
+        base -= min(0.2, disagreement_entropy * 0.35)
+
     if heuristic:
         base = min(base, 0.58)
 
@@ -94,16 +99,19 @@ def score_uncertainty_band(
     confidence: float,
     *,
     heuristic: bool = False,
+    disagreement_entropy: float = 0.0,
 ) -> tuple[float, float]:
     """
     Evidence-strength envelope around the point score (F8 mitigation).
 
-    Not a statistical CI — width grows as confidence falls / heuristic mode.
-    Keeps scores from looking spuriously precise.
+    Not a statistical CI — width grows as confidence falls / heuristic mode /
+    multi-judge disagreement (W15).
     """
     half = 0.08 + 0.22 * (1.0 - confidence)
     if heuristic:
         half += 0.04
+    if disagreement_entropy > 0:
+        half += 0.12 * min(1.0, disagreement_entropy)
     low = max(0.0, curiosity_score - half)
     high = min(1.5, curiosity_score + half)
     return float(low), float(high)
@@ -192,19 +200,9 @@ def heuristic_score(
     if profile.prefer_interdisciplinary and len(q.tags) >= 2:
         impact = min(1.0, impact + 0.05)
 
-    risk = 0.15
-    if any(
-        k in text
-        for k in (
-            "weapon",
-            "pathogen",
-            "bioweapon",
-            "surveillance",
-            "gain-of-function",
-            "gain of function",
-        )
-    ):
-        risk = 0.9
+    # F10: weighted dual-use classifier (beyond lone keywords) — see safety.py.
+    dual: DualUseAssessment = assess_dual_use(text)
+    risk = max(0.15, dual.risk)
 
     cost = 0.45
     if "large-scale" in text or "longitudinal" in text or "clinical trial" in text:
@@ -215,6 +213,22 @@ def heuristic_score(
     def clamp(x: float) -> float:
         return float(max(0.0, min(1.0, x)))
 
+    rationale = {
+        "method": "heuristic_density_and_lexicon",
+        "note": (
+            "Fallback scorer; prefer LLM judges when available. "
+            "Citations affect neglectedness only (anti-McNamara). "
+            "Dual-use via weighted_heuristic_v1 (not a biosafety oracle)."
+        ),
+        "strong_match_count": str(strong_match_count),
+        "value_profile": profile.name,
+        "dual_use_method": dual.method,
+    }
+    if dual.signals:
+        rationale["dual_use_signals"] = ",".join(dual.signals[:6])
+    if dual.needs_human_review:
+        rationale["human_review"] = "near_threshold_or_high_risk"
+
     return ScoreAxes(
         impact=clamp(impact),
         neglectedness=clamp(neglectedness),
@@ -223,13 +237,16 @@ def heuristic_score(
         answerability=clamp(answerability),
         risk=clamp(risk),
         cost_proxy=clamp(cost),
-        rationale={
-            "method": "heuristic_density_and_lexicon",
-            "note": (
-                "Fallback scorer; prefer LLM judges when available. "
-                "Citations affect neglectedness only (anti-McNamara)."
-            ),
-            "strong_match_count": str(strong_match_count),
-            "value_profile": profile.name,
-        },
+        rationale=rationale,
     )
+
+
+def dual_use_flags(text: str, profile: ValueProfile) -> list[str]:
+    """Flags for pipeline: human_review_risk / dual_use_high (WO-0.4.2)."""
+    dual = assess_dual_use(text)
+    flags: list[str] = []
+    if dual.needs_human_review:
+        flags.append("human_review_risk")
+    if dual.hard_reject_likely or dual.risk > profile.max_risk:
+        flags.append("dual_use_high")
+    return flags

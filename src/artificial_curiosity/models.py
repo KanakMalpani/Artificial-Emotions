@@ -166,6 +166,9 @@ class LiteratureHit(BaseModel):
     cited_by_count: int | None = None
     abstract_snippet: str | None = None
     url: str | None = None
+    # Multi-backend provenance (openalex | semantic_scholar | fixture | …)
+    source: str | None = None
+    source_id: str | None = None
 
 
 class GapEvidence(BaseModel):
@@ -176,6 +179,9 @@ class GapEvidence(BaseModel):
     query_used: str = ""
     strong_match_count: int = 0
     top_overlap: float = 0.0
+    # Set when LLM gap reader was grounded on retrieved titles only (W12).
+    llm_grounded: bool | None = None
+    literature_backend: str | None = None
 
 
 class UnansweredQuestion(BaseModel):
@@ -225,6 +231,14 @@ class CuriosityConfig(BaseModel):
     use_llm: bool = False
     use_literature: bool = True
     literature_timeout_s: float = 12.0
+    # openalex (default) | semantic_scholar | both
+    literature_backend: str = Field(
+        "openalex",
+        pattern="^(openalex|semantic_scholar|s2|both|merge|multi)$",
+    )
+    # Opt-in disk cache for literature responses (rate-limit softener).
+    literature_cache_dir: str | None = None
+    literature_cache_ttl_s: float = 86_400.0
     diversity_threshold: float = Field(0.82, ge=0.5, le=0.99)
     # "jaccard" (default, offline) | "embedding" (optional extras; falls back if missing)
     diversity_backend: str = Field("jaccard", pattern="^(jaccard|embedding)$")
@@ -232,9 +246,19 @@ class CuriosityConfig(BaseModel):
     llm_model: str = "gpt-4o-mini"
     # Separate judge/gap-reader model when set (F5). Falls back to llm_model / env.
     judge_model: str | None = None
+    # Multi-judge ensemble size (W15). 1 = single judge; >1 runs extra passes.
+    judge_ensemble_n: int = Field(1, ge=1, le=5)
+    # Optional extra judge model ids (comma-separated env LLM_JUDGE_MODELS also honored).
+    judge_models: list[str] = Field(default_factory=list)
     # Provider-agnostic (preferred). Any OpenAI-compatible /chat/completions host.
     llm_base_url: str | None = None
     llm_api_key_env: str = "LLM_API_KEY"
     # Backward-compatible aliases (still honored).
     openai_base_url: str | None = None
     openai_api_key_env: str = "OPENAI_API_KEY"
+    # Opt-in preference / feedback JSONL path (W13).
+    preference_log_path: str | None = None
+    # Optional versioned domain pack JSON paths (WO-0.3.6).
+    domain_pack_paths: list[str] = Field(default_factory=list)
+    # Include packaged example packs under artificial_curiosity/packs/.
+    load_bundled_packs: bool = False
