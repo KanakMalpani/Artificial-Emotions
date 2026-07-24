@@ -24,7 +24,7 @@ pip install -e ".[dev]"
 pip install -e ".[dev]"
 ```
 
-No API key required for the default fast path (curated seeds + heuristic ranking). Literature grounding uses OpenAlex (no key). Optional LLMs via any OpenAI-compatible provider — see [`.env.example`](.env.example).
+No API key required for the default fast path (curated seeds + heuristic ranking). Literature grounding uses OpenAlex (no key). Optional LLMs via any OpenAI-compatible provider — see [`.env.example`](.env.example). Maintainer publish notes: [`docs/PUBLISHING.md`](docs/PUBLISHING.md).
 
 ## Three ways to plug in
 

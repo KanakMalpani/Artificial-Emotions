@@ -25,7 +25,9 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
 ]
 dependencies = [
   "pydantic>=2.6",
@@ -51,10 +53,7 @@ curiosity-mcp = "artificial_curiosity.mcp_server:main"
 packages = ["src/artificial_curiosity"]
 
 [tool.hatch.build.targets.wheel.sources]
-"src/artificial_curiosity" = "artificial_curiosity"
-
-[tool.hatch.build.targets.wheel.force-include]
-"src/artificial_curiosity/packs" = "artificial_curiosity/packs"
+"src" = ""
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -64,6 +63,7 @@ include = [
   "/evals",
   "/examples",
   "/README.md",
+  "/LICENSE",
   "/pyproject.toml",
   "/CONTRIBUTING.md",
 ]

@@ -24,10 +24,14 @@ pip install -e ".[embeddings]"
 
 - Prefer small, focused PRs.
 - Keep rankings value-explicit (`ValueProfile`); do not claim value-free scores.
-- Never commit `.env`, API keys, or local venvs.
+- Never commit `.env`, API keys, PyPI tokens, or local venvs.
 - Product docs live in `docs/`; long research notes belong in `research/` (optional reading).
 - Add or update tests when changing gates, gap logic, MCP/tools, or CLI.
 - Update `docs/LIMITS.md` before marketing any new claim.
+
+## Publishing (maintainers)
+
+PyPI releases are owner-gated. See [`docs/PUBLISHING.md`](docs/PUBLISHING.md) for Trusted Publishing / `PYPI_API_TOKEN` workflow details. Do not put tokens in the repo.
 
 ## Surfaces to keep in sync
 
