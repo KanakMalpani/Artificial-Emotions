@@ -35,6 +35,7 @@ Everything under `research/` is design/background material that informed the imp
 | [PROBLEM_SELECTION_MCNAMARA.md](PROBLEM_SELECTION_MCNAMARA.md) | Bisht et al. McNamara/hivemind → why ValueProfile+diversity |
 | [PROFILE_COMPARE_UX.md](PROFILE_COMPARE_UX.md) | Side-by-side ranks; Kendall τ; companion to compare.py |
 | [FAILURE_KNOWLEDGE.md](FAILURE_KNOWLEDGE.md) | Publication bias / dark reactions / topic contraction |
+| [HIVEMIND.md](HIVEMIND.md) | Jiang et al. Artificial Hivemind → diversity metrics |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

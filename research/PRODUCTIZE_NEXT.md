@@ -13,16 +13,17 @@
 1. **Elicit A/B eval path** — Implement agent A/B using `examples/elicit_ab_protocol.json` (+ optional rubric rows from [`INVESTIGATION_DESIGN.md`](INVESTIGATION_DESIGN.md)); report investigation-quality deltas. See [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md).
 2. **Gap-status fixture + metric** — Hand-label 15–30 Qs using `examples/gap_status_fixture_template.json`; report status accuracy and related-but-unanswered recall ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md), [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
 3. **MCP/tool description lint** — Forbid manipulative substrings (`ALWAYS`, `ignore other tools`) in tool schemas ([`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md), [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
-4. **Prefs summarize + pairwise nudge** — CLI/API summary of JSONL; encourage `preferred_over_ids`; clamp dual-use prefers ([`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md), [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
+4. **Prefs summarize + pairwise nudge** — ✅ partially shipped (`0af53f4`); keep pairwise `preferred_over_ids` UX + dual-use clamp ([`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md), [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 5. **Agent card safety blurb** — Not ERS; cues annotation_only; scores not EVSI ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md), [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md)).
 
 ## P1 — clear product value
 
-6. **`compare_profiles` / veto stack** — ✅ core offline compare landed; add Kendall τ + CLI/MCP/API/web ([`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md), [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md)).
+6. **`compare_profiles` / veto stack** — ✅ core offline compare + productize pass (`0af53f4`); still add Kendall τ + fuller web two-column ([`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md)).
 7. **Public-demo profile** — Stricter `max_risk` than lab presets ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 8. **Eval report sections** — gap_f1, rank_spearman, elicit_rubric_mean, risk_flags ([`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
 9. **Inject always includes risk** — Regression test ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 10. **OpenAlex rationale keys only** — `hit_n`, optional `mean_cited_by`, `funder_field_missing_rate` — no silent weight change ([`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md)).
+10b. **Mix safety guards** — ✅ soft guards landed (`0af53f4`); keep epistemic-default docs ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
 
 ## P2 — research-facing / moonshot-adjacent
 

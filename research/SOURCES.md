@@ -41,6 +41,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Problem selection / McNamara (Bisht et al.) | [`PROBLEM_SELECTION_MCNAMARA.md`](PROBLEM_SELECTION_MCNAMARA.md) | Hivemind; co-scientist; diversity |
 | Profile compare UX | [`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md) | Kendall/Spearman; deltas; veto tip |
 | Failure knowledge / publication bias | [`FAILURE_KNOWLEDGE.md`](FAILURE_KNOWLEDGE.md) | Dark reactions; Hao topic contraction |
+| Artificial Hivemind note | [`HIVEMIND.md`](HIVEMIND.md) | Inter/intra-model homogeneity on open-ended ideation |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
