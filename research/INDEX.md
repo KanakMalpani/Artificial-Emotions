@@ -68,6 +68,7 @@ Everything under `research/` is design/background material that informed the imp
 | [CONSTITUTION_WEB_UX.md](CONSTITUTION_WEB_UX.md) | Compare + veto stack web flow |
 | [EVIDENCE_INFORMED_BELIEFS.md](EVIDENCE_INFORMED_BELIEFS.md) | Non-stationary surprisal; AutoDiscovery follow-on |
 | [DUAL_USE_REDTEAM.md](DUAL_USE_REDTEAM.md) | Offline dual-use red-team fixture recipe |
+| [INTERN_ATLAS.md](INTERN_ATLAS.md) | Method evolution graph adjacency |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

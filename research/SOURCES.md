@@ -74,6 +74,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Soundness pass UX | [`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md) | Triage badges; no silent re-rank |
 | InnoEval | arXiv:2602.14367 | Knowledge-grounded idea evaluation |
 | Personalized vs aggregate judges | arXiv:2604.22517 | Pluralistic evaluation fragility |
+| Intern-Atlas method graphs | [`INTERN_ATLAS.md`](INTERN_ATLAS.md) | Method lineage ≠ unanswered Qs |
+| Intern-Atlas | arXiv:2604.28158 | Methodological evolution infrastructure |
 | Gap verify methods (SciFact family) | [`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md) | Claim verify ≠ question settled; escalation pattern |
 | Funding / OpenAlex neglect signals | [`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md) | Metadata honesty; adapter-only upgrades |
 | Investigation design / falsifiers | [`INVESTIGATION_DESIGN.md`](INVESTIGATION_DESIGN.md) | BoxingGym struggle; elicit rubric upgrades |
