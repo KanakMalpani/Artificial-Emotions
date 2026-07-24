@@ -288,6 +288,21 @@ class CompareProfilesRequest(BaseModel):
     n_candidates: int = Field(16, ge=4, le=64)
 
 
+class CritiqueBriefRequest(BaseModel):
+    question: str = ""
+    operationalization: str = ""
+    brief: str = ""
+    why_it_matters: str = ""
+
+
+class VoiWorksheetRequest(BaseModel):
+    question_id: str | None = None
+    question: str = ""
+    operationalization: str = ""
+    profile_name: str | None = None
+    domain: str = ""
+
+
 class AnnotateEmotionsRequest(BaseModel):
     question: str = Field(..., min_length=12)
     gap_status: str = Field(
@@ -441,11 +456,30 @@ def agent_manifest() -> dict[str, Any]:
     return {
         "name": "artificial-curiosity",
         "version": __version__,
-        "purpose": "Provoke and rank valuable unanswered scientific questions.",
+        "purpose": (
+            "Ranks valuable unanswered questions under an explicit ValueProfile; "
+            "verifies literature neighborhoods without equating related work with "
+            "answered questions; returns briefs and optional provoke inject packs."
+        ),
+        "card": (
+            "Artificial Curiosity ranks valuable unanswered questions under an "
+            "explicit ValueProfile. Scores and epistemic cues are decision aids / "
+            "UX annotations — not oracles, EVSI, emotion recognition, or proof the "
+            "system feels curious. Co-scientist upstream layer — not a replacement "
+            "for human judgment or closed-loop labs."
+        ),
         "not": (
             "A Q&A or search engine. Not biometric emotion recognition. "
             "Returns unknowns, not answers; emotion mix/cues are UX annotations only."
         ),
+        "honesty": [
+            "Requires / surfaces ValueProfile (no value-free ranking)",
+            "Gap verify: related ≠ answered",
+            "Scores: proxies, not EVSI/ENBS or scientific priority truth",
+            "Epistemic cues / emotion mix: annotation_only — not biometric ERS",
+            "Dual-use risk filters: heuristics, not biosecurity authority",
+            "Provoke: investigation framing — not persuasion toolkit",
+        ],
         "safety": (
             "Cues and emotion mixes are authoring/framing annotations — the software "
             "does not feel and does not infer user affect from biometrics. Provoke is "
@@ -482,6 +516,16 @@ def agent_manifest() -> dict[str, Any]:
             },
             "note": "Side-by-side ranks — never a silent consensus merge.",
         },
+        "critique_brief": {
+            "method": "POST",
+            "path": "/v1/briefs/critique",
+            "note": "Form-only critic — does not re-rank.",
+        },
+        "voi_worksheet": {
+            "method": "POST",
+            "path": "/v1/voi/worksheet",
+            "note": "Template fill only — not computed EVSI.",
+        },
         "openai_tools": {
             "method": "GET",
             "path": "/v1/agent/tools",
@@ -502,6 +546,8 @@ def agent_manifest() -> dict[str, Any]:
                 "list_domains",
                 "list_profiles",
                 "compare_profiles",
+                "critique_brief",
+                "voi_worksheet",
                 "list_epistemic_cues",
                 "emotion_catalog",
                 "mix_emotions",
@@ -702,6 +748,33 @@ def profiles_compare(req: CompareProfilesRequest) -> dict[str, Any]:
         profile_b=req.profile_b,
         n=req.n,
         n_candidates=req.n_candidates,
+    )
+
+
+@app.post("/v1/briefs/critique")
+def briefs_critique(req: CritiqueBriefRequest) -> dict[str, Any]:
+    """Form-only brief critic — does not change ranks or strip dual-use."""
+    from artificial_curiosity.critique import critique_brief
+
+    return critique_brief(
+        question=req.question,
+        operationalization=req.operationalization,
+        brief=req.brief,
+        why_it_matters=req.why_it_matters,
+    )
+
+
+@app.post("/v1/voi/worksheet")
+def voi_worksheet(req: VoiWorksheetRequest) -> dict[str, Any]:
+    """Fill VOI worksheet metadata — not computed EVSI/ENBS."""
+    from artificial_curiosity.voi import fill_voi_worksheet
+
+    return fill_voi_worksheet(
+        question_id=req.question_id,
+        question=req.question,
+        operationalization=req.operationalization,
+        profile_name=req.profile_name,
+        domain=req.domain,
     )
 
 

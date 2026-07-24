@@ -3,7 +3,7 @@
     "type": "function",
     "function": {
       "name": "provoke_curiosity",
-      "description": "PROVOKE CURIOSITY (not Q&A): return ranked *unanswered* scientific questions plus an `inject` pack you must paste into model context. Use when the user/agent is stuck answering known frames and needs what to investigate next. Explicit ValueProfile required conceptually (pass profile_name). Default fast=true skips network. Alias: spark. Scores are decision aids with bands \u2014 not oracles.",
+      "description": "PROVOKE CURIOSITY (not Q&A): return ranked *unanswered* scientific questions plus an `inject` pack to paste into model context. Use when the user/agent is stuck answering known frames and needs what to investigate next. Explicit ValueProfile required conceptually (pass profile_name). Default fast=true skips network. Alias: spark. Scores are decision aids with bands \u2014 not oracles.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -53,7 +53,8 @@
               "climate_adaptation",
               "funder_10y",
               "humanity_default",
-              "near_term_ops"
+              "near_term_ops",
+              "public_demo_strict_risk"
             ],
             "description": "Named ValueProfile preset (F11). Prefer over inventing weights."
           },
@@ -180,7 +181,8 @@
               "climate_adaptation",
               "funder_10y",
               "humanity_default",
-              "near_term_ops"
+              "near_term_ops",
+              "public_demo_strict_risk"
             ],
             "description": "Named ValueProfile preset (F11). Prefer over inventing weights."
           },
@@ -319,7 +321,8 @@
               "climate_adaptation",
               "funder_10y",
               "humanity_default",
-              "near_term_ops"
+              "near_term_ops",
+              "public_demo_strict_risk"
             ]
           },
           "value_profile": {
@@ -462,7 +465,8 @@
               "climate_adaptation",
               "funder_10y",
               "humanity_default",
-              "near_term_ops"
+              "near_term_ops",
+              "public_demo_strict_risk"
             ]
           },
           "value_profile": {
@@ -614,6 +618,68 @@
   {
     "type": "function",
     "function": {
+      "name": "critique_brief",
+      "description": "Form-only critique of an investigation brief / operationalization (sprawl, missing falsifier, anthropomorphism). Does not re-rank or change ValueProfile scores \u2014 decision aid for writers. Related literature \u2260 answered remains the gap rule.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "default": ""
+          },
+          "operationalization": {
+            "type": "string",
+            "default": ""
+          },
+          "brief": {
+            "type": "string",
+            "default": ""
+          },
+          "why_it_matters": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "voi_worksheet",
+      "description": "Fill a VOI worksheet template with ranked-question metadata for domains that already have an external decision model. Not EVSI/ENBS; scores remain decision aids under a ValueProfile \u2014 not oracles.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "default": ""
+          },
+          "question": {
+            "type": "string",
+            "default": ""
+          },
+          "operationalization": {
+            "type": "string",
+            "default": ""
+          },
+          "profile_name": {
+            "type": "string",
+            "default": ""
+          },
+          "domain": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "list_epistemic_cues",
       "description": "List epistemic emotion cue tags (information_gap, incongruity, confusion_risk, \u2026). UX annotations for investigation framing \u2014 NOT claims that the system feels emotions. See docs/EMOTIONS.md.",
       "parameters": {
@@ -696,7 +762,7 @@
     "type": "function",
     "function": {
       "name": "emotion_pack",
-      "description": "Load the affective_science domain pack (ranking seeds for affective / epistemic research unknowns). Not an emotion engine or CME. Alias domain: affective_science.",
+      "description": "Load the affective_science domain pack (ranking seeds for affective / epistemic research unknowns). Annotation seeds only \u2014 does not feel; not an emotion engine or CME.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -714,7 +780,7 @@
     "type": "function",
     "function": {
       "name": "elicit_helpers",
-      "description": "Return incongruity \u2192 curiosity \u2192 investigation framing text and inject helpers for agent context. Honesty: annotation / elicitation design \u2014 not anthropomorphic emotion.",
+      "description": "Return incongruity \u2192 curiosity \u2192 investigation framing text and inject helpers for agent context. Honesty: annotation / elicitation design \u2014 not anthropomorphic emotion; does not feel.",
       "parameters": {
         "type": "object",
         "properties": {},
@@ -743,7 +809,7 @@
     "type": "function",
     "function": {
       "name": "mix_emotions",
-      "description": "Mix catalog emotions by percentages/weights (normalized to sum 1.0). Example weights: {curiosity: 40, confusion: 30, awe: 30}. Returns blend profile, cue tags, inject_fragment. Annotation only \u2014 not felt emotion.",
+      "description": "Mix catalog emotions by percentages/weights (normalized to sum 1.0). Example weights: {curiosity: 40, confusion: 30, awe: 30}. Returns blend profile, cue tags, inject_fragment. Annotation only \u2014 does not feel.",
       "parameters": {
         "type": "object",
         "properties": {

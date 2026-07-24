@@ -25,6 +25,8 @@ def test_mcp_tool_list_has_required_tools():
         "list_domains",
         "list_profiles",
         "compare_profiles",
+        "critique_brief",
+        "voi_worksheet",
         "list_epistemic_cues",
         "emotion_catalog",
         "mix_emotions",

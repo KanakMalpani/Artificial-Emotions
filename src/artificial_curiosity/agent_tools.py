@@ -205,6 +205,29 @@ COMPARE_PROFILES_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+CRITIQUE_BRIEF_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "question": {"type": "string", "default": ""},
+        "operationalization": {"type": "string", "default": ""},
+        "brief": {"type": "string", "default": ""},
+        "why_it_matters": {"type": "string", "default": ""},
+    },
+    "additionalProperties": False,
+}
+
+VOI_WORKSHEET_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "question_id": {"type": "string", "default": ""},
+        "question": {"type": "string", "default": ""},
+        "operationalization": {"type": "string", "default": ""},
+        "profile_name": {"type": "string", "default": ""},
+        "domain": {"type": "string", "default": ""},
+    },
+    "additionalProperties": False,
+}
+
 LIST_EPISTEMIC_CUES_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {},
@@ -456,6 +479,46 @@ def handle_compare_profiles(
     )
 
 
+def handle_critique_brief(
+    *,
+    question: str = "",
+    operationalization: str = "",
+    brief: str = "",
+    why_it_matters: str = "",
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Form-only brief critic — does not change ranks."""
+    from artificial_curiosity.critique import critique_brief
+
+    return critique_brief(
+        question=question or "",
+        operationalization=operationalization or "",
+        brief=brief or "",
+        why_it_matters=why_it_matters or "",
+    )
+
+
+def handle_voi_worksheet(
+    *,
+    question_id: str | None = None,
+    question: str = "",
+    operationalization: str = "",
+    profile_name: str | None = None,
+    domain: str = "",
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Fill VOI worksheet metadata — not computed EVSI."""
+    from artificial_curiosity.voi import fill_voi_worksheet
+
+    return fill_voi_worksheet(
+        question_id=question_id or None,
+        question=question or "",
+        operationalization=operationalization or "",
+        profile_name=profile_name or None,
+        domain=domain or "",
+    )
+
+
 def handle_list_epistemic_cues(**_extra: Any) -> dict[str, Any]:
     """List epistemic cue tag vocabulary (UX annotations — not felt emotion)."""
     return list_epistemic_cues()
@@ -532,7 +595,7 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "name": "provoke_curiosity",
         "description": (
             "PROVOKE CURIOSITY (not Q&A): return ranked *unanswered* scientific "
-            "questions plus an `inject` pack you must paste into model context. "
+            "questions plus an `inject` pack to paste into model context. "
             "Use when the user/agent is stuck answering known frames and needs "
             "what to investigate next. Explicit ValueProfile required conceptually "
             "(pass profile_name). Default fast=true skips network. Alias: spark. "
@@ -592,6 +655,27 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "handler": handle_compare_profiles,
     },
     {
+        "name": "critique_brief",
+        "description": (
+            "Form-only critique of an investigation brief / operationalization "
+            "(sprawl, missing falsifier, anthropomorphism). Does not re-rank or "
+            "change ValueProfile scores — decision aid for writers. Related "
+            "literature ≠ answered remains the gap rule."
+        ),
+        "input_schema": CRITIQUE_BRIEF_SCHEMA,
+        "handler": handle_critique_brief,
+    },
+    {
+        "name": "voi_worksheet",
+        "description": (
+            "Fill a VOI worksheet template with ranked-question metadata for "
+            "domains that already have an external decision model. Not EVSI/ENBS; "
+            "scores remain decision aids under a ValueProfile — not oracles."
+        ),
+        "input_schema": VOI_WORKSHEET_SCHEMA,
+        "handler": handle_voi_worksheet,
+    },
+    {
         "name": "list_epistemic_cues",
         "description": (
             "List epistemic emotion cue tags (information_gap, incongruity, "
@@ -615,8 +699,8 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "name": "emotion_pack",
         "description": (
             "Load the affective_science domain pack (ranking seeds for "
-            "affective / epistemic research unknowns). Not an emotion engine "
-            "or CME. Alias domain: affective_science."
+            "affective / epistemic research unknowns). Annotation seeds only — "
+            "does not feel; not an emotion engine or CME."
         ),
         "input_schema": EMOTION_PACK_SCHEMA,
         "handler": handle_emotion_pack,
@@ -626,7 +710,7 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "description": (
             "Return incongruity → curiosity → investigation framing text and "
             "inject helpers for agent context. Honesty: annotation / elicitation "
-            "design — not anthropomorphic emotion."
+            "design — not anthropomorphic emotion; does not feel."
         ),
         "input_schema": ELICIT_HELPERS_SCHEMA,
         "handler": handle_elicit_helpers,
@@ -646,7 +730,7 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "description": (
             "Mix catalog emotions by percentages/weights (normalized to sum 1.0). "
             "Example weights: {curiosity: 40, confusion: 30, awe: 30}. Returns "
-            "blend profile, cue tags, inject_fragment. Annotation only — not felt emotion."
+            "blend profile, cue tags, inject_fragment. Annotation only — does not feel."
         ),
         "input_schema": MIX_EMOTIONS_SCHEMA,
         "handler": handle_mix_emotions,

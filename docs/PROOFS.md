@@ -91,8 +91,9 @@ curiosity eval
 curiosity eval --json
 curiosity eval elicit --responses examples/elicit_ab_sample_responses.json --json
 curiosity eval gap-status --json
+curiosity eval report --json
 # Hand-label metrics: status_accuracy, related_but_unanswered_recall, false_answered_rate
-# (not a single marketing accuracy claim)
+# Composite report: gap_f1 + elicit means + risk probes (not a vanity %)
 pytest tests/test_mid_horizon.py -q
 # Methodology: evals/METHODOLOGY.md — report case-level match + F1 miss rate; no vanity accuracy %
 ```
@@ -103,6 +104,14 @@ pytest tests/test_mid_horizon.py -q
 curiosity compare-profiles --domain ai --a humanity_default --b alignment_lab --n 6 --json
 # HTTP: POST /v1/profiles/compare — Kendall τ + top-k Jaccard; no silent weight merge
 # Web: Side-by-side ranks panel (two columns)
+```
+
+## Critique brief + VOI worksheet
+
+```bash
+curiosity critique-brief --question "What is A? What is B?" --ops "do everything" --json
+curiosity voi-worksheet --question "Which biomarkers…?" --profile humanity_default --json
+# HTTP: POST /v1/briefs/critique  POST /v1/voi/worksheet — form-only / template fill (not EVSI)
 ```
 
 ## Second literature backend (W11)

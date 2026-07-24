@@ -34,6 +34,11 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Preference weight hints (`preference_learn_path` / `--preference-learn` / `curiosity preferences hints` / `POST /v1/preferences/hints`): tiny profile-scoped ValueProfile deltas from labeled events with `score_axes` — **not** calibrated; API accepts inline events only (no paths); weights floored so hints cannot zero out a dimension
 - Preference summarize (`curiosity preferences summarize` / `POST /v1/preferences/summarize`): counts, pairwise wins from `preferred_over_ids`, top ids — Stage-1 flywheel, not Bradley–Terry
 - Profile compare (`curiosity compare-profiles` / `POST /v1/profiles/compare` / MCP `compare_profiles` / web two-column panel): side-by-side offline ranks + Kendall τ + top-k Jaccard + veto tip — **no silent consensus merge**
+- Form-only brief critic (`curiosity critique-brief` / `POST /v1/briefs/critique` / MCP `critique_brief`) — does **not** re-rank
+- VOI worksheet fill (`curiosity voi-worksheet` / `POST /v1/voi/worksheet` / MCP `voi_worksheet`) — template metadata only; **not** EVSI/ENBS
+- Composite eval report (`curiosity eval report`) — gap_f1 + gap-status + elicit means + risk probes
+- MCP description lint (`tests/test_mcp_description_lint.py`) — anti-MPMA forbidden phrases + honesty families
+- Agent card honesty block on `GET /v1/agent` (`card` + `honesty` list)
 - Emotion mix soft guards: warn when mix is dominated by fear/anxiety/anger-type ids (annotation still returned)
 - Agent card `/v1/agent` includes affective-safety blurb (not biometric ERS; provoke is opt-in framing)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
@@ -64,7 +69,8 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | OpenAlex / S2 neighborhoods can be topically noisy | Relevance search ≠ semantic match | Low overlap keeps `unanswered`; `both` merges sources |
 | OpenAlex funder/affiliation metadata incomplete | Coverage ≠ accuracy (esp. outside WoS/Scopus overlap) | Treat funder signals as optional rationale keys only — not silent score weight |
 | Seed set is curated (+ optional packs) | Offline reliability | LLM generation + CONTRIBUTING pack bar |
-| Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile`; see McNamara / demand-pull notes in `research/PROBLEM_SELECTION_MCNAMARA.md` |
+| Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile`; see McNamara / demand-pull notes in `research/PROBLEM_SELECTION_MCNAMARA.md` (explicit profiles exist because “priority” is contested) |
+| Ranked unknowns ≠ post-execution quality | Ideation–execution gap (arXiv 2506.20803) | Treat ranks as decision aids; outcome flywheel is sparse / deferred |
 | Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; agent safety blurb; no silent user-affect inference |
 | No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL + thin re-rank + tiny weight hints; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |

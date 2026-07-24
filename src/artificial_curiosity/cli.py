@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from artificial_curiosity.models import (
     CuriosityConfig,
@@ -172,6 +173,27 @@ def build_parser() -> argparse.ArgumentParser:
     compare_p.add_argument("--n", type=int, default=8)
     compare_p.add_argument("--json", action="store_true")
 
+    critique_p = sub.add_parser(
+        "critique-brief",
+        help="Form-only critique of a brief/ops (does not re-rank)",
+    )
+    critique_p.add_argument("--question", default="")
+    critique_p.add_argument("--ops", default="", dest="operationalization")
+    critique_p.add_argument("--brief", default="")
+    critique_p.add_argument("--why", default="", dest="why_it_matters")
+    critique_p.add_argument("--json", action="store_true")
+
+    voi_p = sub.add_parser(
+        "voi-worksheet",
+        help="Fill VOI worksheet metadata (not computed EVSI)",
+    )
+    voi_p.add_argument("--question-id", default=None)
+    voi_p.add_argument("--question", default="")
+    voi_p.add_argument("--ops", default="", dest="operationalization")
+    voi_p.add_argument("--profile", default=None)
+    voi_p.add_argument("--domain", default="")
+    voi_p.add_argument("--json", action="store_true")
+
     eval_p = sub.add_parser(
         "eval",
         help="Offline eval harnesses (spotcheck / elicit A/B / gap-status; no vanity %%)",
@@ -180,8 +202,8 @@ def build_parser() -> argparse.ArgumentParser:
         "eval_cmd",
         nargs="?",
         default="spotcheck",
-        choices=["spotcheck", "elicit", "gap-status"],
-        help="Harness: spotcheck (default), elicit, or gap-status",
+        choices=["spotcheck", "elicit", "gap-status", "report"],
+        help="Harness: spotcheck (default), elicit, gap-status, or report",
     )
     eval_p.add_argument(
         "--fixtures",
@@ -412,6 +434,45 @@ def _compare_profiles(args: argparse.Namespace) -> int:
     return 0
 
 
+def _critique_brief(args: argparse.Namespace) -> int:
+    from artificial_curiosity.critique import critique_brief
+
+    payload = critique_brief(
+        question=args.question or "",
+        operationalization=args.operationalization or "",
+        brief=args.brief or "",
+        why_it_matters=args.why_it_matters or "",
+    )
+    if args.json:
+        print(json.dumps(payload, indent=2))
+        return 0
+    print(f"Critique brief  issues={payload['n_issues']}  changes_ranks=False")
+    for issue in payload.get("issues") or []:
+        print(f"  [{issue['severity']}] {issue['code']}: {issue['detail']}")
+    print(f"\n{payload.get('honesty')}")
+    return 0
+
+
+def _voi_worksheet(args: argparse.Namespace) -> int:
+    from artificial_curiosity.voi import fill_voi_worksheet
+
+    payload = fill_voi_worksheet(
+        question_id=args.question_id,
+        question=args.question or "",
+        operationalization=args.operationalization or "",
+        profile_name=args.profile,
+        domain=args.domain or "",
+    )
+    if args.json:
+        print(json.dumps(payload, indent=2))
+        return 0
+    print("VOI worksheet (template fill — not EVSI)")
+    print(f"  decision_problem={payload.get('decision_problem')[:120]}")
+    print(f"  link={payload.get('link_to_ranked_question')}")
+    print(f"\n{payload.get('honesty')}")
+    return 0
+
+
 def _preferences(args: argparse.Namespace) -> int:
     from artificial_curiosity.preferences import (
         learn_profile_weight_hints,
@@ -532,6 +593,32 @@ def _eval(args: argparse.Namespace) -> int:
                 f"  [{mark}] {r['case_id']}: gold={r['gold_status']} "
                 f"pred={r['predicted_status']}"
             )
+        return 0
+
+    if cmd == "report":
+        from artificial_curiosity.eval_report import build_eval_report
+
+        root = Path(__file__).resolve().parents[2]
+        sample = root / "examples" / "elicit_ab_sample_responses.json"
+        payload = build_eval_report(
+            fixtures=args.fixtures,
+            elicit_responses=str(sample) if sample.is_file() else None,
+        )
+        if args.json:
+            print(json.dumps(payload, indent=2))
+            return 0
+        secs = payload.get("sections") or {}
+        gf = secs.get("gap_f1") or {}
+        print("Composite eval report (multi-metric)")
+        print(f"  gap_f1={gf.get('f1')}  precision={gf.get('precision')}  recall={gf.get('recall')}")
+        gs = secs.get("gap_status_handlabel") or {}
+        print(
+            f"  gap_status accuracy={gs.get('status_accuracy')}  "
+            f"rbu_recall={gs.get('related_but_unanswered_recall')}"
+        )
+        el = secs.get("elicit_rubric") or {}
+        print(f"  elicit means={el.get('condition_means')}  deltas={el.get('deltas')}")
+        print(f"\n{payload.get('honesty')}")
         return 0
 
     from artificial_curiosity.evals import (
@@ -716,6 +803,8 @@ def main(argv: list[str] | None = None) -> int:
         "profiles",
         "preferences",
         "compare-profiles",
+        "critique-brief",
+        "voi-worksheet",
         "eval",
         "emotions",
         "epistemic",
@@ -736,6 +825,10 @@ def main(argv: list[str] | None = None) -> int:
         return _preferences(args)
     if args.command == "compare-profiles":
         return _compare_profiles(args)
+    if args.command == "critique-brief":
+        return _critique_brief(args)
+    if args.command == "voi-worksheet":
+        return _voi_worksheet(args)
     if args.command == "eval":
         return _eval(args)
     if args.command in ("emotions", "epistemic"):

@@ -750,3 +750,79 @@ def test_lit_rationale_keys_no_weight_change():
     assert before == after
     assert axes.rationale["funder_field_missing_rate"] == keys["funder_field_missing_rate"]
 
+
+def test_critique_brief_form_only():
+    from artificial_curiosity.critique import critique_brief
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    bad = critique_brief(
+        question="What is A? What is B?",
+        operationalization="Do X and Y and Z and W in one go without stopping.",
+        brief="We prove this is settled by Nature and the AI is curious.",
+    )
+    assert bad["changes_ranks"] is False
+    codes = {i["code"] for i in bad["issues"]}
+    assert "sprawl_multi_question" in codes or "anthropomorphism" in codes
+
+    good = critique_brief(
+        question="Which circulating biomarkers predict remaining healthspan?",
+        operationalization=(
+            "Rank markers by out-of-sample AUROC; falsifier: AUROC ≤ 0.55 "
+            "would reduce confidence in the panel."
+        ),
+        brief="## Investigation brief\n\n**Gap status.** unanswered",
+    )
+    assert good["changes_ranks"] is False
+
+    client = TestClient(app)
+    res = client.post(
+        "/v1/briefs/critique",
+        json={"question": "What is A? What is B?", "operationalization": "measure"},
+    )
+    assert res.status_code == 200
+    assert res.json()["changes_ranks"] is False
+
+
+def test_voi_worksheet_and_eval_report():
+    from pathlib import Path
+
+    from artificial_curiosity.eval_report import build_eval_report
+    from artificial_curiosity.voi import fill_voi_worksheet
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    sheet = fill_voi_worksheet(
+        question_id="q1",
+        question="Which biomarkers predict healthspan under interventions?",
+        operationalization="AUROC ≥ 0.7 across ≥2 intervention classes",
+        profile_name="humanity_default",
+        domain="biology",
+    )
+    assert sheet["link_to_ranked_question"]["question_id"] == "q1"
+    assert "EVSI" in (sheet.get("honesty") or "") or "EVSI" in str(
+        sheet.get("external_compute")
+    )
+
+    root = Path(__file__).resolve().parents[1]
+    report = build_eval_report(
+        elicit_responses=root / "examples" / "elicit_ab_sample_responses.json"
+    )
+    assert "gap_f1" in report["sections"]
+    assert "elicit_rubric" in report["sections"]
+    assert "risk_flags" in report["sections"]
+    assert report["sections"]["rank_spearman"]["value"] is None
+
+    client = TestClient(app)
+    vres = client.post(
+        "/v1/voi/worksheet",
+        json={"question": "Test unknown?", "profile_name": "humanity_default"},
+    )
+    assert vres.status_code == 200
+    agent = client.get("/v1/agent")
+    assert agent.status_code == 200
+    assert "card" in agent.json()
+    assert "critique_brief" in agent.json()["mcp"]["tools"]
+
