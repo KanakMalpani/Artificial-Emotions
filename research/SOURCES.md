@@ -57,6 +57,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Neglectedness ITN addendum | [`NEGLECTEDNESS_ITN.md`](NEGLECTEDNESS_ITN.md) | Importance×Tractability×Neglectedness honesty |
 | Bayesian surprise / AutoDiscovery | [`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md) | Experimental surprisal ≠ lit surprise proxy |
 | Dual-use ranking safety | [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md) | Safeguarding AI scientists; Jr. AI risk report → filters |
+| BioVeil / agentic dual-use | [`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md) | Scaffolding uplift; WMDP proxy; taxonomy pointer |
+| BioVeil MATRIX | arXiv:2605.00927 | Agentic bio AI scientist vulnerabilities |
 | HybridQuestion method note | [`HYBRID_QUESTION.md`](HYBRID_QUESTION.md) | Multi-LLM vote + human foresight divergence |
 | Hybrid vote offline protocol | [`HYBRID_VOTE_OFFLINE.md`](HYBRID_VOTE_OFFLINE.md) | Keep-rate vs hivemind; no silent re-rank |
 | FALSIFYBENCH (negative testing) | [`FALSIFYBENCH.md`](FALSIFYBENCH.md) | Wason-style; falsify > confirm |

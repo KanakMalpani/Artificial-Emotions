@@ -38,7 +38,8 @@ See [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) MPMA lint · threat map [`MCP_THR
 
 ## 4. Productize next (sibling)
 
-1. Paste short card into `/v1/agent` + MCP instructions.  
+1. ~~Paste short card into `/v1/agent`~~ — ✅ present in `agent_manifest` honesty + summary.  
 2. Link `curiosity://limits` early in agent guide ordering.  
-3. Keep LIMITS.md as source of truth; this note is draft only.  
-4. After merge: add regression that agent card contains “related ≠ answered” and “annotation_only”.
+3. Keep LIMITS.md as source of truth; merge [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md).  
+4. Regression: agent card contains “related ≠ answered” and “annotation_only”.  
+5. Optional: add “Provoke: not a persuasion toolkit” if missing from honesty array.

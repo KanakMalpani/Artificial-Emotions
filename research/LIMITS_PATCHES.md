@@ -21,7 +21,7 @@
 
 6. **OpenAlex metadata:** Hit counts and optional funder fields are incomplete/uneven; never treat as calibrated neglectedness. See `research/FUNDING_NEGLECT_SIGNALS.md`.
 
-7. **Dual-use filters:** Heuristic risk scores are not a biosecurity authority. See `research/DUAL_USE_RANKING.md`.
+7. **Dual-use filters:** Heuristic risk scores are not a biosecurity authority. Agentic lab scaffolds can **uplift** dual-use capability vs base models (BioVeil MATRIX) — this product must not strip risk metadata and must not ship lab actuators. See `research/DUAL_USE_RANKING.md`, `research/BIOVEIL_DUAL_USE.md`.
 
 ---
 

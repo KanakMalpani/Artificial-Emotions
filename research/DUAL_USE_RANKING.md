@@ -22,7 +22,8 @@ Ranking *unanswered* questions is dual-use by nature: the same “valuable unkno
 | **Provoke steers agents** | Inject pack omits risk flags | Always include risk in inject item fields |
 | **Preference hacking** | User marks risky Qs “prefer” to raise weight | Clamp hints; audit dual_use events |
 | **Downstream AI Scientist abuse** | Ranked Qs → unsupervised lab agents | Domain packs / tool allowlists (host-side) |
-| **Academic integrity (Jr. AI class)** | Fabrication, citation invention, review hacking | Not our generator’s job — still: grounded lit reader; no fake titles |
+| Academic integrity (Jr. AI class) | Fabrication, citation invention, review hacking | Not our generator’s job — still: grounded lit reader; no fake titles |
+| **Agentic scaffolding uplift** | Ranked Qs → Biomni-class agents that bypass base refusals | BioVeil MATRIX ([`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md)); never strip risk; no lab tools here |
 
 ---
 

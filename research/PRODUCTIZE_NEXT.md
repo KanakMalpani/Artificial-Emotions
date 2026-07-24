@@ -14,7 +14,7 @@
 2. **Gap-status fixture + metric** — ✅ gap-status metric (`874dd7a`); grow hand-labels + VERITAS cousins ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md), [`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
 3. **MCP/tool description lint** — ✅ landed (`2a33786` / `mcp_lint.py`); keep CI green ([`MCP_DESCRIPTION_LINT.md`](MCP_DESCRIPTION_LINT.md), [`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md)).
 4. **Prefs summarize + pairwise nudge** — ✅ ties + suggest-pair API + web duel (`27eb346`, `b7f152a`) ([`WEB_PAIR_DUEL_UX.md`](WEB_PAIR_DUEL_UX.md), [`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md)).
-5. **Agent card safety blurb** — Still open: merge [`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md) into `/v1/agent` + LIMITS patches ([`LIMITS_PATCHES.md`](LIMITS_PATCHES.md)).
+5. **Agent card safety blurb** — ✅ largely in `/v1/agent` honesty block; keep regression + LIMITS merge ([`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md), [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md)).
 
 ## P1 — clear product value
 
@@ -36,7 +36,7 @@
 13. **LitGapFinder cooccur correlation study** — ✅ helpers landed (`04eeebf`); run offline protocol ([`LITGAP_CORRELATION_STUDY.md`](LITGAP_CORRELATION_STUDY.md)).
 14. **Optional cross-model vote** — ✅ heuristic proxy (`hybrid_vote.py`); live multi-model offline only ([`HYBRID_VOTE_OFFLINE.md`](HYBRID_VOTE_OFFLINE.md), [`FALSIFYBENCH.md`](FALSIFYBENCH.md)).
 15. **Bayesian surprise closed-loop** — Worksheet template only ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md), `examples/bayesian_surprise_worksheet.json`); no axis rename.
-16. **LIMITS cite McNamara / EVSI / ERS** — [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md).
+16. **LIMITS cite McNamara / EVSI / ERS / agentic dual-use** — [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md), [`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md).
 17. **Optional idea-graph export** — EIG-inspired debug JSON ([`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md)).
 18. **Mix intensity cap (optional)** — Cap non-epistemic mix weights ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
 
