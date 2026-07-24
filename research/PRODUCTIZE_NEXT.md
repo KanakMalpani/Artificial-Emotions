@@ -35,7 +35,7 @@
 12. **Cue threshold knobs** — ✅ (`044c75e`); presets JSON ([`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md)).
 13. **LitGapFinder cooccur correlation study** — ✅ helpers landed (`04eeebf`); run offline protocol ([`LITGAP_CORRELATION_STUDY.md`](LITGAP_CORRELATION_STUDY.md)).
 14. **Optional cross-model vote** — ✅ heuristic proxy (`hybrid_vote.py`); live multi-model offline only ([`HYBRID_VOTE_OFFLINE.md`](HYBRID_VOTE_OFFLINE.md), [`FALSIFYBENCH.md`](FALSIFYBENCH.md)).
-15. **Bayesian surprise closed-loop** — Only with posteriors ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md)).
+15. **Bayesian surprise closed-loop** — Worksheet template only ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md), `examples/bayesian_surprise_worksheet.json`); no axis rename.
 16. **LIMITS cite McNamara / EVSI / ERS** — [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md).
 17. **Optional idea-graph export** — EIG-inspired debug JSON ([`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md)).
 18. **Mix intensity cap (optional)** — Cap non-epistemic mix weights ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).

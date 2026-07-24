@@ -1,0 +1,14 @@
+{
+  "name": "bayesian_surprise_closed_loop_worksheet",
+  "honesty": "Not EVSI and not AutoDiscovery Bayesian surprise. Manual belief-shift logging only — see research/BAYESIAN_SURPRISE.md.",
+  "fields": {
+    "question_id": null,
+    "profile_name": null,
+    "predicted_surprise": null,
+    "pilot_result": "",
+    "belief_shift_1_to_5": null,
+    "crude_update_note": "",
+    "logged_at": null
+  },
+  "analysis": "Offline Spearman(predicted_surprise, belief_shift); do not rename ScoreAxes.surprise based on n<30."
+}

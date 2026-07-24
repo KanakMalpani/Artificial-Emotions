@@ -29,8 +29,24 @@
 2. Do **not** rename axis to `bayesian_surprise` without posterior evidence.  
 3. Pair with provoke: treat high-surprise items as candidates for cheap pilot experiments that *could* yield measurable updates.
 
+### 3.1 Minimal closed-loop worksheet (offline)
+
+When a user later logs PreferenceEvent `outcome` (or lab note):
+
+| Field | Source |
+|-------|--------|
+| `predicted_surprise` | `scores.surprise` at rank time (snapshot) |
+| `pilot_result` | short text / pass-fail / metric |
+| `belief_shift` | user Likert 1–5 “how much did this change your belief?” |
+| `crude_update_note` | free text — **not** a KL divergence |
+
+Report Spearman(predicted_surprise, belief_shift) offline. If weak, keep axis as lit proxy. Yanagisawa IG / Wundt still inform **cue** design, not this rename.
+
+Neuro/MARL “Bayesian surprise” papers (cultures, ICES) are **different objects** — do not cite as product validation.
+
 ## 4. See also
 
 - [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md) — Yanagisawa Bayesian IG / Wundt curve  
 - [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md) — information value after sampling  
+- [`OUTCOME_FLYWHEEL.md`](OUTCOME_FLYWHEEL.md) — sparse outcome events  
 - ROADMAP lab closed-loop moonshot  
