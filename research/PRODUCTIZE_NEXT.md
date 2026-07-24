@@ -39,6 +39,7 @@
 16. **LIMITS cite McNamara / EVSI / ERS / agentic dual-use** — [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md), [`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md).
 17. **Optional idea-graph export** — ✅ `idea_graph.py` (Jaccard similarity + tag conflict); display only ([`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md)).
 18. **Mix intensity cap (optional)** — Cap non-epistemic mix weights ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
+19. **SFBench-cousin feasibility_note** — Display only; offline calibrate first ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
 
 ## Explicit non-goals (from research)
 

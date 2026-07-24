@@ -74,6 +74,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Artificial Hivemind note | [`HIVEMIND.md`](HIVEMIND.md) | Inter/intra-model homogeneity on open-ended ideation |
 | AI co-scientist landscape | [`CO_SCIENTIST_LANDSCAPE.md`](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist, HeurekaBench, MIND adjacency |
 | Answerability / feasibility axes | [`ANSWERABILITY_FEASIBILITY.md`](ANSWERABILITY_FEASIBILITY.md) | SFBench vs heuristic answerability/tractability |
+| SFBench calibration protocol | [`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md) | Offline ρ vs expert; no silent axis fold |
 | Evolving Idea Graphs adjacency | [`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md) | Persistent claim graph; edit-and-commit |
 | Idea-graph export UX | [`IDEA_GRAPH_UX.md`](IDEA_GRAPH_UX.md) | Jaccard map; no silent re-rank |
 | EIG (Dong et al.) | arXiv:2605.04922 | Multi-agent ideation with graph state |

@@ -34,7 +34,7 @@
 Answerability drops for: hard keywords, non-interrogative form, short operationalization, multi-`?`, sprawling “and”, many enabling questions.  
 Tractability bumps for measure/experiment/dataset; drops for “quantum gravity”/“consciousness” lexicon.  
 
-**Productize:** Document this in LIMITS/ARCHITECTURE; optional SFBench-inspired judge rubric field `feasibility_note` separate from axes.
+**Productize:** Document this in LIMITS/ARCHITECTURE; optional SFBench-inspired judge rubric field `feasibility_note` separate from axes. Full protocol: [`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md).
 
 ---
 

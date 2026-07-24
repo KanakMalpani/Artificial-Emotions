@@ -60,6 +60,7 @@ Everything under `research/` is design/background material that informed the imp
 | [FALSIFYBENCH.md](FALSIFYBENCH.md) | Negative testing → falsifier-first elicit |
 | [BIOVEIL_DUAL_USE.md](BIOVEIL_DUAL_USE.md) | Agentic dual-use uplift → keep risk on inject |
 | [IDEA_GRAPH_UX.md](IDEA_GRAPH_UX.md) | Idea-graph export honesty / consumer UX |
+| [SFBENCH_CALIBRATION.md](SFBENCH_CALIBRATION.md) | Offline feasibility cousin calibration |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
