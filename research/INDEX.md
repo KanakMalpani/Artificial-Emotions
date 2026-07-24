@@ -1,8 +1,8 @@
 # Research Index (archived)
 
-> **Not required to use the product.** Start at [`../README.md`](../README.md).
+> **Not required to use the product.** Start at [`../README.md`](../README.md) · Product docs: [`../docs/INDEX.md`](../docs/INDEX.md).
 
-Everything under `research/` is design/background material that informed the implementation.
+Everything under `research/` is design/background material that informed the implementation. Prefer `docs/` for install, plugins, limits, and proofs.
 
 | File | Contents |
 |------|----------|

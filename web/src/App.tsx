@@ -113,6 +113,10 @@ const FALLBACK_PROFILES: ProfileMeta[] = [
   { name: "climate_adaptation", description: "Climate adaptation / resilience" },
   { name: "basic_science", description: "Surprising fundamental unknowns" },
   { name: "near_term_ops", description: "Low-cost near-term operational unknowns" },
+  {
+    name: "public_demo_strict_risk",
+    description: "Public / demo surface with a strict dual-use risk ceiling",
+  },
 ];
 
 const MIX_SLIDERS: { id: string; label: string }[] = [
@@ -130,6 +134,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<Ranked[]>([]);
+  const [resultMode, setResultMode] = useState<"run" | "spark" | null>(null);
   const [activeProfile, setActiveProfile] = useState<string | null>(null);
   const [profileDescription, setProfileDescription] = useState<string | null>(
     null,
@@ -175,7 +180,7 @@ export default function App() {
 
   const subtitle = useMemo(
     () =>
-      "Current AI answers questions. This layer asks what humanity should investigate next — and ranks unknowns by expected impact.",
+      "Current AI answers questions. This curiosity layer ranks what to investigate next — decision aids, not oracles.",
     [],
   );
 
@@ -223,6 +228,7 @@ export default function App() {
       }
       const data = await res.json();
       setResults(data.questions ?? []);
+      setResultMode("run");
       setActiveProfile(data.value_profile?.name ?? profileName);
       setProfileDescription(data.value_profile?.description ?? null);
     } catch (e) {
@@ -252,6 +258,7 @@ export default function App() {
       const data = await res.json();
       const questions = (data.questions ?? []) as Ranked[];
       setResults(questions);
+      setResultMode("spark");
       setActiveProfile(data.value_profile?.name ?? profileName);
       setProfileDescription(data.value_profile?.description ?? null);
       if (mixBlend?.inject_fragment && data.inject) {
@@ -850,7 +857,11 @@ export default function App() {
             <span>{results.length} ranked unknowns</span>
             <span>domain={domain}</span>
             <span>profile={activeProfile ?? profileName}</span>
-            <span>literature-grounded gap check</span>
+            <span>
+              {resultMode === "spark"
+                ? "fast spark (offline seeds)"
+                : "literature-grounded gap check"}
+            </span>
           </div>
           <p className="profile-note">
             Rankings use explicit ValueProfile weights — decision aids, not oracles.

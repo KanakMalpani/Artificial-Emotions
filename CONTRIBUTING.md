@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for interest in Artificial Curiosity.
+Thanks for interest in **Artificial Curiosity** — a curiosity layer that ranks valuable *unanswered* questions (not Q&A).
 
 ## Setup
 
@@ -14,22 +14,23 @@ pip install -e ".[dev]"
 pytest -q
 ```
 
-### End-to-end suite
-
-Fast-path e2e (API TestClient + CLI `main`, no OpenAlex) lives under `tests/e2e/`:
-
-```bash
-pytest tests/e2e -q          # API + CLI journeys
-pytest -m e2e -q             # same via marker
-pytest -m "not slow" -q      # full suite minus optional lit smoke
-pytest -m slow -q            # optional OpenAlex run (skips if offline)
-```
-
 Optional semantic diversity:
 
 ```bash
 pip install -e ".[embeddings]"
 ```
+
+### Tests
+
+```bash
+pytest -q                     # full suite (CI default)
+pytest tests/e2e -q           # API TestClient + CLI journeys (no OpenAlex)
+pytest -m e2e -q              # same via marker
+pytest -m "not slow" -q       # full suite minus optional lit smoke
+pytest -m slow -q             # optional OpenAlex (skips if offline)
+```
+
+CI runs ruff + pytest on every PR/push (`.github/workflows/ci.yml`).
 
 ## Guidelines
 
@@ -37,22 +38,26 @@ pip install -e ".[embeddings]"
 - Keep rankings value-explicit (`ValueProfile`); do not claim value-free scores.
 - Never commit `.env`, API keys, PyPI tokens, or local venvs.
 - Product docs live in `docs/`; long research notes belong in `research/` (optional reading).
-- Add or update tests when changing gates, gap logic, MCP/tools, or CLI.
-- Update `docs/LIMITS.md` before marketing any new claim.
+- Add or update tests when changing gates, gap logic, MCP/tools, emotions, or CLI.
+- Update [`docs/LIMITS.md`](docs/LIMITS.md) **before** marketing any new claim.
+- Emotions / mixes are **annotation_only** — never claim the system feels.
 
-## Publishing (maintainers)
+## Where things live
 
-PyPI releases are owner-gated. See [`docs/PUBLISHING.md`](docs/PUBLISHING.md) for Trusted Publishing / `PYPI_API_TOKEN` workflow details. Do not put tokens in the repo.
+| Concern | Location |
+|---------|----------|
+| Shared tool contracts (MCP / OpenAI / HTTP) | `src/artificial_curiosity/agent_tools.py` |
+| ValueProfile presets | `src/artificial_curiosity/models.py` (`VALUE_PROFILE_PRESETS`) |
+| Offline seeds | `src/artificial_curiosity/seeds.py` |
+| Domain packs (JSON) | `src/artificial_curiosity/packs/*.json` + `packs.py` |
+| Product docs | `docs/` — start at [`docs/INDEX.md`](docs/INDEX.md) |
+| Examples / protocols | [`examples/README.md`](examples/README.md) |
+| Research (optional) | [`research/INDEX.md`](research/INDEX.md) |
+| Stuck playbooks | [`docs/ROADMAP.md`](docs/ROADMAP.md) §0→§3→§2 |
 
-## Surfaces to keep in sync
+## Adding a domain seed
 
-Shared tool contracts live in `src/artificial_curiosity/agent_tools.py` (MCP, OpenAI tools JSON, HTTP `/v1/agent/tools`).
-
-Named ValueProfile presets live in `src/artificial_curiosity/models.py` (`VALUE_PROFILE_PRESETS`).
-
-## Adding a domain seed (quality bar)
-
-Seeds power the offline demo path. Edit `src/artificial_curiosity/seeds.py`.
+Edit `src/artificial_curiosity/seeds.py` (`SEED_QUESTIONS`).
 
 ### Schema (required fields)
 
@@ -72,17 +77,50 @@ Seeds power the offline demo path. Edit `src/artificial_curiosity/seeds.py`.
 3. **Not already textbook-solved** — prefer frontiers the seed author believes are open.
 4. **Dual-use awareness** — avoid seeds that primarily teach harm pathways; risk gate will hard-reject high-risk language (F10).
 
-### Domain pack format (lightweight)
+## Adding a domain pack
 
-Until versioned packs ship (v0.3+), a “pack” is: a domain key in `SEED_QUESTIONS` plus ≥2 curated `UnansweredQuestion` entries meeting the bar above. Optional topic filters go through `seeds_for(domain, topic=...)`.
+Versioned packs live under `src/artificial_curiosity/packs/` (`domain_pack.v1`). Enable with `CuriosityConfig(load_bundled_packs=True)` or `domain_pack_paths=[...]`.
 
-### Checklist before opening a seed PR
+Minimum shape:
+
+```json
+{
+  "schema_version": "domain_pack.v1",
+  "domain": "ai",
+  "questions": [
+    {
+      "id": "ai-pack-01",
+      "question": "…",
+      "operationalization": "Measurable success criteria (≥20 chars)…",
+      "why_it_matters": "…",
+      "tags": ["…"]
+    }
+  ]
+}
+```
+
+Same quality bar as seeds. Template sketch: [`examples/pack_meta_template.json`](examples/pack_meta_template.json). Deeper notes: [`research/DOMAIN_PACK_QUALITY.md`](research/DOMAIN_PACK_QUALITY.md).
+
+### Checklist before opening a seed/pack PR
 
 - [ ] `pytest -q` green
-- [ ] New seed has operationalization + why_it_matters
+- [ ] Operationalization + why_it_matters present
 - [ ] No secrets / no `.env`
-- [ ] LIMITS unchanged unless claims changed
+- [ ] `docs/LIMITS.md` unchanged unless claims changed
 
 ## ValueProfile presets
 
 Do not add a “neutral” or value-free profile. New presets must name stakeholders and weights explicitly in `VALUE_PROFILE_PRESETS`.
+
+## Publishing (maintainers)
+
+PyPI releases are owner-gated. Package is **not published yet**. See [`docs/PUBLISHING.md`](docs/PUBLISHING.md). Do not put tokens in the repo.
+
+## Docs / copy hygiene
+
+When changing public behavior:
+
+1. Update LIMITS if the claim surface changes.
+2. Add a PROOFS one-liner if the behavior is demo-worthy.
+3. Keep README status table accurate (version, PyPI, honesty).
+4. Keep `examples/openai_tools.json` in sync with `agent_tools.py` (regenerate or edit both).

@@ -20,6 +20,8 @@ from artificial_curiosity.models import (
 from artificial_curiosity.pipeline import CuriosityEngine
 from artificial_curiosity.provoke import provoke
 
+__version__ = "0.4.0"
+
 __all__ = [
     "CuriosityConfig",
     "CuriosityEngine",
@@ -27,6 +29,7 @@ __all__ = [
     "RankedQuestion",
     "UnansweredQuestion",
     "ValueProfile",
+    "__version__",
     "annotate_epistemic",
     "elicit_helpers",
     "emotion_catalog",
@@ -37,5 +40,3 @@ __all__ = [
     "mix_emotions",
     "provoke",
 ]
-
-__version__ = "0.4.0"

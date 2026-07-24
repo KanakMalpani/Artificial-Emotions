@@ -9,6 +9,12 @@ from typing import Any
 _REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_TEMPLATE = _REPO / "examples" / "voi_worksheet_template.json"
 
+__all__ = [
+    "default_voi_template_path",
+    "fill_voi_worksheet",
+    "load_voi_template",
+]
+
 
 def default_voi_template_path() -> Path:
     return _DEFAULT_TEMPLATE

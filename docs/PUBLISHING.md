@@ -1,6 +1,8 @@
 # Publishing to PyPI
 
-Package name: **`artificial-curiosity`** · Version: see `pyproject.toml` (currently `0.3.1`).
+Package name: **`artificial-curiosity`** · Version: see `pyproject.toml` (currently **`0.4.0`**).
+
+**Status:** not on PyPI yet — do not document `pip install artificial-curiosity` as a public path until `https://pypi.org/project/artificial-curiosity/` resolves.
 
 Never store PyPI tokens in the repo or commit `.env` / credentials.
 
@@ -14,7 +16,7 @@ Once configured, GitHub Actions can publish without a long-lived API token.
    - Workflow: `publish.yml`
    - Environment: leave blank (or match a GitHub Environment if you add one later)
 2. In `.github/workflows/publish.yml`, enable OIDC by setting job `permissions.id-token: write` and remove the `password:` input from `pypa/gh-action-pypi-publish` (or keep token as fallback only while migrating).
-3. Create a GitHub Release / tag `v*` matching `pyproject.toml` (e.g. `v0.3.0`).
+3. Create a GitHub Release / tag `v*` matching `pyproject.toml` (e.g. `v0.4.0`).
 
 ## Current path: API token (repository secret)
 
@@ -29,7 +31,7 @@ The publish workflow uploads with `secrets.PYPI_API_TOKEN` via [pypa/gh-action-p
 | Event | Behavior |
 |-------|----------|
 | GitHub Release published | Build + upload to PyPI |
-| Push tag `v*` (e.g. `v0.3.0`) | Build + upload to PyPI |
+| Push tag `v*` (e.g. `v0.4.0`) | Build + upload to PyPI |
 | `workflow_dispatch` with dry-run | Build only |
 | `workflow_dispatch` with dry-run off | Build + upload |
 | Pull request (packaging paths) | Build only (no upload) |
@@ -50,7 +52,7 @@ If `https://pypi.org/project/artificial-curiosity/` does not exist yet, the firs
 ## Checklist before tagging
 
 - [ ] `version` in `pyproject.toml` and `__version__` in `src/artificial_curiosity/__init__.py` match
-- [ ] Tag is `v` + that version (e.g. `v0.3.0`)
+- [ ] Tag is `v` + that version (e.g. `v0.4.0`)
 - [ ] `pytest -q` green
 - [ ] `docs/LIMITS.md` / ROADMAP updated only after a successful publish
 

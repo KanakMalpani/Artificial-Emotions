@@ -253,4 +253,4 @@ pytest -q
 # CI-safe (exclude optional lit): pytest -m "not slow" -q
 ```
 
-Design rationale: [`research/`](../research/). Short invariants: [`DESIGN.md`](DESIGN.md).
+Design rationale: [`research/`](../research/). Short invariants: [`DESIGN.md`](DESIGN.md). Examples index: [`../examples/README.md`](../examples/README.md).

@@ -14,6 +14,14 @@ from artificial_curiosity.models import Domain, UnansweredQuestion
 
 PACK_SCHEMA_VERSION = "domain_pack.v1"
 
+__all__ = [
+    "PACK_SCHEMA_VERSION",
+    "default_packs_dir",
+    "load_domain_packs",
+    "load_pack_file",
+    "questions_from_pack",
+]
+
 
 def default_packs_dir() -> Path:
     return Path(__file__).resolve().parent / "packs"

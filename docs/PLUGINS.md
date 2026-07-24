@@ -51,11 +51,13 @@ curiosity-mcp
 python -m artificial_curiosity.mcp_server
 ```
 
-Tools exposed:
+Tools exposed (core):
 
 - `provoke_curiosity` / `spark` — instant ranked unknowns + `inject` pack
 - `rank_unknowns` / `run_curiosity` — full pipeline (optional OpenAlex)
-- `list_domains`
+- `list_domains`, `list_profiles`
+
+Affect / framing (optional — annotation only; does not feel): `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`. Tier via `CURIOSITY_MCP_TIER`. Full list: `curiosity-mcp --list-tools`.
 
 ### Cursor
 

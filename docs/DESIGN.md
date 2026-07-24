@@ -16,8 +16,11 @@ It is **not** literature Q&A, citation forecasting, or an end-to-end AI Scientis
 
 | Need | Doc |
 |------|-----|
+| Docs index | [INDEX.md](INDEX.md) |
 | Install / plugins | [PLUGINS.md](PLUGINS.md) |
+| Emotions (annotation only) | [EMOTIONS.md](EMOTIONS.md) |
 | Honest bounds | [LIMITS.md](LIMITS.md) |
 | Demo commands | [PROOFS.md](PROOFS.md) |
 | Modules | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| Full design rationale (optional) | [`research/`](../research/) |
+| Roadmap skim | [ROADMAP_SUMMARY.md](ROADMAP_SUMMARY.md) |
+| Full design rationale (optional) | [`research/INDEX.md`](../research/INDEX.md) |

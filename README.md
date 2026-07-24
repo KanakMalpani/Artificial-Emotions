@@ -1,12 +1,34 @@
 # Artificial Curiosity
 
-**Current AI answers questions. This system generates the most valuable unanswered ones.**
+**Current AI answers questions. This is the curiosity layer — ranked unanswered questions, not Q&A.**
 
-Clone → install → plug into **any** AI platform (MCP, HTTP, OpenAI tools, or CLI). Ask: *What should we investigate next?*
+Ask any model or agent: *What should we investigate next?* Get investigation briefs with an explicit `ValueProfile`, gap evidence, and uncertainty bands. Plug in via **MCP**, **HTTP**, **OpenAI tools**, **CLI**, or **Python**.
 
-**Repo:** https://github.com/KanakMalpani/Artificial-Curiosity
+[![CI](https://github.com/KanakMalpani/Artificial-Curiosity/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Curiosity/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
-## Install
+> **v0.4.0** · Clone & install (not on PyPI yet) · Scores are **decision aids**, not oracles · Emotions are **annotation_only** framing — the system does **not** feel.
+
+---
+
+## Why this exists
+
+Most AI tools optimize for *answers*. Research and product work still stall on a harder problem: **which unknowns are worth chasing?**
+
+Artificial Curiosity generates candidate unknowns, checks that related literature ≠ answered, scores them on impact / neglectedness / tractability / surprise / answerability / risk, diversifies near-duplicates, and returns **investigation briefs** you can inject into any model.
+
+| This is | This is not |
+|---------|-------------|
+| A curiosity layer for agents & labs | Literature Q&A / chatbot |
+| Ranked *unanswered* questions | Citation forecasting |
+| Explicit `ValueProfile` weights | Value-free “objective” ranking |
+| MCP + HTTP + tools plugin | A locked-in vendor stack |
+| Annotation-only epistemic cues / emotion mixes | Claimed felt emotion or EES scores |
+
+---
+
+## 60-second spark
 
 ```bash
 git clone https://github.com/KanakMalpani/Artificial-Curiosity.git
@@ -24,17 +46,27 @@ pip install -e ".[dev]"
 pip install -e ".[dev]"
 ```
 
-No API key required for the default fast path (curated seeds + heuristic ranking). Literature grounding uses OpenAlex (no key). Optional LLMs via any OpenAI-compatible provider — see [`.env.example`](.env.example). Maintainer publish notes: [`docs/PUBLISHING.md`](docs/PUBLISHING.md).
+```bash
+curiosity spark --domain ai --n 5
+curiosity profiles
+curiosity emotions mix curiosity=40 confusion=30 awe=30 --json
+```
 
-## Three ways to plug in
+No API key required for the default fast path (curated seeds + heuristic ranking). Literature grounding uses **OpenAlex** (no key). Optional LLMs via any **OpenAI-compatible** provider — see [`.env.example`](.env.example).
 
-| Mode | Command / URL | Best for |
-|------|----------------|----------|
-| **MCP plugin** | `curiosity-mcp` | Cursor, Claude Desktop, Claude Code, VS Code Copilot |
-| **HTTP API** | `curiosity serve` → `:8000` | Agents, curl, OpenAPI (`/docs`) |
-| **CLI spark** | `curiosity spark --domain ai` | Humans + scripts |
+---
 
-Full install snippets: **[`docs/PLUGINS.md`](docs/PLUGINS.md)**.
+## Plug into any platform
+
+| Surface | Command / URL | Best for |
+|---------|----------------|----------|
+| **MCP** | `curiosity-mcp` | Cursor, Claude Desktop, Claude Code, VS Code Copilot |
+| **HTTP** | `curiosity serve` → `:8000` | Agents, curl, OpenAPI |
+| **OpenAI tools** | [`examples/openai_tools.json`](examples/openai_tools.json) or `GET /v1/agent/tools` | Function-calling hosts |
+| **CLI** | `curiosity spark` / `curiosity run` | Humans + scripts |
+| **Python** | `provoke`, `CuriosityEngine` | Libraries & notebooks |
+
+Full install snippets for every host: **[`docs/PLUGINS.md`](docs/PLUGINS.md)**.
 
 ### MCP (stdio)
 
@@ -54,7 +86,7 @@ curiosity-mcp
 }
 ```
 
-Tools: `provoke_curiosity` / `spark`, `rank_unknowns` / `run_curiosity`, `list_domains`, `list_profiles`, `list_epistemic_cues`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`.
+Core tools: `provoke_curiosity` / `spark`, `rank_unknowns` / `run_curiosity`, `list_domains`, `list_profiles`. Affect tools (optional): `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`. Progressive disclosure via `CURIOSITY_MCP_TIER`.
 
 ### HTTP
 
@@ -66,48 +98,66 @@ curiosity serve
 |-----|---------|
 | http://127.0.0.1:8000/docs | Interactive OpenAPI |
 | http://127.0.0.1:8000/v1/curiosity/provoke?domain=ai&n=5 | Instant spark |
-| http://127.0.0.1:8000/v1/emotions/cues | Epistemic cue vocabulary |
-| http://127.0.0.1:8000/v1/emotions/annotate | Annotate a question (POST/GET) |
+| http://127.0.0.1:8000/v1/emotions/catalog | Mixable emotion catalog |
+| http://127.0.0.1:8000/v1/emotions/mix | POST framing mix (annotation only) |
 | http://127.0.0.1:8000/v1/profiles | Named ValueProfile presets |
-| http://127.0.0.1:8000/v1/agent | Machine guide for AI agents |
+| http://127.0.0.1:8000/v1/agent | Machine guide + honesty block |
 | http://127.0.0.1:8000/v1/agent/tools | OpenAI-compatible tool schemas |
 
-### OpenAI function-calling
-
-- Live: `GET /v1/agent/tools`
-- Static: [`examples/openai_tools.json`](examples/openai_tools.json)
-
-### Instant CLI
+### CLI demos
 
 ```bash
-curiosity spark --domain ai --n 5
 curiosity spark --domain biology --profile alignment_lab --json
-curiosity profiles
+curiosity run --domain ai --n 5 --no-literature --json
+curiosity compare-profiles --domain ai --a humanity_default --b alignment_lab --n 6 --json
 curiosity emotions cues
 curiosity emotions annotate "What remains unknown about epistemic emotion elicitation?" --surprise 0.7
+curiosity eval
+curiosity-mcp --list-tools
 ```
 
-Prints an `inject` pack for Claude, GPT, Gemini, Llama, or any local model.
+More verified commands: **[`docs/PROOFS.md`](docs/PROOFS.md)**. Sample payloads: **[`examples/`](examples/)** ([index](examples/README.md)).
 
-**Epistemic cues / emotions surface** (investigation framing — not felt emotion): see [`docs/EMOTIONS.md`](docs/EMOTIONS.md).
+---
 
-## Domains
+## Emotions / epistemic cues (honest)
 
-Offline seeds cover: **ai**, **biology**, **physics**, **climate**, **medicine**, **materials**, **social**, **energy** (plus **general** mix).
+Tag questions with epistemic cues, pull a named emotion catalog, or mix framing weights (e.g. curiosity 40% + confusion 30% + awe 30%).
 
-## Use with any LLM provider
+These are **UX / investigation-framing annotations**. Responses carry `honesty: "annotation_only"`. The software does **not** feel emotions.
 
-Optional LLM path speaks **OpenAI-compatible** `/chat/completions`:
+```python
+from artificial_curiosity import emotion_catalog, mix_emotions, annotate_epistemic
+
+print(emotion_catalog()["ids"][:5])
+print(mix_emotions(curiosity=40, confusion=30, awe=30)["inject_fragment"])
+print(annotate_epistemic(
+    "What remains unknown about epistemic emotion elicitation?",
+    surprise=0.7,
+)["epistemic_cues"])
+```
+
+How-to: [`docs/EMOTIONS.md`](docs/EMOTIONS.md) · Background (optional): [`research/AI_EMOTIONS.md`](research/AI_EMOTIONS.md).
+
+---
+
+## Multi-provider LLM (optional)
+
+Any OpenAI-compatible `/chat/completions` host:
 
 ```bash
 export LLM_API_KEY=...
 export LLM_BASE_URL=https://api.openai.com/v1
 export LLM_MODEL=gpt-4o-mini
 
-curiosity --domain ai --llm --model llama3.2 --base-url http://localhost:11434/v1 --no-literature
+curiosity run --domain ai --llm --n 5 --no-literature
+# Local Ollama example:
+curiosity run --domain ai --llm --model llama3.2 --base-url http://localhost:11434/v1 --no-literature
 ```
 
-(`OPENAI_API_KEY` / `OPENAI_BASE_URL` still work as aliases.) Credentials stay in the environment — never commit `.env`.
+(`OPENAI_API_KEY` / `OPENAI_BASE_URL` still work as aliases.) Credentials stay in the environment — never commit `.env`. Provider matrix notes: [`docs/PROOFS.md`](docs/PROOFS.md).
+
+---
 
 ## Python API
 
@@ -125,55 +175,102 @@ pack = provoke(domain="ai", n=5, fast=True)
 print(pack["inject"])
 
 print(list_epistemic_cues()["tags"])
-print(annotate_epistemic(
-    "What remains unknown about epistemic emotion elicitation?",
-    surprise=0.7,
-)["epistemic_cues"])
 print(dispatch_tool("list_domains"))
 ```
 
-## What the system does
+---
 
-1. Propose candidate unknowns  
-2. Verify they look unanswered in the literature (OpenAlex)  
-3. Score impact / neglectedness / tractability / surprise / answerability / risk  
-4. Diversify and return investigation briefs  
+## Architecture (sketch)
 
-## Design invariants
+```
+ValueProfile + domain ──▶ CuriosityEngine ──▶ Ranked unknowns + briefs
+                              │
+              ┌───────────────┼───────────────┐
+              ▼               ▼               ▼
+         Generate        Verify gap      Score + gate
+       (seeds/packs/LLM) (OpenAlex/S2)  (heuristic/LLM)
+              │               │               │
+              └──────────▶ Diversify ◀────────┘
+```
 
-- No value-free ranking — `ValueProfile` is explicit  
+| Step | What happens |
+|------|----------------|
+| 1. Propose | Curated seeds + optional domain packs + optional LLM forge |
+| 2. Verify | Literature neighborhood; **related ≠ answered** |
+| 3. Score | Impact / neglectedness / tractability / surprise / answerability / risk |
+| 4. Gate | Answerability, dual-use risk, likely-answered |
+| 5. Diversify | Near-dup suppression (Jaccard default; optional embeddings) |
+| 6. Brief | Investigation briefs + optional `inject` pack for any model |
+
+Modules & trust boundaries: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+### Design invariants
+
+- No value-free ranking — `ValueProfile` is always explicit  
 - Related literature ≠ answered  
 - Near-duplicates are suppressed  
-- Scores carry confidence / uncertainty bands; heuristics are flagged  
+- Scores carry confidence / `[low–high]` bands; heuristics are flagged  
+- Offline path degrades gracefully when literature / LLM is unavailable  
 
-## Docs
+---
+
+## Domains & profiles
+
+Offline seeds cover: **ai**, **biology**, **physics**, **climate**, **medicine**, **materials**, **social**, **energy** (plus **general**). Optional JSON **domain packs** under `src/artificial_curiosity/packs/`.
+
+Named profiles: `humanity_default`, `funder_10y`, `alignment_lab`, `climate_adaptation`, `basic_science`, `near_term_ops`, `public_demo_strict_risk` — via `curiosity profiles`, `GET /v1/profiles`, or `--profile`.
+
+---
+
+## Docs map
 
 | Doc | Purpose |
 |-----|---------|
-| [`docs/PLUGINS.md`](docs/PLUGINS.md) | Platform install (MCP / HTTP / tools) |
-| [`docs/EMOTIONS.md`](docs/EMOTIONS.md) | Epistemic cues / affective pack (does not feel) |
-| [`docs/LIMITS.md`](docs/LIMITS.md) | Honest bounds |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Pipeline overview |
+| [`docs/INDEX.md`](docs/INDEX.md) | Docs entry point |
+| [`docs/PLUGINS.md`](docs/PLUGINS.md) | MCP / HTTP / tools install |
+| [`docs/EMOTIONS.md`](docs/EMOTIONS.md) | Epistemic cues + mixes (does not feel) |
+| [`docs/LIMITS.md`](docs/LIMITS.md) | Honest bounds — read before marketing |
 | [`docs/PROOFS.md`](docs/PROOFS.md) | Demo commands for verified behaviors |
-| [`docs/DESIGN.md`](docs/DESIGN.md) | Short design invariants |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Agent playbook + roadmap (stuck → §0→§3→§2) · [`summary`](docs/ROADMAP_SUMMARY.md) |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Pipeline overview |
+| [`docs/DESIGN.md`](docs/DESIGN.md) | Short invariants |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Agent playbook (stuck → §0→§3→§2) |
+| [`docs/ROADMAP_SUMMARY.md`](docs/ROADMAP_SUMMARY.md) | One-page roadmap |
+| [`docs/PUBLISHING.md`](docs/PUBLISHING.md) | Maintainer PyPI notes |
+| [`examples/README.md`](examples/README.md) | Sample JSON / protocols |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setup, seeds, packs, PR bar |
 
-**Design rationale (optional):** [`research/`](research/) — first principles, F1–F15 failure modes, sources. Used to build the product; not required to run it.
+**Design rationale (optional):** [`research/`](research/) — first principles, F1–F15 failure modes, sources. Used to build the product; **not** required to run it. Index: [`research/INDEX.md`](research/INDEX.md).
 
-## Roadmap
-
-See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the **agent playbook** (stuck playbooks, priority wedges, session DoD) plus phased work orders (v0.2 → v2+). One-page overview: [`docs/ROADMAP_SUMMARY.md`](docs/ROADMAP_SUMMARY.md).
+---
 
 ## Web UI (optional)
 
 ```bash
-curiosity serve          # terminal 1 — API :8000
+curiosity serve                    # terminal 1 — API :8000
 cd web && npm install && npm run dev   # terminal 2 — UI :5173
 ```
 
-## Status
+UI shows briefs, `[low–high]` bands, profile name, optional framing mix (annotation only), and profile compare. Decision aids, not oracles.
 
-v0.1.0 — clone, install, MCP or HTTP plugin, spark. Works offline; optional any-provider LLM; optional OpenAlex grounding. Scores are decision aids, not oracles.
+---
+
+## Status & honesty
+
+| Claim | Reality |
+|-------|---------|
+| Version | **0.4.0** (see `pyproject.toml`) |
+| Install | Clone + `pip install -e .` — **not on PyPI yet** |
+| Default path | Offline seeds + heuristics; no API key |
+| Literature | OpenAlex (default); optional Semantic Scholar |
+| LLM | Optional; any OpenAI-compatible host |
+| Emotions | `annotation_only` — does **not** feel |
+| Scores | Decision aids with uncertainty bands — **not** calibrated oracles |
+| Dual-use | Weighted heuristic + human-review flag — **not** a biosafety oracle |
+| CI | Ruff + pytest on push/PR (`.github/workflows/ci.yml`) |
+
+Full bounds: [`docs/LIMITS.md`](docs/LIMITS.md).
+
+---
 
 ## License
 

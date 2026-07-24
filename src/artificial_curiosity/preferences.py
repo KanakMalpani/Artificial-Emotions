@@ -22,6 +22,22 @@ from artificial_curiosity.models import ValueProfile, resolve_value_profile
 
 SCHEMA_VERSION = "preference_event.v1"
 
+__all__ = [
+    "SCHEMA_VERSION",
+    "PreferenceEvent",
+    "append_preference_event",
+    "apply_preference_rerank",
+    "apply_weight_hints_to_profile",
+    "events_from_ranked",
+    "fit_bt_offline",
+    "learn_profile_weight_hints",
+    "load_preference_events",
+    "preference_score_adjustments",
+    "read_preference_events",
+    "suggest_next_pair",
+    "summarize_preferences",
+]
+
 _AXIS_TO_WEIGHT = {
     "impact": "weight_impact",
     "neglectedness": "weight_neglectedness",
