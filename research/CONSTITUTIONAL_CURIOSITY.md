@@ -72,10 +72,11 @@ Silent merge into one score labeled “consensus.”
 
 ## 5. Productize next (sibling)
 
-1. **Document veto pattern** in profiles docs — compose `max_risk` from strictest stakeholder without new API.  
-2. **Optional `compare_profiles` tool** — same candidates scored under two profiles; return rank deltas.  
-3. **Constitution JSON example** under `examples/` when implementing B.  
-4. Moonshot only: LLM self-critique of top-n against constitution text (CAI-style) — eval required.
+1. **Document veto pattern** — ✅ `compare.py` veto_tip + docs.  
+2. **`compare_profiles` tool** — ✅ landed.  
+3. **Constitution JSON example** — ✅ `examples/constitution_veto_stack.json`.  
+4. **Web compare + veto UX** — [`CONSTITUTION_WEB_UX.md`](CONSTITUTION_WEB_UX.md).  
+5. Moonshot only: LLM self-critique of top-n against constitution text — eval required.
 
 ---
 

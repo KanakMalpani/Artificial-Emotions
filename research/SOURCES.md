@@ -64,6 +64,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | FALSIFYBENCH (negative testing) | [`FALSIFYBENCH.md`](FALSIFYBENCH.md) | Wason-style; falsify > confirm |
 | FALSIFYBENCH paper | arXiv:2606.04751 | Inductive reasoning / rule discovery games |
 | Constitutional / multi-stakeholder curiosity | [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md) | Veto stacks vs fake consensus blends |
+| Constitution web UX | [`CONSTITUTION_WEB_UX.md`](CONSTITUTION_WEB_UX.md) | Compare + hard risk veto flow |
 | Curiosity eval metric stack | [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md) | RINoBench caveats; gap+rank+elicit primary |
 | InnoEval / personalized judges | [`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md) | Multi-perspective eval; anti-global-judge |
 | Soundness pass UX | [`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md) | Triage badges; no silent re-rank |
