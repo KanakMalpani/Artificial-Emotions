@@ -152,9 +152,13 @@ async def http_exception_handler(_request: Request, exc: HTTPException) -> JSONR
 
 
 class RunRequest(BaseModel):
-    domain: str = Domain.AI.value
-    topic: str = ""
-    n_return: int = Field(8, ge=1, le=32)
+    domain: str = Field(
+        Domain.AI.value,
+        examples=["ai", "biology", "climate"],
+        description="Domain key for seed pool / packs",
+    )
+    topic: str = Field("", examples=["aging biomarkers", "sandbagging evals"])
+    n_return: int = Field(8, ge=1, le=32, examples=[5, 8])
     n_candidates: int = Field(16, ge=4, le=64)
     use_llm: bool = False
     use_literature: bool = True
@@ -162,6 +166,7 @@ class RunRequest(BaseModel):
         "openalex",
         pattern="^(openalex|semantic_scholar|both)$",
         description="Literature adapter (W11)",
+        examples=["openalex", "both"],
     )
     llm_model: str | None = None
     judge_model: str | None = None
@@ -172,13 +177,34 @@ class RunRequest(BaseModel):
         ge=1,
         le=16,
         description="Parallel literature fetches when use_literature=true (1=serial)",
+        examples=[1, 4],
     )
     profile_name: str | None = Field(
         None,
         description=f"Named ValueProfile preset: {', '.join(list_profile_names())}",
+        examples=["humanity_default", "alignment_lab", "climate_adaptation"],
     )
     value_profile: ValueProfile | None = None
     diversity_backend: str = Field("jaccard", pattern="^(jaccard|embedding)$")
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "domain": "ai",
+                    "topic": "",
+                    "n_return": 8,
+                    "n_candidates": 16,
+                    "use_llm": False,
+                    "use_literature": True,
+                    "literature_backend": "openalex",
+                    "literature_workers": 4,
+                    "profile_name": "alignment_lab",
+                    "diversity_backend": "jaccard",
+                }
+            ]
+        }
+    }
 
 
 class ProvokeRequest(BaseModel):

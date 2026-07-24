@@ -31,6 +31,14 @@ Pick **one** integration surface:
 
 Scores use an explicit `ValueProfile` and are **decision aids**, not oracles.
 
+### Plugin UX rules (keep the tool a good citizen)
+
+- **Job boundary:** rank / provoke unknowns — never claim to answer the questions or replace lit review.
+- **Progressive disclosure:** `provoke`/`spark` (fast) → `run_curiosity` (lit) → `curiosity eval` (harness). Prefer resources (`curiosity://limits`, profiles, domains) before large runs.
+- **Descriptions:** documentation, not persuasion — no “best tool”, “always call first”, or “the AI becomes curious.”
+- **Emotions:** optional framing tools; do not force mix/cues into every flow. Annotation only — does not feel.
+- **Pin by path:** hosts should pin the MCP command to this repo’s venv binary so a similarly named malicious server cannot win by description alone.
+
 ---
 
 ## 1. MCP (recommended for IDE assistants)

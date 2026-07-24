@@ -83,6 +83,18 @@ def load_domain_packs(
         if key in seen:
             continue
         seen.add(key)
-        qs = questions_from_pack(load_pack_file(f))
+        # Skip non-domain assets co-located in packs/ (e.g. emotion_catalog.json).
+        if f.name in {"emotion_catalog.json"} or f.stem.startswith("emotion_"):
+            continue
+        try:
+            data = load_pack_file(f)
+        except Exception:  # noqa: BLE001
+            continue
+        schema = str(data.get("schema_version") or "")
+        if schema and not schema.startswith("domain_pack"):
+            continue
+        if not data.get("questions"):
+            continue
+        qs = questions_from_pack(data)
         out.extend(qs)
     return out

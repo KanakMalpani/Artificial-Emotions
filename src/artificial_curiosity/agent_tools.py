@@ -505,12 +505,12 @@ TOOL_SPECS: list[dict[str, Any]] = [
     {
         "name": "rank_unknowns",
         "description": (
-            "RANK UNKNOWNS — full curiosity pipeline: generate candidates, "
-            "optionally verify gaps (OpenAlex / Semantic Scholar), multi-axis score "
-            "with an explicit ValueProfile, diversify, return investigation briefs. "
-            "Call this when you need literature-aware gap status and briefs, not "
-            "instant spark. Alias: run_curiosity. Related literature ≠ answered; "
-            "scores are decision aids, not oracles."
+            "Rank and briefly explain valuable unanswered questions under an "
+            "explicit ValueProfile; does not answer the questions. Full pipeline: "
+            "generate → optional OpenAlex/S2 gap verify → multi-axis score → "
+            "gates → diversify → investigation briefs. Pass profile_name. "
+            "Related literature ≠ answered. Scores are decision aids with "
+            "[low–high] bands — not oracles. Alias: run_curiosity."
         ),
         "input_schema": RANK_SCHEMA,
         "handler": handle_rank_unknowns,

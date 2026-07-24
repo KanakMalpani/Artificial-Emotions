@@ -257,7 +257,7 @@
     "type": "function",
     "function": {
       "name": "rank_unknowns",
-      "description": "RANK UNKNOWNS \u2014 full curiosity pipeline: generate candidates, optionally verify gaps (OpenAlex / Semantic Scholar), multi-axis score with an explicit ValueProfile, diversify, return investigation briefs. Call this when you need literature-aware gap status and briefs, not instant spark. Alias: run_curiosity. Related literature \u2260 answered; scores are decision aids, not oracles.",
+      "description": "Rank and briefly explain valuable unanswered questions under an explicit ValueProfile; does not answer the questions. Full pipeline: generate \u2192 optional OpenAlex/S2 gap verify \u2192 multi-axis score \u2192 gates \u2192 diversify \u2192 investigation briefs. Pass profile_name. Related literature \u2260 answered. Scores are decision aids with [low\u2013high] bands \u2014 not oracles. Alias: run_curiosity.",
       "parameters": {
         "type": "object",
         "properties": {

@@ -47,6 +47,14 @@ type ProfileMeta = {
   description: string;
 };
 
+type MixBlend = {
+  framing?: string;
+  inject_fragment?: string;
+  percents?: Record<string, number>;
+  honesty?: string;
+  disclaimer?: string;
+};
+
 const DOMAINS = [
   "ai",
   "biology",
@@ -76,6 +84,13 @@ const FALLBACK_PROFILES: ProfileMeta[] = [
   { name: "near_term_ops", description: "Low-cost near-term operational unknowns" },
 ];
 
+const MIX_SLIDERS: { id: string; label: string }[] = [
+  { id: "curiosity", label: "Curiosity" },
+  { id: "confusion", label: "Confusion" },
+  { id: "awe", label: "Awe" },
+  { id: "interest", label: "Interest" },
+];
+
 export default function App() {
   const [domain, setDomain] = useState("ai");
   const [topic, setTopic] = useState("");
@@ -88,6 +103,15 @@ export default function App() {
   const [profileDescription, setProfileDescription] = useState<string | null>(
     null,
   );
+  const [mixWeights, setMixWeights] = useState<Record<string, number>>({
+    curiosity: 40,
+    confusion: 25,
+    awe: 20,
+    interest: 15,
+  });
+  const [mixBlend, setMixBlend] = useState<MixBlend | null>(null);
+  const [mixOpen, setMixOpen] = useState(false);
+  const [mixBusy, setMixBusy] = useState(false);
 
   const subtitle = useMemo(
     () =>
@@ -101,7 +125,6 @@ export default function App() {
   );
 
   useEffect(() => {
-    // Fire-and-forget profile list; keep fallbacks if API is down.
     fetch("/v1/profiles")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -132,6 +155,7 @@ export default function App() {
           use_llm: false,
           use_literature: true,
           profile_name: profileName,
+          literature_workers: 4,
         }),
       });
       if (!res.ok) {
@@ -149,6 +173,74 @@ export default function App() {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function spark() {
+    setLoading(true);
+    setError(null);
+    try {
+      const qs = new URLSearchParams({
+        domain,
+        n: "5",
+        fast: "true",
+        profile_name: profileName,
+      });
+      if (topic.trim()) qs.set("topic", topic.trim());
+      const res = await fetch(`/v1/curiosity/provoke?${qs.toString()}`);
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const questions = (data.questions ?? []) as Ranked[];
+      setResults(questions);
+      setActiveProfile(data.value_profile?.name ?? profileName);
+      setProfileDescription(data.value_profile?.description ?? null);
+      if (mixBlend?.inject_fragment && data.inject) {
+        // Framing is optional UX — never claimed as felt emotion.
+        void navigator.clipboard?.writeText?.(
+          `${mixBlend.inject_fragment}\n\n${data.inject}`,
+        );
+      }
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? `${e.message}. Is the API running on :8000?`
+          : "Spark failed",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function buildMix() {
+    setMixBusy(true);
+    setError(null);
+    try {
+      const weights: Record<string, number> = {};
+      for (const s of MIX_SLIDERS) {
+        const v = mixWeights[s.id] ?? 0;
+        if (v > 0) weights[s.id] = v;
+      }
+      const res = await fetch("/v1/emotions/mix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weights }),
+      });
+      if (!res.ok) throw new Error(`Mix API ${res.status}`);
+      const data = await res.json();
+      setMixBlend({
+        framing: data.framing,
+        inject_fragment: data.inject_fragment,
+        percents: data.percents,
+        honesty: data.disclaimer || data.honesty,
+        disclaimer: data.disclaimer,
+      });
+      setMixOpen(true);
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "Emotion mix failed",
+      );
+    } finally {
+      setMixBusy(false);
     }
   }
 
@@ -189,9 +281,19 @@ export default function App() {
             placeholder="optional — e.g. aging biomarkers"
           />
         </label>
-        <button type="button" onClick={run} disabled={loading}>
-          {loading ? "Mapping unknowns…" : "Ask what to investigate"}
-        </button>
+        <div className="btn-row">
+          <button type="button" onClick={run} disabled={loading}>
+            {loading ? "Mapping unknowns…" : "Ask what to investigate"}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={spark}
+            disabled={loading}
+          >
+            Fast spark
+          </button>
+        </div>
       </div>
 
       {(activeProfileMeta?.description || profileDescription) && (
@@ -200,6 +302,68 @@ export default function App() {
           {profileDescription ?? activeProfileMeta?.description}
         </p>
       )}
+
+      <section className="mix-panel" aria-label="Investigation framing mix">
+        <button
+          type="button"
+          className="mix-toggle"
+          onClick={() => setMixOpen((o) => !o)}
+          aria-expanded={mixOpen}
+        >
+          {mixOpen ? "Hide" : "Show"} investigation framing mix
+          <span className="mix-hint">UX annotation only — does not feel</span>
+        </button>
+        {mixOpen && (
+          <div className="mix-body">
+            <p className="mix-honesty">
+              Percentages are framing weights for investigation tone — not EES
+              scores, not felt emotion, and not a clinical mood measure.
+            </p>
+            <div className="mix-sliders">
+              {MIX_SLIDERS.map((s) => (
+                <label key={s.id} className="mix-slider">
+                  <span>
+                    {s.label}{" "}
+                    <em>{Math.round(mixWeights[s.id] ?? 0)}</em>
+                  </span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={mixWeights[s.id] ?? 0}
+                    onChange={(e) =>
+                      setMixWeights((w) => ({
+                        ...w,
+                        [s.id]: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </label>
+              ))}
+            </div>
+            <button type="button" onClick={buildMix} disabled={mixBusy}>
+              {mixBusy ? "Mixing…" : "Build framing mix"}
+            </button>
+            {mixBlend && (
+              <div className="mix-result">
+                {mixBlend.framing && (
+                  <p>
+                    <strong>Framing.</strong> {mixBlend.framing}
+                  </p>
+                )}
+                {mixBlend.inject_fragment && (
+                  <pre className="mix-inject">{mixBlend.inject_fragment}</pre>
+                )}
+                <p className="mix-disclaimer">
+                  {mixBlend.honesty ||
+                    mixBlend.disclaimer ||
+                    "Annotation only — this system does not feel."}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
 
       {error && <div className="error">{error}</div>}
 
@@ -219,7 +383,7 @@ export default function App() {
           </p>
           <section className="list">
             {results.map((r) => {
-              const works = r.gap.related_works?.slice(0, 3) ?? [];
+              const works = r.gap?.related_works?.slice(0, 3) ?? [];
               const band =
                 r.score_low != null && r.score_high != null
                   ? `[${r.score_low.toFixed(2)}–${r.score_high.toFixed(2)}]`
@@ -235,8 +399,8 @@ export default function App() {
                         {band ? ` ${band}` : ""}
                       </span>
                       <span className="chip">conf {r.confidence.toFixed(2)}</span>
-                      <span className={`chip gap-${r.gap.status}`}>
-                        gap:{r.gap.status}
+                      <span className={`chip gap-${r.gap?.status ?? "unknown"}`}>
+                        gap:{r.gap?.status ?? "n/a"}
                       </span>
                       <span className="chip">
                         cost {r.scores.cost_proxy.toFixed(2)}
@@ -315,6 +479,7 @@ export default function App() {
         tractability × surprise), gated by answerability, risk, and literature gap
         status. Profile name and [low–high] bands are always shown — decision aids,
         not oracles. Neglectedness/cost are heuristic proxies, not funding databases.
+        Emotion mixes are optional framing weights only.
       </p>
     </main>
   );

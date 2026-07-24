@@ -1,0 +1,33 @@
+{
+  "schema_version": "domain_pack.v1",
+  "name": "aging_biology_pack",
+  "version": "0.1.0",
+  "domain": "biology",
+  "description": "Neglected aging / longevity biology unknowns with measurable operationalizations.",
+  "questions": [
+    {
+      "id": "aging-pack-01",
+      "question": "Which circulating biomarkers best predict remaining healthspan under interventions that extend lifespan in model organisms?",
+      "operationalization": "Rank candidate biomarkers by out-of-sample AUROC ≥ 0.7 for remaining healthspan across ≥2 intervention classes in mice or equivalent, with pre-registered endpoints.",
+      "why_it_matters": "Longevity trials need transferable interim endpoints shorter than full lifespan.",
+      "tags": ["aging", "biomarkers", "healthspan", "translational"],
+      "assumptions": ["Healthspan endpoints can be operationalized consistently across labs."]
+    },
+    {
+      "id": "aging-pack-02",
+      "question": "How much of cellular senescence burden in human tissues is causal for functional decline versus a correlated passenger of damage?",
+      "operationalization": "Estimate causal contribution via senolytic or genetic ablation experiments with tissue-function primary endpoints and mediation analysis of senescence markers.",
+      "why_it_matters": "Senolytic programs depend on whether senescence is causal or epiphenomenal in target tissues.",
+      "tags": ["aging", "senescence", "causality"],
+      "assumptions": ["Tissue-level senescence burden is measurable in vivo or ex vivo."]
+    },
+    {
+      "id": "aging-pack-03",
+      "question": "Which mitochondrial quality-control interventions most improve cognitive resilience under metabolic stress without impairing basal ATP supply?",
+      "operationalization": "Compare interventions on a fixed metabolic-stress cognitive battery; report delta in error rates and ATP/mitochondrial flux under basal and stressed conditions.",
+      "why_it_matters": "Energy failure is a shared substrate of neurodegeneration and aging cognition.",
+      "tags": ["aging", "mitochondria", "cognition", "metabolism"],
+      "assumptions": ["Basal ATP and stress-flux can be measured without destroying the tissue of interest."]
+    }
+  ]
+}
