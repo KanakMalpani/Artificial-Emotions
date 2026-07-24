@@ -71,3 +71,7 @@ include = [
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+markers = [
+  "e2e: end-to-end surface tests (API TestClient + CLI main)",
+  "slow: optional network/literature tests (may skip offline)",
+]

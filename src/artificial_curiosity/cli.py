@@ -121,7 +121,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     eval_p = sub.add_parser(
         "eval",
-        help="Offline expert-eval / spot-check harness (W10; no vanity accuracy %)",
+        help="Offline expert-eval / spot-check harness (W10; no vanity accuracy %%)",
     )
     eval_p.add_argument(
         "--fixtures",

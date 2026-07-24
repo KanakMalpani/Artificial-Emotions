@@ -97,7 +97,7 @@ Aligned with [`LIMITS.md`](LIMITS.md) and [`research/HANDOFF.md`](../research/HA
 | **LLM** | OpenAI-compatible client; optional judge + gap reader | `llm.py`, `judge.py` |
 | **Surfaces** | CLI, FastAPI `:8000`, MCP stdio, Python API, Vite UI `:5173` | `cli.py`, `api.py`, `mcp_server.py`, `web/` |
 | **Agent glue** | `/v1/agent`, `/v1/agent/tools`, provoke/spark inject packs | `agent_tools.py`, `provoke.py`, `examples/openai_tools.json` |
-| **Tests** | Core, failure-mode, provoke/API, MCP | `tests/` — run `pytest -q` |
+| **Tests** | Core, failure-mode, provoke/API, MCP, e2e (API+CLI) | `tests/` — run `pytest -q`; e2e: `pytest tests/e2e -q` |
 | **Artifacts** | Offline vs literature compares | `examples/run_ai_*_final.json`, `examples/_run_compare.py` |
 | **Docs** | Product under `docs/`; design rationale under `research/` | See appendix C |
 
@@ -245,6 +245,8 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 | Failure modes | `pytest tests/test_failure_modes.py -q` | F1–F15 adversarial |
 | Provoke/API | `pytest tests/test_api_provoke.py -q` | Spark/provoke/agent |
 | MCP | `pytest tests/test_mcp.py -q` | Tool list/dispatch |
+| E2E (fast) | `pytest tests/e2e -q` | Health→provoke→run + CLI spark/run/eval |
+| E2E lit (opt) | `pytest -m slow -q` | OpenAlex run; skips offline |
 
 **Playbook:** Reproduce with the smallest suite → fix code (not delete assertions) → re-run full `pytest -q`. If intentional behavior change, update tests **and** LIMITS.
 

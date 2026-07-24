@@ -14,6 +14,17 @@ pip install -e ".[dev]"
 pytest -q
 ```
 
+### End-to-end suite
+
+Fast-path e2e (API TestClient + CLI `main`, no OpenAlex) lives under `tests/e2e/`:
+
+```bash
+pytest tests/e2e -q          # API + CLI journeys
+pytest -m e2e -q             # same via marker
+pytest -m "not slow" -q      # full suite minus optional lit smoke
+pytest -m slow -q            # optional OpenAlex run (skips if offline)
+```
+
 Optional semantic diversity:
 
 ```bash

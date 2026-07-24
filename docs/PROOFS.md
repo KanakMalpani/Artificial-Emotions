@@ -176,10 +176,28 @@ python -m build
 # Artifacts under dist/; owner publishes to PyPI when ready
 ```
 
+## End-to-end surfaces (API + CLI)
+
+Offline by default — does not depend on OpenAlex:
+
+```bash
+pytest tests/e2e -q
+# or: pytest -m e2e -q
+```
+
+Covers: `GET /health` → domains/profiles/agent/tools → fast provoke → `POST /v1/curiosity/run` with `use_literature=false`; CLI `spark` / `run --no-literature` / `profiles` / `eval`.
+
+Optional literature smoke (may skip when OpenAlex is unreachable):
+
+```bash
+pytest -m slow -q
+```
+
 ## Full suite
 
 ```bash
 pytest -q
+# CI-safe (exclude optional lit): pytest -m "not slow" -q
 ```
 
 Design rationale: [`research/`](../research/). Short invariants: [`DESIGN.md`](DESIGN.md).
