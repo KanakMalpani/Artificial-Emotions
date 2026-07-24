@@ -586,6 +586,11 @@ def test_preference_summarize_and_compare_profiles(tmp_path: Path):
     assert len(cmp["ranks_b"]) == 4
     assert "veto_tip" in cmp
     assert cmp["veto_tip"]["strictest_max_risk"] <= 0.85
+    assert "agreement" in cmp
+    assert "top_k_jaccard" in cmp["agreement"]
+    # n=4 → kendall may be None; with default n=8 it should compute
+    cmp8 = compare_profiles(domain="ai", n=8)
+    assert cmp8["agreement"]["kendall_tau"] is not None or len(cmp8["ranks_a"]) < 5
 
     client = TestClient(app)
     sres = client.post(

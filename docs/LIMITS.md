@@ -17,7 +17,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Optional LLM judge + LLM gap reader when `use_llm=True` and any OpenAI-compatible provider is configured (`LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`)
 - Separate `judge_model` / `LLM_JUDGE_MODEL` from generator model (F5) — config + CLI/API/MCP flags
 - Multi-judge ensemble (`judge_ensemble_n` / `LLM_JUDGE_MODELS`): disagreement entropy flag + wider bands (W15) — requires live LLM; offline path uses heuristic
-- Named **ValueProfile presets** (`humanity_default`, `funder_10y`, `alignment_lab`, `climate_adaptation`, `basic_science`, `near_term_ops`) via `curiosity profiles`, `GET /v1/profiles`, MCP `list_profiles`, `--profile` / `profile_name`
+- Named **ValueProfile presets** (`humanity_default`, `funder_10y`, `alignment_lab`, `climate_adaptation`, `basic_science`, `near_term_ops`, `public_demo_strict_risk`) via `curiosity profiles`, `GET /v1/profiles`, MCP `list_profiles`, `--profile` / `profile_name`
 - Instant spark for any agent/model: `GET|POST /v1/curiosity/provoke`, CLI `curiosity spark`, `curiosity serve`
 - Agent manifest: `GET /v1/agent`
 - OpenAI-compatible tool schemas: `GET /v1/agent/tools` + `examples/openai_tools.json`
@@ -59,8 +59,10 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | Heuristic scoring is lexicon/density based | No LLM required for demos | Set `use_llm=True` + API key |
 | Gap reading is phrase/overlap, not full-text comprehension | Abstracts are partial | Grounded LLM reader (optional) or full-text APIs later |
 | OpenAlex / S2 neighborhoods can be topically noisy | Relevance search ≠ semantic match | Low overlap keeps `unanswered`; `both` merges sources |
+| OpenAlex funder/affiliation metadata incomplete | Coverage ≠ accuracy (esp. outside WoS/Scopus overlap) | Treat funder signals as optional rationale keys only — not silent score weight |
 | Seed set is curated (+ optional packs) | Offline reliability | LLM generation + CONTRIBUTING pack bar |
-| Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile` |
+| Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile`; see McNamara / demand-pull notes in `research/PROBLEM_SELECTION_MCNAMARA.md` |
+| Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; agent safety blurb; no silent user-affect inference |
 | No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL + thin re-rank + tiny weight hints; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |
 | Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains | Human review hook + LIMITS residual risk; stronger models later |

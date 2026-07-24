@@ -98,6 +98,12 @@ def build_inject_prompt(
         )
         lines.append(f"   Why: {u['why_it_matters']}")
         lines.append(f"   How we'd know: {u['operationalization']}")
+        axes = u.get("axes") or {}
+        if "risk" in axes:
+            lines.append(
+                f"   Risk: {float(axes['risk']):.2f} "
+                f"(dual-use / harm proxy — respect ValueProfile max_risk)"
+            )
         if u.get("brief"):
             lines.append(f"   Brief: {u['brief'][:280]}")
         cue_line = format_cues_for_inject(u.get("epistemic_cues"))
@@ -115,8 +121,10 @@ def build_inject_prompt(
         "1) Prefer unanswered/partial gaps with strong operationalization.\n"
         "2) State which ValueProfile tradeoffs you are accepting.\n"
         "3) Propose a concrete first investigation + falsifier.\n"
-        "4) Do not invent papers; respect gap_status and neighborhood notes.\n"
-        "5) Do not claim the ranking engine 'feels' curiosity or other emotions."
+        "4) Prefer a discriminating observation over a vague 'run more experiments'.\n"
+        "5) Do not invent papers; respect gap_status and neighborhood notes.\n"
+        "6) Surface risk flags; do not launder dual-use as harmless curiosity.\n"
+        "7) Do not claim the ranking engine 'feels' curiosity or other emotions."
     )
     return "\n".join(lines)
 

@@ -19,6 +19,37 @@ from artificial_curiosity.models import (
 from artificial_curiosity.scoring import aggregate_curiosity, heuristic_score
 
 
+def _kendall_tau(rank_a: dict[str, int], rank_b: dict[str, int]) -> float | None:
+    """Kendall τ on shared ids (None if fewer than 5 shared)."""
+    ids = sorted(set(rank_a) & set(rank_b))
+    n = len(ids)
+    if n < 5:
+        return None
+    concordant = 0
+    discordant = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            da = rank_a[ids[i]] - rank_a[ids[j]]
+            db = rank_b[ids[i]] - rank_b[ids[j]]
+            if da == 0 or db == 0:
+                continue
+            if da * db > 0:
+                concordant += 1
+            else:
+                discordant += 1
+    denom = concordant + discordant
+    if denom == 0:
+        return 0.0
+    return round((concordant - discordant) / denom, 4)
+
+
+def _top_k_jaccard(ids_a: list[str], ids_b: list[str]) -> float:
+    sa, sb = set(ids_a), set(ids_b)
+    if not sa and not sb:
+        return 1.0
+    return round(len(sa & sb) / len(sa | sb), 4)
+
+
 def compare_profiles(
     *,
     domain: str = "ai",
@@ -112,10 +143,16 @@ def compare_profiles(
                 "question_id": qid,
                 "rank_a": ra,
                 "rank_b": rb,
-                "delta_a_minus_b": ra - rb,  # negative ⇒ higher under A
+                "delta_a_minus_b": ra - rb,
             }
         )
     deltas.sort(key=lambda d: (abs(d["delta_a_minus_b"]), d["question_id"]), reverse=True)
+
+    tau = _kendall_tau(pos_a, pos_b)
+    jaccard = _top_k_jaccard(
+        [r["question_id"] for r in ranks_a],
+        [r["question_id"] for r in ranks_b],
+    )
 
     return {
         "domain": domain,
@@ -126,6 +163,14 @@ def compare_profiles(
         "ranks_a": ranks_a,
         "ranks_b": ranks_b,
         "rank_deltas": deltas,
+        "agreement": {
+            "kendall_tau": tau,
+            "top_k_jaccard": jaccard,
+            "note": (
+                "Kendall τ requires ≥5 shared ids; None means too few for a "
+                "stable ordinal association. Not a claim either profile is correct."
+            ),
+        },
         "veto_tip": {
             "strictest_max_risk": min(pa.max_risk, pb.max_risk),
             "note": (

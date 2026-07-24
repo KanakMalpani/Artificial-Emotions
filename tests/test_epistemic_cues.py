@@ -89,7 +89,17 @@ def test_inject_includes_framing_and_anti_anthropomorphism():
     assert "does not feel" in text.lower() or "not feel" in text.lower()
     assert "epistemic_cues=" in text
     assert "falsifier" in text.lower()
+    assert "risk:" in text.lower()
+    assert "discriminating observation" in text.lower()
     assert incongruity_investigate_block().split("\n")[0] in text
+
+
+def test_public_demo_strict_risk_preset():
+    from artificial_curiosity.models import get_profile
+
+    p = get_profile("public_demo_strict_risk")
+    assert p.max_risk <= 0.55
+    assert p.max_risk < get_profile("humanity_default").max_risk
 
 
 def test_provoke_fast_attaches_epistemic_cues():

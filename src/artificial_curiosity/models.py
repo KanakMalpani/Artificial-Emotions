@@ -111,6 +111,20 @@ VALUE_PROFILE_PRESETS: dict[str, ValueProfile] = {
         min_answerability=0.55,
         time_horizon_years=3,
     ),
+    "public_demo_strict_risk": ValueProfile(
+        name="public_demo_strict_risk",
+        description=(
+            "Public / demo surface with a strict dual-use risk ceiling — use as a "
+            "safety veto stakeholder when composing with a primary lab or funder profile."
+        ),
+        weight_impact=1.0,
+        weight_neglectedness=1.0,
+        weight_tractability=0.9,
+        weight_surprise=0.6,
+        max_risk=0.55,
+        min_answerability=0.5,
+        time_horizon_years=10,
+    ),
 }
 
 
