@@ -10,7 +10,7 @@
 
 ## 1. Executive summary
 
-Psychology measures epistemic emotions with **discrete scales (EES)** and **incongruity / high-confidence-error paradigms**. Those paradigms map cleanly onto what Artificial Curiosity already ships: gap status + surprise/answerability axes + optional cue tags + provoke inject instructions. The productive product path is **not** embedding an EES API; it is **eval design**: A/B incongruity-framed injects → investigation quality (specificity, falsifiers), with optional short EES items only in human studies. Medium information gaps + sense of control beat “too wide / hopeless” gaps (Loewenstein; Pekrun control-value). Confusion is a **risk tag**, not a goal state.
+Psychology measures epistemic emotions with **discrete scales (EES)** and **incongruity / high-confidence-error paradigms**. Those paradigms map cleanly onto what Artificial Curiosity already ships: gap status + surprise/answerability axes + optional cue tags + provoke inject instructions. The productive product path is **not** embedding an EES API; it is **eval design**: A/B incongruity-framed injects → investigation quality (specificity, falsifiers), with optional short EES items only in human studies. Medium information gaps + sense of control beat “too wide / hopeless” gaps (Loewenstein; Pekrun control-value). Confusion is a **risk tag**, not a goal state. Profile `cue_*` knobs already exist — see [`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md) and `examples/cue_threshold_presets.json`.
 
 ---
 

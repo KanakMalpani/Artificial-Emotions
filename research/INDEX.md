@@ -47,6 +47,8 @@ Everything under `research/` is design/background material that informed the imp
 | [PREFERENCE_BT_STAGE2.md](PREFERENCE_BT_STAGE2.md) | Bradley–Terry / ties / active pairing within profile |
 | [VERITAS_EPISTEMIC_LABELS.md](VERITAS_EPISTEMIC_LABELS.md) | Supported/Refuted/Underpowered/Invalid → gap status |
 | [VOI_IMPRECISE.md](VOI_IMPRECISE.md) | Credal / multicenter VOI honesty addendum |
+| [CUE_THRESHOLD_KNOBS.md](CUE_THRESHOLD_KNOBS.md) | Profile cue_* presets + elicit A/B |
+| [HIVEMIND_METRIC_SPEC.md](HIVEMIND_METRIC_SPEC.md) | Mean pairwise cosine eval recipe |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

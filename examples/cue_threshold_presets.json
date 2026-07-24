@@ -1,0 +1,25 @@
+{
+  "name": "cue_threshold_presets",
+  "honesty": "Annotation intensity presets only — not EES cut-scores or emotion recognition.",
+  "presets": {
+    "conservative": {
+      "cue_surprise_high": 0.65,
+      "cue_neglectedness_high": 0.65,
+      "cue_answerability_low": 0.35,
+      "note": "Fewer incongruity/surprise tags; public-demo friendly."
+    },
+    "default": {
+      "cue_surprise_high": 0.55,
+      "cue_neglectedness_high": 0.55,
+      "cue_answerability_low": 0.45,
+      "note": "Matches ValueProfile field defaults."
+    },
+    "sensitive": {
+      "cue_surprise_high": 0.5,
+      "cue_neglectedness_high": 0.5,
+      "cue_answerability_low": 0.55,
+      "note": "More confusion_risk → stronger 'propose one experiment' framing."
+    }
+  },
+  "see": "research/CUE_THRESHOLD_KNOBS.md"
+}

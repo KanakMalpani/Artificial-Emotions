@@ -28,6 +28,8 @@ For curiosity: generating unknowns is an open-ended ideation task — exactly wh
 
 ## 3. Productize next (sibling)
 
+Full recipe: [`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md).
+
 1. Eval: mean pairwise cosine of top-n question embeddings (hivemind score).  
 2. Flag runs when similarity > threshold.  
 3. Do not advertise “6 models = 6× creativity.”  

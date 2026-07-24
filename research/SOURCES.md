@@ -35,6 +35,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Consumer access to emotion / epistemic tooling | [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) | APIs, SDKs, OCC libs, LLM toolkits, EES, datasets (easy vs locked); minimal public contract |
 | Emotion mixing / blends (synthesis) | [`EMOTION_MIXING.md`](EMOTION_MIXING.md) | PAD interpolation, Plutchik dyads, mixed feelings; % mix schema + honesty limits |
 | Epistemic elicitation → provoke | [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md) | EES, incongruity paradigms, agent/human A/B protocol |
+| Cue threshold knobs | [`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md) | Profile cue_* presets; persuasion-intensity caution |
+| Hivemind metric spec | [`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md) | Mean/max pairwise cosine eval recipe |
 | Gap verify / question-rank competitors | [`GAP_VERIFICATION_COMPETITORS.md`](GAP_VERIFICATION_COMPETITORS.md) | SciMuse, ScholarEval, LitGapFinder, ResearchAgent, Owl-class |
 | Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |
 | Agent plugin / MCP UX | [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) | Tool description hygiene; progressive disclosure; ScaleMCP |
