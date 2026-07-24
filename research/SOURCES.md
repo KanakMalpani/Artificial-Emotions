@@ -33,6 +33,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Constitutional / multi-stakeholder curiosity | [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md) | Veto stacks vs fake consensus blends |
 | Curiosity eval metric stack | [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md) | RINoBench caveats; gap+rank+elicit primary |
 | Gap verify methods (SciFact family) | [`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md) | Claim verify ≠ question settled; escalation pattern |
+| Funding / OpenAlex neglect signals | [`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md) | Metadata honesty; adapter-only upgrades |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
@@ -95,6 +96,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | SciFact / SciFact-Open | arXiv:2004.14974 ; 2210.13777 | Scientific claim verification (+ open-domain drop) |
 | DeepSciVerify | arXiv:2605.27710 | Abstract-first claim–citation escalation |
 | SciClops | arXiv:2110.13090 | Claim extract/cluster for science fact-check |
+| Alperin et al., OpenAlex vs Scopus | arXiv:2404.17663 | Coverage vs metadata accuracy tradeoffs |
+| Alonso-Alvarez & van Eck, OpenAlex Africa | arXiv:2409.01120 | High coverage; weaker funder/affiliation metadata |
 | Kumar et al., IAScore / Distinctness | arXiv:2409.06185 | Automated future-idea eval metrics |
 | EmotionBench (Huang et al.) | NeurIPS 2024; arXiv:2308.03656 | LLM emotional alignment fragility |
 | CoRE | arXiv:2508.05880 | Fragile appraisal→emotion reasoning in LLMs |

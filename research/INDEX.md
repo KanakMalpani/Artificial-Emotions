@@ -29,6 +29,7 @@ Everything under `research/` is design/background material that informed the imp
 | [CONSTITUTIONAL_CURIOSITY.md](CONSTITUTIONAL_CURIOSITY.md) | Multi-stakeholder ValueProfile / veto-stack moonshot |
 | [CURIOSITY_EVAL_METRICS.md](CURIOSITY_EVAL_METRICS.md) | RINoBench / ideation–execution / metric stack for evals |
 | [GAP_VERIFY_METHODS.md](GAP_VERIFY_METHODS.md) | SciFact-family methods vs related≠answered verify |
+| [FUNDING_NEGLECT_SIGNALS.md](FUNDING_NEGLECT_SIGNALS.md) | OpenAlex/funding metadata as neglectedness adapters |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
