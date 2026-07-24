@@ -127,13 +127,49 @@ def test_emotions_surface_e2e(client: TestClient) -> None:
     )
     assert mix.status_code == 200
     assert mix.json()["honesty"] == "annotation_only"
+    assert "framing" in mix.json()
+    assert "inject_fragment" in mix.json()
+
+    hints = client.post(
+        "/v1/preferences/hints",
+        json={
+            "profile_name": "humanity_default",
+            "events": [
+                {
+                    "event_type": "prefer",
+                    "profile_name": "humanity_default",
+                    "question_id": "a",
+                    "score_axes": {
+                        "impact": 0.9,
+                        "neglectedness": 0.8,
+                        "tractability": 0.3,
+                        "surprise": 0.7,
+                    },
+                },
+                {
+                    "event_type": "reject",
+                    "profile_name": "humanity_default",
+                    "question_id": "b",
+                    "score_axes": {
+                        "impact": 0.3,
+                        "neglectedness": 0.2,
+                        "tractability": 0.9,
+                        "surprise": 0.2,
+                    },
+                },
+            ],
+        },
+    )
+    assert hints.status_code == 200
+    assert hints.json()["ok"] is True
+    assert "not calibrated" in hints.json()["honesty"].lower()
 
     agent = client.get("/v1/agent").json()
     assert "emotions" in agent
     assert "list_epistemic_cues" in agent["mcp"]["tools"]
     assert "mix_emotions" in agent["mcp"]["tools"]
     assert "emotion_catalog" in agent["mcp"]["tools"]
-
+    assert "preferences" in client.get("/").json()
 
 def test_provoke_post_and_multi_domain(client: TestClient) -> None:
     post = client.post(

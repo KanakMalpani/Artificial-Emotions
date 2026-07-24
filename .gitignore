@@ -37,6 +37,8 @@ htmlcov/
 # Web
 web/node_modules/
 web/dist/
+web/*.tsbuildinfo
+*.tsbuildinfo
 
 # Local experiment dumps (keep committed examples/*.json that are intentional)
 examples/*.local.json

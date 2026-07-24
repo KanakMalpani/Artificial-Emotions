@@ -39,6 +39,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
 - Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, e2e — run `pytest -q`
+- Optional Playwright web smoke: `CURIOSITY_PLAYWRIGHT=1` + `web/dist` + chromium (`tests/e2e/test_web_playwright.py`) — skipped by default
 - Smoke: `curiosity spark`, `curiosity profiles`, `curiosity eval`, `curiosity-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy

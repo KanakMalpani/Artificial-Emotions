@@ -185,7 +185,16 @@ pytest tests/e2e -q
 # or: pytest -m e2e -q
 ```
 
-Covers: `GET /health` → domains/profiles/agent/tools → fast provoke → `POST /v1/curiosity/run` with `use_literature=false`; emotions (`/v1/emotions/*`); CLI `spark` / `run --no-literature` / `profiles` / `eval` / `emotions`.
+Covers: `GET /health` → domains/profiles/agent/tools → fast provoke → `POST /v1/curiosity/run` with `use_literature=false`; emotions (`/v1/emotions/*` mix/catalog); `POST /v1/preferences/hints`; CLI `spark` / `run --no-literature` / `profiles` / `eval` / `emotions` / `preferences hints`.
+
+Optional Vite UI Playwright (skipped by default):
+
+```bash
+cd web && npm run build
+# pip install playwright && playwright install chromium
+set CURIOSITY_PLAYWRIGHT=1
+pytest tests/e2e/test_web_playwright.py -q
+```
 
 ## Epistemic cues / emotions (annotation only)
 
