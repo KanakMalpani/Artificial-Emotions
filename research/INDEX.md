@@ -40,6 +40,7 @@ Everything under `research/` is design/background material that informed the imp
 | [AGENT_CARD_COPY.md](AGENT_CARD_COPY.md) | Draft honesty copy for /v1/agent and MCP |
 | [MCP_DESCRIPTION_LINT.md](MCP_DESCRIPTION_LINT.md) | Forbidden/required strings for tool schemas |
 | [ANSWERABILITY_FEASIBILITY.md](ANSWERABILITY_FEASIBILITY.md) | Axis hygiene; SFBench feasibility vs our proxies |
+| [CRITIC_DEBATE_JUDGES.md](CRITIC_DEBATE_JUDGES.md) | HeurekaBench critic / MPDS debate → form critique |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
