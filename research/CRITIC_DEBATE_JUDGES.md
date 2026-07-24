@@ -35,8 +35,10 @@
 ## 3. Productize next (sibling)
 
 1. Optional `critique_brief` tool — returns form issues only; does not change ranks silently.  
+   **WIP (sibling):** `src/artificial_curiosity/critique.py` — regex form critic (sprawl, missing falsifier, anthropomorphism, citation tells). Wire to MCP/API when ready; keep “does not change ranks.”  
 2. Eval: % of top-n with F9 sprawl before/after critic.  
 3. Do not run unbounded debate loops in default provoke (latency/cost).  
+4. Steal **label taxonomy** from VERITAS (Supported/Refuted/Underpowered/Invalid) for gap fixtures — see [`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md).  
 
 ---
 

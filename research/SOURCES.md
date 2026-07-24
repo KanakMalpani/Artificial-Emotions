@@ -23,6 +23,12 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | SFBench scientific feasibility | arXiv:2606.29630 | Expert 1–5 feasibility on de novo materials claims |
 | MPDS multi-persona debate | arXiv:2605.23917 | Literature-grounded hypothesis debate |
 | AutoResearchClaw | arXiv:2605.20025 | Debate + Pivot/Refine; HITL leverage points |
+| VERITAS co-scientist | arXiv:2604.12144 | Supported/Refuted/Underpowered/Invalid verdicts |
+| HLER HITL econ research | arXiv:2603.07444 | Dataset-aware hypothesis feasibility |
+| Imprecise VOI (credal) | arXiv:2607.06570 | Rule-specific vs envelope VOI |
+| Multicenter validation EVPI | arXiv:2607.02321 | Cluster vs global EVPI |
+| Swiss InfoGain prefs | arXiv:2511.12796 | Adaptive pairwise under budget |
+| BTT (BT with ties) | arXiv:2410.05328 | Ties in preference strength |
 | Computational Theories of Curiosity (Oudeyer) | arXiv 1802.10546 | Intrinsic motivation foundations |
 | Large-Scale Curiosity-Driven Learning (Pathak et al.) | arXiv 1808.04355 | RL curiosity ≠ scientific VOI |
 | Emotions in AI / epistemic affect (synthesis) | [`AI_EMOTIONS.md`](AI_EMOTIONS.md) | Monograph: classical theories, CME architectures, ML/RL/LLM stacks, epistemic elicitation ↔ provoke |
@@ -33,7 +39,11 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |
 | Agent plugin / MCP UX | [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) | Tool description hygiene; progressive disclosure; ScaleMCP |
 | Approximate VOI / EVSI spike | [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md) | ISPOR/ConVOI methods; worksheet vs fake EVSI |
+| Imprecise / multicentre VOI addendum | [`VOI_IMPRECISE.md`](VOI_IMPRECISE.md) | Credal VOI (2607.06570); Wynants EVPI clusters |
 | Preference calibration / LTR ladder | [`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md) | Pairwise prefs → profile weight hints → optional BT |
+| Preference BT stage-2 | [`PREFERENCE_BT_STAGE2.md`](PREFERENCE_BT_STAGE2.md) | Swiss InfoGain; BTT ties; GenRM honesty |
+| VERITAS epistemic labels | [`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md) | Underpowered≠Refuted; gap fixture taxonomy |
+| LIMITS citation patches | [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md) | Proposed docs/LIMITS honesty bullets |
 | Neglectedness ITN addendum | [`NEGLECTEDNESS_ITN.md`](NEGLECTEDNESS_ITN.md) | Importance×Tractability×Neglectedness honesty |
 | Bayesian surprise / AutoDiscovery | [`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md) | Experimental surprisal ≠ lit surprise proxy |
 | Dual-use ranking safety | [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md) | Safeguarding AI scientists; Jr. AI risk report → filters |

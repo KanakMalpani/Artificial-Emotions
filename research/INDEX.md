@@ -44,6 +44,9 @@ Everything under `research/` is design/background material that informed the imp
 | [DOMAIN_PACK_QUALITY.md](DOMAIN_PACK_QUALITY.md) | Seed/pack quality bar beyond CONTRIBUTING |
 | [OUTCOME_FLYWHEEL.md](OUTCOME_FLYWHEEL.md) | Longitudinal outcome events → sparse calibration |
 | [LIMITS_PATCHES.md](LIMITS_PATCHES.md) | Proposed LIMITS.md citation one-liners for sibling |
+| [PREFERENCE_BT_STAGE2.md](PREFERENCE_BT_STAGE2.md) | Bradley–Terry / ties / active pairing within profile |
+| [VERITAS_EPISTEMIC_LABELS.md](VERITAS_EPISTEMIC_LABELS.md) | Supported/Refuted/Underpowered/Invalid → gap status |
+| [VOI_IMPRECISE.md](VOI_IMPRECISE.md) | Credal / multicenter VOI honesty addendum |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

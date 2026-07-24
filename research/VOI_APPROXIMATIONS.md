@@ -38,6 +38,8 @@ Canonical intros: ISPOR VOI Task Force reports (introduction + analytical method
 
 **Conclusion:** Porting Heath/Jalal/Strong EVSI estimators wholesale is a **domain adapter**, not a core scorer replacement.
 
+**Addendum:** Contested beliefs → credal / rule-specific VOI; lab packs as clusters — [`VOI_IMPRECISE.md`](VOI_IMPRECISE.md). Sibling `fill_voi_worksheet` prefills metadata only (not EVSI).
+
 ---
 
 ## 4. Approximation methods worth knowing (for future adapters)

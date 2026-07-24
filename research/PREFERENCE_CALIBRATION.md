@@ -25,6 +25,8 @@ The product already logs `PreferenceEvent` JSONL and can suggest **tiny weight d
 
 Research implication: next wedges are **collection UX + pairwise structure + eval**, not a new learning framework from scratch.
 
+**Stage-2 deep dive:** [`PREFERENCE_BT_STAGE2.md`](PREFERENCE_BT_STAGE2.md) (ties, Swiss InfoGain pairing, offline BT only).
+
 ---
 
 ## 3. Relevant literature (mapped)
