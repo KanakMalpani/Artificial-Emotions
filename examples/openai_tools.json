@@ -706,6 +706,30 @@
   {
     "type": "function",
     "function": {
+      "name": "soundness_pass",
+      "description": "Offline ScholarEval/InnoEval-cousin soundness pass on top-n briefs (form, gap honesty, feasibility note). Decoupled dimensions \u2014 not a global science judge. Does not re-rank; ValueProfile remains explicit.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object"
+            },
+            "description": "Top-n unknowns with question / operationalization / brief"
+          }
+        },
+        "required": [
+          "candidates"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "voi_worksheet",
       "description": "Fill a VOI worksheet template with ranked-question metadata for domains that already have an external decision model. Not EVSI/ENBS; scores remain decision aids under a ValueProfile \u2014 not oracles.",
       "parameters": {

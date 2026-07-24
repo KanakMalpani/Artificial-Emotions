@@ -50,6 +50,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - EIG-inspired idea-graph export (`POST /v1/evals/idea-graph` / MCP `export_idea_graph`) — display only
 - Offline HybridQuestion-style `cross_model_vote` — form/heuristic proxy; never silent re-rank
 - Briefs include display-only `feasibility_note` (SFBench cousin — not a weighted axis)
+- Offline soundness pass (`POST /v1/evals/soundness` / MCP `soundness_pass`) — form/gap annotations; not a global science judge
 - Agent card `/v1/agent` includes affective-safety blurb (not biometric ERS; provoke is opt-in framing)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon (`research/NEGLECTEDNESS_COST.md`) — **not** funding DBs

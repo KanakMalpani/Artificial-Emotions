@@ -378,6 +378,20 @@ IDEA_GRAPH_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+SOUNDNESS_PASS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "object"},
+            "description": "Top-n unknowns with question / operationalization / brief",
+        },
+    },
+    "required": ["candidates"],
+    "additionalProperties": False,
+}
+
 
 def _parse_value_profile(
     raw: Any,
@@ -663,6 +677,17 @@ def handle_idea_graph(
     )
 
 
+def handle_soundness_pass(
+    *,
+    candidates: list[dict[str, Any]] | None = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Offline soundness pass — does not re-rank."""
+    from artificial_curiosity.soundness import soundness_pass
+
+    return soundness_pass(list(candidates or []))
+
+
 # Canonical tool registry: name → (description, schema, handler)
 # Aliases (spark / run_curiosity) share handlers with primary names.
 ToolHandler = Callable[..., dict[str, Any]]
@@ -762,6 +787,16 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": IDEA_GRAPH_SCHEMA,
         "handler": handle_idea_graph,
+    },
+    {
+        "name": "soundness_pass",
+        "description": (
+            "Offline ScholarEval/InnoEval-cousin soundness pass on top-n briefs "
+            "(form, gap honesty, feasibility note). Decoupled dimensions — not a "
+            "global science judge. Does not re-rank; ValueProfile remains explicit."
+        ),
+        "input_schema": SOUNDNESS_PASS_SCHEMA,
+        "handler": handle_soundness_pass,
     },
     {
         "name": "voi_worksheet",

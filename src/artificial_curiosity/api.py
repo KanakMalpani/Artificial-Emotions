@@ -376,6 +376,10 @@ class IdeaGraphRequest(BaseModel):
     similarity_threshold: float = Field(0.28, ge=0.0, le=1.0)
 
 
+class SoundnessPassRequest(BaseModel):
+    candidates: list[dict[str, Any]] = Field(..., min_length=1)
+
+
 def _safe_profile(
     value_profile: ValueProfile | None,
     profile_name: str | None,
@@ -582,6 +586,7 @@ def agent_manifest() -> dict[str, Any]:
                 "voi_worksheet",
                 "cross_model_vote",
                 "export_idea_graph",
+                "soundness_pass",
                 "list_epistemic_cues",
                 "emotion_catalog",
                 "mix_emotions",
@@ -801,6 +806,14 @@ def evals_idea_graph(req: IdeaGraphRequest) -> dict[str, Any]:
         req.candidates,
         similarity_threshold=req.similarity_threshold,
     )
+
+
+@app.post("/v1/evals/soundness")
+def evals_soundness(req: SoundnessPassRequest) -> dict[str, Any]:
+    """Offline soundness pass on briefs — does not re-rank."""
+    from artificial_curiosity.soundness import soundness_pass
+
+    return soundness_pass(req.candidates)
 
 
 @app.post("/v1/profiles/compare")

@@ -1150,3 +1150,42 @@ def test_feasibility_note_display_only():
     assert "Feasibility note" in brief
     assert item.scores.answerability == 0.75  # unchanged — display only
 
+
+def test_soundness_pass_offline():
+    from artificial_curiosity.soundness import soundness_pass
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    out = soundness_pass(
+        [
+            {
+                "question_id": "good",
+                "question": "Which biomarkers predict remaining healthspan under interventions?",
+                "operationalization": "AUROC ≥ 0.7; falsifier: AUROC ≤ 0.55.",
+                "brief": "Gap status unanswered. Related literature ≠ answered.",
+                "gap_status": "unanswered",
+                "axes": {"answerability": 0.7, "tractability": 0.6, "risk": 0.2},
+            },
+            {
+                "question_id": "bad",
+                "question": "What is A? What is B? What is C?",
+                "operationalization": "Everything and everything.",
+                "brief": "The AI is curious.",
+                "gap_status": "unanswered",
+            },
+        ]
+    )
+    assert out["changes_ranks"] is False
+    by_id = {r["question_id"]: r["soundness"] for r in out["results"]}
+    assert by_id["bad"] == "fail"
+    assert by_id["good"] in ("pass", "revise")
+
+    client = TestClient(app)
+    res = client.post(
+        "/v1/evals/soundness",
+        json={"candidates": [{"question": "Short?", "operationalization": "x"}]},
+    )
+    assert res.status_code == 200
+    assert res.json()["changes_ranks"] is False
+
