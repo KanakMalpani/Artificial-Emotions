@@ -50,6 +50,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | AI co-scientist landscape | [`CO_SCIENTIST_LANDSCAPE.md`](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist, HeurekaBench, MIND adjacency |
 | Answerability / feasibility axes | [`ANSWERABILITY_FEASIBILITY.md`](ANSWERABILITY_FEASIBILITY.md) | SFBench vs heuristic answerability/tractability |
 | Critic / debate for judges | [`CRITIC_DEBATE_JUDGES.md`](CRITIC_DEBATE_JUDGES.md) | Form critique vs axis scoring |
+| Domain pack quality | [`DOMAIN_PACK_QUALITY.md`](DOMAIN_PACK_QUALITY.md) | Anti-hivemind / dual-use / sprawl pack rules |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |

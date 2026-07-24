@@ -41,6 +41,7 @@ Everything under `research/` is design/background material that informed the imp
 | [MCP_DESCRIPTION_LINT.md](MCP_DESCRIPTION_LINT.md) | Forbidden/required strings for tool schemas |
 | [ANSWERABILITY_FEASIBILITY.md](ANSWERABILITY_FEASIBILITY.md) | Axis hygiene; SFBench feasibility vs our proxies |
 | [CRITIC_DEBATE_JUDGES.md](CRITIC_DEBATE_JUDGES.md) | HeurekaBench critic / MPDS debate → form critique |
+| [DOMAIN_PACK_QUALITY.md](DOMAIN_PACK_QUALITY.md) | Seed/pack quality bar beyond CONTRIBUTING |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
