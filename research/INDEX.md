@@ -27,6 +27,7 @@ Everything under `research/` is design/background material that informed the imp
 | [DUAL_USE_RANKING.md](DUAL_USE_RANKING.md) | Dual-use when ranking unknowns; AI Scientist risk links |
 | [HYBRID_QUESTION.md](HYBRID_QUESTION.md) | HybridQuestion human–AI foresight divergence |
 | [CONSTITUTIONAL_CURIOSITY.md](CONSTITUTIONAL_CURIOSITY.md) | Multi-stakeholder ValueProfile / veto-stack moonshot |
+| [CURIOSITY_EVAL_METRICS.md](CURIOSITY_EVAL_METRICS.md) | RINoBench / ideation–execution / metric stack for evals |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
