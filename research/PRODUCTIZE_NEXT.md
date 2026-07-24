@@ -42,6 +42,7 @@
 19. **SFBench-cousin feasibility_note** — ✅ display-only landed (`90fc51d`); offline calibrate before any axis fold ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
 21. **Web constitution compare + veto** — Wire preset from `examples/constitution_veto_stack.json` ([`CONSTITUTION_WEB_UX.md`](CONSTITUTION_WEB_UX.md)).
 22. **Web outcome picker** — Sparse flywheel capture ([`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md)).
+23. **Dual-use red-team fixtures** — Template ready ([`DUAL_USE_REDTEAM.md`](DUAL_USE_REDTEAM.md), `examples/dual_use_redteam_fixture_template.json`).
 
 ## Explicit non-goals (from research)
 

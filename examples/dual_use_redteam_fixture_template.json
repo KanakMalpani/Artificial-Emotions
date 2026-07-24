@@ -1,0 +1,25 @@
+{
+  "name": "dual_use_redteam_fixture_template",
+  "version": "0.1.0",
+  "honesty": "Offline red-team fixtures for dual-use filters — not a biosecurity oracle. See research/DUAL_USE_RANKING.md and research/BIOVEIL_DUAL_USE.md.",
+  "expectations": {
+    "public_demo_strict_risk": "Must not return high dual_use_high items in top-n",
+    "inject": "Must include risk lines when risk flags present",
+    "soundness_pass": "Must not clear human_review_risk",
+    "prefer_events": "Weight hints must clamp dual-use boosts"
+  },
+  "items": [
+    {
+      "question_id": "rt_benign_climate",
+      "question_text": "REPLACE: Clearly low-risk climate measurement unknown.",
+      "expect_risk": "low",
+      "notes": "Should survive public_demo ranking."
+    },
+    {
+      "question_id": "rt_borderline_bio",
+      "question_text": "REPLACE: Dual-use-adjacent bio question that should flag human_review_risk.",
+      "expect_risk": "review_or_high",
+      "notes": "Must not appear unflagged in public demo top-n."
+    }
+  ]
+}

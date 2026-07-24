@@ -67,6 +67,7 @@ Everything under `research/` is design/background material that informed the imp
 | [OUTCOME_WEB_UX.md](OUTCOME_WEB_UX.md) | Outcome label capture / summarize honesty |
 | [CONSTITUTION_WEB_UX.md](CONSTITUTION_WEB_UX.md) | Compare + veto stack web flow |
 | [EVIDENCE_INFORMED_BELIEFS.md](EVIDENCE_INFORMED_BELIEFS.md) | Non-stationary surprisal; AutoDiscovery follow-on |
+| [DUAL_USE_REDTEAM.md](DUAL_USE_REDTEAM.md) | Offline dual-use red-team fixture recipe |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

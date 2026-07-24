@@ -61,6 +61,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Evidence-informed beliefs | arXiv:2606.29182 | Continual discovery; RAG belief update |
 | Dual-use ranking safety | [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md) | Safeguarding AI scientists; Jr. AI risk report → filters |
 | BioVeil / agentic dual-use | [`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md) | Scaffolding uplift; WMDP proxy; taxonomy pointer |
+| Dual-use red-team fixtures | [`DUAL_USE_REDTEAM.md`](DUAL_USE_REDTEAM.md) | Public-demo regression recipe |
 | BioVeil MATRIX | arXiv:2605.00927 | Agentic bio AI scientist vulnerabilities |
 | HybridQuestion method note | [`HYBRID_QUESTION.md`](HYBRID_QUESTION.md) | Multi-LLM vote + human foresight divergence |
 | Hybrid vote offline protocol | [`HYBRID_VOTE_OFFLINE.md`](HYBRID_VOTE_OFFLINE.md) | Keep-rate vs hivemind; no silent re-rank |
