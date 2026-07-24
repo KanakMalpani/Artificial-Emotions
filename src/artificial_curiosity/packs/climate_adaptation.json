@@ -1,0 +1,25 @@
+{
+  "schema_version": "domain_pack.v1",
+  "name": "climate_adaptation_pack",
+  "version": "0.1.0",
+  "domain": "climate",
+  "description": "Neglected climate adaptation / resilience unknowns with measurable operationalizations.",
+  "questions": [
+    {
+      "id": "clim-pack-01",
+      "question": "Which early-warning indicators best predict cascading infrastructure failure under compound heat–drought events?",
+      "operationalization": "Evaluate candidate indicators for lead-time ≥7 days and precision ≥0.6 on historical compound events across ≥2 regions with infrastructure outage labels.",
+      "why_it_matters": "Compound extremes drive adaptation priorities beyond mean-temperature framing.",
+      "tags": ["climate", "adaptation", "infrastructure", "extremes"],
+      "assumptions": ["Historical outage labels are incomplete but usable."]
+    },
+    {
+      "id": "clim-pack-02",
+      "question": "How do informal water-sharing networks change household drought resilience relative to formal utility interventions?",
+      "operationalization": "Estimate causal effect of informal sharing intensity on days-without-water using panel or matched designs in ≥2 drought-affected cities.",
+      "why_it_matters": "Adaptation policy often ignores informal institutions that dominate local resilience.",
+      "tags": ["climate", "adaptation", "water", "social"],
+      "assumptions": ["Sharing intensity can be proxied from surveys or sensors."]
+    }
+  ]
+}

@@ -60,6 +60,14 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         help="Opt-in JSONL path for preference / ranking snapshots (W13)",
     )
     p.add_argument(
+        "--preference-rerank",
+        default=None,
+        help=(
+            "Opt-in labeled prefer/reject JSONL for thin profile-scoped re-rank "
+            "(not weight learning; CLI only)"
+        ),
+    )
+    p.add_argument(
         "--lit-cache",
         default=None,
         help="Optional directory for literature response cache",
@@ -142,6 +150,7 @@ def _run_engine(args: argparse.Namespace) -> int:
         value_profile=profile,
         diversity_backend=args.diversity,
         preference_log_path=args.preference_log,
+        preference_rerank_path=getattr(args, "preference_rerank", None),
     )
     results = CuriosityEngine(config).run()
 

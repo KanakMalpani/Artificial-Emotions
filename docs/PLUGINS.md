@@ -206,6 +206,10 @@ curiosity serve
 | http://127.0.0.1:8000/v1/agent/tools | OpenAI-compatible tool schemas |
 | http://127.0.0.1:8000/v1/domains | Domain list |
 
+### Optional API key (WO-0.4.6)
+
+Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health` and `/` stay open; health reports `api_auth_required`.
+
 Example:
 
 ```bash

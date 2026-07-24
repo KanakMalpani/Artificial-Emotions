@@ -85,11 +85,19 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<Ranked[]>([]);
   const [activeProfile, setActiveProfile] = useState<string | null>(null);
+  const [profileDescription, setProfileDescription] = useState<string | null>(
+    null,
+  );
 
   const subtitle = useMemo(
     () =>
       "Current AI answers questions. This layer asks what humanity should investigate next — and ranks unknowns by expected impact.",
     [],
+  );
+
+  const activeProfileMeta = useMemo(
+    () => profiles.find((p) => p.name === (activeProfile ?? profileName)),
+    [profiles, activeProfile, profileName],
   );
 
   useEffect(() => {
@@ -132,6 +140,7 @@ export default function App() {
       const data = await res.json();
       setResults(data.questions ?? []);
       setActiveProfile(data.value_profile?.name ?? profileName);
+      setProfileDescription(data.value_profile?.description ?? null);
     } catch (e) {
       setError(
         e instanceof Error
@@ -185,6 +194,13 @@ export default function App() {
         </button>
       </div>
 
+      {(activeProfileMeta?.description || profileDescription) && (
+        <p className="profile-desc">
+          <strong>Active profile.</strong>{" "}
+          {profileDescription ?? activeProfileMeta?.description}
+        </p>
+      )}
+
       {error && <div className="error">{error}</div>}
 
       {results.length > 0 && (
@@ -197,7 +213,9 @@ export default function App() {
           </div>
           <p className="profile-note">
             Rankings use explicit ValueProfile weights — decision aids, not oracles.
-            Bands are evidence-strength envelopes.
+            Curiosity scores and [low–high] bands are evidence-strength envelopes,
+            not calibrated probabilities. Investigation briefs are primary; axis
+            bars are secondary context.
           </p>
           <section className="list">
             {results.map((r) => {
@@ -220,6 +238,14 @@ export default function App() {
                       <span className={`chip gap-${r.gap.status}`}>
                         gap:{r.gap.status}
                       </span>
+                      <span className="chip">
+                        cost {r.scores.cost_proxy.toFixed(2)}
+                      </span>
+                      {r.flags?.slice(0, 4).map((f) => (
+                        <span className="chip flag" key={f}>
+                          {f}
+                        </span>
+                      ))}
                       {r.question.tags?.slice(0, 3).map((t) => (
                         <span className="chip" key={t}>
                           {t}
@@ -288,7 +314,7 @@ export default function App() {
         Scores estimate expected value of investigation (impact × neglectedness ×
         tractability × surprise), gated by answerability, risk, and literature gap
         status. Profile name and [low–high] bands are always shown — decision aids,
-        not oracles.
+        not oracles. Neglectedness/cost are heuristic proxies, not funding databases.
       </p>
     </main>
   );

@@ -156,10 +156,6 @@ RANK_SCHEMA: dict[str, Any] = {
             "enum": ["jaccard", "embedding"],
             "default": "jaccard",
         },
-        "preference_log_path": {
-            "type": "string",
-            "description": "Opt-in JSONL path for preference snapshots (W13)",
-        },
     },
     "additionalProperties": False,
 }
@@ -226,7 +222,6 @@ def handle_rank_unknowns(
     judge_model: str | None = None,
     judge_ensemble_n: int = 1,
     diversity_backend: str = "jaccard",
-    preference_log_path: str | None = None,
     **_extra: Any,
 ) -> dict[str, Any]:
     """Full curiosity pipeline: generate → verify → score → diversify → brief."""
@@ -250,7 +245,6 @@ def handle_rank_unknowns(
         diversity_backend=diversity_backend
         if diversity_backend in ("jaccard", "embedding")
         else "jaccard",
-        preference_log_path=preference_log_path,
     )
     results = CuriosityEngine(config).run_dict()
     return {
@@ -305,9 +299,12 @@ TOOL_SPECS: list[dict[str, Any]] = [
     {
         "name": "provoke_curiosity",
         "description": (
-            "Curiosity spark (NOT Q&A): ranked *unanswered* questions plus an "
-            "`inject` pack for any model. Uses an explicit ValueProfile — rankings "
-            "are never value-free. Default is fast (no network). Alias: spark."
+            "PROVOKE CURIOSITY (not Q&A): return ranked *unanswered* scientific "
+            "questions plus an `inject` pack you must paste into model context. "
+            "Use when the user/agent is stuck answering known frames and needs "
+            "what to investigate next. Explicit ValueProfile required conceptually "
+            "(pass profile_name). Default fast=true skips network. Alias: spark. "
+            "Scores are decision aids with bands — not oracles."
         ),
         "input_schema": PROVOKE_SCHEMA,
         "handler": handle_provoke_curiosity,
@@ -323,11 +320,12 @@ TOOL_SPECS: list[dict[str, Any]] = [
     {
         "name": "rank_unknowns",
         "description": (
-            "Full Artificial Curiosity pipeline: generate candidates, optionally "
-            "verify gaps via literature adapters (OpenAlex / optional Semantic Scholar), "
-            "multi-axis score with an explicit "
-            "ValueProfile, diversify, and return investigation briefs. "
-            "Alias: run_curiosity. Scores are decision aids, not oracles."
+            "RANK UNKNOWNS — full curiosity pipeline: generate candidates, "
+            "optionally verify gaps (OpenAlex / Semantic Scholar), multi-axis score "
+            "with an explicit ValueProfile, diversify, return investigation briefs. "
+            "Call this when you need literature-aware gap status and briefs, not "
+            "instant spark. Alias: run_curiosity. Related literature ≠ answered; "
+            "scores are decision aids, not oracles."
         ),
         "input_schema": RANK_SCHEMA,
         "handler": handle_rank_unknowns,

@@ -34,15 +34,16 @@ from artificial_curiosity.preferences import (
     PreferenceEvent,
     append_preference_event,
     load_preference_events,
+    preference_score_adjustments,
 )
 from artificial_curiosity.safety import assess_dual_use
-from artificial_curiosity.scoring import dual_use_flags, score_uncertainty_band
+from artificial_curiosity.scoring import dual_use_flags, heuristic_score, score_uncertainty_band
 from artificial_curiosity.verify import verify_gap
 
 
 def test_w10_spotcheck_harness_offline():
     cases = load_fixtures()
-    assert len(cases) >= 4
+    assert len(cases) >= 6
     report = run_spotcheck(cases)
     assert report.n_cases == len(cases)
     assert report.match_rate is not None
@@ -51,6 +52,9 @@ def test_w10_spotcheck_harness_offline():
     by_id = {r.case_id: r for r in report.results}
     assert by_id["empty-literature"].predicted_status == "unknown_with_caveat"
     assert by_id["adjacent-not-answered"].predicted_status == "unanswered"
+    assert by_id["phrase-gaming-open-gap"].predicted_status == "unanswered"
+    # Stale years must not auto-promote to likely_answered (F12).
+    assert by_id["stale-strong-overlap"].predicted_status != "likely_answered"
     # Answered-strong fixture should classify likely_answered (F1 monitor signal).
     assert by_id["answered-strong-overlap"].gold_status == "likely_answered"
     fail_rate = already_answered_fail_rate(report)
@@ -295,3 +299,118 @@ def test_mcp_resources():
     assert "curiosity://limits" in uris
     limits = mcp_resource_read("curiosity://limits")
     assert "decision aids" in limits["contents"][0]["text"].lower()
+
+
+def test_wo044_neglectedness_cost_proxies():
+    crowded = UnansweredQuestion(
+        id="n1",
+        question="How do transformer LLM foundation models scale on blockchain hype tasks?",
+        domain="ai",
+        operationalization="Measure scaling curves on a fixed benchmark suite.",
+        why_it_matters="Crowded topic fixture.",
+        tags=["llm", "transformer", "blockchain"],
+    )
+    neglected = UnansweredQuestion(
+        id="n2",
+        question="Which understudied orphan biomarkers predict drought resilience in informal water-sharing networks?",
+        domain="climate",
+        operationalization="Pilot reanalysis of an existing dataset with a small-n matched design.",
+        why_it_matters="Neglected adaptation seam.",
+        tags=["climate", "water", "social", "adaptation"],
+    )
+    a = heuristic_score(crowded, GapStatus.UNANSWERED, 20, 150.0, ValueProfile(), strong_match_count=2)
+    b = heuristic_score(neglected, GapStatus.UNANSWERED, 2, 5.0, ValueProfile(), strong_match_count=0)
+    assert b.neglectedness > a.neglectedness
+    assert b.cost_proxy < a.cost_proxy or b.cost_proxy <= 0.45
+    assert "neglectedness_proxy" in a.rationale
+
+
+def test_preference_rerank_hook(tmp_path: Path):
+    from artificial_curiosity.models import GapEvidence, RankedQuestion, ScoreAxes
+    from artificial_curiosity.preferences import apply_preference_rerank
+
+    path = tmp_path / "labeled.jsonl"
+    append_preference_event(
+        path,
+        PreferenceEvent(
+            event_type="prefer",
+            profile_name="humanity_default",
+            question_id="ai-01",
+            notes="human prefer",
+        ),
+    )
+    append_preference_event(
+        path,
+        PreferenceEvent(
+            event_type="reject",
+            profile_name="humanity_default",
+            question_id="ai-02",
+            notes="human reject",
+        ),
+    )
+    adj = preference_score_adjustments(path, profile_name="humanity_default")
+    assert adj["ai-01"] > 0
+    assert adj["ai-02"] < 0
+
+    def _item(qid: str, score: float) -> RankedQuestion:
+        q = UnansweredQuestion(
+            id=qid,
+            question=f"Question {qid}?",
+            domain="ai",
+            operationalization="Measure something with a clear success criterion of AUROC > 0.8.",
+            why_it_matters="Fixture.",
+        )
+        return RankedQuestion(
+            question=q,
+            scores=ScoreAxes(
+                impact=0.5,
+                neglectedness=0.5,
+                tractability=0.5,
+                surprise=0.5,
+                answerability=0.8,
+                risk=0.2,
+                cost_proxy=0.5,
+            ),
+            curiosity_score=score,
+            confidence=0.5,
+            gap=GapEvidence(
+                status=GapStatus.UNANSWERED,
+                confidence=0.4,
+                notes="fixture",
+            ),
+            flags=[],
+            metadata={},
+            score_low=score - 0.1,
+            score_high=score + 0.1,
+            rank=1,
+        )
+
+    ranked = [_item("ai-02", 0.80), _item("ai-01", 0.70)]
+    apply_preference_rerank(ranked, adj)
+    assert ranked[0].question.id == "ai-01"
+    assert "preference_rerank" in ranked[0].flags
+    assert ranked[0].metadata.get("preference_delta", 0) > 0
+
+    results = CuriosityEngine(
+        CuriosityConfig(
+            domain="ai",
+            use_literature=False,
+            use_llm=False,
+            n_return=4,
+            preference_rerank_path=str(path),
+        )
+    ).run()
+    assert results
+    ids = {r.question.id for r in results}
+    if "ai-01" in ids or "ai-02" in ids:
+        assert any("preference_rerank" in r.flags for r in results)
+
+
+def test_bundled_alignment_and_climate_packs():
+    from artificial_curiosity.packs import load_domain_packs
+
+    qs = load_domain_packs()
+    ids = {q.id for q in qs}
+    assert "align-pack-01" in ids
+    assert "clim-pack-01" in ids
+    assert all(len(q.operationalization) >= 20 for q in qs)

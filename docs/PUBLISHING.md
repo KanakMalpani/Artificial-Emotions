@@ -53,3 +53,21 @@ If `https://pypi.org/project/artificial-curiosity/` does not exist yet, the firs
 - [ ] Tag is `v` + that version (e.g. `v0.3.0`)
 - [ ] `pytest -q` green
 - [ ] `docs/LIMITS.md` / ROADMAP updated only after a successful publish
+
+## Troubleshooting
+
+### Actions job fails in ~2s with zero steps
+
+Annotation typically says:
+
+> The job was not started because recent account payments have failed or your spending limit needs to be increased.
+
+Fix in GitHub → Settings → Billing & plans (update payment method / raise Actions spending limit), wait a few minutes, then re-run:
+
+```bash
+gh run rerun <run-id> --failed
+# or
+gh workflow run publish.yml -f dry_run=false
+```
+
+Until Actions can start runners, PyPI upload via this workflow cannot complete. Local `python -m build` still works for smoke; do not claim PyPI publish until `https://pypi.org/project/artificial-curiosity/` resolves.

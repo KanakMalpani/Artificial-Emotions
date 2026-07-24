@@ -191,6 +191,11 @@ button:disabled {
   border-radius: 2px;
 }
 
+.chip.flag {
+  background: color-mix(in srgb, var(--amber) 18%, white);
+  color: var(--amber-deep);
+}
+
 .chip.gap-unanswered {
   background: color-mix(in srgb, var(--ok) 18%, white);
   color: var(--ok);
@@ -223,6 +228,13 @@ button:disabled {
   margin: 0 0 1rem;
   font-size: 0.9rem;
   color: var(--ink-soft);
+}
+
+.profile-desc {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  max-width: 48rem;
 }
 
 .why strong,

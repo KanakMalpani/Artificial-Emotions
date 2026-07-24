@@ -8,7 +8,12 @@ from artificial_curiosity.generate import generate_candidates
 from artificial_curiosity.judge import llm_refine_gap, llm_score_ensemble
 from artificial_curiosity.literature import build_literature_client
 from artificial_curiosity.models import CuriosityConfig, RankedQuestion
-from artificial_curiosity.preferences import PreferenceEvent, append_preference_event
+from artificial_curiosity.preferences import (
+    PreferenceEvent,
+    append_preference_event,
+    apply_preference_rerank,
+    preference_score_adjustments,
+)
 from artificial_curiosity.scoring import (
     aggregate_curiosity,
     confidence_from_signals,
@@ -134,6 +139,29 @@ class CuriosityEngine:
             n_return=self.config.n_return,
             backend=backend if backend in ("jaccard", "embedding") else "jaccard",
         )
+
+        # Thin preference re-rank (opt-in): prefer/reject JSONL → small score deltas.
+        # Does NOT learn universal ValueProfile weights — profile-scoped only.
+        # Paths come from CuriosityConfig / CLI only (not HTTP body — path injection).
+        if self.config.preference_rerank_path:
+            adj = preference_score_adjustments(
+                self.config.preference_rerank_path,
+                profile_name=self.config.value_profile.name,
+            )
+            if adj:
+                result = apply_preference_rerank(result, adj)
+                for item in result:
+                    delta = float(item.metadata.get("preference_delta") or 0.0)
+                    if not delta:
+                        continue
+                    item.score_low, item.score_high = score_uncertainty_band(
+                        item.curiosity_score,
+                        item.confidence,
+                        heuristic="heuristic_scoring" in (item.flags or []),
+                        disagreement_entropy=float(
+                            item.metadata.get("judge_disagreement_entropy") or 0.0
+                        ),
+                    )
 
         # Opt-in preference JSONL snapshot (W13) — ranks only, unlabeled.
         if self.config.preference_log_path:

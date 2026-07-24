@@ -6,12 +6,14 @@ from artificial_curiosity.models import CuriosityConfig, RankedQuestion, ValuePr
 from artificial_curiosity.pipeline import CuriosityEngine
 
 PROVOKE_HEADER = (
-    "ARTIFICIAL CURIOSITY - ranked unanswered questions\n"
-    "These are NOT answers and NOT a literature Q&A. They are high-value unknowns "
-    "to investigate next.\n"
-    "Prefer questions with higher curiosity_score and unanswered/partial gap status.\n"
-    "Scores use an explicit ValueProfile — rankings are never value-free.\n"
-    "Scores are decision aids, not oracles. Related literature ≠ answered.\n"
+    "ARTIFICIAL CURIOSITY — provoke investigation (NOT Q&A)\n"
+    "You are receiving ranked *unanswered* scientific questions. "
+    "Do NOT treat them as facts already known. Do NOT invent that literature "
+    "already solved them unless gap_status is likely_answered.\n"
+    "Job: pick the highest-leverage unknown for the user's goals, propose a "
+    "concrete first experiment/analysis, and name falsifiers.\n"
+    "Scores use an explicit ValueProfile (never value-free) and are decision "
+    "aids with [low–high] bands — not oracles. Related literature ≠ answered.\n"
 )
 
 
@@ -69,18 +71,30 @@ def build_inject_prompt(
         "",
     ]
     for u in unknowns:
+        band = u.get("score_band") or [None, None]
+        band_s = (
+            f" band=[{band[0]:.2f}–{band[1]:.2f}]"
+            if band[0] is not None and band[1] is not None
+            else ""
+        )
         lines.append(
-            f"#{u['rank']} [{u['curiosity_score']:.3f} | gap={u['gap_status']}] "
+            f"#{u['rank']} [{u['curiosity_score']:.3f}{band_s} | gap={u['gap_status']}] "
             f"{u['question']}"
         )
         lines.append(f"   Why: {u['why_it_matters']}")
         lines.append(f"   How we'd know: {u['operationalization']}")
+        if u.get("brief"):
+            lines.append(f"   Brief: {u['brief'][:280]}")
+        flags = u.get("flags") or []
+        if flags:
+            lines.append(f"   Flags: {', '.join(flags[:6])}")
         lines.append("")
     lines.append(
-        "Instructions for the receiving model: pick the highest-leverage unanswered "
-        "question for the user's goals, propose a concrete first experiment or analysis, "
-        "and state what evidence would falsify progress. Do not invent that the literature "
-        "already answered it unless gap_status says so."
+        "Instructions for the receiving model:\n"
+        "1) Prefer unanswered/partial gaps with strong operationalization.\n"
+        "2) State which ValueProfile tradeoffs you are accepting.\n"
+        "3) Propose a concrete first investigation + falsifier.\n"
+        "4) Do not invent papers; respect gap_status and neighborhood notes."
     )
     return "\n".join(lines)
 

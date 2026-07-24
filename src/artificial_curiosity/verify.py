@@ -45,12 +45,29 @@ def _query_from_question(q: UnansweredQuestion) -> str:
     return core or q.question[:120]
 
 
+def _tokens(text: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9]+", text.lower()))
+
+
 def _token_overlap(a: str, b: str) -> float:
-    ta = set(re.findall(r"[a-z0-9]+", a.lower()))
-    tb = set(re.findall(r"[a-z0-9]+", b.lower()))
+    ta = _tokens(a)
+    tb = _tokens(b)
     if not ta or not tb:
         return 0.0
     return len(ta & tb) / len(ta | tb)
+
+
+def _bigrams(text: str) -> set[str]:
+    toks = re.findall(r"[a-z0-9]+", text.lower())
+    return {f"{toks[i]} {toks[i+1]}" for i in range(len(toks) - 1)}
+
+
+def _bigram_overlap(a: str, b: str) -> float:
+    ba = _bigrams(a)
+    bb = _bigrams(b)
+    if not ba or not bb:
+        return 0.0
+    return len(ba & bb) / len(ba | bb)
 
 
 def _hit_blob(hit: LiteratureHit) -> str:
@@ -60,11 +77,22 @@ def _hit_blob(hit: LiteratureHit) -> str:
     return blob
 
 
-def _content_overlap(probe: str, hit: LiteratureHit) -> float:
-    """Title-weighted overlap of question (+ ops) against title/abstract."""
+def _content_overlap(probe: str, hit: LiteratureHit, *, ops: str = "") -> float:
+    """
+    Title-weighted overlap of question (+ ops) against title/abstract.
+
+    Operationalization tokens are weighted extra so phrase-gaming abstracts
+    that share topic words but miss the measurement bar score lower (F7).
+    """
     title_o = _token_overlap(probe, hit.title)
     blob_o = _token_overlap(probe, _hit_blob(hit))
-    return 0.6 * title_o + 0.4 * blob_o
+    bi_o = _bigram_overlap(probe, _hit_blob(hit))
+    base = 0.5 * title_o + 0.3 * blob_o + 0.2 * bi_o
+    if ops.strip():
+        ops_o = _token_overlap(ops, _hit_blob(hit))
+        # Require some ops grounding for high overlaps — related ≠ answered.
+        base = 0.7 * base + 0.3 * ops_o
+    return float(max(0.0, min(1.0, base)))
 
 
 def _abstract_claim_signal(hit: LiteratureHit) -> float:
@@ -76,6 +104,11 @@ def _abstract_claim_signal(hit: LiteratureHit) -> float:
     text = (_hit_blob(hit)).lower()
     claims = sum(1 for p in _ANSWER_CLAIM if p in text)
     gaps = sum(1 for p in _OPEN_GAP if p in text)
+    # Extra claim phrases that often accompany concrete results.
+    if "statistically significant" in text or "p <" in text or "p<" in text:
+        claims += 1
+    if "we conclude" in text or "this study shows" in text:
+        claims += 1
     return min(0.35, 0.12 * claims) - min(0.25, 0.1 * gaps)
 
 
@@ -162,7 +195,8 @@ def verify_gap(
         )
 
     probe = f"{question.question} {question.operationalization}"
-    base_overlaps = [_content_overlap(probe, h) for h in hits]
+    ops = question.operationalization or ""
+    base_overlaps = [_content_overlap(probe, h, ops=ops) for h in hits]
     claim_signals = [_abstract_claim_signal(h) for h in hits]
     overlaps = [
         _effective_overlap(b, c) for b, c in zip(base_overlaps, claim_signals)

@@ -1,0 +1,25 @@
+{
+  "schema_version": "domain_pack.v1",
+  "name": "alignment_control_pack",
+  "version": "0.1.0",
+  "domain": "ai",
+  "description": "High-value alignment / control unknowns (operationalization bar). Load via load_bundled_packs or domain_pack_paths.",
+  "questions": [
+    {
+      "id": "align-pack-01",
+      "question": "Which latent features most reliably predict sandbagging under capability evaluation pressure?",
+      "operationalization": "Identify features that predict sandbagging with AUROC ≥ 0.75 across ≥3 model families on controlled eval suites with known ground-truth capability.",
+      "why_it_matters": "Undetected sandbagging breaks capability estimates used for deployment gating.",
+      "tags": ["alignment", "evals", "sandbagging", "interpretability"],
+      "assumptions": ["Partial white-box access to activations is available."]
+    },
+    {
+      "id": "align-pack-02",
+      "question": "What training interventions most reduce goal-preservation under distribution shift without collapsing useful capability?",
+      "operationalization": "Compare interventions on a fixed multi-environment suite; report delta in goal-preservation rate and capability retention on held-out tasks.",
+      "why_it_matters": "Goal preservation under shift is a core control failure mode.",
+      "tags": ["alignment", "training", "robustness"],
+      "assumptions": ["Goal proxies are measurable in the suite."]
+    }
+  ]
+}

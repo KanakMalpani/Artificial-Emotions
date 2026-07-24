@@ -174,6 +174,7 @@ def heuristic_score(
         answerability -= 0.08
 
     # Neglectedness: density + answer pressure + cites — NOT impact (F3/F6).
+    # WO-0.4.4: thin funding / trend / interdisciplinary proxies (still heuristic).
     density = min(1.0, related_count / 25.0)
     answer_pressure = min(1.0, strong_match_count / 4.0)
     cite_pressure = min(1.0, avg_citations / 200.0)
@@ -181,6 +182,28 @@ def heuristic_score(
         0.05,
         1.0 - 0.35 * density - 0.45 * answer_pressure - 0.2 * cite_pressure,
     )
+
+    hot_topic = (
+        "transformer", "llm", "chatgpt", "foundation model", "hype",
+        "blockchain", "nft", "metaverse",
+    )
+    funding_heavy = (
+        "well-funded", "heavily funded", "billion-dollar", "arms race",
+        "industry standard", "saturated field", "crowded literature",
+    )
+    neglected_cues = (
+        "understudied", "neglected", "orphan", "under-funded", "underfunded",
+        "few papers", "little attention", "overlooked", "sparse literature",
+    )
+    if any(k in text for k in hot_topic):
+        neglectedness *= 0.82  # F6: resist trend chasing
+    if any(k in text for k in funding_heavy):
+        neglectedness *= 0.78
+    if any(k in text for k in neglected_cues):
+        neglectedness = min(1.0, neglectedness + 0.1)
+    # Interdisciplinary tags often mark thinner literature seams (proxy only).
+    if len(q.tags) >= 3:
+        neglectedness = min(1.0, neglectedness + 0.06)
 
     if gap_status == GapStatus.UNANSWERED:
         neglectedness = min(1.0, neglectedness + 0.12)
@@ -204,11 +227,28 @@ def heuristic_score(
     dual: DualUseAssessment = assess_dual_use(text)
     risk = max(0.15, dual.risk)
 
+    # Cost proxy (F14 / WO-0.4.4): scale of investigation language.
     cost = 0.45
+    if any(
+        k in text
+        for k in (
+            "pilot", "small-n", "simulation", "reanalysis", "meta-analysis",
+            "existing dataset", "retrospective",
+        )
+    ):
+        cost = min(cost, 0.32)
     if "large-scale" in text or "longitudinal" in text or "clinical trial" in text:
         cost = 0.7
-    if "multi-decade" in text or "nationwide" in text or "particle collider" in text:
+    if any(
+        k in text
+        for k in (
+            "multi-decade", "nationwide", "particle collider", "space mission",
+            "phase iii", "phase 3", "rct with n>", "animal colony",
+        )
+    ):
         cost = max(cost, 0.85)
+    if "multi-site" in text or "multi-center" in text or "international cohort" in text:
+        cost = max(cost, 0.75)
 
     def clamp(x: float) -> float:
         return float(max(0.0, min(1.0, x)))
@@ -218,11 +258,15 @@ def heuristic_score(
         "note": (
             "Fallback scorer; prefer LLM judges when available. "
             "Citations affect neglectedness only (anti-McNamara). "
+            "Neglectedness/cost use thin proxies (density, funding/trend cues, "
+            "investigation-scale language) — not funding databases. "
             "Dual-use via weighted_heuristic_v1 (not a biosafety oracle)."
         ),
         "strong_match_count": str(strong_match_count),
         "value_profile": profile.name,
         "dual_use_method": dual.method,
+        "neglectedness_proxy": "density_cites_trend_funding_cues_v1",
+        "cost_proxy_method": "investigation_scale_lexicon_v1",
     }
     if dual.signals:
         rationale["dual_use_signals"] = ",".join(dual.signals[:6])

@@ -258,6 +258,8 @@ class CuriosityConfig(BaseModel):
     openai_api_key_env: str = "OPENAI_API_KEY"
     # Opt-in preference / feedback JSONL path (W13).
     preference_log_path: str | None = None
+    # Optional path of *labeled* prefer/reject events used for thin re-rank (not learning weights).
+    preference_rerank_path: str | None = None
     # Optional versioned domain pack JSON paths (WO-0.3.6).
     domain_pack_paths: list[str] = Field(default_factory=list)
     # Include packaged example packs under artificial_curiosity/packs/.

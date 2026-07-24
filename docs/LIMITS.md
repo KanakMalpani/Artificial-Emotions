@@ -25,17 +25,20 @@ Honest bounds for **v0.3.0** — do not overclaim.
 - Demo proofs: `docs/PROOFS.md` (includes multi-provider smoke matrix notes — no secrets)
 - CLI, Python API, FastAPI (`:8000`), Vite UI (`:5173`) — UI shows briefs, `[low–high]` bands, and profile name
 - Expert-eval / spot-check harness: `curiosity eval` + `evals/fixtures/` + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**)
-- Opt-in preference JSONL schema (`preference_log_path` / `--preference-log`) — no DB required (W13)
+- Opt-in preference JSONL schema (`preference_log_path` / `--preference-log`) — no DB required (W13); **CLI/config only** (not HTTP body — path injection)
+- Thin preference re-rank (`preference_rerank_path` / `--preference-rerank`): prefer/reject → small profile-scoped score deltas + `preference_rerank` flag — **not** calibrated weight learning; CLI/config only
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
-- Versioned domain packs (`artificial_curiosity/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`)
-- Automated tests: core, failure-mode, provoke/API, MCP, mid-horizon (W10–W15) — **71 passed** (`pytest -q`, 2026-07-23)
+- Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon (`research/NEGLECTEDNESS_COST.md`) — **not** funding DBs
+- Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
+- Versioned domain packs (`artificial_curiosity/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment + climate packs
+- Automated tests: core, failure-mode, provoke/API, MCP, mid-horizon (W10–W15) — run `pytest -q`
 - Smoke: `curiosity spark`, `curiosity profiles`, `curiosity eval`, `curiosity-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
 - Failure-mode suite: `tests/test_failure_modes.py` encodes F1–F15 from `research/FAILURE_MODES.md`
 - Explicit ValueProfile on provoke/inject (F11); recency-aware likely-answered gate (F12)
 - Download-and-run: `pip install -e .` then `curiosity serve` **or** `curiosity-mcp` — no vendor lock-in for LLM hosts
-- Packaging: hatchling sdist/wheel buildable locally; **not published to PyPI yet** (owner-gated)
+- Packaging: hatchling sdist/wheel buildable locally; **not published to PyPI yet** (GitHub Actions blocked by account billing/spending — see `docs/PUBLISHING.md`)
 
 ## Known limits
 
@@ -46,12 +49,13 @@ Honest bounds for **v0.3.0** — do not overclaim.
 | OpenAlex / S2 neighborhoods can be topically noisy | Relevance search ≠ semantic match | Low overlap keeps `unanswered`; `both` merges sources |
 | Seed set is curated (+ optional packs) | Offline reliability | LLM generation + CONTRIBUTING pack bar |
 | Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile` |
-| No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL is the breadcrumb; bands provisional |
+| No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL + thin re-rank deltas; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |
 | Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains | Human review hook + LIMITS residual risk; stronger models later |
+| Neglectedness/cost are lexicon/density proxies | No grant/spend APIs wired | Documented spike; optional funding adapters later |
 | LLM paths untested live in CI | `LLM_API_KEY` often unset | Local multi-provider smoke per PROOFS; no secrets in repo |
 | Multi-judge ensemble needs live LLM | Offline uses single heuristic | Documented; disagreement flag only when ≥2 judges return |
-| Not on PyPI yet | Owner publish gate | `python -m build` locally; publish when tagged |
+| Not on PyPI yet | Owner publish + Actions billing gate | Fix Billing & plans; then re-run `publish.yml` (see PUBLISHING) |
 | Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — not claimed done |
 
 ## Confidence interpretation

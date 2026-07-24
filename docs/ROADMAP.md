@@ -130,7 +130,7 @@ ValueProfile + Domain/Topic
 | Dual-use residual risk | Weighted heuristic + review flag shipped (W14); not a trained oracle | Keep hard reject; LIMITS residual |
 | LLM paths often untested live | Smoke with mocked + optional live matrix; no secrets in repo |
 | MCP tools-only | Resources/prompts later if hosts need them |
-| No PyPI yet | Packaging wedge; owner-gated publish |
+| No PyPI yet | Packaging wedge; owner-gated publish — Actions still blocked by billing/spending until payment clears |
 | Public GitHub may lag local | Never force-push; never commit secrets |
 
 **Why this design?** See `research/` — agents coding day-to-day should prefer LIMITS + this playbook.
@@ -454,9 +454,9 @@ flowchart LR
 - [x] **WO-0.4.1** Dual-use classifier beyond keywords **or** LIMITS caps claim  
 - [x] **WO-0.4.2** Human review hook for near-threshold risk (`human_review_risk`)  
 - [x] **WO-0.4.3** Multi-judge + disagreement entropy flag  
-- [ ] **WO-0.4.4** Neglectedness / cost proxy research spike (may stay heuristic)  
+- [x] **WO-0.4.4** Neglectedness / cost proxy research spike (may stay heuristic)  
 - [x] **WO-0.4.5** OpenAlex / literature cache / rate-limit softener  
-- [ ] **WO-0.4.6** Optional API keys for HTTP (local offline unchanged)
+- [x] **WO-0.4.6** Optional API keys for HTTP (local offline unchanged)
 
 ### 7.4 v1.0 — Credible trust bar (not a feature dump)
 

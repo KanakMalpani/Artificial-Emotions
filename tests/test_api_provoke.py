@@ -94,3 +94,28 @@ def test_resolve_judge_model_env(monkeypatch):
     s2 = resolve_llm_settings(judge=False)
     assert s2 is not None
     assert s2.model == "gen-model"
+
+
+def test_optional_api_key_auth(monkeypatch):
+    client = TestClient(app)
+    # Disabled by default — health and provoke open.
+    assert client.get("/health").status_code == 200
+    assert client.get("/v1/curiosity/provoke", params={"n": 1, "fast": True}).status_code == 200
+
+    monkeypatch.setenv("CURIOSITY_API_KEY", "test-secret-key")
+    # Health stays open; protected routes need key.
+    assert client.get("/health").json()["api_auth_required"] is True
+    denied = client.get("/v1/curiosity/provoke", params={"n": 1, "fast": True})
+    assert denied.status_code == 401
+    ok = client.get(
+        "/v1/curiosity/provoke",
+        params={"n": 1, "fast": True},
+        headers={"X-API-Key": "test-secret-key"},
+    )
+    assert ok.status_code == 200
+    ok2 = client.get(
+        "/v1/profiles",
+        headers={"Authorization": "Bearer test-secret-key"},
+    )
+    assert ok2.status_code == 200
+    monkeypatch.delenv("CURIOSITY_API_KEY", raising=False)

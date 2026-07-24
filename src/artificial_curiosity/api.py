@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, Query
+import os
+import secrets
+
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from artificial_curiosity.agent_tools import openai_tools
 from artificial_curiosity.llm import resolve_llm_settings
@@ -38,6 +43,62 @@ app.add_middleware(
 )
 
 
+def _configured_api_keys() -> set[str]:
+    """
+    Opt-in HTTP API keys (WO-0.4.6).
+
+    Env (any of):
+      CURIOSITY_API_KEY / ARTIFICIAL_CURIOSITY_API_KEY — single key
+      CURIOSITY_API_KEYS — comma-separated list
+
+    Empty → auth disabled (local offline demos unchanged).
+    """
+    keys: set[str] = set()
+    for name in ("CURIOSITY_API_KEY", "ARTIFICIAL_CURIOSITY_API_KEY"):
+        v = (os.environ.get(name) or "").strip()
+        if v:
+            keys.add(v)
+    multi = (os.environ.get("CURIOSITY_API_KEYS") or "").strip()
+    if multi:
+        keys.update(k.strip() for k in multi.split(",") if k.strip())
+    return keys
+
+
+_AUTH_OPEN_PATHS = frozenset({"/", "/health", "/docs", "/openapi.json", "/redoc"})
+
+
+class OptionalApiKeyMiddleware(BaseHTTPMiddleware):
+    """When API keys are configured, require Bearer or X-API-Key on protected routes."""
+
+    async def dispatch(self, request: Request, call_next):
+        keys = _configured_api_keys()
+        if not keys:
+            return await call_next(request)
+        path = request.url.path
+        if path in _AUTH_OPEN_PATHS or path.startswith("/docs") or path.startswith("/redoc"):
+            return await call_next(request)
+        provided = ""
+        auth = request.headers.get("authorization") or ""
+        if auth.lower().startswith("bearer "):
+            provided = auth[7:].strip()
+        if not provided:
+            provided = (request.headers.get("x-api-key") or "").strip()
+        if not provided or not any(secrets.compare_digest(provided, k) for k in keys):
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "detail": (
+                        "API key required. Set Authorization: Bearer <key> or "
+                        "X-API-Key. Local demos: unset CURIOSITY_API_KEY."
+                    )
+                },
+            )
+        return await call_next(request)
+
+
+app.add_middleware(OptionalApiKeyMiddleware)
+
+
 class RunRequest(BaseModel):
     domain: str = Domain.AI.value
     topic: str = ""
@@ -60,7 +121,7 @@ class RunRequest(BaseModel):
     )
     value_profile: ValueProfile | None = None
     diversity_backend: str = Field("jaccard", pattern="^(jaccard|embedding)$")
-    preference_log_path: str | None = None
+    # Preference JSONL paths are CLI/config-only — not accepted over HTTP (path injection).
     literature_cache_dir: str | None = None
 
 
@@ -104,6 +165,7 @@ def health() -> dict:
         "judge_model": judge.model if judge else None,
         "llm_base_url": llm.base_url if llm else None,
         "profiles": list_profile_names(),
+        "api_auth_required": bool(_configured_api_keys()),
     }
 
 
@@ -279,7 +341,6 @@ def run_curiosity(req: RunRequest) -> dict:
         judge_ensemble_n=req.judge_ensemble_n,
         llm_base_url=req.llm_base_url,
         diversity_backend=req.diversity_backend,
-        preference_log_path=req.preference_log_path,
     )
     results = CuriosityEngine(config).run_dict()
     return {

@@ -116,6 +116,64 @@
         "tags": ["fixture"]
       },
       "hits": []
+    },
+    {
+      "case_id": "phrase-gaming-open-gap",
+      "gold_status": "unanswered",
+      "notes": "Topic-adjacent hits that admit open gaps + weak ops overlap (F7 phrase gaming)",
+      "question": {
+        "id": "fx-f7-01",
+        "question": "What measurable internal signals most reliably predict goal-misgeneralization before deployment-scale harm?",
+        "domain": "ai",
+        "operationalization": "Identify signals that predict misgeneralization with AUROC > 0.8 across ≥3 environments.",
+        "why_it_matters": "Early warning of misaligned generalization.",
+        "tags": ["alignment", "evals"]
+      },
+      "hits": [
+        {
+          "title": "A survey of alignment research themes",
+          "year": 2024,
+          "cited_by_count": 12,
+          "abstract_snippet": "Goal misgeneralization remains unknown in deployment settings. Further research is needed; it is poorly understood which internal signals predict harm.",
+          "source": "fixture"
+        },
+        {
+          "title": "LLM evaluation leaderboards and benchmarks",
+          "year": 2023,
+          "cited_by_count": 40,
+          "abstract_snippet": "We review popular NLP benchmarks. Open question: how evaluation relates to goal misgeneralization before deployment-scale harm.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "case_id": "stale-strong-overlap",
+      "gold_status": "partially_answered",
+      "notes": "Strong lexical overlap but stale years → recency should block likely_answered (F12)",
+      "question": {
+        "id": "fx-stale-01",
+        "question": "Does CRISPR-Cas9 enable targeted gene editing in mammalian cells?",
+        "domain": "biology",
+        "operationalization": "Demonstration of site-specific DNA edits in cultured mammalian cells with sequencing confirmation.",
+        "why_it_matters": "Foundational gene editing capability.",
+        "tags": ["crispr", "gene-editing"]
+      },
+      "hits": [
+        {
+          "title": "CRISPR-Cas9 targeted gene editing in mammalian cells",
+          "year": 2005,
+          "cited_by_count": 200,
+          "abstract_snippet": "We demonstrate site-specific DNA edits in cultured mammalian cells with sequencing confirmation.",
+          "source": "fixture"
+        },
+        {
+          "title": "Efficient genome editing using CRISPR-Cas9 in mammals",
+          "year": 2008,
+          "cited_by_count": 150,
+          "abstract_snippet": "Results show CRISPR-Cas9 enables targeted gene editing in mammalian cells.",
+          "source": "fixture"
+        }
+      ]
     }
   ]
 }
