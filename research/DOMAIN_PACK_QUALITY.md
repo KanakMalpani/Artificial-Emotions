@@ -26,6 +26,8 @@ Packs now live under `src/artificial_curiosity/packs/` (aging_biology, materials
 | Dual-use | Materials/bio packs: escalate `max_risk` awareness; prefer public_demo for demos |
 | Answerability sprawl | One `?` primary; enabling_questions ≤4 |
 | Feasibility theater | Don’t claim synthesizability; use operationalization for *measurement plan* |
+| Confirmation-only ops | Prefer ops that name a **falsifying / discriminating** observation ([`FALSIFYBENCH.md`](FALSIFYBENCH.md)) |
+| Invalid form | Reject multi-`?` sprawl seeds; critique would flag ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)) |
 
 ---
 

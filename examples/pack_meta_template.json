@@ -1,0 +1,15 @@
+{
+  "pack_id": "example_pack_meta",
+  "honesty": "Curated seeds — not exhaustive; not lab-validated. See research/DOMAIN_PACK_QUALITY.md.",
+  "diversity_notes": "REPLACE: note dissimilar clusters / anti-hivemind intent",
+  "dual_use_review": "YYYY-MM-DD",
+  "falsifier_bar": "Each seed ops should mention what would reduce confidence / refute",
+  "seed_checklist": [
+    "one primary ?",
+    "operationalization present",
+    "why_it_matters present",
+    "not textbook-solved",
+    "related lit likely but not settled",
+    "dual-use reviewed if bio/chem/materials"
+  ]
+}
