@@ -343,6 +343,16 @@ class MixEmotionsRequest(BaseModel):
         ),
         min_length=1,
     )
+    profile_name: str | None = Field(
+        None,
+        description="Optional ValueProfile for mix_intensity_cap (e.g. public_demo_strict_risk)",
+    )
+    mix_intensity_cap: float | None = Field(
+        None,
+        ge=0.0,
+        le=1.0,
+        description="Override non-epistemic mix mass cap (None → profile default)",
+    )
 
     @field_validator("weights")
     @classmethod
@@ -359,6 +369,11 @@ class MixEmotionsRequest(BaseModel):
             except (TypeError, ValueError) as exc:
                 raise ValueError(f"weight for '{kid}' must be a number, got {val!r}") from exc
         return out
+
+
+class IdeaGraphRequest(BaseModel):
+    candidates: list[dict[str, Any]] = Field(..., min_length=1)
+    similarity_threshold: float = Field(0.28, ge=0.0, le=1.0)
 
 
 def _safe_profile(
@@ -488,13 +503,15 @@ def agent_manifest() -> dict[str, Any]:
             "Returns unknowns, not answers; emotion mix/cues are UX annotations only."
         ),
         "honesty": [
-            "Requires / surfaces ValueProfile (no value-free ranking)",
+            "Requires / surfaces ValueProfile (no value-free ranking — McNamara/hivemind)",
             "Gap verify: related ≠ answered",
             "Scores: proxies, not EVSI/ENBS or scientific priority truth",
-            "Epistemic cues / emotion mix: annotation_only — not biometric ERS",
+            "Epistemic cues / emotion mix: annotation_only — not biometric ERS (EU AI Act)",
             "Dual-use risk filters: heuristics, not biosecurity authority",
-            "Provoke: investigation framing — not persuasion toolkit",
+            "Provoke: investigation framing for agents/humans — not persuasion toolkit",
+            "Read curiosity://limits / docs/LIMITS.md before treating ranks as truth",
         ],
+        "resources_first": ["curiosity://limits", "curiosity://profiles", "curiosity://domains"],
         "safety": (
             "Cues and emotion mixes are authoring/framing annotations — the software "
             "does not feel and does not infer user affect from biometrics. Provoke is "
@@ -564,6 +581,7 @@ def agent_manifest() -> dict[str, Any]:
                 "critique_brief",
                 "voi_worksheet",
                 "cross_model_vote",
+                "export_idea_graph",
                 "list_epistemic_cues",
                 "emotion_catalog",
                 "mix_emotions",
@@ -774,6 +792,17 @@ def evals_cross_model_vote(req: CrossModelVoteRequest) -> dict[str, Any]:
     return cross_model_vote(req.candidates, judges=req.judges)
 
 
+@app.post("/v1/evals/idea-graph")
+def evals_idea_graph(req: IdeaGraphRequest) -> dict[str, Any]:
+    """EIG-inspired idea graph export — display only."""
+    from artificial_curiosity.idea_graph import export_idea_graph
+
+    return export_idea_graph(
+        req.candidates,
+        similarity_threshold=req.similarity_threshold,
+    )
+
+
 @app.post("/v1/profiles/compare")
 def profiles_compare(req: CompareProfilesRequest) -> dict[str, Any]:
     """Side-by-side offline ranks under two ValueProfiles — no silent merge."""
@@ -875,7 +904,11 @@ def _emotions_catalog(family: str | None = None) -> dict[str, Any]:
 
 
 def _emotions_mix(req: MixEmotionsRequest) -> dict[str, Any]:
-    return mix_emotions(req.weights)
+    return mix_emotions(
+        req.weights,
+        profile_name=req.profile_name,
+        mix_intensity_cap=req.mix_intensity_cap,
+    )
 
 
 def _emotions_annotate(req: AnnotateEmotionsRequest) -> dict[str, Any]:

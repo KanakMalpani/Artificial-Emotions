@@ -647,6 +647,65 @@
   {
     "type": "function",
     "function": {
+      "name": "cross_model_vote",
+      "description": "Offline HybridQuestion-style keep/drop/rewrite annotations on candidate unknowns (form/heuristic proxy). Does not re-rank; agreement is not VOI. Decision aids under an explicit ValueProfile remain separate. See research/HYBRID_VOTE_OFFLINE.md.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object"
+            },
+            "description": "Candidate unknowns with question / operationalization"
+          },
+          "judges": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6,
+            "default": 1
+          }
+        },
+        "required": [
+          "candidates"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "export_idea_graph",
+      "description": "Export top-n unknowns as a tiny EIG-inspired idea graph (similarity/conflict edges). Display/debug only \u2014 does not re-rank or replace ValueProfile scoring. Related literature \u2260 answered.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object"
+            }
+          },
+          "similarity_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.28
+          }
+        },
+        "required": [
+          "candidates"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "voi_worksheet",
       "description": "Fill a VOI worksheet template with ranked-question metadata for domains that already have an external decision model. Not EVSI/ENBS; scores remain decision aids under a ValueProfile \u2014 not oracles.",
       "parameters": {
@@ -819,6 +878,16 @@
             "additionalProperties": {
               "type": "number"
             }
+          },
+          "profile_name": {
+            "type": "string",
+            "description": "Optional ValueProfile for mix_intensity_cap"
+          },
+          "mix_intensity_cap": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Override non-epistemic mix mass cap"
           }
         },
         "required": [

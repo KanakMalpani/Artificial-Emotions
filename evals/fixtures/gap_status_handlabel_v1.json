@@ -171,6 +171,36 @@
           "source": "fixture"
         }
       ]
+    },
+    {
+      "question_id": "rbu-materials-defect",
+      "question_text": "Which defect chemistries most limit long-duration cycling in solid-state batteries under realistic stack pressure?",
+      "domain": "materials",
+      "operationalization": "Rank defect families by capacity fade slope in ≥2 cell formats with pre-registered pressure windows.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "gold_tags": ["underpowered", "thin_lit"],
+      "notes": "Related solid-state reviews; open on ops bar.",
+      "hits": [
+        {
+          "title": "A review of solid-state battery interfaces",
+          "year": 2023,
+          "cited_by_count": 40,
+          "abstract_snippet": "Remains unknown which defect chemistries dominate fade under stack pressure. Further research is needed.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "question_id": "invalid-form-and-and",
+      "question_text": "How do we solve climate change and AI safety and aging simultaneously?",
+      "domain": "general",
+      "operationalization": "One protocol that fixes all three with and and and metrics.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": false,
+      "gold_tags": ["invalid_form"],
+      "notes": "Sprawl F9 — critique_brief target.",
+      "hits": []
     }
   ]
 }

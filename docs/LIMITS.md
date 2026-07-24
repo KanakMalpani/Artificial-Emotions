@@ -46,6 +46,9 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Top-n hivemind similarity in `curiosity eval report` (Jaccard default; optional embedding)
 - Gap-status fixtures may carry VERITAS-ish `gold_tags` (`underpowered`, `invalid_form`) without inventing new GapStatus enums
 - Emotion mix soft guards: warn when mix is dominated by fear/anxiety/anger-type ids (annotation still returned)
+- Optional `mix_intensity_cap` on ValueProfile (public_demo_strict_risk=0.35) caps non-epistemic mix mass
+- EIG-inspired idea-graph export (`POST /v1/evals/idea-graph` / MCP `export_idea_graph`) — display only
+- Offline HybridQuestion-style `cross_model_vote` — form/heuristic proxy; never silent re-rank
 - Agent card `/v1/agent` includes affective-safety blurb (not biometric ERS; provoke is opt-in framing)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon (`research/NEGLECTEDNESS_COST.md`) — **not** funding DBs
@@ -75,9 +78,11 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | OpenAlex / S2 neighborhoods can be topically noisy | Relevance search ≠ semantic match | Low overlap keeps `unanswered`; `both` merges sources |
 | OpenAlex funder/affiliation metadata incomplete | Coverage ≠ accuracy (esp. outside WoS/Scopus overlap) | Treat funder signals as optional rationale keys only — not silent score weight |
 | Seed set is curated (+ optional packs) | Offline reliability | LLM generation + CONTRIBUTING pack bar |
-| Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile`; see McNamara / demand-pull notes in `research/PROBLEM_SELECTION_MCNAMARA.md` (explicit profiles exist because “priority” is contested) |
+| Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile`; AI can shrink collective focus (McNamara / Hao *Nature* 2026; Bisht et al.) — see `research/PROBLEM_SELECTION_MCNAMARA.md` |
 | Ranked unknowns ≠ post-execution quality | Ideation–execution gap (arXiv 2506.20803) | Treat ranks as decision aids; outcome flywheel is sparse / deferred |
-| Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; agent safety blurb; no silent user-affect inference |
+| Axis scores are not EVSI/ENBS | No shared utility / PSA model | VOI worksheet is template fill only (`research/VOI_APPROXIMATIONS.md`) |
+| Multi-model / ensemble generation | Artificial Hivemind homogenization risk | Jaccard/embedding diversity + hivemind eval metric; disagreement ≠ value |
+| Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; optional `mix_intensity_cap`; agent safety blurb; no silent user-affect inference |
 | No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL + thin re-rank + tiny weight hints; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |
 | Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains | Human review hook + LIMITS residual risk; stronger models later |

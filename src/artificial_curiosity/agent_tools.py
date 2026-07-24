@@ -344,8 +344,37 @@ MIX_EMOTIONS_SCHEMA: dict[str, Any] = {
             ),
             "additionalProperties": {"type": "number"},
         },
+        "profile_name": {
+            "type": "string",
+            "description": "Optional ValueProfile for mix_intensity_cap",
+        },
+        "mix_intensity_cap": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Override non-epistemic mix mass cap",
+        },
     },
     "required": ["weights"],
+    "additionalProperties": False,
+}
+
+IDEA_GRAPH_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "object"},
+        },
+        "similarity_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.28,
+        },
+    },
+    "required": ["candidates"],
     "additionalProperties": False,
 }
 
@@ -600,6 +629,8 @@ def handle_emotion_catalog(
 def handle_mix_emotions(
     *,
     weights: dict[str, Any] | None = None,
+    profile_name: str | None = None,
+    mix_intensity_cap: float | None = None,
     **_extra: Any,
 ) -> dict[str, Any]:
     """Mix catalog emotions by percent/weight; normalize to sum=1.0."""
@@ -610,7 +641,26 @@ def handle_mix_emotions(
     cleaned: dict[str, float] = {}
     for key, val in weights.items():
         cleaned[str(key)] = float(val)
-    return mix_emotions(cleaned)
+    return mix_emotions(
+        cleaned,
+        profile_name=profile_name,
+        mix_intensity_cap=mix_intensity_cap,
+    )
+
+
+def handle_idea_graph(
+    *,
+    candidates: list[dict[str, Any]] | None = None,
+    similarity_threshold: float = 0.28,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """EIG-inspired idea graph export — display only."""
+    from artificial_curiosity.idea_graph import export_idea_graph
+
+    return export_idea_graph(
+        list(candidates or []),
+        similarity_threshold=float(similarity_threshold or 0.28),
+    )
 
 
 # Canonical tool registry: name → (description, schema, handler)
@@ -702,6 +752,16 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": CROSS_MODEL_VOTE_SCHEMA,
         "handler": handle_cross_model_vote,
+    },
+    {
+        "name": "export_idea_graph",
+        "description": (
+            "Export top-n unknowns as a tiny EIG-inspired idea graph "
+            "(similarity/conflict edges). Display/debug only — does not re-rank "
+            "or replace ValueProfile scoring. Related literature ≠ answered."
+        ),
+        "input_schema": IDEA_GRAPH_SCHEMA,
+        "handler": handle_idea_graph,
     },
     {
         "name": "voi_worksheet",

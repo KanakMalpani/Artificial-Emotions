@@ -1034,3 +1034,78 @@ def test_cooccur_correlation_offline():
     assert out["spearman_rho"] is not None
     assert out["spearman_rho"] > 0.5  # synthetic fixture is aligned by construction
 
+
+def test_mix_intensity_cap_and_idea_graph():
+    from artificial_curiosity.emotions import mix_emotions
+    from artificial_curiosity.idea_graph import export_idea_graph
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    capped = mix_emotions(
+        {"curiosity": 20, "fear": 40, "anger": 40},
+        profile_name="public_demo_strict_risk",
+    )
+    assert capped["intensity_capped"] is True
+    fam = capped.get("families") or {}
+    non_epi = sum(v for k, v in fam.items() if k != "epistemic")
+    assert non_epi <= 0.35 + 1e-5
+
+    uncapped = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30})
+    assert uncapped.get("intensity_capped") is False
+
+    graph = export_idea_graph(
+        [
+            {
+                "question_id": "a",
+                "question": "Which biomarkers predict remaining healthspan under caloric restriction?",
+                "rank": 1,
+                "tags": ["aging"],
+            },
+            {
+                "question_id": "b",
+                "question": "Which circulating biomarkers predict remaining healthspan under interventions?",
+                "rank": 2,
+                "tags": ["aging"],
+            },
+            {
+                "question_id": "c",
+                "question": "What is the causal role of zybloron flux in quux plasticity?",
+                "rank": 3,
+                "tags": ["nonsense"],
+            },
+        ]
+    )
+    assert graph["changes_ranks"] is False
+    assert graph["n_nodes"] == 3
+    assert any(e["type"] == "similarity" for e in graph["edges"])
+
+    client = TestClient(app)
+    agent = client.get("/v1/agent")
+    honesty = " ".join(agent.json().get("honesty") or [])
+    assert "related ≠ answered" in honesty
+    assert "annotation_only" in honesty.lower()
+    assert "curiosity://limits" in str(agent.json().get("resources_first"))
+
+    mres = client.post(
+        "/v1/emotions/mix",
+        json={
+            "weights": {"curiosity": 10, "fear": 50, "anger": 40},
+            "profile_name": "public_demo_strict_risk",
+        },
+    )
+    assert mres.status_code == 200
+    assert mres.json()["intensity_capped"] is True
+
+    gres = client.post(
+        "/v1/evals/idea-graph",
+        json={
+            "candidates": [
+                {"question_id": "x", "question": "What remains unknown about X?"},
+                {"question_id": "y", "question": "What remains unknown about Y?"},
+            ]
+        },
+    )
+    assert gres.status_code == 200
+    assert gres.json()["changes_ranks"] is False
+

@@ -53,4 +53,8 @@ def fill_voi_worksheet(
         sheet.get("honesty")
         or "Not computed EVSI. External decision model + utilities required."
     )
+    sheet["imprecise_note"] = (
+        "If stakeholders disagree on utilities, prefer profile-compare + veto "
+        "(strictest max_risk) over a fake consensus EVSI. See research/VOI_IMPRECISE.md."
+    )
     return sheet

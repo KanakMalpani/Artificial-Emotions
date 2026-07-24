@@ -47,6 +47,16 @@ class ValueProfile(BaseModel):
     cue_surprise_high: float = Field(0.55, ge=0.0, le=1.0)
     cue_neglectedness_high: float = Field(0.55, ge=0.0, le=1.0)
     cue_answerability_low: float = Field(0.45, ge=0.0, le=1.0)
+    # Cap on non-epistemic mix mass (annotation framing — not felt intensity).
+    mix_intensity_cap: float = Field(
+        1.0,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Max allowed sum of non-epistemic mix weights after normalize. "
+            "1.0 = no cap. public_demo may use a lower ceiling."
+        ),
+    )
 
 
 # Named presets — never a "neutral / value-free" mode (F11).
@@ -128,6 +138,7 @@ VALUE_PROFILE_PRESETS: dict[str, ValueProfile] = {
         max_risk=0.55,
         min_answerability=0.5,
         time_horizon_years=10,
+        mix_intensity_cap=0.35,
     ),
 }
 
