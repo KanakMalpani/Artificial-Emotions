@@ -112,9 +112,22 @@ def test_emotions_surface_e2e(client: TestClient) -> None:
     assert pack.status_code == 200
     assert pack.json()["count"] >= 8
 
+    cat = client.get("/v1/emotions/catalog")
+    assert cat.status_code == 200
+    assert cat.json()["count"] >= 20
+
+    mix = client.post(
+        "/v1/emotions/mix",
+        json={"weights": {"curiosity": 40, "confusion": 30, "awe": 30}},
+    )
+    assert mix.status_code == 200
+    assert mix.json()["honesty"] == "annotation_only"
+
     agent = client.get("/v1/agent").json()
     assert "emotions" in agent
     assert "list_epistemic_cues" in agent["mcp"]["tools"]
+    assert "mix_emotions" in agent["mcp"]["tools"]
+    assert "emotion_catalog" in agent["mcp"]["tools"]
 
 
 def test_provoke_post_and_multi_domain(client: TestClient) -> None:

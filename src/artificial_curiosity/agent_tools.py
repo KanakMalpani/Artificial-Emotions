@@ -12,8 +12,10 @@ from typing import Any, Callable
 from artificial_curiosity.emotions import (
     annotate_epistemic,
     elicit_helpers,
+    emotion_catalog,
     emotion_pack,
     list_epistemic_cues,
+    mix_emotions,
 )
 from artificial_curiosity.models import (
     CuriosityConfig,
@@ -256,6 +258,36 @@ ELICIT_HELPERS_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+EMOTION_CATALOG_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "family": {
+            "type": "string",
+            "description": (
+                "Optional filter: epistemic | basic | social | achievement"
+            ),
+        },
+    },
+    "additionalProperties": False,
+}
+
+MIX_EMOTIONS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "weights": {
+            "type": "object",
+            "description": (
+                "Map emotion_id → percent (e.g. 40) or weight (e.g. 0.4). "
+                "Normalized to sum 1.0. Example: "
+                '{"curiosity": 40, "confusion": 30, "awe": 30}'
+            ),
+            "additionalProperties": {"type": "number"},
+        },
+    },
+    "required": ["weights"],
+    "additionalProperties": False,
+}
+
 
 def _parse_value_profile(
     raw: Any,
@@ -417,6 +449,32 @@ def handle_elicit_helpers(**_extra: Any) -> dict[str, Any]:
     return elicit_helpers()
 
 
+def handle_emotion_catalog(
+    *,
+    family: str | None = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Return mixable named-emotion catalog (annotation only)."""
+    return emotion_catalog(family=family or None)
+
+
+def handle_mix_emotions(
+    *,
+    weights: dict[str, Any] | None = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Mix catalog emotions by percent/weight; normalize to sum=1.0."""
+    if not isinstance(weights, dict) or not weights:
+        raise ValueError(
+            "weights must be a non-empty object, e.g. "
+            '{"curiosity": 40, "confusion": 30, "awe": 30}'
+        )
+    cleaned: dict[str, float] = {}
+    for key, val in weights.items():
+        cleaned[str(key)] = float(val)
+    return mix_emotions(cleaned)
+
+
 # Canonical tool registry: name → (description, schema, handler)
 # Aliases (spark / run_curiosity) share handlers with primary names.
 ToolHandler = Callable[..., dict[str, Any]]
@@ -516,6 +574,26 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": ELICIT_HELPERS_SCHEMA,
         "handler": handle_elicit_helpers,
+    },
+    {
+        "name": "emotion_catalog",
+        "description": (
+            "List mixable named emotions (epistemic, basic, social, achievement) "
+            "with optional PAD anchors and elicit hints. Annotation only — "
+            "does not feel. See docs/EMOTIONS.md."
+        ),
+        "input_schema": EMOTION_CATALOG_SCHEMA,
+        "handler": handle_emotion_catalog,
+    },
+    {
+        "name": "mix_emotions",
+        "description": (
+            "Mix catalog emotions by percentages/weights (normalized to sum 1.0). "
+            "Example weights: {curiosity: 40, confusion: 30, awe: 30}. Returns "
+            "blend profile, cue tags, inject_fragment. Annotation only — not felt emotion."
+        ),
+        "input_schema": MIX_EMOTIONS_SCHEMA,
+        "handler": handle_mix_emotions,
     },
 ]
 

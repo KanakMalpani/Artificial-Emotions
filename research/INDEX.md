@@ -14,6 +14,7 @@ Everything under `research/` is design/background material that informed the imp
 | [HANDOFF.md](HANDOFF.md) | Historical agent notes (may be stale) |
 | [AI_EMOTIONS.md](AI_EMOTIONS.md) | Emotions in AI — taxonomies, production mechanisms, epistemic emotions ↔ provoke (not anthropomorphic) |
 | [EMOTION_ACCESS.md](EMOTION_ACCESS.md) | Consumer access patterns — APIs/SDKs/datasets; minimal public emotions contract |
+| [EMOTION_MIXING.md](EMOTION_MIXING.md) | Blends / PAD interpolation / Plutchik dyads; % mix API justification + honesty limits |
 | [NEGLECTEDNESS_COST.md](NEGLECTEDNESS_COST.md) | Neglectedness / cost proxy spike notes |
 | [README.md](README.md) | Archive orientation |
 

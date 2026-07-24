@@ -5,7 +5,7 @@ Product documentation for Artificial Curiosity. Start at the root [README](../RE
 | Doc | Purpose |
 |-----|---------|
 | [PLUGINS.md](PLUGINS.md) | MCP / HTTP / OpenAI tools / CLI install |
-| [EMOTIONS.md](EMOTIONS.md) | Epistemic cues / affective pack — how to use (does not feel) |
+| [EMOTIONS.md](EMOTIONS.md) | Epistemic cues, mixable catalog + % mixes — how to use (does not feel) |
 | [LIMITS.md](LIMITS.md) | Honest bounds — what works, what doesn’t |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Pipeline modules and trust boundaries |
 | [PROOFS.md](PROOFS.md) | Demo commands for verified behaviors |

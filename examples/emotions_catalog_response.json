@@ -1,0 +1,24 @@
+{
+  "name": "emotion_catalog",
+  "version": "1.0.0",
+  "count": 25,
+  "families": ["achievement", "basic", "epistemic", "social"],
+  "ids_sample": [
+    "curiosity",
+    "interest",
+    "confusion",
+    "surprise",
+    "awe",
+    "wonder",
+    "boredom",
+    "joy",
+    "fear",
+    "hope"
+  ],
+  "max_mix_components": 8,
+  "honesty": "annotation_only",
+  "disclaimer": "Named emotions and mixes are UX / investigation-framing annotations. This software does not feel emotions; PAD anchors are illustrative, not measured affect.",
+  "docs": "docs/EMOTIONS.md",
+  "research": "research/EMOTION_MIXING.md",
+  "note": "Use individually or mix with mix_emotions / POST /v1/emotions/mix. Percentages are framing weights — this software does not feel."
+}

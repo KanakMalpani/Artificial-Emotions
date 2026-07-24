@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
 from fastapi.testclient import TestClient
 
-from artificial_curiosity import annotate_epistemic, emotion_pack, list_epistemic_cues
+from artificial_curiosity import (
+    annotate_epistemic,
+    emotion_catalog,
+    emotion_pack,
+    list_epistemic_cues,
+    mix_emotions,
+)
 from artificial_curiosity.agent_tools import dispatch_tool
 from artificial_curiosity.api import app
 from artificial_curiosity.emotions import elicit_helpers
@@ -46,6 +53,55 @@ def test_elicit_helpers_anti_anthropomorphism():
     assert "not" in text and ("feel" in text or "anthropomorphism" in text)
 
 
+def test_emotion_catalog_python():
+    cat = emotion_catalog()
+    assert cat["count"] >= 20
+    assert "curiosity" in cat["ids"]
+    assert "confusion" in cat["ids"]
+    assert "awe" in cat["ids"]
+    assert cat["honesty"] == "annotation_only"
+    assert "epistemic" in cat["families"]
+    epi = emotion_catalog(family="epistemic")
+    assert epi["count"] >= 8
+    assert all(e["family"] == "epistemic" for e in epi["emotions"])
+
+
+def test_mix_emotions_percentages():
+    blend = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30})
+    assert blend["honesty"] == "annotation_only"
+    assert abs(sum(blend["weights"].values()) - 1.0) < 1e-9
+    assert abs(blend["percents"]["curiosity"] - 40.0) < 1e-6
+    assert blend["primary"] == "curiosity"
+    assert "pad" in blend and "P" in blend["pad"]
+    assert "curiosity_target" in blend["cue_tags"] or "information_gap" in blend["cue_tags"]
+    assert blend["inject_fragment"].startswith("emotion_mix=")
+    assert "phenomenal feeling" in blend["claims_not"][0]
+
+
+def test_mix_emotions_unit_weights_and_kwargs():
+    a = mix_emotions(curiosity=0.4, confusion=0.3, awe=0.3)
+    b = mix_emotions({"curiosity": 0.4, "confusion": 0.3, "awe": 0.3})
+    assert a["weights"] == b["weights"]
+    assert abs(sum(a["weights"].values()) - 1.0) < 1e-9
+
+
+def test_mix_emotions_plutchik_dyad_hint():
+    blend = mix_emotions({"joy": 50, "trust": 50})
+    assert blend["plutchik_dyad_hint"] is not None
+    assert blend["plutchik_dyad_hint"]["name"] == "love"
+
+
+def test_mix_emotions_rejects_nonsense():
+    with pytest.raises(ValueError, match="Unknown"):
+        mix_emotions({"not_a_real_emotion": 100})
+    with pytest.raises(ValueError, match="Empty|zero"):
+        mix_emotions({})
+    with pytest.raises(ValueError, match="zero"):
+        mix_emotions({"curiosity": 0, "awe": 0})
+    with pytest.raises(ValueError, match="Negative"):
+        mix_emotions({"curiosity": -1})
+
+
 def test_api_emotions_cues_and_annotate():
     client = TestClient(app)
     cues = client.get("/v1/emotions/cues")
@@ -85,10 +141,39 @@ def test_api_emotions_cues_and_annotate():
     assert pack.json()["count"] >= 8
 
 
+def test_api_emotions_catalog_and_mix():
+    client = TestClient(app)
+    cat = client.get("/v1/emotions/catalog")
+    assert cat.status_code == 200
+    body = cat.json()
+    assert body["count"] >= 20
+    assert body["honesty"] == "annotation_only"
+
+    epi = client.get("/v1/epistemic/catalog", params={"family": "epistemic"})
+    assert epi.status_code == 200
+    assert all(e["family"] == "epistemic" for e in epi.json()["emotions"])
+
+    mix = client.post(
+        "/v1/emotions/mix",
+        json={"weights": {"curiosity": 40, "confusion": 30, "awe": 30}},
+    )
+    assert mix.status_code == 200
+    m = mix.json()
+    assert abs(m["sum_weights"] - 1.0) < 1e-9
+    assert m["honesty"] == "annotation_only"
+
+    bad = client.post(
+        "/v1/emotions/mix",
+        json={"weights": {"nope": 100}},
+    )
+    assert bad.status_code == 400
+
+
 def test_api_root_mentions_emotions():
     client = TestClient(app)
     root = client.get("/").json()
     assert "emotions" in root
+    assert "catalog" in root["emotions"] or "mix" in root["emotions"]
 
 
 def test_mcp_emotion_tools():
@@ -97,6 +182,8 @@ def test_mcp_emotion_tools():
     names = {t["name"] for t in mcp_tool_list()}
     assert {
         "list_epistemic_cues",
+        "emotion_catalog",
+        "mix_emotions",
         "annotate_epistemic",
         "emotion_pack",
         "elicit_helpers",
@@ -104,6 +191,13 @@ def test_mcp_emotion_tools():
 
     out = dispatch_tool("list_epistemic_cues", {})
     assert "tags" in out
+    out = dispatch_tool("emotion_catalog", {})
+    assert out["count"] >= 20
+    out = dispatch_tool(
+        "mix_emotions",
+        {"weights": {"curiosity": 40, "confusion": 30, "awe": 30}},
+    )
+    assert abs(out["sum_weights"] - 1.0) < 1e-9
     out = dispatch_tool(
         "annotate_epistemic",
         {

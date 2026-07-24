@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "artificial-curiosity"
-version = "0.3.0"
+version = "0.3.1"
 description = "A curiosity layer for AI: generate and rank valuable unanswered questions"
 readme = "README.md"
 requires-python = ">=3.11"

@@ -1,6 +1,6 @@
 # Publishing to PyPI
 
-Package name: **`artificial-curiosity`** · Version: see `pyproject.toml` (currently `0.3.0`).
+Package name: **`artificial-curiosity`** · Version: see `pyproject.toml` (currently `0.3.1`).
 
 Never store PyPI tokens in the repo or commit `.env` / credentials.
 

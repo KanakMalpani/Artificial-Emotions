@@ -131,14 +131,35 @@ def build_parser() -> argparse.ArgumentParser:
     eval_p.add_argument("--json", action="store_true")
 
     for emo_name, emo_help in (
-        ("emotions", "Epistemic emotion cues (UX annotations — does not feel)"),
-        ("epistemic", "Alias of emotions — list/annotate/elicit/pack"),
+        ("emotions", "Emotion catalog + epistemic cues (UX annotations — does not feel)"),
+        ("epistemic", "Alias of emotions — cues/catalog/mix/annotate/elicit/pack"),
     ):
         emo_p = sub.add_parser(emo_name, help=emo_help)
         emo_sub = emo_p.add_subparsers(dest="emotions_cmd")
 
         cues_p = emo_sub.add_parser("cues", help="List epistemic cue tags")
         cues_p.add_argument("--json", action="store_true")
+
+        cat_p = emo_sub.add_parser(
+            "catalog", help="List mixable named emotions (optional --family)"
+        )
+        cat_p.add_argument(
+            "--family",
+            default=None,
+            help="Filter: epistemic | basic | social | achievement",
+        )
+        cat_p.add_argument("--json", action="store_true")
+
+        mix_p = emo_sub.add_parser(
+            "mix",
+            help="Mix emotions by percent, e.g. curiosity=40 confusion=30 awe=30",
+        )
+        mix_p.add_argument(
+            "parts",
+            nargs="+",
+            help="emotion_id=percent_or_weight (repeatable)",
+        )
+        mix_p.add_argument("--json", action="store_true")
 
         ann_p = emo_sub.add_parser(
             "annotate", help="Annotate a question with epistemic cues"
@@ -222,7 +243,8 @@ def _serve(args: argparse.Namespace) -> int:
     print(
         f"Artificial Curiosity API → http://{args.host}:{args.port}\n"
         f"  Instant spark: GET /v1/curiosity/provoke?domain=ai&n=5\n"
-        f"  Emotions:      GET /v1/emotions/cues  POST /v1/emotions/annotate\n"
+        f"  Emotions:      GET /v1/emotions/catalog  POST /v1/emotions/mix\n"
+        f"                 GET /v1/emotions/cues  POST /v1/emotions/annotate\n"
         f"  Agent guide:   GET /v1/agent\n"
         f"  Agent tools:   GET /v1/agent/tools\n"
         f"  Profiles:      GET /v1/profiles\n"
@@ -306,20 +328,40 @@ def _eval(args: argparse.Namespace) -> int:
     return 0
 
 
+def _parse_mix_parts(parts: list[str]) -> dict[str, float]:
+    out: dict[str, float] = {}
+    for part in parts:
+        raw = part.strip()
+        if "=" not in raw:
+            raise ValueError(
+                f"Expected emotion_id=percent, got '{part}'. "
+                "Example: curiosity=40 confusion=30 awe=30"
+            )
+        key, val = raw.split("=", 1)
+        kid = key.strip().lower().replace("-", "_")
+        if not kid:
+            raise ValueError(f"Empty emotion id in '{part}'")
+        out[kid] = float(val.strip())
+    return out
+
+
 def _emotions(args: argparse.Namespace) -> int:
     from artificial_curiosity.emotions import (
         annotate_epistemic,
         elicit_helpers,
+        emotion_catalog,
         emotion_pack,
         list_epistemic_cues,
+        mix_emotions,
     )
 
     cmd = getattr(args, "emotions_cmd", None)
     if not cmd:
         print(
-            "Usage: curiosity emotions {cues|annotate|elicit|pack}\n"
+            "Usage: curiosity emotions {cues|catalog|mix|annotate|elicit|pack}\n"
             "  (alias: curiosity epistemic …)\n"
-            "Epistemic cues are UX annotations — this system does not feel.",
+            "  mix example: curiosity emotions mix curiosity=40 confusion=30 awe=30\n"
+            "Emotion tags/mixes are UX annotations — this system does not feel.",
             file=sys.stderr,
         )
         return 2
@@ -333,6 +375,47 @@ def _emotions(args: argparse.Namespace) -> int:
             for c in payload["cues"]:
                 print(f"  {c['tag']}: {c['meaning']}")
             print(f"\n{payload['disclaimer']}")
+        return 0
+
+    if cmd == "catalog":
+        try:
+            payload = emotion_catalog(family=getattr(args, "family", None))
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print(
+                f"Emotion catalog v{payload.get('version')} — "
+                f"{payload['count']} emotions (annotation only)\n"
+            )
+            for e in payload["emotions"]:
+                print(f"  {e['id']:14} [{e['family']}] {e['label']}")
+            print(f"\n{payload['disclaimer']}")
+        return 0
+
+    if cmd == "mix":
+        try:
+            weights = _parse_mix_parts(list(args.parts))
+            payload = mix_emotions(weights)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print(f"primary={payload['primary']}")
+            print(
+                "mix="
+                + ", ".join(
+                    f"{c['id']}={c['percent']:.1f}%" for c in payload["components"]
+                )
+            )
+            if payload.get("cue_tags"):
+                print(f"cues={', '.join(payload['cue_tags'])}")
+            print(payload["inject_fragment"])
+            print(payload["disclaimer"])
         return 0
 
     if cmd == "annotate":

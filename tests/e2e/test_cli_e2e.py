@@ -94,3 +94,24 @@ def test_cli_emotions_cues_annotate_pack(capsys: pytest.CaptureFixture[str]) -> 
     pack = json.loads(capsys.readouterr().out)
     assert pack["count"] >= 8
     assert pack["name"] == "affective_science"
+
+    code = main(["emotions", "catalog", "--json"])
+    assert code == 0
+    cat = json.loads(capsys.readouterr().out)
+    assert cat["count"] >= 20
+    assert "curiosity" in cat["ids"]
+
+    code = main(
+        [
+            "emotions",
+            "mix",
+            "curiosity=40",
+            "confusion=30",
+            "awe=30",
+            "--json",
+        ]
+    )
+    assert code == 0
+    mix = json.loads(capsys.readouterr().out)
+    assert abs(mix["sum_weights"] - 1.0) < 1e-9
+    assert mix["honesty"] == "annotation_only"

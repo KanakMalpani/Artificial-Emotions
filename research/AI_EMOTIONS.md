@@ -478,6 +478,7 @@ Picard’s later emphasis on clinical / wellbeing sensing with consent contrasts
 | Wedge | Design | Status |
 |-------|--------|--------|
 | **Epistemic cue tags** | Derive `incongruity` / `information_gap` / `curiosity_target` / `confusion_risk` / `boredom_guard` from gap + axes | Thin hook: `epistemic_cues.py` + optional provoke metadata |
+| **Named catalog + % mixes** | Mixable emotion ids; normalize weights; PAD blend + framing | `emotion_catalog.json` + `mix_emotions` / `/v1/emotions/mix` — see [`EMOTION_MIXING.md`](EMOTION_MIXING.md) |
 | **Incongruity→curiosity inject block** | Short honest template: name the gap, ask for experiment + falsifier | Optional section in `build_inject_prompt` |
 | **Surprise axis calibration notes** | Document that max surprise ≠ max value; ValueProfile weights | Research + scoring docs |
 | **Confusion-aware brief line** | If confusion_risk, suggest enabling question / narrower ops | Future brief template |

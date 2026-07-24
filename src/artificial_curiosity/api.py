@@ -15,8 +15,10 @@ from artificial_curiosity.agent_tools import openai_tools
 from artificial_curiosity.emotions import (
     annotate_epistemic,
     elicit_helpers,
+    emotion_catalog,
     emotion_pack,
     list_epistemic_cues,
+    mix_emotions,
 )
 from artificial_curiosity.llm import resolve_llm_settings
 from artificial_curiosity.models import (
@@ -37,7 +39,7 @@ app = FastAPI(
         "questions. Designed so any human or AI model/provider can download this "
         "repo, start the server, and instantly ask: what should we investigate next?"
     ),
-    version="0.3.0",
+    version="0.3.1",
 )
 
 app.add_middleware(
@@ -162,6 +164,19 @@ class AnnotateEmotionsRequest(BaseModel):
     domain: str = Domain.AI.value
 
 
+class MixEmotionsRequest(BaseModel):
+    """Percentage or weight mix over catalog emotion ids (normalized to sum=1)."""
+
+    weights: dict[str, float] = Field(
+        ...,
+        description=(
+            "Map of emotion_id → percent (e.g. 40) or weight (e.g. 0.4). "
+            "Normalized to sum 1.0. Example: {\"curiosity\": 40, \"confusion\": 30, \"awe\": 30}"
+        ),
+        min_length=1,
+    )
+
+
 def _safe_profile(
     value_profile: ValueProfile | None,
     profile_name: str | None,
@@ -196,7 +211,11 @@ def root() -> dict:
         "docs": "/docs",
         "provoke": "GET or POST /v1/curiosity/provoke",
         "run": "POST /v1/curiosity/run",
-        "emotions": "GET /v1/emotions/cues · POST /v1/emotions/annotate · GET /v1/emotions/elicit · GET /v1/emotions/pack",
+        "emotions": (
+            "GET /v1/emotions/cues · GET /v1/emotions/catalog · "
+            "POST /v1/emotions/mix · POST /v1/emotions/annotate · "
+            "GET /v1/emotions/elicit · GET /v1/emotions/pack"
+        ),
         "epistemic": "Alias of /v1/emotions/* (same handlers)",
         "agent": "GET /v1/agent",
         "tools": "GET /v1/agent/tools",
@@ -250,20 +269,25 @@ def agent_manifest() -> dict:
                 "list_domains",
                 "list_profiles",
                 "list_epistemic_cues",
+                "emotion_catalog",
+                "mix_emotions",
                 "annotate_epistemic",
                 "emotion_pack",
+                "elicit_helpers",
             ],
             "docs": "docs/PLUGINS.md",
         },
         "emotions": {
             "path": "/v1/emotions/cues",
+            "catalog": "GET /v1/emotions/catalog",
+            "mix": "POST /v1/emotions/mix",
             "annotate": "POST /v1/emotions/annotate",
             "elicit": "GET /v1/emotions/elicit",
             "pack": "GET /v1/emotions/pack?name=affective_science",
             "alias": "/v1/epistemic/*",
             "docs": "docs/EMOTIONS.md",
             "note": (
-                "Epistemic UX annotations for investigation framing — "
+                "Epistemic UX annotations + mixable catalog — "
                 "not claims that the system feels emotions."
             ),
         },
@@ -324,8 +348,11 @@ def agent_tools() -> dict:
             "list_domains": "GET /v1/domains",
             "list_profiles": "GET /v1/profiles",
             "list_epistemic_cues": "GET /v1/emotions/cues",
+            "emotion_catalog": "GET /v1/emotions/catalog",
+            "mix_emotions": "POST /v1/emotions/mix",
             "annotate_epistemic": "POST /v1/emotions/annotate",
             "emotion_pack": "GET /v1/emotions/pack",
+            "elicit_helpers": "GET /v1/emotions/elicit",
         },
     }
 
@@ -457,6 +484,20 @@ def _emotions_cues() -> dict:
     return list_epistemic_cues()
 
 
+def _emotions_catalog(family: str | None = None) -> dict:
+    try:
+        return emotion_catalog(family=family)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+def _emotions_mix(req: MixEmotionsRequest) -> dict:
+    try:
+        return mix_emotions(req.weights)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 def _emotions_annotate(req: AnnotateEmotionsRequest) -> dict:
     try:
         return annotate_epistemic(
@@ -488,6 +529,25 @@ def _emotions_pack(name: str = "affective_science") -> dict:
 def emotions_cues() -> dict:
     """List epistemic cue tags (investigation framing — not felt emotion)."""
     return _emotions_cues()
+
+
+@app.get("/v1/emotions/catalog")
+@app.get("/v1/epistemic/catalog")
+def emotions_catalog(
+    family: str | None = Query(
+        None,
+        description="Optional filter: epistemic | basic | social | achievement",
+    ),
+) -> dict:
+    """Named mixable emotion catalog (annotation only)."""
+    return _emotions_catalog(family)
+
+
+@app.post("/v1/emotions/mix")
+@app.post("/v1/epistemic/mix")
+def emotions_mix(req: MixEmotionsRequest) -> dict:
+    """Mix catalog emotions by percent/weight; normalize to sum=1.0."""
+    return _emotions_mix(req)
 
 
 @app.post("/v1/emotions/annotate")

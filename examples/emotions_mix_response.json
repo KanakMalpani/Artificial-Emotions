@@ -1,0 +1,26 @@
+{
+  "components": [
+    {"id": "curiosity", "label": "Curiosity", "family": "epistemic", "weight": 0.4, "percent": 40.0},
+    {"id": "awe", "label": "Awe", "family": "epistemic", "weight": 0.3, "percent": 30.0},
+    {"id": "confusion", "label": "Confusion", "family": "epistemic", "weight": 0.3, "percent": 30.0}
+  ],
+  "weights": {"curiosity": 0.4, "awe": 0.3, "confusion": 0.3},
+  "percents": {"curiosity": 40.0, "awe": 30.0, "confusion": 30.0},
+  "sum_weights": 1.0,
+  "primary": "curiosity",
+  "pad": {"P": 0.155, "A": 0.565, "D": -0.05},
+  "families": {"epistemic": 1.0},
+  "cue_tags": ["curiosity_target", "information_gap", "confusion_risk", "incongruity"],
+  "inject_fragment": "emotion_mix=[curiosity=40.0%, awe=30.0%, confusion=30.0%] primary=curiosity cues=[curiosity_target, information_gap, confusion_risk, incongruity]",
+  "plutchik_dyad_hint": null,
+  "honesty": "annotation_only",
+  "disclaimer": "Emotion mixes are UX framing weights (normalized percentages) — NOT felt intensities, EES scores, or OCC appraisal state. Epistemic cues are UX annotations for investigation framing (incongruity / information-gap / confusion-risk) — NOT claims that this system feels emotions.",
+  "claims_not": [
+    "phenomenal feeling in the software",
+    "measured human affect / EES scores",
+    "OCC appraisal intensity",
+    "clinically validated PAD mood"
+  ],
+  "docs": "docs/EMOTIONS.md",
+  "research": "research/EMOTION_MIXING.md"
+}

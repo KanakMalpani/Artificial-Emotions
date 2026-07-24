@@ -1,6 +1,6 @@
 # Known Limits (verified)
 
-Honest bounds for **v0.3.0** — do not overclaim.
+Honest bounds for **v0.3.1** — do not overclaim.
 
 ## Verified working (2026-07-23)
 

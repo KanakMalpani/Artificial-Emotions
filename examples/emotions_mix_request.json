@@ -1,0 +1,7 @@
+{
+  "weights": {
+    "curiosity": 40,
+    "confusion": 30,
+    "awe": 30
+  }
+}

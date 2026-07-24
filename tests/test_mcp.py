@@ -25,6 +25,8 @@ def test_mcp_tool_list_has_required_tools():
         "list_domains",
         "list_profiles",
         "list_epistemic_cues",
+        "emotion_catalog",
+        "mix_emotions",
         "annotate_epistemic",
         "emotion_pack",
         "elicit_helpers",

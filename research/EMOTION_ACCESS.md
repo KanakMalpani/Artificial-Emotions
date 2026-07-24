@@ -149,6 +149,8 @@ Consumer / developer intent
 | Resource | Purpose | Stability |
 |----------|---------|-----------|
 | Cue vocabulary | `information_gap`, `curiosity_target`, `confusion_risk`, `surprise_signal`, `incongruity`, `boredom_guard` | Freeze names; extend only with changelog |
+| Named emotion catalog | Mixable ids across epistemic/basic/social/achievement + optional PAD anchors | Versioned JSON pack |
+| Percentage mixes | `{id: percent\|weight}` → normalize sum=1; blend PAD + cues + framing | Soft validation; max 8 components; see [`EMOTION_MIXING.md`](EMOTION_MIXING.md) |
 | Honesty fields | Every emotions payload includes `honesty: "annotation_only"` + `disclaimer` | Required |
 | Domain pack | `affective_science` seed questions | Versioned JSON |
 | Elicit helpers | Incongruity → experiment → falsifier framing text | Semver soft |
@@ -159,10 +161,10 @@ Consumer / developer intent
 
 | Surface | Path / entry | Notes |
 |---------|--------------|-------|
-| Python | `artificial_curiosity.emotions` | `list_epistemic_cues`, `annotate_epistemic`, `elicit_helpers`, `emotion_pack` |
-| HTTP | `/v1/emotions/*` (+ `/v1/epistemic/*` aliases) | See OpenAPI-ish shapes below |
-| Agent / MCP | `list_epistemic_cues` (+ annotate if exposed) | Same JSON |
-| CLI | emotions / cues subcommands (if shipped) | Mirror HTTP |
+| Python | `artificial_curiosity.emotions` | `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `elicit_helpers`, `emotion_pack` |
+| HTTP | `/v1/emotions/*` (+ `/v1/epistemic/*` aliases) | cues, **catalog**, **mix**, annotate, elicit, pack |
+| Agent / MCP | `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, … | Same JSON |
+| CLI | `curiosity emotions {cues\|catalog\|mix\|…}` | Mirror HTTP |
 
 **Non-goals in the contract:** face upload, voice stream, OCC state machine, “emotion intensity of the AI,” silent biosensing.
 
@@ -357,6 +359,9 @@ from artificial_curiosity import provoke  # ranked unknowns + inject
 | File | Role |
 |------|------|
 | [`examples/emotions_cues_response.json`](../examples/emotions_cues_response.json) | Catalog sample |
+| [`examples/emotions_catalog_response.json`](../examples/emotions_catalog_response.json) | Named emotion catalog sample |
+| [`examples/emotions_mix_request.json`](../examples/emotions_mix_request.json) | Mix body (percentages) |
+| [`examples/emotions_mix_response.json`](../examples/emotions_mix_response.json) | Mix blend sample |
 | [`examples/emotions_annotate_request.json`](../examples/emotions_annotate_request.json) | Annotate body |
 | [`examples/emotions_annotate_response.json`](../examples/emotions_annotate_response.json) | Annotate result |
 | [`examples/emotions_elicit_response.json`](../examples/emotions_elicit_response.json) | Elicit helpers sample |

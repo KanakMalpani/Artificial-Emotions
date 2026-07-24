@@ -1,6 +1,6 @@
 # Artificial Curiosity — Roadmap Summary
 
-**Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `0.3.0`
+**Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `0.3.1`
 
 > Agents: when stuck, open the full roadmap **§0 → §3 → §2**. This page is the executive skim only.
 
