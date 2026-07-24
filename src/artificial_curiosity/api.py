@@ -166,6 +166,12 @@ class RunRequest(BaseModel):
     judge_model: str | None = None
     judge_ensemble_n: int = Field(1, ge=1, le=5)
     # llm_base_url / literature_cache_dir are env/CLI-only (SSRF + path injection).
+    literature_workers: int = Field(
+        4,
+        ge=1,
+        le=16,
+        description="Parallel literature fetches when use_literature=true (1=serial)",
+    )
     profile_name: str | None = Field(
         None,
         description=f"Named ValueProfile preset: {', '.join(list_profile_names())}",
@@ -522,6 +528,7 @@ def run_curiosity(req: RunRequest) -> dict[str, Any]:
         use_literature=req.use_literature,
         literature_backend=req.literature_backend,
         literature_timeout_s=cfg.literature_timeout_s,
+        literature_workers=req.literature_workers,
         value_profile=profile,
         llm_model=req.llm_model or "gpt-4o-mini",
         judge_model=req.judge_model,

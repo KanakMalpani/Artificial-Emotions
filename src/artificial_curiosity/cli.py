@@ -72,6 +72,12 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         default=None,
         help="Optional directory for literature response cache",
     )
+    p.add_argument(
+        "--lit-workers",
+        type=int,
+        default=4,
+        help="Parallel literature fetches (1=serial; default 4)",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -199,6 +205,7 @@ def _run_engine(args: argparse.Namespace) -> int:
         use_literature=not args.no_literature,
         literature_backend=args.literature_backend,
         literature_cache_dir=args.lit_cache,
+        literature_workers=max(1, min(16, int(getattr(args, "lit_workers", 4) or 4))),
         llm_model=args.model,
         judge_model=args.judge_model,
         judge_ensemble_n=args.judge_ensemble,

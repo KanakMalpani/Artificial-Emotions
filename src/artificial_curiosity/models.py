@@ -238,6 +238,8 @@ class CuriosityConfig(BaseModel):
     # Opt-in disk cache for literature responses (rate-limit softener).
     literature_cache_dir: str | None = None
     literature_cache_ttl_s: float = 86_400.0
+    # Parallel OpenAlex/S2 fetches when literature is on (1 = serial).
+    literature_workers: int = Field(4, ge=1, le=16)
     diversity_threshold: float = Field(0.82, ge=0.5, le=0.99)
     # "jaccard" (default, offline) | "embedding" (optional extras; falls back if missing)
     diversity_backend: str = Field("jaccard", pattern="^(jaccard|embedding)$")

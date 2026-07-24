@@ -7,6 +7,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Offline seed → score → rank → brief pipeline
 - Literature neighborhood fetch via **OpenAlex** (default) and optional **Semantic Scholar** (`literature_backend=semantic_scholar|both`)
 - Optional literature disk cache (`literature_cache_dir`) for rate-limit softening
+- Parallel literature fetches (`literature_workers`, default 4; CLI `--lit-workers`; API field) — serial when `1`
 - Gap gate: related papers ≠ answered (overlap-gated + phrase-level abstract reading)
 - LLM gap reader (optional): **rejects ungrounded / invented paper titles**; keeps heuristic gap when evidence missing (W12)
 - Acceptance gates: answerability, risk, likely-answered

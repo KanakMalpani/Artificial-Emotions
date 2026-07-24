@@ -310,3 +310,68 @@ def test_judge_model_config_field_accepted():
     # Offline path still runs with distinct judge_model set.
     results = CuriosityEngine(cfg).run()
     assert results
+
+
+def test_literature_workers_parallel_verify():
+    """Parallel verify uses ThreadPoolExecutor but preserves candidate order."""
+    import threading
+    import time
+
+    from artificial_curiosity.models import LiteratureHit
+
+    lock = threading.Lock()
+    in_flight = 0
+    max_in_flight = 0
+    call_order: list[str] = []
+
+    class SlowFake:
+        def search_works(self, query: str, per_page: int = 8):
+            nonlocal in_flight, max_in_flight
+            with lock:
+                in_flight += 1
+                max_in_flight = max(max_in_flight, in_flight)
+                call_order.append(query[:40])
+            time.sleep(0.05)
+            with lock:
+                in_flight -= 1
+            return [
+                LiteratureHit(
+                    title="Unrelated neighborhood paper about widgets",
+                    year=2024,
+                    cited_by_count=2,
+                    abstract_snippet="Remains unknown how widgets generalize.",
+                )
+            ]
+
+    engine = CuriosityEngine(
+        CuriosityConfig(
+            domain="ai",
+            use_llm=False,
+            use_literature=True,
+            literature_workers=4,
+            n_candidates=6,
+            n_return=3,
+        )
+    )
+    engine._client = SlowFake()
+    results = engine.run()
+    assert results
+    assert max_in_flight >= 2  # actually overlapped
+    assert any("lit_parallel" in (r.flags or []) for r in results)
+    # Order of network calls need not match; ranked results still valid.
+    assert all(r.gap is not None for r in results)
+
+
+def test_literature_workers_serial_when_one():
+    engine = CuriosityEngine(
+        CuriosityConfig(
+            domain="ai",
+            use_llm=False,
+            use_literature=False,
+            literature_workers=1,
+            n_return=2,
+        )
+    )
+    results = engine.run()
+    assert results
+    assert all("lit_parallel" not in (r.flags or []) for r in results)

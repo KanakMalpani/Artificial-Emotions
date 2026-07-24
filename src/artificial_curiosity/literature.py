@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -49,6 +50,7 @@ class CachedLiteratureClient:
         self.backend_name = backend_name
         self.ttl_s = ttl_s
         self.cache_dir = Path(cache_dir) if cache_dir else None
+        self._lock = threading.Lock()
         if self.cache_dir is not None:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -57,27 +59,31 @@ class CachedLiteratureClient:
             return self.inner.search_works(query, per_page=per_page)
         path = self.cache_dir / f"{_cache_key(self.backend_name, query, per_page)}.json"
         now = time.time()
-        if path.exists():
-            try:
-                payload = json.loads(path.read_text(encoding="utf-8"))
-                if now - float(payload.get("ts", 0)) <= self.ttl_s:
-                    return [LiteratureHit.model_validate(h) for h in payload.get("hits", [])]
-            except Exception as exc:  # noqa: BLE001 — corrupt cache → refetch
-                logger.warning("Literature cache read failed; refetching: %s", exc)
+        with self._lock:
+            if path.exists():
+                try:
+                    payload = json.loads(path.read_text(encoding="utf-8"))
+                    if now - float(payload.get("ts", 0)) <= self.ttl_s:
+                        return [
+                            LiteratureHit.model_validate(h) for h in payload.get("hits", [])
+                        ]
+                except Exception as exc:  # noqa: BLE001 — corrupt cache → refetch
+                    logger.warning("Literature cache read failed; refetching: %s", exc)
         hits = self.inner.search_works(query, per_page=per_page)
         try:
-            path.write_text(
-                json.dumps(
-                    {
-                        "ts": now,
-                        "backend": self.backend_name,
-                        "query": query,
-                        "hits": [h.model_dump(mode="json") for h in hits],
-                    },
-                    indent=0,
-                ),
-                encoding="utf-8",
+            tmp = path.with_suffix(".json.tmp")
+            payload = json.dumps(
+                {
+                    "ts": now,
+                    "backend": self.backend_name,
+                    "query": query,
+                    "hits": [h.model_dump(mode="json") for h in hits],
+                },
+                indent=0,
             )
+            with self._lock:
+                tmp.write_text(payload, encoding="utf-8")
+                tmp.replace(path)
         except Exception as exc:  # noqa: BLE001 — cache write is best-effort
             logger.warning("Literature cache write failed: %s", exc)
         return hits

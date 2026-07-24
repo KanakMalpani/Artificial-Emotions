@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+
 from artificial_curiosity.brief import write_brief
 from artificial_curiosity.diversity import diversify
 from artificial_curiosity.generate import generate_candidates
 from artificial_curiosity.judge import llm_refine_gap, llm_score_ensemble
 from artificial_curiosity.literature import build_literature_client
-from artificial_curiosity.models import CuriosityConfig, RankedQuestion
+from artificial_curiosity.models import CuriosityConfig, GapEvidence, RankedQuestion, UnansweredQuestion
 from artificial_curiosity.preferences import (
     PreferenceEvent,
     append_preference_event,
@@ -37,20 +39,36 @@ class CuriosityEngine:
                 cache_ttl_s=self.config.literature_cache_ttl_s,
             )
 
+    def _verify_one(self, question: UnansweredQuestion) -> GapEvidence:
+        return verify_gap(
+            question,
+            client=self._client,
+            use_literature=self.config.use_literature,
+            literature_backend=self.config.literature_backend
+            if self.config.use_literature
+            else "none",
+        )
+
+    def _verify_all(self, candidates: list[UnansweredQuestion]) -> list[GapEvidence]:
+        """Fetch gap evidence; parallelize literature calls when workers > 1."""
+        workers = int(self.config.literature_workers or 1)
+        if (
+            self.config.use_literature
+            and self._client is not None
+            and workers > 1
+            and len(candidates) > 1
+        ):
+            with ThreadPoolExecutor(max_workers=min(workers, len(candidates))) as pool:
+                return list(pool.map(self._verify_one, candidates))
+        return [self._verify_one(q) for q in candidates]
+
     def run(self) -> list[RankedQuestion]:
         candidates = generate_candidates(self.config)
         scored: list[RankedQuestion] = []
         rejected_for_log: list[RankedQuestion] = []
 
-        for q in candidates:
-            gap = verify_gap(
-                q,
-                client=self._client,
-                use_literature=self.config.use_literature,
-                literature_backend=self.config.literature_backend
-                if self.config.use_literature
-                else "none",
-            )
+        gaps = self._verify_all(candidates)
+        for q, gap in zip(candidates, gaps):
             refined = llm_refine_gap(q, gap, self.config)
             if refined is not None:
                 gap = refined
@@ -97,6 +115,8 @@ class CuriosityEngine:
                 flags = list(set(flags + ["no_literature"]))
             if disagree >= 0.35:
                 flags = list(set(flags + ["judge_disagreement"]))
+            if self.config.use_literature and int(self.config.literature_workers or 1) > 1:
+                flags = list(set(flags + ["lit_parallel"]))
 
             score_low, score_high = score_uncertainty_band(
                 curiosity,
@@ -117,6 +137,7 @@ class CuriosityEngine:
                     "judge_disagreement_entropy": disagree,
                     "n_judges": len(judge_members),
                     "literature_backend": gap.literature_backend or self.config.literature_backend,
+                    "literature_workers": int(self.config.literature_workers or 1),
                 },
                 score_low=score_low,
                 score_high=score_high,
