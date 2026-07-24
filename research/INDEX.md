@@ -56,6 +56,7 @@ Everything under `research/` is design/background material that informed the imp
 | [EMOTION_MIXING_ADDENDUM.md](EMOTION_MIXING_ADDENDUM.md) | Speech/LDL mix literature vs annotation honesty |
 | [HYBRID_VOTE_OFFLINE.md](HYBRID_VOTE_OFFLINE.md) | Cross-model vote offline protocol (P2) |
 | [WEB_CRITIQUE_UX.md](WEB_CRITIQUE_UX.md) | Critique form button honesty / anti-patterns |
+| [WEB_PAIR_DUEL_UX.md](WEB_PAIR_DUEL_UX.md) | Suggest-next-duel feedback bar honesty |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

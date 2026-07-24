@@ -40,6 +40,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Hivemind metric spec | [`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md) | Mean/max pairwise cosine eval recipe |
 | LitGap correlation study | [`LITGAP_CORRELATION_STUDY.md`](LITGAP_CORRELATION_STUDY.md) | Offline GapScore ↔ neglectedness protocol |
 | Suggest next pair UX | [`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md) | Active preference duel heuristic |
+| Web pair duel UX | [`WEB_PAIR_DUEL_UX.md`](WEB_PAIR_DUEL_UX.md) | Feedback-bar copy; profile-scoped |
 | LitGapFinder (clawRxiv) | https://www.clawrxiv.io/abs/2603.00233 | Co-occurrence gap skill; ~60% top-10 claim (light review) |
 | Gap verify / question-rank competitors | [`GAP_VERIFICATION_COMPETITORS.md`](GAP_VERIFICATION_COMPETITORS.md) | SciMuse, ScholarEval, LitGapFinder, ResearchAgent, Owl-class |
 | Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |

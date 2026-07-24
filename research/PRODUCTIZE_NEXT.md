@@ -13,7 +13,7 @@
 1. **Elicit A/B eval path** — ✅ landed (`874dd7a`); keep rubric optional rows ([`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md)).
 2. **Gap-status fixture + metric** — ✅ gap-status metric (`874dd7a`); grow hand-labels + VERITAS cousins ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md), [`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
 3. **MCP/tool description lint** — ✅ landed (`2a33786` / `mcp_lint.py`); keep CI green ([`MCP_DESCRIPTION_LINT.md`](MCP_DESCRIPTION_LINT.md), [`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md)).
-4. **Prefs summarize + pairwise nudge** — ✅ ties + suggest-pair + gated BT (`27eb346`) ([`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md), [`PREFERENCE_BT_STAGE2.md`](PREFERENCE_BT_STAGE2.md)).
+4. **Prefs summarize + pairwise nudge** — ✅ ties + suggest-pair API + web duel (`27eb346`, `b7f152a`) ([`WEB_PAIR_DUEL_UX.md`](WEB_PAIR_DUEL_UX.md), [`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md)).
 5. **Agent card safety blurb** — Still open: merge [`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md) into `/v1/agent` + LIMITS patches ([`LIMITS_PATCHES.md`](LIMITS_PATCHES.md)).
 
 ## P1 — clear product value
