@@ -28,6 +28,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Expert-eval / spot-check harness: `curiosity eval` + `evals/fixtures/` + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**)
 - Opt-in preference JSONL schema (`preference_log_path` / `--preference-log`) — no DB required (W13); **CLI/config only** (not HTTP body — path injection)
 - Thin preference re-rank (`preference_rerank_path` / `--preference-rerank`): prefer/reject → small profile-scoped score deltas + `preference_rerank` flag — **not** calibrated weight learning; CLI/config only
+- Preference weight hints (`preference_learn_path` / `--preference-learn` / `curiosity preferences hints` / `POST /v1/preferences/hints`): tiny profile-scoped ValueProfile deltas from labeled events with `score_axes` — **not** calibrated; API accepts inline events only (no paths)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon (`research/NEGLECTEDNESS_COST.md`) — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
@@ -54,7 +55,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | OpenAlex / S2 neighborhoods can be topically noisy | Relevance search ≠ semantic match | Low overlap keeps `unanswered`; `both` merges sources |
 | Seed set is curated (+ optional packs) | Offline reliability | LLM generation + CONTRIBUTING pack bar |
 | Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile` |
-| No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL + thin re-rank deltas; bands provisional |
+| No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL + thin re-rank + tiny weight hints; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |
 | Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains | Human review hook + LIMITS residual risk; stronger models later |
 | Neglectedness/cost are lexicon/density proxies | No grant/spend APIs wired | Documented spike; optional funding adapters later |

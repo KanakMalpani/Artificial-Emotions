@@ -47,6 +47,7 @@ from artificial_curiosity.models import (
     resolve_value_profile,
 )
 from artificial_curiosity.pipeline import CuriosityEngine
+from artificial_curiosity.preferences import learn_profile_weight_hints
 from artificial_curiosity.provoke import provoke
 
 logger = get_logger("api")
@@ -197,7 +198,50 @@ class ProvokeRequest(BaseModel):
     # llm_base_url is env/CLI-only — never accept client URLs (SSRF / key leak).
     profile_name: str | None = None
     value_profile: ValueProfile | None = None
-    diversity_backend: str = "jaccard"
+    diversity_backend: str = Field("jaccard", pattern="^(jaccard|embedding)$")
+
+
+class PreferenceHintsRequest(BaseModel):
+    """Inline preference events → tiny ValueProfile weight hints (no filesystem paths)."""
+
+    events: list[dict[str, Any]] = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Labeled prefer/reject events with score_axes",
+        examples=[
+            [
+                {
+                    "event_type": "prefer",
+                    "profile_name": "humanity_default",
+                    "question_id": "ai-01",
+                    "score_axes": {
+                        "impact": 0.8,
+                        "neglectedness": 0.7,
+                        "tractability": 0.4,
+                        "surprise": 0.6,
+                    },
+                },
+                {
+                    "event_type": "reject",
+                    "profile_name": "humanity_default",
+                    "question_id": "ai-02",
+                    "score_axes": {
+                        "impact": 0.4,
+                        "neglectedness": 0.3,
+                        "tractability": 0.8,
+                        "surprise": 0.3,
+                    },
+                },
+            ]
+        ],
+    )
+    profile_name: str | None = Field(
+        "humanity_default",
+        description=f"Named ValueProfile preset: {', '.join(list_profile_names())}",
+    )
+    value_profile: ValueProfile | None = None
+    max_delta: float = Field(0.08, ge=0.01, le=0.2)
 
 
 class AnnotateEmotionsRequest(BaseModel):
@@ -332,6 +376,7 @@ def root() -> dict[str, Any]:
         "agent": "GET /v1/agent",
         "tools": "GET /v1/agent/tools",
         "profiles": "GET /v1/profiles",
+        "preferences": "POST /v1/preferences/hints (inline events; no filesystem paths)",
         "mcp": "curiosity-mcp (stdio) or python -m artificial_curiosity.mcp_server",
         "config": "artificial_curiosity.config / .env.example",
     }
@@ -545,6 +590,21 @@ def run_curiosity(req: RunRequest) -> dict[str, Any]:
         "questions": results,
         "note": "Scores are decision aids with explicit ValueProfile weights — not oracles.",
     }
+
+
+@app.post("/v1/preferences/hints")
+def preference_weight_hints(req: PreferenceHintsRequest) -> dict[str, Any]:
+    """Suggest tiny ValueProfile weight deltas from inline labeled events.
+
+    No filesystem paths accepted (path injection). Not calibrated learning.
+    """
+    profile = _safe_profile(req.value_profile, req.profile_name)
+    return learn_profile_weight_hints(
+        req.events,
+        profile_name=req.profile_name or profile.name,
+        base_profile=profile,
+        max_delta=req.max_delta,
+    )
 
 
 @app.post("/v1/curiosity/provoke")

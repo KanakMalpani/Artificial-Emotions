@@ -27,6 +27,7 @@ from artificial_curiosity.models import (
     LiteratureHit,
     UnansweredQuestion,
     ValueProfile,
+    resolve_value_profile,
 )
 from artificial_curiosity.packs import questions_from_pack
 from artificial_curiosity.pipeline import CuriosityEngine
@@ -417,3 +418,107 @@ def test_bundled_alignment_and_climate_packs():
     assert "clim-pack-01" in ids
     assert "affect-pack-01" in ids
     assert all(len(q.operationalization) >= 20 for q in qs)
+
+
+def test_preference_weight_hints(tmp_path: Path):
+    from artificial_curiosity.preferences import (
+        apply_weight_hints_to_profile,
+        learn_profile_weight_hints,
+    )
+
+    path = tmp_path / "hints.jsonl"
+    append_preference_event(
+        path,
+        PreferenceEvent(
+            event_type="prefer",
+            profile_name="humanity_default",
+            question_id="ai-01",
+            score_axes={
+                "impact": 0.9,
+                "neglectedness": 0.85,
+                "tractability": 0.3,
+                "surprise": 0.7,
+            },
+        ),
+    )
+    append_preference_event(
+        path,
+        PreferenceEvent(
+            event_type="reject",
+            profile_name="humanity_default",
+            question_id="ai-02",
+            score_axes={
+                "impact": 0.3,
+                "neglectedness": 0.25,
+                "tractability": 0.9,
+                "surprise": 0.2,
+            },
+        ),
+    )
+    hints = learn_profile_weight_hints(path, profile_name="humanity_default")
+    assert hints["ok"] is True
+    assert hints["deltas"]["weight_impact"] > 0
+    assert hints["deltas"]["weight_tractability"] < 0
+    assert "calibrated" not in hints["honesty"].lower() or "not calibrated" in hints["honesty"]
+
+    base = resolve_value_profile(profile_name="humanity_default")
+    suggested = apply_weight_hints_to_profile(base, hints)
+    assert suggested.weight_impact > base.weight_impact
+    assert suggested.weight_tractability < base.weight_tractability
+
+    # Engine path with --preference-learn equivalent
+    results = CuriosityEngine(
+        CuriosityConfig(
+            domain="ai",
+            use_literature=False,
+            use_llm=False,
+            n_return=2,
+            preference_learn_path=str(path),
+        )
+    ).run()
+    assert results
+    assert any("preference_weight_hints" in (r.flags or []) for r in results)
+
+
+def test_preference_hints_api_inline():
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    client = TestClient(app)
+    res = client.post(
+        "/v1/preferences/hints",
+        json={
+            "profile_name": "humanity_default",
+            "events": [
+                {
+                    "event_type": "prefer",
+                    "profile_name": "humanity_default",
+                    "question_id": "a",
+                    "score_axes": {
+                        "impact": 0.85,
+                        "neglectedness": 0.7,
+                        "tractability": 0.35,
+                        "surprise": 0.65,
+                    },
+                },
+                {
+                    "event_type": "reject",
+                    "profile_name": "humanity_default",
+                    "question_id": "b",
+                    "score_axes": {
+                        "impact": 0.35,
+                        "neglectedness": 0.3,
+                        "tractability": 0.85,
+                        "surprise": 0.25,
+                    },
+                },
+            ],
+        },
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["ok"] is True
+    assert "weight_impact" in data["deltas"]
+    assert "suggested_profile" in data
+

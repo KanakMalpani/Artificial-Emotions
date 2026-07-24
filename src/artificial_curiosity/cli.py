@@ -68,6 +68,14 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         ),
     )
     p.add_argument(
+        "--preference-learn",
+        default=None,
+        help=(
+            "Opt-in labeled JSONL with score_axes for tiny ValueProfile weight hints "
+            "(profile-scoped; not calibrated; CLI only)"
+        ),
+    )
+    p.add_argument(
         "--lit-cache",
         default=None,
         help="Optional directory for literature response cache",
@@ -122,6 +130,23 @@ def build_parser() -> argparse.ArgumentParser:
 
     profiles_p = sub.add_parser("profiles", help="List ValueProfile presets")
     profiles_p.add_argument("--json", action="store_true")
+
+    pref_p = sub.add_parser(
+        "preferences",
+        help="Preference JSONL helpers (hints — not calibrated learning)",
+    )
+    pref_sub = pref_p.add_subparsers(dest="preferences_cmd")
+    hints_p = pref_sub.add_parser(
+        "hints",
+        help="Suggest tiny ValueProfile weight deltas from labeled prefer/reject JSONL",
+    )
+    hints_p.add_argument("--path", required=True, help="Labeled preference JSONL path")
+    hints_p.add_argument(
+        "--profile",
+        default="humanity_default",
+        help=f"ValueProfile preset ({', '.join(list_profile_names())})",
+    )
+    hints_p.add_argument("--json", action="store_true")
 
     eval_p = sub.add_parser(
         "eval",
@@ -214,6 +239,7 @@ def _run_engine(args: argparse.Namespace) -> int:
         diversity_backend=args.diversity,
         preference_log_path=args.preference_log,
         preference_rerank_path=getattr(args, "preference_rerank", None),
+        preference_learn_path=getattr(args, "preference_learn", None),
     )
     results = CuriosityEngine(config).run()
 
@@ -298,6 +324,35 @@ def _profiles(args: argparse.Namespace) -> int:
     else:
         for r in rows:
             print(f"{r['name']}: {r['description']}")
+    return 0
+
+
+def _preferences(args: argparse.Namespace) -> int:
+    from artificial_curiosity.preferences import learn_profile_weight_hints
+
+    cmd = getattr(args, "preferences_cmd", None)
+    if cmd != "hints":
+        print(
+            "Usage: curiosity preferences hints --path labeled.jsonl [--profile NAME]\n"
+            "Weight hints are tiny profile-scoped deltas — not calibrated learning.",
+            file=sys.stderr,
+        )
+        return 2
+    hints = learn_profile_weight_hints(args.path, profile_name=args.profile)
+    if args.json:
+        print(json.dumps(hints, indent=2))
+        return 0
+    print(f"Preference weight hints for profile={args.profile}")
+    print(f"  ok={hints.get('ok')}  reason={hints.get('reason')}")
+    print(f"  n_prefer={hints.get('n_prefer')}  n_reject={hints.get('n_reject')}")
+    deltas = hints.get("deltas") or {}
+    if deltas:
+        print("  deltas:")
+        for k, v in deltas.items():
+            print(f"    {k}: {v:+.4f}")
+    else:
+        print("  deltas: (none)")
+    print(f"\n{hints.get('honesty')}")
     return 0
 
 
@@ -482,6 +537,7 @@ def main(argv: list[str] | None = None) -> int:
         "serve",
         "spark",
         "profiles",
+        "preferences",
         "eval",
         "emotions",
         "epistemic",
@@ -498,6 +554,8 @@ def main(argv: list[str] | None = None) -> int:
         return _spark(args)
     if args.command == "profiles":
         return _profiles(args)
+    if args.command == "preferences":
+        return _preferences(args)
     if args.command == "eval":
         return _eval(args)
     if args.command in ("emotions", "epistemic"):

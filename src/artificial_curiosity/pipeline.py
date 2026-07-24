@@ -14,6 +14,8 @@ from artificial_curiosity.preferences import (
     PreferenceEvent,
     append_preference_event,
     apply_preference_rerank,
+    apply_weight_hints_to_profile,
+    learn_profile_weight_hints,
     preference_score_adjustments,
 )
 from artificial_curiosity.scoring import (
@@ -63,6 +65,24 @@ class CuriosityEngine:
         return [self._verify_one(q) for q in candidates]
 
     def run(self) -> list[RankedQuestion]:
+        # Optional profile-scoped weight hints from labeled JSONL (CLI/config only).
+        weight_hint_meta: dict | None = None
+        if self.config.preference_learn_path:
+            hints = learn_profile_weight_hints(
+                self.config.preference_learn_path,
+                profile_name=self.config.value_profile.name.split("+", 1)[0],
+                base_profile=self.config.value_profile,
+            )
+            if hints.get("ok"):
+                self.config.value_profile = apply_weight_hints_to_profile(
+                    self.config.value_profile, hints
+                )
+                weight_hint_meta = {
+                    "deltas": hints.get("deltas"),
+                    "n_prefer": hints.get("n_prefer"),
+                    "n_reject": hints.get("n_reject"),
+                }
+
         candidates = generate_candidates(self.config)
         scored: list[RankedQuestion] = []
         rejected_for_log: list[RankedQuestion] = []
@@ -117,6 +137,8 @@ class CuriosityEngine:
                 flags = list(set(flags + ["judge_disagreement"]))
             if self.config.use_literature and int(self.config.literature_workers or 1) > 1:
                 flags = list(set(flags + ["lit_parallel"]))
+            if weight_hint_meta:
+                flags = list(set(flags + ["preference_weight_hints"]))
 
             score_low, score_high = score_uncertainty_band(
                 curiosity,
@@ -125,6 +147,16 @@ class CuriosityEngine:
                 disagreement_entropy=disagree,
             )
 
+            meta = {
+                "passed_gates": ok,
+                "judge_disagreement_entropy": disagree,
+                "n_judges": len(judge_members),
+                "literature_backend": gap.literature_backend or self.config.literature_backend,
+                "literature_workers": int(self.config.literature_workers or 1),
+            }
+            if weight_hint_meta:
+                meta["preference_weight_hints"] = weight_hint_meta
+
             item = RankedQuestion(
                 question=q,
                 scores=axes,
@@ -132,13 +164,7 @@ class CuriosityEngine:
                 confidence=conf,
                 gap=gap,
                 flags=flags,
-                metadata={
-                    "passed_gates": ok,
-                    "judge_disagreement_entropy": disagree,
-                    "n_judges": len(judge_members),
-                    "literature_backend": gap.literature_backend or self.config.literature_backend,
-                    "literature_workers": int(self.config.literature_workers or 1),
-                },
+                metadata=meta,
                 score_low=score_low,
                 score_high=score_high,
             )
@@ -186,6 +212,14 @@ class CuriosityEngine:
         # Opt-in preference JSONL snapshot (W13) — ranks only, unlabeled.
         if self.config.preference_log_path:
             for r in result:
+                axes = {}
+                if r.scores is not None:
+                    dumped = r.scores.model_dump(mode="json")
+                    axes = {
+                        k: float(dumped[k])
+                        for k in ("impact", "neglectedness", "tractability", "surprise")
+                        if k in dumped and dumped[k] is not None
+                    }
                 append_preference_event(
                     self.config.preference_log_path,
                     PreferenceEvent(
@@ -196,6 +230,7 @@ class CuriosityEngine:
                         question_text=getattr(r.question, "question", None),
                         rank=r.rank,
                         curiosity_score=r.curiosity_score,
+                        score_axes=axes,
                         notes="auto_snapshot_from_run",
                         metadata={
                             "flags": r.flags,
