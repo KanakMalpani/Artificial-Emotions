@@ -915,6 +915,45 @@ def test_voi_worksheet_and_eval_report():
     assert "critique_brief" in agent.json()["mcp"]["tools"]
 
 
+def test_cross_model_vote_offline():
+    from artificial_curiosity.hybrid_vote import cross_model_vote
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    out = cross_model_vote(
+        [
+            {
+                "question_id": "good",
+                "question": "Which circulating biomarkers best predict remaining healthspan under interventions?",
+                "operationalization": "AUROC ≥ 0.7; falsifier: AUROC ≤ 0.55 reduces confidence.",
+            },
+            {
+                "question_id": "bad",
+                "question": "What causes aging and how do we cure cancer and what is consciousness?",
+                "operationalization": "Everything.",
+            },
+        ]
+    )
+    assert out["changes_ranks"] is False
+    assert out["n_candidates"] == 2
+    by_id = {v["question_id"]: v["decision"] for v in out["votes"]}
+    assert by_id["bad"] in ("drop", "rewrite")
+    assert by_id["good"] in ("keep", "rewrite")
+
+    client = TestClient(app)
+    res = client.post(
+        "/v1/evals/cross-model-vote",
+        json={
+            "candidates": [
+                {"question": "Short?", "operationalization": "x"},
+            ]
+        },
+    )
+    assert res.status_code == 200
+    assert res.json()["changes_ranks"] is False
+
+
 def test_suggest_next_pair_and_bt_gate():
     from artificial_curiosity.preferences import (
         PreferenceEvent,

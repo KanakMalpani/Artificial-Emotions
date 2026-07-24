@@ -313,6 +313,11 @@ class SuggestPairRequest(BaseModel):
     profile_name: str | None = "humanity_default"
 
 
+class CrossModelVoteRequest(BaseModel):
+    candidates: list[dict[str, Any]] = Field(..., min_length=1)
+    judges: int = Field(1, ge=1, le=6)
+
+
 class AnnotateEmotionsRequest(BaseModel):
     question: str = Field(..., min_length=12)
     gap_status: str = Field(
@@ -558,6 +563,7 @@ def agent_manifest() -> dict[str, Any]:
                 "compare_profiles",
                 "critique_brief",
                 "voi_worksheet",
+                "cross_model_vote",
                 "list_epistemic_cues",
                 "emotion_catalog",
                 "mix_emotions",
@@ -758,6 +764,14 @@ def preference_suggest_pair(req: SuggestPairRequest) -> dict[str, Any]:
         req.events,
         profile_name=req.profile_name,
     )
+
+
+@app.post("/v1/evals/cross-model-vote")
+def evals_cross_model_vote(req: CrossModelVoteRequest) -> dict[str, Any]:
+    """Offline keep/drop/rewrite annotations — does not re-rank."""
+    from artificial_curiosity.hybrid_vote import cross_model_vote
+
+    return cross_model_vote(req.candidates, judges=req.judges)
 
 
 @app.post("/v1/profiles/compare")

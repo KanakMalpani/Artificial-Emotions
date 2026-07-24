@@ -216,6 +216,21 @@ CRITIQUE_BRIEF_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+CROSS_MODEL_VOTE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "object"},
+            "description": "Candidate unknowns with question / operationalization",
+        },
+        "judges": {"type": "integer", "minimum": 1, "maximum": 6, "default": 1},
+    },
+    "required": ["candidates"],
+    "additionalProperties": False,
+}
+
 VOI_WORKSHEET_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
@@ -498,6 +513,18 @@ def handle_critique_brief(
     )
 
 
+def handle_cross_model_vote(
+    *,
+    candidates: list[dict[str, Any]] | None = None,
+    judges: int = 1,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Offline HybridQuestion-style vote proxy — does not re-rank."""
+    from artificial_curiosity.hybrid_vote import cross_model_vote
+
+    return cross_model_vote(list(candidates or []), judges=int(judges or 1))
+
+
 def handle_voi_worksheet(
     *,
     question_id: str | None = None,
@@ -664,6 +691,17 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": CRITIQUE_BRIEF_SCHEMA,
         "handler": handle_critique_brief,
+    },
+    {
+        "name": "cross_model_vote",
+        "description": (
+            "Offline HybridQuestion-style keep/drop/rewrite annotations on "
+            "candidate unknowns (form/heuristic proxy). Does not re-rank; "
+            "agreement is not VOI. Decision aids under an explicit ValueProfile "
+            "remain separate. See research/HYBRID_VOTE_OFFLINE.md."
+        ),
+        "input_schema": CROSS_MODEL_VOTE_SCHEMA,
+        "handler": handle_cross_model_vote,
     },
     {
         "name": "voi_worksheet",
