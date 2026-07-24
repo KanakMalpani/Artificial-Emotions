@@ -26,6 +26,7 @@
 10b. **Mix safety guards** — ✅ soft guards landed (`0af53f4`); keep epistemic-default docs ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
 10c. **Top-n hivemind similarity metric** — embedding pairwise cosine in eval ([`HIVEMIND.md`](HIVEMIND.md)).
 10d. **Optional `critique_brief`** — form-only critic (F9/falsifier); no silent re-rank ([`CRITIC_DEBATE_JUDGES.md`](CRITIC_DEBATE_JUDGES.md)).
+10e. **Outcome labels in prefs summarize** — sparse flywheel ([`OUTCOME_FLYWHEEL.md`](OUTCOME_FLYWHEEL.md)).
 
 ## P2 — research-facing / moonshot-adjacent
 
