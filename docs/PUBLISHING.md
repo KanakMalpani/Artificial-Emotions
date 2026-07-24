@@ -4,7 +4,7 @@ Package name: **`artificial-curiosity`** · Version: see `pyproject.toml` (curre
 
 **Status:** not on PyPI yet — do not document `pip install artificial-curiosity` as a public path until `https://pypi.org/project/artificial-curiosity/` resolves.
 
-Never store PyPI tokens in the repo or commit `.env` / credentials.
+Never store PyPI tokens in the repo or commit `.env` / credentials. For HTTP demos, unset `CURIOSITY_API_KEY` is fine on localhost only — set a key before any non-local bind.
 
 ## Preferred: Trusted Publishing (OIDC)
 

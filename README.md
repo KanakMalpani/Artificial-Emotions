@@ -104,6 +104,12 @@ curiosity serve
 | http://127.0.0.1:8000/v1/agent | Machine guide + honesty block |
 | http://127.0.0.1:8000/v1/agent/tools | OpenAI-compatible tool schemas |
 
+### Security
+
+- **Unset `CURIOSITY_API_KEY`** → open local demo (default DX). Fine on `127.0.0.1`.
+- **Set `CURIOSITY_API_KEY`** (or `CURIOSITY_API_KEYS` / `ARTIFICIAL_CURIOSITY_API_KEY`) before any non-local use; send `Authorization: Bearer <key>` or `X-API-Key`.
+- **Do not bind `0.0.0.0` without auth.** Default host is `127.0.0.1`.
+
 ### CLI demos
 
 ```bash

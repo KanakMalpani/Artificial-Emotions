@@ -43,6 +43,16 @@ web/*.tsbuildinfo
 # Local experiment dumps (keep committed examples/*.json that are intentional)
 examples/*.local.json
 examples/eval_offline_summary.json
+examples/*.jsonl
+
+# Preference / labeled logs (do not ignore intentional fixtures under evals/)
+prefs.jsonl
+*.preference.jsonl
+labeled.jsonl
+
+# Literature cache dirs
+.lit_cache/
+lit_cache/
 
 # OS junk
 Thumbs.db

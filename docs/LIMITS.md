@@ -101,7 +101,10 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | LLM paths untested live in CI | `LLM_API_KEY` often unset | Local multi-provider smoke per PROOFS; no secrets in repo |
 | Multi-judge ensemble needs live LLM | Offline uses single heuristic | Documented; disagreement flag only when ≥2 judges return |
 | Not on PyPI yet | Owner publish + Actions billing gate | Fix Billing & plans; then re-run `publish.yml` (see PUBLISHING) |
+| Absolute local paths may remain in older git commits | Working-tree scrub does not rewrite history | Accept residual username-in-history risk, or squash/filter before first public clone wave |
 | Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — not claimed done |
+| Unauthenticated local HTTP when API key unset | Demo DX by design | Documented; set key + avoid `0.0.0.0` for non-local |
+| MCP / `use_llm` can incur provider cost | Tools may call paid LLM hosts | Operator controls keys + MCP tier; no silent billing claims |
 
 ## Confidence interpretation
 

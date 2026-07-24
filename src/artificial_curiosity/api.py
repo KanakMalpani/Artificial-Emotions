@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import posixpath
 import secrets
 from typing import Any
+from urllib.parse import unquote, urlparse
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
@@ -79,6 +81,51 @@ app.add_middleware(
 _AUTH_OPEN_PATHS = frozenset({"/", "/health", "/ready", "/docs", "/openapi.json", "/redoc"})
 
 
+def _normalize_request_path(path: str) -> str:
+    """Normalize path for auth open-list checks (decode, collapse ``..`` / ``//``)."""
+    raw = unquote(path or "/")
+    if not raw.startswith("/"):
+        raw = "/" + raw
+    norm = posixpath.normpath(raw)
+    if not norm.startswith("/"):
+        norm = "/" + norm
+    return norm
+
+
+def _is_auth_open_path(path: str) -> bool:
+    """Exact open paths, plus safe ``/docs/`` and ``/redoc/`` prefixes only."""
+    p = _normalize_request_path(path)
+    if p in _AUTH_OPEN_PATHS:
+        return True
+    # Trailing-slash prefixes avoid ``startswith("/docs")`` matching ``/docsEvil``.
+    return p.startswith("/docs/") or p.startswith("/redoc/")
+
+
+def _api_key_matches(provided: str, keys: set[str]) -> bool:
+    """Constant-time key check; never raises on length/type mismatch (always → fail closed)."""
+    if not provided or not isinstance(provided, str):
+        return False
+    for key in keys:
+        if not isinstance(key, str):
+            continue
+        try:
+            if secrets.compare_digest(provided, key):
+                return True
+        except (TypeError, ValueError):
+            continue
+    return False
+
+
+def _redact_base_url(url: str | None) -> str | None:
+    """Expose scheme only — never leak host/path from unauthenticated ``/health``."""
+    if not url:
+        return None
+    parsed = urlparse(url)
+    if parsed.scheme:
+        return f"{parsed.scheme}://[redacted]"
+    return "[redacted]"
+
+
 class OptionalApiKeyMiddleware(BaseHTTPMiddleware):
     """When API keys are configured, require Bearer or X-API-Key on protected routes."""
 
@@ -86,8 +133,7 @@ class OptionalApiKeyMiddleware(BaseHTTPMiddleware):
         keys = configured_api_keys()
         if not keys:
             return await call_next(request)
-        path = request.url.path
-        if path in _AUTH_OPEN_PATHS or path.startswith("/docs") or path.startswith("/redoc"):
+        if _is_auth_open_path(request.url.path):
             return await call_next(request)
         provided = ""
         auth = request.headers.get("authorization") or ""
@@ -95,7 +141,7 @@ class OptionalApiKeyMiddleware(BaseHTTPMiddleware):
             provided = auth[7:].strip()
         if not provided:
             provided = (request.headers.get("x-api-key") or "").strip()
-        if not provided or not any(secrets.compare_digest(provided, k) for k in keys):
+        if not _api_key_matches(provided, keys):
             return JSONResponse(
                 status_code=401,
                 content=error_payload(
@@ -431,7 +477,7 @@ def health() -> dict[str, Any]:
         "llm_configured": llm is not None,
         "llm_model": llm.model if llm else None,
         "judge_model": judge.model if judge else None,
-        "llm_base_url": llm.base_url if llm else None,
+        "llm_base_url": _redact_base_url(llm.base_url if llm else None),
         "llm_timeout_s": cfg.llm_timeout_s,
         "literature_timeout_s": cfg.literature_timeout_s,
         "s2_key_configured": cfg.s2_configured,

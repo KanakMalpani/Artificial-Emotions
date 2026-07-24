@@ -120,5 +120,29 @@ def test_optional_api_key_auth(monkeypatch):
         headers={"Authorization": "Bearer test-secret-key"},
     )
     assert ok2.status_code == 200
+    # Wrong-length key must 401 (never 500 from compare_digest).
+    wrong_len = client.get(
+        "/v1/profiles",
+        headers={"X-API-Key": "short"},
+    )
+    assert wrong_len.status_code == 401
+    # startswith("/docs") footgun: /docsEvil stays protected.
+    evil = client.get("/docsEvil")
+    assert evil.status_code == 401
     monkeypatch.delenv("CURIOSITY_API_KEY", raising=False)
+    clear_config_cache()
+
+
+def test_health_redacts_llm_base_url(monkeypatch):
+    from artificial_curiosity.config import clear_config_cache
+
+    monkeypatch.setenv("LLM_API_KEY", "dummy")
+    monkeypatch.setenv("LLM_BASE_URL", "https://secret-host.example/v1")
+    clear_config_cache()
+    client = TestClient(app)
+    h = client.get("/health").json()
+    assert h["llm_base_url"] == "https://[redacted]"
+    assert "secret-host" not in (h["llm_base_url"] or "")
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    monkeypatch.delenv("LLM_BASE_URL", raising=False)
     clear_config_cache()

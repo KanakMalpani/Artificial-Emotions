@@ -1,7 +1,7 @@
 # Agent Handoff — Artificial Curiosity
 
-**Workspace (only):** `<local-clone>`  
-**Remote:** https://github.com/KanakMalpani/Artificial-Curiosity.git (private for now)  
+**Repo root:** this clone  
+**Remote:** https://github.com/KanakMalpani/Artificial-Curiosity.git  
 **Goal:** Curiosity layer — generate & rank valuable *unanswered* questions (not Q&A).  
 **Entry docs:** Product → root `README.md` + `docs/`. Research archive → `research/` (`FIRST_PRINCIPLES`, `RESEARCH`, `FAILURE_MODES`, …).  
 **Version:** `0.3.0`

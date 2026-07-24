@@ -237,7 +237,7 @@ Errors use a stable shape: `{"error":{"code":"unknown_emotion","message":"…"}}
 
 ### Optional API key (WO-0.4.6)
 
-Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health`, `/ready`, and `/` stay open; health reports `api_auth_required`.
+Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health`, `/ready`, and `/` stay open; health reports `api_auth_required`. Do not bind `0.0.0.0` without a key.
 
 Central env reference: `artificial_curiosity.config` and `.env.example` (`LLM_TIMEOUT_S`, `LITERATURE_TIMEOUT_S`, `CURIOSITY_CORS_ORIGINS`, …).
 
