@@ -1,0 +1,12 @@
+{
+  "framing": "(see live GET /v1/emotions/elicit — incongruity → name the gap → first experiment → falsifier)",
+  "inject_prefix": "Epistemic framing (not anthropomorphism): treat ranked items as information gaps / incongruities. Name missing knowledge → first experiment → falsifier. This layer does not feel.",
+  "how_to_use": [
+    "Call list_epistemic_cues (or GET /v1/emotions/cues) for the tag vocabulary.",
+    "Annotate a draft question with annotate_epistemic (or POST /v1/emotions/annotate).",
+    "Paste framing + inject_fragment into agent context alongside provoke inject packs."
+  ],
+  "honesty": "annotation_only",
+  "disclaimer": "Epistemic cues are UX annotations for investigation framing (incongruity / information-gap / confusion-risk) — NOT claims that this system feels emotions.",
+  "docs": "docs/EMOTIONS.md"
+}

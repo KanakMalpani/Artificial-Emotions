@@ -18,6 +18,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Computational Theories of Curiosity (Oudeyer) | arXiv 1802.10546 | Intrinsic motivation foundations |
 | Large-Scale Curiosity-Driven Learning (Pathak et al.) | arXiv 1808.04355 | RL curiosity ≠ scientific VOI |
 | Emotions in AI / epistemic affect (synthesis) | [`AI_EMOTIONS.md`](AI_EMOTIONS.md) | Monograph: classical theories, CME architectures, ML/RL/LLM stacks, epistemic elicitation ↔ provoke |
+| Consumer access to emotion / epistemic tooling | [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) | APIs, SDKs, OCC libs, LLM toolkits, EES, datasets (easy vs locked); minimal public contract |
 | ISPOR VOI Task Force | https://eprints.whiterose.ac.uk/id/eprint/158024/ | EVPI / EVSI / ENBS research prioritization |
 | Picard, Affective Computing (1997) | MIT Press / Media Lab TR-321 | Field definition: relate to / arise from / influence emotion |
 | OCC — Ortony, Clore & Collins | DOI 10.1017/CBO9780511571299 | Appraisal typology used by most CMEs |
@@ -44,6 +45,28 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Broekens et al., fine-grained affective LLMs | arXiv:2309.01664 | Emergent affective processing probes |
 | Becker et al., emotional robot trust | arXiv:2307.02924 | Emotion display can reduce trust |
 | Affective computing × privacy / AI Act | arXiv:2509.20153 | Regulatory / ethics framing |
+| Hume AI Expression / EVI / TTS | https://dev.hume.ai/intro | Easy cloud expression + empathic voice access |
+| Microsoft Face emotion attribute retirement | Azure Responsible AI blog (2022) | Platform lock / withdrawal of emotion inference |
+| Py-Feat facial expression toolbox | https://py-feat.org/ ; arXiv:2104.03509 | Easy local open FER SDK |
+| FAtiMA Toolkit | https://github.com/GAIPS/FAtiMA-Toolkit ; ACM 10.1145/3510822 | Accessible OCC socio-emotional agents (C#/Unity) |
+| GAMYGDALA | https://github.com/broekens/gamygdala ; IEEE TAC 2014 | Easy MIT/JS game appraisal engine |
+| EmotionBench | arXiv:2308.03656 ; CUHK-ARISE GitHub | LLM emotional alignment toolkit (research / NC) |
+| CAREBench | arXiv:2605.17176 | Appraisal-reasoning chain eval for LLMs |
+| CAPE appraisal corpus | NAACL Findings 2025 | Appraisal-conditioned emotional generation (ZH) |
+| GoEmotions | google-research / HF Apache-2.0 | Easy open text emotion labels (incl. curiosity) |
+| AffectNet / RAF-DB access policies | DU academic agreement; RAF university form | Locked in-the-wild face datasets |
+
+### Consumer access patterns (summary)
+
+| Pattern | Easy | Locked / hard | See |
+|---------|------|---------------|-----|
+| Cloud face/voice expression | Hume (key + SDK) | Azure emotion attrs retired; Affectiva enterprise | [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) §3.1 |
+| Local FER | Py-Feat, OpenFace | Some model weights NC | §3.2 |
+| OCC appraisal middleware | GAMYGDALA (JS), FAtiMA (C#) | Full EMA/Soar | §3.3 |
+| LLM affect toolkits | HF classifiers, prompt JSON | EmotionBench NC; fragile alignment | §3.4 |
+| Epistemic emotion (EES) | Scale items + behavior paradigms | No mass-market EES API | §3.5 |
+| Datasets | GoEmotions | AffectNet, RAF-DB gated | §3.6 |
+| This repo public contract | `/v1/emotions/*` + examples | Not a FER/OCC product | §5 |
 
 ## Products (contrast class — answer/search, not curiosity ranking)
 
@@ -66,4 +89,6 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Mode collapse / duplicates | `diversity.py` |
 | Failure catalog | `research/FAILURE_MODES.md` + `tests/test_failure_modes.py` |
 | Epistemic cue tags (UX only) | `epistemic_cues.py` + `provoke.py` |
+| Emotions / epistemic public surface | `emotions.py`; `/v1/emotions/*` |
+| Emotion access contract examples | `examples/emotions_*.json` |
 | Affective-science seed pack | `packs/affective_science.json` |

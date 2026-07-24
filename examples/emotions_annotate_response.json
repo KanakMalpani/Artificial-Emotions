@@ -1,0 +1,25 @@
+{
+  "question": "How does productive confusion differ from stuck confusion when AI tutors surface literature gaps?",
+  "gap_status": "partially_answered",
+  "axes": {
+    "surprise": 0.72,
+    "neglectedness": 0.61,
+    "answerability": 0.38
+  },
+  "epistemic_cues": {
+    "tags": [
+      "information_gap",
+      "curiosity_target",
+      "confusion_risk",
+      "surprise_signal",
+      "incongruity",
+      "boredom_guard"
+    ],
+    "primary": "information_gap",
+    "disclaimer": "Epistemic cues are UX annotations for investigation framing (incongruity / information-gap / confusion-risk) — NOT claims that this system feels emotions.",
+    "honesty": "annotation_only"
+  },
+  "inject_fragment": "epistemic_cues=[information_gap, curiosity_target, confusion_risk, surprise_signal, incongruity, boredom_guard] primary=information_gap",
+  "honesty": "annotation_only",
+  "disclaimer": "Epistemic cues are UX annotations for investigation framing (incongruity / information-gap / confusion-risk) — NOT claims that this system feels emotions."
+}

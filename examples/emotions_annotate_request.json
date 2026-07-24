@@ -1,0 +1,9 @@
+{
+  "question": "How does productive confusion differ from stuck confusion when AI tutors surface literature gaps?",
+  "gap_status": "partially_answered",
+  "surprise": 0.72,
+  "neglectedness": 0.61,
+  "answerability": 0.38,
+  "notes": "Related tutoring papers exist; causal mechanism for epistemic emotion trajectories remains open.",
+  "domain": "ai"
+}

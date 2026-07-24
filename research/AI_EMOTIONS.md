@@ -4,7 +4,7 @@
 **Honesty bar:** This document distinguishes *having* emotions from *modeling*, *detecting*, *displaying*, and *eliciting* affect. Nothing here claims that Artificial Curiosity (or current LLMs) *feel*. Curiosity in this repo is a **decision / information-seeking layer**, not an anthropomorphic mind.
 
 **Primary workspace path:** `research/AI_EMOTIONS.md`  
-**Related in-repo:** [`FIRST_PRINCIPLES.md`](FIRST_PRINCIPLES.md) (decision-theoretic curiosity), [`SOURCES.md`](SOURCES.md) (curiosity / VOI bibliography), `src/artificial_curiosity/provoke.py` (epistemic *provoke*), `src/artificial_curiosity/epistemic_cues.py` (optional UX annotations), [`docs/ROADMAP.md`](../docs/ROADMAP.md) §7.6 / near-wedge pointer.
+**Related in-repo:** [`FIRST_PRINCIPLES.md`](FIRST_PRINCIPLES.md) (decision-theoretic curiosity), [`SOURCES.md`](SOURCES.md) (curiosity / VOI bibliography), [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) (consumer APIs / libraries / public contract), `src/artificial_curiosity/provoke.py` (epistemic *provoke*), `src/artificial_curiosity/epistemic_cues.py` (optional UX annotations), [`docs/ROADMAP.md`](../docs/ROADMAP.md) §7.6 / near-wedge pointer.
 
 **Revision note:** Second-pass expansion beyond the initial spike — classical theories, CME architecture survey, ML recognition/generation stacks, RL functional analogs, LLM appraisal evidence, neuromodulation (cautious), HRI, epistemic-emotion elicitation design, ethics, and concrete product wedges.
 
@@ -599,8 +599,11 @@ Picard’s later emphasis on clinical / wellbeing sensing with consent contrasts
 |------|----------|
 | Decision-theoretic curiosity | `research/FIRST_PRINCIPLES.md` |
 | Curiosity literature map | `research/SOURCES.md` |
+| Consumer access patterns / public contract | `research/EMOTION_ACCESS.md` |
 | Provoke inject (epistemic elicitation) | `src/artificial_curiosity/provoke.py` |
 | Epistemic cue tags (UX annotations) | `src/artificial_curiosity/epistemic_cues.py` |
+| Public emotions surface | `src/artificial_curiosity/emotions.py`; `/v1/emotions/*` |
+| Example emotion schemas | `examples/emotions_*.json` |
 | Surprise / axes | `scoring.py`, `models.ScoreAxes` |
 | Dual-use / risk | `safety.py`, F10 in FAILURE_MODES |
 | Affect-domain seeds | `src/artificial_curiosity/packs/affective_science.json` |
@@ -608,6 +611,22 @@ Picard’s later emphasis on clinical / wellbeing sensing with consent contrasts
 
 ---
 
-## 16. One-paragraph bottom line
+## 16. Consumer access patterns (pointer)
+
+How third parties *reach* affect tooling (cloud FER/SER, local Py-Feat, OCC middleware, LLM toolkits, EES, open vs locked datasets) and the **minimal public contract** recommended for this repo live in [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md). Short map:
+
+| Pattern | Easy examples | This repo |
+|---------|---------------|-----------|
+| Sense human expression | Hume APIs; Py-Feat local | Out of scope |
+| Simulate agent OCC/PAD | FAtiMA Toolkit; GAMYGDALA | Out of scope |
+| LLM affect classify/eval | GoEmotions models; EmotionBench | Interop / honesty only |
+| Epistemic measure (EES) | Psych scales + behavior | Eval notes, not an EES API |
+| Epistemic framing + rank | — | **Own:** cues, annotate, elicit, pack, provoke |
+
+Ethics when “anyone can use” affect tooling (consent, covert sensing, manipulation) are expanded in [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) §6; they reinforce §12 here.
+
+---
+
+## 17. One-paragraph bottom line
 
 Emotions in AI are **engineered constructs**—appraisal rules, dimensional states, classifiers, RL bonuses, embodied displays, or LLM text patterns—optimized for recognition, control, or social effect. Classical theories (James–Lange through constructionism) supply metaphors and partial blueprints; CME stacks (EMA, FAtiMA, WASABI, ALMA, Kismet, …) show what *production* looks like in practice: event → appraisal/dynamics → state → expression/action. Epistemic emotions in humans motivate information seeking under incongruity; Artificial Curiosity operationalizes a related *function* (rank and provoke investigation of unknowns) with explicit values, gap evidence, and optional UX cues—never an OCC “feeling” engine. Treat affective science as a **source of hypotheses, elicitation designs, and eval metrics**, not as a license to claim the system feels.

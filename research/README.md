@@ -13,6 +13,8 @@ Long-form research that **informed** the product. You do not need these files to
 | [SOURCES.md](SOURCES.md) | Annotated bibliography (HybridQuestion, SciMuse, AutoDiscovery, MIRAI, …) |
 | [CAPABILITY.md](CAPABILITY.md) | Capability contract: ranked unknowns + ValueProfile — not Q&A / lab automation |
 | [HANDOFF.md](HANDOFF.md) | Historical implementation notes (may be stale) |
+| [AI_EMOTIONS.md](AI_EMOTIONS.md) | Emotion mechanisms; epistemic elicitation ↔ provoke (not anthropomorphic) |
+| [EMOTION_ACCESS.md](EMOTION_ACCESS.md) | Consumer APIs/SDKs/datasets; minimal `/v1/emotions/*` public contract |
 | [INDEX.md](INDEX.md) | Legacy research index |
 
 Where research shows up in code:
@@ -22,4 +24,5 @@ Where research shows up in code:
 - `diversity.py` — F4/F13 near-duplicate suppression
 - `judge.py` — structured rubrics (F5); curiosity ≠ citation forecast
 - `provoke.py` / MCP / HTTP — explicit ValueProfile (F11); “not Q&A” agent UX
+- `emotions.py` / `/v1/emotions/*` — epistemic cue annotate/elicit/pack (annotation_only)
 - `tests/test_failure_modes.py` — adversarial coverage for F1–F15

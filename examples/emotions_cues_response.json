@@ -1,0 +1,40 @@
+{
+  "cues": [
+    {
+      "tag": "information_gap",
+      "meaning": "Gap looks unanswered / partially answered — knowledge missing."
+    },
+    {
+      "tag": "curiosity_target",
+      "meaning": "Item is a candidate investigation target (functional curiosity cue)."
+    },
+    {
+      "tag": "confusion_risk",
+      "meaning": "Partial/caveated gap or low answerability — risk of stuck confusion."
+    },
+    {
+      "tag": "surprise_signal",
+      "meaning": "High surprise axis with an open gap — unexpectedness signal."
+    },
+    {
+      "tag": "incongruity",
+      "meaning": "Related literature ≠ answered, or surprise+gap — incongruity framing."
+    },
+    {
+      "tag": "boredom_guard",
+      "meaning": "High neglectedness — prefer under-explored over over-covered topics."
+    }
+  ],
+  "tags": [
+    "information_gap",
+    "curiosity_target",
+    "confusion_risk",
+    "surprise_signal",
+    "incongruity",
+    "boredom_guard"
+  ],
+  "honesty": "annotation_only",
+  "disclaimer": "Epistemic cues are UX annotations for investigation framing (incongruity / information-gap / confusion-risk) — NOT claims that this system feels emotions.",
+  "docs": "docs/EMOTIONS.md",
+  "note": "Epistemic cues annotate investigation framing. This software does not feel emotions."
+}
