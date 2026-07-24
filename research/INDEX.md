@@ -21,6 +21,9 @@ Everything under `research/` is design/background material that informed the imp
 | [AGENT_PLUGIN_UX.md](AGENT_PLUGIN_UX.md) | MCP / tool-calling UX for curiosity layers |
 | [NEGLECTEDNESS_COST.md](NEGLECTEDNESS_COST.md) | Neglectedness / cost proxy spike notes |
 | [VOI_APPROXIMATIONS.md](VOI_APPROXIMATIONS.md) | ISPOR/ConVOI EVSI methods → honest proxy vs adapter paths |
+| [PREFERENCE_CALIBRATION.md](PREFERENCE_CALIBRATION.md) | Preference JSONL → profile-scoped LTR/BT ladder |
+| [NEGLECTEDNESS_ITN.md](NEGLECTEDNESS_ITN.md) | ITN / EA neglectedness addendum for proxies |
+| [BAYESIAN_SURPRISE.md](BAYESIAN_SURPRISE.md) | AutoDiscovery surprisal vs score-axis surprise |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

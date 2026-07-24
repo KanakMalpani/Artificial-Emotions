@@ -25,6 +25,9 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |
 | Agent plugin / MCP UX | [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) | Tool description hygiene; progressive disclosure; ScaleMCP |
 | Approximate VOI / EVSI spike | [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md) | ISPOR/ConVOI methods; worksheet vs fake EVSI |
+| Preference calibration / LTR ladder | [`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md) | Pairwise prefs → profile weight hints → optional BT |
+| Neglectedness ITN addendum | [`NEGLECTEDNESS_ITN.md`](NEGLECTEDNESS_ITN.md) | Importance×Tractability×Neglectedness honesty |
+| Bayesian surprise / AutoDiscovery | [`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md) | Experimental surprisal ≠ lit surprise proxy |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
@@ -69,6 +72,13 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Kunst et al., ConVOI EVSI methods guide | arXiv:1910.03368 | Which approx method given skills/model |
 | Li, Jalal, Heath TGA EVSI | arXiv:2401.17393 | Nonlinear net-benefit correction |
 | Sadatsafavi et al., EVSI for validation | arXiv:2401.01849 | VOI lens on external validation studies |
+| Lingeman & Yu, LTR scientific documents | arXiv:1611.01400 | Expert relatedness ≠ text similarity |
+| Ai et al., unbiased learning to rank | arXiv:2004.13574 | Offline/online ULTR; position bias |
+| PFP preference feature preservation | arXiv:2506.11098 | Online preference learning majority-feature bias |
+| BT-σ LLM-as-a-jury | arXiv:2602.16610 | Judge reliability from pairwise comps |
+| DMLRank nonparametric preference ranking | arXiv:2601.21816 | GARS + efficient CIs for prefs |
+| 80,000 Hours / GiveWell ITN framing | 80000hours.org ; GiveWell Labs posts | Cause-level neglectedness vocabulary |
+| AutoDiscovery (Bayesian surprise ASD) | arXiv:2507.00310 ; NeurIPS 2025 | Surprisal-guided open-ended discovery |
 | EmotionBench (Huang et al.) | NeurIPS 2024; arXiv:2308.03656 | LLM emotional alignment fragility |
 | CoRE | arXiv:2508.05880 | Fragile appraisal→emotion reasoning in LLMs |
 | Human-like Affective Cognition in FMs | arXiv:2409.11733 | Structured affective cognition probes |
@@ -125,3 +135,4 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Affective-science seed pack | `packs/affective_science.json` |
 | Elicitation A/B protocol example | `examples/elicit_ab_protocol.json` |
 | VOI worksheet template | `examples/voi_worksheet_template.json` |
+| Preference events / weight hints | `preferences.py` |
