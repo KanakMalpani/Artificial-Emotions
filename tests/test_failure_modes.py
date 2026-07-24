@@ -264,6 +264,31 @@ def test_f7_further_research_needed_not_claim():
     assert _abstract_claim_signal(hit) < 0
 
 
+def test_f7_null_replication_phrases_dampen_answered():
+    """Null/replication open-gap lexicon should damp effective overlap (failure knowledge)."""
+    from artificial_curiosity.models import LiteratureHit
+    from artificial_curiosity.verify import _abstract_claim_signal, _effective_overlap
+
+    nullish = LiteratureHit(
+        title="Replication note",
+        abstract_snippet=(
+            "We failed to replicate the earlier effect; null findings remain. "
+            "Despite null results, further research is needed."
+        ),
+    )
+    claiming = LiteratureHit(
+        title="Positive result",
+        abstract_snippet=(
+            "We show the method works. Our results demonstrate significant improvement."
+        ),
+    )
+    assert _abstract_claim_signal(nullish) < 0
+    assert _abstract_claim_signal(claiming) > 0
+    assert _effective_overlap(0.4, _abstract_claim_signal(nullish)) < _effective_overlap(
+        0.4, _abstract_claim_signal(claiming)
+    )
+
+
 def test_f7_related_topic_phrase_not_auto_answered():
     """High hit count + weak overlap stays unanswered — related ≠ answered (F7)."""
     status = classify_gap(

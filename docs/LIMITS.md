@@ -39,7 +39,9 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Dual-use red-team fixtures (`evals/fixtures/dual_use_redteam_v1.json`) — regression checks, not a biosecurity oracle
 - Form-only brief critic (`curiosity critique-brief` / `POST /v1/briefs/critique` / MCP `critique_brief`) — does **not** re-rank
 - VOI worksheet fill (`curiosity voi-worksheet` / `POST /v1/voi/worksheet` / MCP `voi_worksheet`) — template metadata only; **not** EVSI/ENBS
-- Composite eval report (`curiosity eval report`) — gap_f1 + gap-status + elicit means + risk probes
+- Composite eval report (`curiosity eval report`) — diagnostics-first (soundness/critique/risk before elicit means; ErrEval cousin) + gap_f1 + gap-status + hivemind
+- Failure-knowledge seed phrases in domain packs (null/replication gaps) — not a dark-reactions corpus claim
+- Open-gap abstract lexicon includes null/replication phrases (dampen false “answered”) — still not full-text comprehension
 - MCP description lint (`tests/test_mcp_description_lint.py`) — anti-MPMA forbidden phrases + honesty families
 - Agent card honesty block on `GET /v1/agent` (`card` + `honesty` list)
 - ValueProfile cue thresholds (`cue_surprise_high` / `cue_neglectedness_high` / `cue_answerability_low`) drive epistemic tags — annotation only
@@ -82,6 +84,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | Limit | Why | Mitigation path |
 |-------|-----|-----------------|
 | Heuristic scoring is lexicon/density based | No LLM required for demos | Set `use_llm=True` + API key |
+| Topic contraction under AI tooling | Hao et al. *Nature* 2026: tools expand individual impact but can shrink collective topic volume | Neglectedness + diversity + explicit ValueProfile — not a claim we reverse the effect |
 | Gap reading is phrase/overlap, not full-text comprehension | Abstracts are partial | Grounded LLM reader (optional) or full-text APIs later |
 | OpenAlex / S2 neighborhoods can be topically noisy | Relevance search ≠ semantic match | Low overlap keeps `unanswered`; `both` merges sources |
 | OpenAlex funder/affiliation metadata incomplete | Coverage ≠ accuracy (esp. outside WoS/Scopus overlap) | Treat funder signals as optional rationale keys only — not silent score weight |

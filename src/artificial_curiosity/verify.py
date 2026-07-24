@@ -43,6 +43,11 @@ _OPEN_GAP = (
     "unclear whether",
     "still unknown",
     "to be determined",
+    "failed to replicate",
+    "null findings",
+    "despite null",
+    "negative result",
+    "replication failure",
 )
 
 

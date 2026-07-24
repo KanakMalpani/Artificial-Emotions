@@ -20,6 +20,14 @@
       "why_it_matters": "Idealized active sites mislead catalyst design when real surfaces are dynamic.",
       "tags": ["catalysis", "operando", "selectivity"],
       "assumptions": ["Operando spectroscopy can constrain site distributions."]
+    },
+    {
+      "id": "matcat-pack-03-null",
+      "question": "Which hydrothermal synthesis routes that look phase-pure by bulk XRD still fail under microstructure checks after failed replications?",
+      "operationalization": "Catalog routes with published null/replication-failure notes; rank by fraction failing microstructure criteria despite XRD pass on ≥20 attempts.",
+      "why_it_matters": "Negative microstructural results after apparent phase-pure XRD are under-reported; failure knowledge improves synthesizability priors.",
+      "tags": ["materials", "synthesis", "null_result", "failure_knowledge"],
+      "assumptions": ["Attempt-level outcomes can be coded from lab notes or registries."]
     }
   ]
 }

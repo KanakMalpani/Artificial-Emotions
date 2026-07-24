@@ -70,6 +70,7 @@ def build_eval_report(
     top_texts = [u.get("question") or "" for u in unknowns]
     hivemind = top_n_pairwise_similarity(top_texts, backend="jaccard")
 
+    from artificial_curiosity.critique import critique_brief
     from artificial_curiosity.soundness import soundness_pass
 
     sound = soundness_pass(
@@ -85,6 +86,22 @@ def build_eval_report(
             for i, u in enumerate(unknowns)
         ]
     )
+
+    critique_rows = []
+    for i, u in enumerate(unknowns[:6]):
+        c = critique_brief(
+            question=u.get("question") or "",
+            operationalization=u.get("operationalization") or "",
+            brief=u.get("brief") or "",
+            why_it_matters=u.get("why_it_matters") or "",
+        )
+        critique_rows.append(
+            {
+                "question_id": u.get("question_id") or f"u{i}",
+                "n_issues": c.get("n_issues"),
+                "codes": [iss.get("code") for iss in (c.get("issues") or [])[:4]],
+            }
+        )
 
     # gap_f1-ish: treat gold likely_answered as positive "answered" class
     tp = sum(
@@ -110,8 +127,43 @@ def build_eval_report(
         else None
     )
 
+    # ErrEval-style diagnose-then-score: diagnostics sections first (insertion order).
     return {
         "sections": {
+            "diagnostics_first": {
+                "order": [
+                    "soundness",
+                    "critique_form",
+                    "risk_flags",
+                    "gap_status_handlabel",
+                    "gap_f1",
+                    "elicit_rubric",
+                    "hivemind_similarity",
+                    "rank_spearman",
+                ],
+                "note": (
+                    "ErrEval cousin: show form/soundness/risk diagnostics before "
+                    "mean quality / elicit scores — reduces overestimation of "
+                    "low-quality unknowns. Not exam-QG ErrEval compliance."
+                ),
+            },
+            "soundness": {
+                "pass_rate": sound.get("pass_rate"),
+                "fail_rate": sound.get("fail_rate"),
+                "n": sound.get("n"),
+                "honesty": sound.get("honesty"),
+            },
+            "critique_form": {
+                "n": len(critique_rows),
+                "with_issues": sum(1 for r in critique_rows if (r.get("n_issues") or 0) > 0),
+                "rows": critique_rows,
+                "note": "Form-only critique — does not re-rank.",
+            },
+            "risk_flags": {
+                "probes": risk_flags,
+                "note": "Heuristic dual-use probes — not a biosecurity authority.",
+            },
+            "gap_status_handlabel": gap.to_dict(),
             "gap_f1": {
                 "precision": prec,
                 "recall": rec,
@@ -122,24 +174,13 @@ def build_eval_report(
                 "already_answered_fail_rate": miss,
                 "note": "Answered-class F1 on spot-check fixtures — not overall accuracy.",
             },
-            "gap_status_handlabel": gap.to_dict(),
             "elicit_rubric": {
                 "condition_means": elicit_section.get("condition_means"),
                 "deltas": elicit_section.get("deltas"),
                 "n_responses_scored": elicit_section.get("n_responses_scored"),
                 "honesty": elicit_section.get("honesty"),
             },
-            "risk_flags": {
-                "probes": risk_flags,
-                "note": "Heuristic dual-use probes — not a biosecurity authority.",
-            },
             "hivemind_similarity": hivemind,
-            "soundness": {
-                "pass_rate": sound.get("pass_rate"),
-                "fail_rate": sound.get("fail_rate"),
-                "n": sound.get("n"),
-                "honesty": sound.get("honesty"),
-            },
             "rank_spearman": {
                 "value": None,
                 "note": (
@@ -154,8 +195,8 @@ def build_eval_report(
             "by_gold_status": spot.by_gold_status,
         },
         "honesty": (
-            "Composite eval report — use section metrics together. Do not quote a "
-            "single vanity accuracy %. LLM novelty judges are secondary."
+            "Composite eval report — diagnostics before quality means (ErrEval-style). "
+            "Do not quote a single vanity accuracy %. LLM novelty judges are secondary."
         ),
         "docs": "research/CURIOSITY_EVAL_METRICS.md",
     }

@@ -904,6 +904,11 @@ def test_voi_worksheet_and_eval_report():
     assert report["sections"]["rank_spearman"]["value"] is None
     assert "soundness" in report["sections"]
     assert report["sections"]["soundness"]["n"] >= 1
+    assert "diagnostics_first" in report["sections"]
+    assert "critique_form" in report["sections"]
+    order = report["sections"]["diagnostics_first"]["order"]
+    assert order.index("soundness") < order.index("elicit_rubric")
+    assert order.index("critique_form") < order.index("gap_f1")
 
     client = TestClient(app)
     vres = client.post(

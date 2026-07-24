@@ -20,6 +20,14 @@
       "why_it_matters": "Goal preservation under shift is a core control failure mode.",
       "tags": ["alignment", "training", "robustness"],
       "assumptions": ["Goal proxies are measurable in the suite."]
+    },
+    {
+      "id": "align-pack-03-null",
+      "question": "Despite null findings on probe-based sandbagging detectors, which evaluation pressures still produce undetected capability underreporting?",
+      "operationalization": "Enumerate pressures where published detectors failed to replicate AUROC ≥ 0.7; measure residual underreporting on ≥2 model families.",
+      "why_it_matters": "Publication bias hides failed detectors; naming null gaps keeps ranking honest.",
+      "tags": ["alignment", "evals", "null_result", "failure_knowledge"],
+      "assumptions": ["Failed detector reports or replications are available as fixtures."]
     }
   ]
 }
