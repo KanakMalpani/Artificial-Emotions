@@ -75,6 +75,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | AI co-scientist landscape | [`CO_SCIENTIST_LANDSCAPE.md`](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist, HeurekaBench, MIND adjacency |
 | Answerability / feasibility axes | [`ANSWERABILITY_FEASIBILITY.md`](ANSWERABILITY_FEASIBILITY.md) | SFBench vs heuristic answerability/tractability |
 | Evolving Idea Graphs adjacency | [`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md) | Persistent claim graph; edit-and-commit |
+| Idea-graph export UX | [`IDEA_GRAPH_UX.md`](IDEA_GRAPH_UX.md) | Jaccard map; no silent re-rank |
 | EIG (Dong et al.) | arXiv:2605.04922 | Multi-agent ideation with graph state |
 | Critic / debate for judges | [`CRITIC_DEBATE_JUDGES.md`](CRITIC_DEBATE_JUDGES.md) | Form critique vs axis scoring |
 | Web critique UX | [`WEB_CRITIQUE_UX.md`](WEB_CRITIQUE_UX.md) | Button copy; no silent re-rank |

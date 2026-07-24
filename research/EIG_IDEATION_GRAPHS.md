@@ -27,6 +27,8 @@
 
 **Productize (optional, P2):** Export top-n as a tiny JSON “idea graph” for agents (`nodes: questions`, `edges: similarity|conflict`) — display/debug only; no silent re-rank.
 
+**Sibling landing:** `idea_graph.py` (in flight / landed) — keep export **annotation-only**; edges must not rewrite ranks.
+
 ---
 
 ## 3. Positioning
