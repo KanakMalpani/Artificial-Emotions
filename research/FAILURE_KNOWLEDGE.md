@@ -26,6 +26,14 @@ Hao, Xu, Li & Evans (*Nature* 2026): AI tools expand individual scientists’ im
 
 Optional future: ingest **negative-result registries** / preregistration dumps as adapters — not core.
 
+### 2.1 Extra literature pointers (2025–2026)
+
+| Work | Transfer |
+|------|----------|
+| Peng et al. SAEs to discover unknowns ([2506.23845](https://arxiv.org/abs/2506.23845)) | Interpretability: “unknown concepts” ≠ our unanswered science Qs — naming collision only |
+| Choudhary et al. Sr₃Ru₂O₇ films ([2502.16817](https://arxiv.org/abs/2502.16817)) | Negative microstructural result after apparent phase-pure XRD — seed: “what looks settled under bulk metrics but fails under microstructure?” |
+| Publication-incentive topic narrowing ([2501.17150](https://arxiv.org/abs/2501.17150)) | External incentives warp curiosity — ValueProfile antidote |
+
 ---
 
 ## 3. Productize next (sibling)
