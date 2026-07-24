@@ -17,6 +17,8 @@ Production-ready hardening of the public surface (emotions + API + plugins).
 - Emotion mix/catalog/annotate raise typed `CuriosityError` (still subclasses `ValueError`)
 - Auth reject responses use `{ "error": { "code": "auth_required", … } }`
 - Regenerated `examples/openai_tools.json` to include emotion catalog/mix tools
+- HTTP no longer accepts `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
+- `/ready` returns **503** when checks fail
 
 ### Honesty
 - Emotions remain **annotation_only** framing — not felt affect; scores ≠ oracles

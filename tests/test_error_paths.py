@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from artificial_curiosity import CuriosityError, mix_emotions
-from artificial_curiosity.api import app
+from artificial_curiosity.api import ProvokeRequest, RunRequest, app
 from artificial_curiosity.config import clear_config_cache
 from artificial_curiosity.errors import (
     ERR_AUTH_REQUIRED,
@@ -80,6 +80,48 @@ def test_health_and_ready_detail():
     assert r["ready"] is True
     assert r["checks"]["emotion_catalog"] is True
     assert r["checks"]["profiles"] is True
+
+
+def test_ready_returns_503_when_checks_fail(monkeypatch):
+    import artificial_curiosity.api as api_mod
+
+    monkeypatch.setattr(
+        api_mod,
+        "emotion_catalog",
+        lambda **_kw: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+    client = TestClient(app)
+    ready = client.get("/ready")
+    assert ready.status_code == 503
+    body = ready.json()
+    assert body["ready"] is False
+    assert body["ok"] is False
+    assert body["checks"]["emotion_catalog"] is False
+
+
+def test_http_ignores_cache_dir_and_client_llm_base_url():
+    """HTTP must not accept path/SSRF knobs (CLI/env only)."""
+    assert "literature_cache_dir" not in RunRequest.model_fields
+    assert "llm_base_url" not in RunRequest.model_fields
+    assert "llm_base_url" not in ProvokeRequest.model_fields
+
+    client = TestClient(app)
+    # Extra body fields are ignored; must not mkdir or call attacker URL.
+    run = client.post(
+        "/v1/curiosity/run",
+        json={
+            "domain": "ai",
+            "n_return": 2,
+            "n_candidates": 8,
+            "use_literature": False,
+            "use_llm": False,
+            "literature_cache_dir": "/tmp/evil-cache",
+            "llm_base_url": "http://127.0.0.1:9/steal",
+        },
+    )
+    assert run.status_code == 200
+    assert "literature_cache_dir" not in run.json()["query"]
+    assert "llm_base_url" not in run.json()["query"]
 
 
 def test_api_mix_validation_empty_weights():

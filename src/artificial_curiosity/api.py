@@ -165,15 +165,13 @@ class RunRequest(BaseModel):
     llm_model: str | None = None
     judge_model: str | None = None
     judge_ensemble_n: int = Field(1, ge=1, le=5)
-    llm_base_url: str | None = None
+    # llm_base_url / literature_cache_dir are env/CLI-only (SSRF + path injection).
     profile_name: str | None = Field(
         None,
         description=f"Named ValueProfile preset: {', '.join(list_profile_names())}",
     )
     value_profile: ValueProfile | None = None
     diversity_backend: str = Field("jaccard", pattern="^(jaccard|embedding)$")
-    # Preference JSONL paths are CLI/config-only — not accepted over HTTP (path injection).
-    literature_cache_dir: str | None = None
 
 
 class ProvokeRequest(BaseModel):
@@ -190,7 +188,7 @@ class ProvokeRequest(BaseModel):
     use_literature: bool | None = None
     llm_model: str | None = None
     judge_model: str | None = None
-    llm_base_url: str | None = None
+    # llm_base_url is env/CLI-only — never accept client URLs (SSRF / key leak).
     profile_name: str | None = None
     value_profile: ValueProfile | None = None
     diversity_backend: str = "jaccard"
@@ -275,8 +273,11 @@ def health() -> dict[str, Any]:
 
 
 @app.get("/ready")
-def ready() -> dict[str, Any]:
-    """Readiness: process can serve offline spark (no network required)."""
+def ready() -> JSONResponse:
+    """Readiness: process can serve offline spark (no network required).
+
+    Returns HTTP 503 when checks fail so load balancers stop routing traffic.
+    """
     clear_config_cache()
     cfg = get_config()
     checks: dict[str, bool] = {
@@ -294,7 +295,7 @@ def ready() -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         logger.warning("readiness profiles check failed: %s", exc)
     ok = all(checks.values())
-    return {
+    body = {
         "ok": ok,
         "ready": ok,
         "service": "artificial-curiosity",
@@ -302,6 +303,7 @@ def ready() -> dict[str, Any]:
         "checks": checks,
         "note": ("Ready means offline spark/emotions work. Literature/LLM remain optional."),
     }
+    return JSONResponse(status_code=200 if ok else 503, content=body)
 
 
 @app.get("/")
@@ -519,13 +521,12 @@ def run_curiosity(req: RunRequest) -> dict[str, Any]:
         use_llm=req.use_llm,
         use_literature=req.use_literature,
         literature_backend=req.literature_backend,
-        literature_cache_dir=req.literature_cache_dir,
         literature_timeout_s=cfg.literature_timeout_s,
         value_profile=profile,
         llm_model=req.llm_model or "gpt-4o-mini",
         judge_model=req.judge_model,
         judge_ensemble_n=req.judge_ensemble_n,
-        llm_base_url=req.llm_base_url,
+        # LLM base URL from env only — never from HTTP body (SSRF / key leak).
         diversity_backend=req.diversity_backend,
     )
     results = CuriosityEngine(config).run_dict()
@@ -553,7 +554,6 @@ def provoke_post(req: ProvokeRequest) -> dict[str, Any]:
         profile_name=req.profile_name,
         llm_model=req.llm_model,
         judge_model=req.judge_model,
-        llm_base_url=req.llm_base_url,
         diversity_backend=req.diversity_backend,
     )
 
@@ -568,7 +568,6 @@ def provoke_get(
     use_literature: bool | None = Query(None),
     llm_model: str | None = Query(None),
     judge_model: str | None = Query(None),
-    llm_base_url: str | None = Query(None),
     profile_name: str | None = Query(None),
     diversity_backend: str = Query("jaccard"),
 ) -> dict[str, Any]:
@@ -583,7 +582,6 @@ def provoke_get(
         profile_name=profile_name,
         llm_model=llm_model,
         judge_model=judge_model,
-        llm_base_url=llm_base_url,
         diversity_backend=diversity_backend,
     )
 

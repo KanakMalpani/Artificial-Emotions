@@ -185,7 +185,13 @@ class MergedLiteratureClient:
 
         try:
             secondary_hits = self.secondary.search_works(query, per_page=per_page)
-        except Exception:  # noqa: BLE001 — soft-fail secondary
+        except Exception as exc:  # noqa: BLE001 — soft-fail secondary
+            logger.warning(
+                "Secondary literature backend %s soft-fail; using %s only: %s",
+                self.secondary_name,
+                self.primary_name,
+                exc,
+            )
             return primary_hits
 
         for h in secondary_hits:

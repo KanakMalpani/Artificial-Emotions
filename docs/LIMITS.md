@@ -31,8 +31,9 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon (`research/NEGLECTEDNESS_COST.md`) — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
 - Versioned domain packs (`artificial_curiosity/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment + climate packs
-- Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness
+- Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness (**503** when not ready)
 - Central env config module (`artificial_curiosity.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS
+- HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
 - Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, e2e — run `pytest -q`
 - Smoke: `curiosity spark`, `curiosity profiles`, `curiosity eval`, `curiosity-mcp --list-tools`, `--list-resources`
