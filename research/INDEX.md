@@ -37,6 +37,7 @@ Everything under `research/` is design/background material that informed the imp
 | [FAILURE_KNOWLEDGE.md](FAILURE_KNOWLEDGE.md) | Publication bias / dark reactions / topic contraction |
 | [HIVEMIND.md](HIVEMIND.md) | Jiang et al. Artificial Hivemind → diversity metrics |
 | [CO_SCIENTIST_LANDSCAPE.md](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist / HeurekaBench / MIND vs curiosity layer |
+| [AGENT_CARD_COPY.md](AGENT_CARD_COPY.md) | Draft honesty copy for /v1/agent and MCP |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
