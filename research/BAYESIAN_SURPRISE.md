@@ -44,6 +44,8 @@ Report Spearman(predicted_surprise, belief_shift) offline. If weak, keep axis as
 
 Neuro/MARL “Bayesian surprise” papers (cultures, ICES) are **different objects** — do not cite as product validation.
 
+**Follow-on:** Non-stationary / evidence-informed LLM beliefs ([`EVIDENCE_INFORMED_BELIEFS.md`](EVIDENCE_INFORMED_BELIEFS.md); arXiv 2606.29182) — static surprisal can be spurious; diversity+belief update matter for continual discovery. Sibling `fill_surprise_worksheet` remains manual logging only.
+
 ## 4. See also
 
 - [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md) — Yanagisawa Bayesian IG / Wundt curve  

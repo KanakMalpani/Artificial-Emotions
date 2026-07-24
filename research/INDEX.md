@@ -66,6 +66,7 @@ Everything under `research/` is design/background material that informed the imp
 | [SOUNDNESS_PASS_UX.md](SOUNDNESS_PASS_UX.md) | Heuristic soundness triage UX |
 | [OUTCOME_WEB_UX.md](OUTCOME_WEB_UX.md) | Outcome label capture / summarize honesty |
 | [CONSTITUTION_WEB_UX.md](CONSTITUTION_WEB_UX.md) | Compare + veto stack web flow |
+| [EVIDENCE_INFORMED_BELIEFS.md](EVIDENCE_INFORMED_BELIEFS.md) | Non-stationary surprisal; AutoDiscovery follow-on |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

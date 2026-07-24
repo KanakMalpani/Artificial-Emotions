@@ -56,6 +56,9 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | LIMITS citation patches | [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md) | Proposed docs/LIMITS honesty bullets |
 | Neglectedness ITN addendum | [`NEGLECTEDNESS_ITN.md`](NEGLECTEDNESS_ITN.md) | Importance×Tractability×Neglectedness honesty |
 | Bayesian surprise / AutoDiscovery | [`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md) | Experimental surprisal ≠ lit surprise proxy |
+| Evidence-informed LLM beliefs | [`EVIDENCE_INFORMED_BELIEFS.md`](EVIDENCE_INFORMED_BELIEFS.md) | Non-stationary surprisal; spurious static rewards |
+| AutoDiscovery | arXiv:2507.00310 | Bayesian surprise open-ended ASD |
+| Evidence-informed beliefs | arXiv:2606.29182 | Continual discovery; RAG belief update |
 | Dual-use ranking safety | [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md) | Safeguarding AI scientists; Jr. AI risk report → filters |
 | BioVeil / agentic dual-use | [`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md) | Scaffolding uplift; WMDP proxy; taxonomy pointer |
 | BioVeil MATRIX | arXiv:2605.00927 | Agentic bio AI scientist vulnerabilities |
