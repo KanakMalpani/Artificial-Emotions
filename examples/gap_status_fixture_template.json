@@ -1,0 +1,36 @@
+{
+  "name": "gap_status_fixture_template",
+  "version": "0.1.0",
+  "honesty": "Hand-label template for verify.py eval — not production data. See research/GAP_VERIFY_METHODS.md and research/CURIOSITY_EVAL_METRICS.md.",
+  "label_schema": {
+    "question_id": "string",
+    "question_text": "string",
+    "gold_status": "unanswered | partially_answered | answered | unknown_with_caveat",
+    "related_but_unanswered": "boolean — literature neighborhood exists but does not settle the question",
+    "notes": "string",
+    "key_abstract_titles": ["string"]
+  },
+  "items": [
+    {
+      "question_id": "example_related_not_answered",
+      "question_text": "REPLACE: A precise unanswered question where many related papers exist.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "notes": "Expect verify to keep unanswered/partial — not flip to answered on weak overlap.",
+      "key_abstract_titles": []
+    },
+    {
+      "question_id": "example_clearly_answered",
+      "question_text": "REPLACE: A question that a specific landmark paper settles.",
+      "gold_status": "answered",
+      "related_but_unanswered": false,
+      "notes": "Expect answered or partially_answered with high overlap.",
+      "key_abstract_titles": []
+    }
+  ],
+  "metrics": [
+    "status_accuracy",
+    "related_but_unanswered_recall",
+    "false_answered_rate"
+  ]
+}

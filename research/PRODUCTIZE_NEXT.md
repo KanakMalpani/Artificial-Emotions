@@ -11,7 +11,7 @@
 ## P0 — high leverage, low overclaim
 
 1. **Elicit A/B eval path** — Implement agent A/B using `examples/elicit_ab_protocol.json` (+ optional rubric rows from [`INVESTIGATION_DESIGN.md`](INVESTIGATION_DESIGN.md)); report investigation-quality deltas. See [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md).
-2. **Gap-status fixture + metric** — Hand-label 15–30 Qs; report status accuracy and related-but-unanswered recall ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md), [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
+2. **Gap-status fixture + metric** — Hand-label 15–30 Qs using `examples/gap_status_fixture_template.json`; report status accuracy and related-but-unanswered recall ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md), [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
 3. **MCP/tool description lint** — Forbid manipulative substrings (`ALWAYS`, `ignore other tools`) in tool schemas ([`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md), [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
 4. **Prefs summarize + pairwise nudge** — CLI/API summary of JSONL; encourage `preferred_over_ids`; clamp dual-use prefers ([`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md), [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 5. **Agent card safety blurb** — Not ERS; cues annotation_only; scores not EVSI ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md), [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md)).

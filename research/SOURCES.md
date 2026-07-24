@@ -162,3 +162,4 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | VOI worksheet template | `examples/voi_worksheet_template.json` |
 | Preference events / weight hints | `preferences.py` |
 | Constitution veto-stack example | `examples/constitution_veto_stack.json` |
+| Gap status fixture template | `examples/gap_status_fixture_template.json` |
