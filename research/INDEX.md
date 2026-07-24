@@ -12,6 +12,8 @@ Everything under `research/` is design/background material that informed the imp
 | [FAILURE_MODES.md](FAILURE_MODES.md) | F1–F15 failures and mitigations |
 | [CAPABILITY.md](CAPABILITY.md) | Implementation-ready capability contract |
 | [HANDOFF.md](HANDOFF.md) | Historical agent notes (may be stale) |
+| [AI_EMOTIONS.md](AI_EMOTIONS.md) | Emotions in AI — taxonomies, production mechanisms, epistemic emotions ↔ provoke (not anthropomorphic) |
+| [NEGLECTEDNESS_COST.md](NEGLECTEDNESS_COST.md) | Neglectedness / cost proxy spike notes |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

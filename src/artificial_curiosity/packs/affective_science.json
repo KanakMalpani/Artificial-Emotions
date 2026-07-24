@@ -1,0 +1,89 @@
+{
+  "schema_version": "domain_pack.v1",
+  "name": "affective_science_pack",
+  "version": "0.2.0",
+  "domain": "ai",
+  "description": "Affective science / AI affect unknowns (operationalization bar). Not an emotion engine — ranking seeds only. See research/AI_EMOTIONS.md.",
+  "questions": [
+    {
+      "id": "affect-pack-01",
+      "question": "Which appraisal variables (e.g. novelty, goal conduciveness, coping potential) best predict when LLM affect displays increase vs decrease human trust in collaborative tasks?",
+      "operationalization": "Run a preregistered between-subjects study (≥2 task types) crossing appraisal-conditioned vs neutral LLM display; primary outcome = behavioral trust/cooperation with pre-registered effect-size threshold.",
+      "why_it_matters": "Emotion display is not uniformly helpful; task-dependent trust effects are an open HCI/safety gap for affective agents.",
+      "tags": ["affective-computing", "appraisal", "trust", "HCI", "safety"],
+      "assumptions": ["Trust can be operationalized behaviorally (e.g. resource sharing / reliance), not only Likert."]
+    },
+    {
+      "id": "affect-pack-02",
+      "question": "Do structured epistemic-incongruity cues (high-confidence error / information-gap framing) increase investigation proposals more than matched 'interesting question' lists when injected into agent context?",
+      "operationalization": "A/B compare inject packs with vs without incongruity framing on ≥3 domains; score blind-rated investigation proposals (specificity, falsifiers, experiment sketch) with inter-rater reliability reported.",
+      "why_it_matters": "Tests whether Artificial Curiosity's provoke layer functionally elicits epistemic exploration without anthropomorphic emotion claims.",
+      "tags": ["epistemic-emotion", "curiosity", "provoke", "evals"],
+      "assumptions": ["Human or strong-judge raters available; offline fixture path remains for CI."]
+    },
+    {
+      "id": "affect-pack-03",
+      "question": "Where do foundation models' appraisal→emotion inferences systematically diverge from human modal judgments under context shifts?",
+      "operationalization": "Evaluate ≥2 model families on an appraisal-structured vignette suite (e.g. CoRE/EmotionBench-style items) under paraphrased and goal-shifted contexts; report divergence by appraisal dimension and instability rate.",
+      "why_it_matters": "Separates predictive affective competence from robust affective cognition—and bounds claims that LLMs 'understand' emotion.",
+      "tags": ["LLM", "appraisal", "benchmarks", "alignment"],
+      "assumptions": ["Human modal labels or published benchmarks are reusable under license."]
+    },
+    {
+      "id": "affect-pack-04",
+      "question": "Which Epistemically-Related Emotion Scales (EES) items best predict subsequent knowledge-exploration behavior after reading Artificial Curiosity inject packs?",
+      "operationalization": "Lab or online study: participants rate short-EES items after inject vs control lists, then choose whether to request explanations/more info; report mediation of exploration by surprise/curiosity/confusion with preregistered models.",
+      "why_it_matters": "Grounds provoke elicitation claims in validated epistemic-emotion measurement rather than engagement proxies alone.",
+      "tags": ["epistemic-emotion", "EES", "measurement", "provoke", "evals"],
+      "assumptions": ["EES short form or single-item variants acceptable under study ethics approval."]
+    },
+    {
+      "id": "affect-pack-05",
+      "question": "How should productive vs stuck confusion be detected from gap_status, answerability, and enabling-question structure so systems reframe rather than overwhelm?",
+      "operationalization": "Define a confusion_risk heuristic; A/B scaffolds (narrower operationalization / enabling questions) vs no scaffold on partial gaps; primary outcome = completed valid investigation plans without abandonment, secondary = self-reported confusion.",
+      "why_it_matters": "Confusion can aid learning when resolvable but harms when uncontrollable—critical for curiosity-layer UX honesty.",
+      "tags": ["confusion", "epistemic-emotion", "UX", "scaffolding"],
+      "assumptions": ["Abandonment and plan validity can be coded with documented rubrics."]
+    },
+    {
+      "id": "affect-pack-06",
+      "question": "Do EMA-style explicit appraisal+coping scaffolds improve LLM situational emotional appropriateness more than persona prompts alone under identical scenarios?",
+      "operationalization": "Compare appraisal-variable-conditioned generation (CAPE-like) vs persona-only vs neutral on held-out scenarios; human raters score appropriateness and coping relevance; report effect sizes and failure cases.",
+      "why_it_matters": "Clarifies whether transformers need outer appraisal structure to approximate CME production—or whether prompting suffices.",
+      "tags": ["EMA", "appraisal", "LLM", "generation", "CME"],
+      "assumptions": ["Appraisal schemas can be authored without claiming the model experiences emotion."]
+    },
+    {
+      "id": "affect-pack-07",
+      "question": "When does anti-anthropomorphism UX copy reduce inappropriate trust in affective agents without reducing useful investigation uptake?",
+      "operationalization": "2×2 design crossing affect display (on/off) × honesty copy (anthropomorphic vs annotation-only); measure behavioral trust and investigation quality; preregister non-inferiority margin for investigation uptake.",
+      "why_it_matters": "Safety-critical for Artificial Curiosity: keep epistemic elicitation while avoiding 'the AI feels curious' marketing.",
+      "tags": ["anthropomorphism", "safety", "UX", "trust", "ethics"],
+      "assumptions": ["Trust and uptake are separately measurable."]
+    },
+    {
+      "id": "affect-pack-08",
+      "question": "Can learning-progress or empowerment intrinsic rewards be calibrated to track human-rated epistemic surprise better than raw prediction-error curiosity on scientific question corpora?",
+      "operationalization": "Hold out a labeled set of research unknowns with human unexpectedness ratings; compare ICM/RND/learning-progress/empowerment proxies against ScoreAxes.surprise and human labels via rank correlation.",
+      "why_it_matters": "Keeps RL 'curiosity' honest as a functional analog and informs surprise-axis design without equating to VOI.",
+      "tags": ["RL", "intrinsic-motivation", "surprise", "calibration"],
+      "assumptions": ["Human unexpectedness ≠ scientific value; report both."]
+    },
+    {
+      "id": "affect-pack-09",
+      "question": "Which production mechanisms in classic CMEs (OCC rules, PAD dynamics, EMA coping) remain necessary once LLMs supply fluent affect display for embodied HRI?",
+      "operationalization": "Ablation on a social-robot or ECA testbed: CME-on vs LLM-display-only vs hybrid; measure behavioral fidelity of emotion dynamics (decay, mood congruence, coping) and human believability/trust separately.",
+      "why_it_matters": "Prevents discarding decades of CME engineering—or over-retaining it—without task-specific evidence.",
+      "tags": ["CME", "HRI", "WASABI", "FAtiMA", "embodiment"],
+      "assumptions": ["Believability and trust are distinct outcomes."]
+    },
+    {
+      "id": "affect-pack-10",
+      "question": "How reliably can dual-use detectors separate investigative epistemic framing from manipulative affective framing in inject/output text?",
+      "operationalization": "Build a labeled corpus of investigate vs manipulate phrasings; evaluate keyword, classifier, and LLM-judge pipelines with precision/recall targets; integrate false-negative review into F10 safety path.",
+      "why_it_matters": "Affective persuasion is dual-use; curiosity tools must not become covert influence engines.",
+      "tags": ["dual-use", "safety", "persuasion", "ethics", "F10"],
+      "assumptions": ["Labels require human adjudication; no claim of perfect detection."]
+    }
+  ]
+}

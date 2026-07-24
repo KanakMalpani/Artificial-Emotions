@@ -499,8 +499,12 @@ Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding de
 | Lab closed-loop | Curiosity → experiment → re-rank (still not “we write Nature”) |
 | Constitutional curiosity | Multi-stakeholder ValueProfile negotiation |
 | Adversarial red-team league | Continuous F1–F15 corpus |
+| Affect / epistemic-emotion track | Research-only CME notes → optional incongruity UX cues / provoke elicitation eval; never claim the engine “feels” ([`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md)) |
+| Epistemic emotion elicitation | Near moonshot / research wedge: measure whether incongruity-framed injects raise investigation quality (human or agent A/B + optional EES); ship only annotation-level cues (`epistemic_cues.py`), not OCC/PAD engines |
 
 Only pick these if the user explicitly asks or P1–P2 are clear.
+
+**Near pointer (not a default P1 ID):** If P1 is clear and the user asks for affect-adjacent product work, prefer **Epistemic emotion elicitation** over companion/empathy personas — keep honesty bar in [`LIMITS.md`](LIMITS.md) and [`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md).
 
 ---
 

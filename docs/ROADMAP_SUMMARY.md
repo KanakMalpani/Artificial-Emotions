@@ -40,7 +40,7 @@ P2 W10–W15 are ✅. Full queue: roadmap **§2**.
 | **Near** | v0.2 | ✅ Embeddings optional, multi-provider notes, presets, UX honesty, packaging prep |
 | **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge; remaining: PyPI → **credible v1** |
 | **Long** | v1.x→v2+ | Flywheel, preference learning, enterprise, AI-Scientist upstream |
-| **Moonshots** | — | Approximate VOI, surprise search, lab closed-loop — not default backlog |
+| **Moonshots** | — | Approximate VOI, surprise search, lab closed-loop, epistemic emotion elicitation — not default backlog |
 
 Phased **work-order checklists**: roadmap **§7**.
 

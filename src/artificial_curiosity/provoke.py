@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from artificial_curiosity.epistemic_cues import (
+    format_cues_for_inject,
+    incongruity_investigate_block,
+)
 from artificial_curiosity.models import CuriosityConfig, RankedQuestion, ValueProfile
 from artificial_curiosity.pipeline import CuriosityEngine
 
@@ -14,10 +18,15 @@ PROVOKE_HEADER = (
     "concrete first experiment/analysis, and name falsifiers.\n"
     "Scores use an explicit ValueProfile (never value-free) and are decision "
     "aids with [low–high] bands — not oracles. Related literature ≠ answered.\n"
+    "Do NOT anthropomorphize: this layer ranks unknowns; it does not feel.\n"
 )
 
 
-def compact_unknown(item: RankedQuestion) -> dict:
+def compact_unknown(
+    item: RankedQuestion,
+    *,
+    epistemic_cues: bool = True,
+) -> dict:
     works = [
         {
             "title": h.title,
@@ -27,7 +36,7 @@ def compact_unknown(item: RankedQuestion) -> dict:
         }
         for h in item.gap.related_works[:3]
     ]
-    return {
+    out: dict = {
         "rank": item.rank,
         "question": item.question.question,
         "why_it_matters": item.question.why_it_matters,
@@ -52,6 +61,11 @@ def compact_unknown(item: RankedQuestion) -> dict:
         "brief": item.investigation_brief,
         "flags": item.flags,
     }
+    if epistemic_cues:
+        from artificial_curiosity.epistemic_cues import derive_epistemic_cues
+
+        out["epistemic_cues"] = derive_epistemic_cues(item)
+    return out
 
 
 def build_inject_prompt(
@@ -60,6 +74,7 @@ def build_inject_prompt(
     domain: str,
     topic: str,
     value_profile: ValueProfile | None = None,
+    include_epistemic_framing: bool = True,
 ) -> str:
     profile = value_profile or ValueProfile()
     lines = [
@@ -85,16 +100,23 @@ def build_inject_prompt(
         lines.append(f"   How we'd know: {u['operationalization']}")
         if u.get("brief"):
             lines.append(f"   Brief: {u['brief'][:280]}")
+        cue_line = format_cues_for_inject(u.get("epistemic_cues"))
+        if cue_line:
+            lines.append(f"   {cue_line}")
         flags = u.get("flags") or []
         if flags:
             lines.append(f"   Flags: {', '.join(flags[:6])}")
+        lines.append("")
+    if include_epistemic_framing:
+        lines.append(incongruity_investigate_block())
         lines.append("")
     lines.append(
         "Instructions for the receiving model:\n"
         "1) Prefer unanswered/partial gaps with strong operationalization.\n"
         "2) State which ValueProfile tradeoffs you are accepting.\n"
         "3) Propose a concrete first investigation + falsifier.\n"
-        "4) Do not invent papers; respect gap_status and neighborhood notes."
+        "4) Do not invent papers; respect gap_status and neighborhood notes.\n"
+        "5) Do not claim the ranking engine 'feels' curiosity or other emotions."
     )
     return "\n".join(lines)
 
@@ -113,6 +135,7 @@ def provoke(
     judge_model: str | None = None,
     llm_base_url: str | None = None,
     diversity_backend: str = "jaccard",
+    epistemic_cues: bool = True,
 ) -> dict:
     """
     Instant curiosity provocation.
@@ -120,6 +143,9 @@ def provoke(
     fast=True (default): skip literature for sub-second local response so any
     agent can spark curiosity immediately after downloading the repo.
     Set use_literature=True / fast=False for OpenAlex-grounded gaps.
+
+    epistemic_cues=True (default): attach UX annotations for incongruity /
+    information-gap framing on each unknown — not a claim the system feels.
     """
     from artificial_curiosity.models import resolve_value_profile
 
@@ -139,9 +165,13 @@ def provoke(
         diversity_backend=diversity_backend if diversity_backend in ("jaccard", "embedding") else "jaccard",
     )
     ranked = CuriosityEngine(config).run()
-    unknowns = [compact_unknown(r) for r in ranked]
+    unknowns = [compact_unknown(r, epistemic_cues=epistemic_cues) for r in ranked]
     inject = build_inject_prompt(
-        unknowns, domain=domain, topic=topic, value_profile=profile
+        unknowns,
+        domain=domain,
+        topic=topic,
+        value_profile=profile,
+        include_epistemic_framing=epistemic_cues,
     )
     top = unknowns[0]["question"] if unknowns else None
     return {

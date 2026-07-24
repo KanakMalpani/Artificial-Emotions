@@ -413,4 +413,5 @@ def test_bundled_alignment_and_climate_packs():
     ids = {q.id for q in qs}
     assert "align-pack-01" in ids
     assert "clim-pack-01" in ids
+    assert "affect-pack-01" in ids
     assert all(len(q.operationalization) >= 20 for q in qs)

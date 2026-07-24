@@ -12,4 +12,4 @@ Product documentation for Artificial Curiosity. Start at the root [README](../RE
 | [ROADMAP.md](ROADMAP.md) | Agent playbook + roadmap — stuck? start §0→§3→§2 |
 | [ROADMAP_SUMMARY.md](ROADMAP_SUMMARY.md) | 1-page summary + top wedges |
 
-**Design rationale (optional):** [`research/`](../research/) — first principles, failure modes, sources. Research informed the code; it is not the homepage.
+**Design rationale (optional):** [`research/`](../research/) — first principles, failure modes, sources. Research informed the code; it is not the homepage. Affect / epistemic-emotion background: [`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md).

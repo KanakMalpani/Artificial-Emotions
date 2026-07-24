@@ -17,7 +17,33 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Agentic AI Scientists Are Not Built For ASD | arXiv 2605.08956 | Problem-selection bottleneck / McNamara fallacy |
 | Computational Theories of Curiosity (Oudeyer) | arXiv 1802.10546 | Intrinsic motivation foundations |
 | Large-Scale Curiosity-Driven Learning (Pathak et al.) | arXiv 1808.04355 | RL curiosity ≠ scientific VOI |
+| Emotions in AI / epistemic affect (synthesis) | [`AI_EMOTIONS.md`](AI_EMOTIONS.md) | Monograph: classical theories, CME architectures, ML/RL/LLM stacks, epistemic elicitation ↔ provoke |
 | ISPOR VOI Task Force | https://eprints.whiterose.ac.uk/id/eprint/158024/ | EVPI / EVSI / ENBS research prioritization |
+| Picard, Affective Computing (1997) | MIT Press / Media Lab TR-321 | Field definition: relate to / arise from / influence emotion |
+| OCC — Ortony, Clore & Collins | DOI 10.1017/CBO9780511571299 | Appraisal typology used by most CMEs |
+| Scherer Component Process Model | Phil. Trans. R. Soc. B / handbook chapters | Multi-check appraisal process |
+| Smith & Carette, What Lies Beneath | IEEE TAC; McMaster author PDF | Survey of ~67 CMEs; OCC+PAD theory-use map |
+| Kowalczuk & Czubenko, modeling artificial emotion | Frontiers Robotics & AI 2016 | EMA / FAtiMA / WASABI / FLAME comparison |
+| Marsella & Gratch, EMA | Cognitive Systems Research 2009 | Appraisal dynamics + coping |
+| Becker-Asano, WASABI | Thesis / AAMAS papers | PAD dynamics + BDI secondary emotions |
+| Gebhard, ALMA | IVA / AAMAS line | OCC + PAD + personality for ECAs |
+| FAtiMA / FAtiMA-Toolkit | Dias & Paiva; arXiv:2206.03360 | OCC+appraisal storytelling agents; authoring |
+| Ojha et al., EEGS | arXiv:2011.02573 | Transparent emotion intensity formulas |
+| Zhang, Broekens & Jokinen | arXiv:2309.06367 | CPM appraisal ↔ TD/RL |
+| Broekens, Modeling Experience of Emotion | arXiv:0903.0735 | Phenomenology gap in affective computing |
+| Broekens et al., Emotion in RL agents | Machine Learning 2018 | Functional emotion models in RL |
+| Breazeal, Kismet | IJHCS 2003 | Embodied drives + AVS social affect |
+| Pekrun et al., Epistemically-Related Emotion Scales | DOI 10.1080/02699931.2016.1204989 | EES measurement (surprise…boredom) |
+| Vogl et al., surprise/curiosity/confusion → exploration | DOI 10.3389/fpsyg.2019.02474 | High-confidence errors; meta-analytic path |
+| Loewenstein, information-gap curiosity | Psych Bulletin 1994 | Classic elicitation account |
+| Yanagisawa & Honda | arXiv:2401.00007 | Epistemic emotions as Bayesian information gain |
+| EmotionBench (Huang et al.) | NeurIPS 2024; arXiv:2308.03656 | LLM emotional alignment fragility |
+| CoRE | arXiv:2508.05880 | Fragile appraisal→emotion reasoning in LLMs |
+| Human-like Affective Cognition in FMs | arXiv:2409.11733 | Structured affective cognition probes |
+| CAPE appraisal-based generation | arXiv:2410.14145 | Appraisal-conditioned emotional dialogue |
+| Broekens et al., fine-grained affective LLMs | arXiv:2309.01664 | Emergent affective processing probes |
+| Becker et al., emotional robot trust | arXiv:2307.02924 | Emotion display can reduce trust |
+| Affective computing × privacy / AI Act | arXiv:2509.20153 | Regulatory / ethics framing |
 
 ## Products (contrast class — answer/search, not curiosity ranking)
 
@@ -39,3 +65,5 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Human value judgment | `ValueProfile` required |
 | Mode collapse / duplicates | `diversity.py` |
 | Failure catalog | `research/FAILURE_MODES.md` + `tests/test_failure_modes.py` |
+| Epistemic cue tags (UX only) | `epistemic_cues.py` + `provoke.py` |
+| Affective-science seed pack | `packs/affective_science.json` |
