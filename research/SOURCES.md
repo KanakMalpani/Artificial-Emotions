@@ -28,6 +28,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Preference calibration / LTR ladder | [`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md) | Pairwise prefs → profile weight hints → optional BT |
 | Neglectedness ITN addendum | [`NEGLECTEDNESS_ITN.md`](NEGLECTEDNESS_ITN.md) | Importance×Tractability×Neglectedness honesty |
 | Bayesian surprise / AutoDiscovery | [`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md) | Experimental surprisal ≠ lit surprise proxy |
+| Dual-use ranking safety | [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md) | Safeguarding AI scientists; Jr. AI risk report → filters |
+| HybridQuestion method note | [`HYBRID_QUESTION.md`](HYBRID_QUESTION.md) | Multi-LLM vote + human foresight divergence |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
@@ -79,6 +81,9 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | DMLRank nonparametric preference ranking | arXiv:2601.21816 | GARS + efficient CIs for prefs |
 | 80,000 Hours / GiveWell ITN framing | 80000hours.org ; GiveWell Labs posts | Cause-level neglectedness vocabulary |
 | AutoDiscovery (Bayesian surprise ASD) | arXiv:2507.00310 ; NeurIPS 2025 | Surprisal-guided open-ended discovery |
+| Risks of AI Scientists (safeguarding) | arXiv:2402.04247 | Human/agent/environment regulation triad |
+| Jr. AI Scientist risk report | arXiv:2511.04583 | Fabrication, review hacking, citation risks |
+| HybridQuestion | arXiv:2602.03849 | Human–AI collaboration on future questions |
 | EmotionBench (Huang et al.) | NeurIPS 2024; arXiv:2308.03656 | LLM emotional alignment fragility |
 | CoRE | arXiv:2508.05880 | Fragile appraisal→emotion reasoning in LLMs |
 | Human-like Affective Cognition in FMs | arXiv:2409.11733 | Structured affective cognition probes |

@@ -24,6 +24,8 @@ Everything under `research/` is design/background material that informed the imp
 | [PREFERENCE_CALIBRATION.md](PREFERENCE_CALIBRATION.md) | Preference JSONL → profile-scoped LTR/BT ladder |
 | [NEGLECTEDNESS_ITN.md](NEGLECTEDNESS_ITN.md) | ITN / EA neglectedness addendum for proxies |
 | [BAYESIAN_SURPRISE.md](BAYESIAN_SURPRISE.md) | AutoDiscovery surprisal vs score-axis surprise |
+| [DUAL_USE_RANKING.md](DUAL_USE_RANKING.md) | Dual-use when ranking unknowns; AI Scientist risk links |
+| [HYBRID_QUESTION.md](HYBRID_QUESTION.md) | HybridQuestion human–AI foresight divergence |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
