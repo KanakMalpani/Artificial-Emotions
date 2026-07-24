@@ -15,7 +15,12 @@ Long-form research that **informed** the product. You do not need these files to
 | [HANDOFF.md](HANDOFF.md) | Historical implementation notes (may be stale) |
 | [AI_EMOTIONS.md](AI_EMOTIONS.md) | Emotion mechanisms; epistemic elicitation ↔ provoke (not anthropomorphic) |
 | [EMOTION_ACCESS.md](EMOTION_ACCESS.md) | Consumer APIs/SDKs/datasets; minimal `/v1/emotions/*` public contract |
-| [INDEX.md](INDEX.md) | Legacy research index |
+| [EMOTION_MIXING.md](EMOTION_MIXING.md) | Mixable catalog / PAD / Plutchik honesty limits |
+| [INDEX.md](INDEX.md) | Full research file index (including 2026-07 deep spikes) |
+| [PRODUCTIZE_NEXT.md](PRODUCTIZE_NEXT.md) | Aggregated sibling backlog from research cycles |
+| [SOURCES.md](SOURCES.md) | Living annotated bibliography |
+
+Deep spikes (elicitation, competitors, safety, VOI, prefs, McNamara, co-scientist, …) are listed in [INDEX.md](INDEX.md).
 
 Where research shows up in code:
 
@@ -25,4 +30,5 @@ Where research shows up in code:
 - `judge.py` — structured rubrics (F5); curiosity ≠ citation forecast
 - `provoke.py` / MCP / HTTP — explicit ValueProfile (F11); “not Q&A” agent UX
 - `emotions.py` / `/v1/emotions/*` — epistemic cue annotate/elicit/pack (annotation_only)
+- `preferences.py` / `compare.py` — pref JSONL + side-by-side profiles
 - `tests/test_failure_modes.py` — adversarial coverage for F1–F15
