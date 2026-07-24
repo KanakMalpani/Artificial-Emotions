@@ -72,6 +72,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Evolving Idea Graphs adjacency | [`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md) | Persistent claim graph; edit-and-commit |
 | EIG (Dong et al.) | arXiv:2605.04922 | Multi-agent ideation with graph state |
 | Critic / debate for judges | [`CRITIC_DEBATE_JUDGES.md`](CRITIC_DEBATE_JUDGES.md) | Form critique vs axis scoring |
+| Web critique UX | [`WEB_CRITIQUE_UX.md`](WEB_CRITIQUE_UX.md) | Button copy; no silent re-rank |
 | Domain pack quality | [`DOMAIN_PACK_QUALITY.md`](DOMAIN_PACK_QUALITY.md) | Anti-hivemind / dual-use / sprawl pack rules |
 | Outcome flywheel | [`OUTCOME_FLYWHEEL.md`](OUTCOME_FLYWHEEL.md) | Sparse longitudinal calibration from prefs outcomes |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |

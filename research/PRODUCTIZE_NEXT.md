@@ -25,7 +25,7 @@
 10. **OpenAlex rationale keys only** — ✅ (`874dd7a`).
 10b. **Mix safety guards** — ✅ (`0af53f4`).
 10c. **Top-n hivemind similarity metric** — ✅ (`044c75e` / `hivemind.py`).
-10d. **Optional `critique_brief`** — ✅ (`2a33786`).
+10d. **Optional `critique_brief`** — ✅ API + web form button (`2a33786`, `b3c42a0`); UX notes ([`WEB_CRITIQUE_UX.md`](WEB_CRITIQUE_UX.md)).
 10e. **Outcome labels in prefs summarize** — ✅ (`044c75e`).
 10f. **Gap fixture underpowered / invalid_form** — Template v0.2 ready (`examples/gap_status_fixture_template.json`); grow hand-labels.
 
