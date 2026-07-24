@@ -303,6 +303,16 @@ class VoiWorksheetRequest(BaseModel):
     domain: str = ""
 
 
+class SuggestPairRequest(BaseModel):
+    candidates: list[dict[str, Any]] = Field(
+        ...,
+        min_length=2,
+        description="Top-k ranked unknowns with question_id / rank / curiosity_score",
+    )
+    events: list[dict[str, Any]] = Field(default_factory=list)
+    profile_name: str | None = "humanity_default"
+
+
 class AnnotateEmotionsRequest(BaseModel):
     question: str = Field(..., min_length=12)
     gap_status: str = Field(
@@ -735,6 +745,18 @@ def preference_summarize(req: PreferenceSummarizeRequest) -> dict[str, Any]:
         req.events,
         profile_name=req.profile_name,
         top_k=req.top_k,
+    )
+
+
+@app.post("/v1/preferences/suggest-pair")
+def preference_suggest_pair(req: SuggestPairRequest) -> dict[str, Any]:
+    """Propose next pairwise duel among top-k — not BT weight overwrite."""
+    from artificial_curiosity.preferences import suggest_next_pair
+
+    return suggest_next_pair(
+        req.candidates,
+        req.events,
+        profile_name=req.profile_name,
     )
 
 

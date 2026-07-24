@@ -162,6 +162,19 @@ def build_parser() -> argparse.ArgumentParser:
     sum_p.add_argument("--top", type=int, default=10, help="Top question ids to show")
     sum_p.add_argument("--json", action="store_true")
 
+    pair_p = pref_sub.add_parser(
+        "suggest-pair",
+        help="Suggest next pairwise duel among candidate ids (not BT fit)",
+    )
+    pair_p.add_argument(
+        "--candidates",
+        required=True,
+        help="Comma-separated question ids (top-k)",
+    )
+    pair_p.add_argument("--path", default=None, help="Optional preference JSONL for prior edges")
+    pair_p.add_argument("--profile", default="humanity_default")
+    pair_p.add_argument("--json", action="store_true")
+
     compare_p = sub.add_parser(
         "compare-profiles",
         help="Side-by-side offline ranks under two ValueProfiles (no silent merge)",
@@ -521,10 +534,29 @@ def _preferences(args: argparse.Namespace) -> int:
         print(f"  weight_hints ok={wh.get('ok')} deltas={wh.get('deltas')}")
         print(f"\n{summary.get('honesty')}")
         return 0
+    if cmd == "suggest-pair":
+        from artificial_curiosity.preferences import suggest_next_pair
+
+        cands = [c.strip() for c in str(args.candidates).split(",") if c.strip()]
+        events = args.path if args.path else []
+        payload = suggest_next_pair(
+            cands, events, profile_name=args.profile
+        )
+        if args.json:
+            print(json.dumps(payload, indent=2))
+            return 0
+        print(f"Suggest next pair  ok={payload.get('ok')}")
+        pair = payload.get("pair") or {}
+        if pair:
+            print(f"  A={pair.get('a')}  B={pair.get('b')}")
+            print(f"  prior_comparisons={pair.get('prior_comparisons')}")
+        print(f"\n{payload.get('honesty')}")
+        return 0
     print(
         "Usage:\n"
         "  curiosity preferences hints --path labeled.jsonl [--profile NAME]\n"
         "  curiosity preferences summarize --path labeled.jsonl [--profile NAME]\n"
+        "  curiosity preferences suggest-pair --candidates id1,id2,id3 [--path prefs.jsonl]\n"
         "Preference tools are profile-scoped decision aids — not calibrated learning.",
         file=sys.stderr,
     )

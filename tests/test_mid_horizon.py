@@ -914,3 +914,59 @@ def test_voi_worksheet_and_eval_report():
     assert "card" in agent.json()
     assert "critique_brief" in agent.json()["mcp"]["tools"]
 
+
+def test_suggest_next_pair_and_bt_gate():
+    from artificial_curiosity.preferences import (
+        PreferenceEvent,
+        fit_bt_offline,
+        suggest_next_pair,
+        summarize_preferences,
+    )
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    cands = [
+        {"question_id": "a", "rank": 1, "curiosity_score": 0.9},
+        {"question_id": "b", "rank": 2, "curiosity_score": 0.88},
+        {"question_id": "c", "rank": 3, "curiosity_score": 0.7},
+    ]
+    prior = [
+        PreferenceEvent(
+            event_type="prefer",
+            profile_name="humanity_default",
+            question_id="a",
+            preferred_over_ids=["b"],
+        )
+    ]
+    nxt = suggest_next_pair(cands, prior, profile_name="humanity_default")
+    assert nxt["ok"] is True
+    pair = nxt["pair"]
+    ids = {pair["a"]["question_id"], pair["b"]["question_id"]}
+    assert ids != {"a", "b"}
+
+    bt = fit_bt_offline(prior, profile_name="humanity_default", min_pairs=30)
+    assert bt["ok"] is False
+    assert bt["skills"] is None
+
+    summary = summarize_preferences(
+        [
+            PreferenceEvent(
+                event_type="tie",
+                profile_name="humanity_default",
+                question_id="a",
+                preferred_over_ids=["b"],
+            )
+        ],
+        profile_name="humanity_default",
+    )
+    assert summary["counts_by_type"].get("tie") == 1
+
+    client = TestClient(app)
+    res = client.post(
+        "/v1/preferences/suggest-pair",
+        json={"candidates": cands, "profile_name": "humanity_default"},
+    )
+    assert res.status_code == 200
+    assert res.json()["ok"] is True
+

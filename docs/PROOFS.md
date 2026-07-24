@@ -136,6 +136,10 @@ Live LLM smoke is optional (keys often absent).
 ```bash
 curiosity run --domain ai --n 3 --no-literature --preference-log prefs.jsonl
 # Appends PreferenceEvent rows (schema preference_event.v1); no DB required
+curiosity preferences summarize --path prefs.jsonl --json
+curiosity preferences suggest-pair --candidates a,b,c --path prefs.jsonl --json
+# HTTP: POST /v1/preferences/suggest-pair — next duel heuristic; not BT weight overwrite
+# Web: Prefer / Tie / Reject on result cards
 ```
 
 ## Dual-use uplift (W14)

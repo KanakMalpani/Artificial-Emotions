@@ -46,7 +46,7 @@ class PreferenceEvent(BaseModel):
     )
     event_type: str = Field(
         ...,
-        description="prefer | reject | already_answered | keep | outcome | note",
+        description="prefer | reject | already_answered | keep | tie | both_keep | outcome | note",
     )
     profile_name: str = "humanity_default"
     domain: str | None = None
@@ -409,16 +409,25 @@ def summarize_preferences(
         if ev.domain:
             domains[str(ev.domain)] = domains.get(str(ev.domain), 0) + 1
         qid = (ev.question_id or "").strip()
-        if et in ("prefer", "keep") and qid:
+        if et in ("prefer", "keep", "both_keep") and qid:
             prefer_ids[qid] = prefer_ids.get(qid, 0) + 1
             wins[qid] = wins.get(qid, 0) + 1
         elif et in ("reject", "already_answered") and qid:
             reject_ids[qid] = reject_ids.get(qid, 0) + 1
             losses[qid] = losses.get(qid, 0) + 1
+        elif et == "tie" and qid:
+            # Ties: count both sides as soft keep without win/loss (BTT honesty).
+            prefer_ids[qid] = prefer_ids.get(qid, 0) + 1
+            for other in ev.preferred_over_ids or []:
+                oid = str(other).strip()
+                if oid:
+                    prefer_ids[oid] = prefer_ids.get(oid, 0) + 1
         for other in ev.preferred_over_ids or []:
             oid = str(other).strip()
             if not oid:
                 continue
+            if et == "tie":
+                continue  # already handled; do not invent a win
             pairwise_n += 1
             if qid:
                 wins[qid] = wins.get(qid, 0) + 1
@@ -491,4 +500,128 @@ def summarize_preferences(
             "and not a universal science priority. " + _HINT_HONESTY
         ),
         "docs": "research/PREFERENCE_CALIBRATION.md",
+    }
+
+
+def suggest_next_pair(
+    candidates: list[dict[str, Any]] | list[str],
+    events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path | None = None,
+    *,
+    profile_name: str | None = None,
+) -> dict[str, Any]:
+    """
+    Propose the next pairwise duel among top-k candidates (Swiss InfoGain–inspired).
+
+    Heuristic: prefer pairs with fewest prior comparisons, then closest curiosity
+    scores / adjacent ranks. Does **not** fit BT or rewrite weights.
+    """
+    rows: list[dict[str, Any]] = []
+    for i, c in enumerate(candidates):
+        if isinstance(c, str):
+            rows.append({"question_id": c, "rank": i + 1, "curiosity_score": None})
+        elif isinstance(c, dict):
+            qid = str(c.get("question_id") or c.get("id") or f"cand-{i}")
+            rows.append(
+                {
+                    "question_id": qid,
+                    "rank": int(c.get("rank") or i + 1),
+                    "curiosity_score": c.get("curiosity_score"),
+                    "question": c.get("question"),
+                }
+            )
+    if len(rows) < 2:
+        return {
+            "ok": False,
+            "reason": "need_at_least_two_candidates",
+            "pair": None,
+            "honesty": "Active pair picker needs ≥2 candidates.",
+        }
+
+    compared: dict[tuple[str, str], int] = {}
+    if events is not None:
+        for ev in _normalize_events(events):
+            if profile_name and (ev.profile_name or "") not in (profile_name, ""):
+                continue
+            qid = (ev.question_id or "").strip()
+            et = (ev.event_type or "").lower()
+            others = list(ev.preferred_over_ids or [])
+            if et in ("tie", "both_keep") and len(others) >= 1:
+                others = others[:1]
+            for oid in others:
+                a, b = sorted([qid, str(oid).strip()])
+                if not a or not b or a == b:
+                    continue
+                compared[(a, b)] = compared.get((a, b), 0) + 1
+
+    best: tuple[float, dict[str, Any]] | None = None
+    for i in range(len(rows)):
+        for j in range(i + 1, len(rows)):
+            a, b = rows[i], rows[j]
+            key = tuple(sorted([a["question_id"], b["question_id"]]))
+            n_comp = compared.get(key, 0)
+            # Prefer uncompared; then adjacent ranks; then close scores
+            rank_gap = abs(int(a["rank"]) - int(b["rank"]))
+            sa, sb = a.get("curiosity_score"), b.get("curiosity_score")
+            score_gap = abs(float(sa) - float(sb)) if sa is not None and sb is not None else 0.5
+            # Lower is better for selection score
+            sel = (n_comp * 10.0) + (rank_gap * 0.5) + score_gap
+            pair = {
+                "a": a,
+                "b": b,
+                "prior_comparisons": n_comp,
+                "selection_score": round(sel, 4),
+            }
+            if best is None or sel < best[0]:
+                best = (sel, pair)
+
+    assert best is not None
+    return {
+        "ok": True,
+        "pair": best[1],
+        "n_candidates": len(rows),
+        "n_prior_pair_edges": len(compared),
+        "honesty": (
+            "Heuristic next duel for annotation budget — not full Swiss InfoGain, "
+            "not BT MLE, and never auto-overwrites ValueProfile weights. "
+            "See research/PREFERENCE_BT_STAGE2.md."
+        ),
+        "docs": "research/PREFERENCE_BT_STAGE2.md",
+    }
+
+
+def fit_bt_offline(
+    events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
+    *,
+    profile_name: str | None = None,
+    min_pairs: int = 30,
+) -> dict[str, Any]:
+    """
+    Offline Bradley–Terry readiness check (eval only).
+
+    Does **not** fit skills until pair count ≥ min_pairs; never rewrites weights.
+    """
+    evs = _normalize_events(events)
+    if profile_name:
+        evs = [e for e in evs if (e.profile_name or "") == profile_name or not e.profile_name]
+    pairs = 0
+    ties = 0
+    for ev in evs:
+        et = (ev.event_type or "").lower()
+        if et in ("tie", "both_keep"):
+            ties += 1
+        for _ in ev.preferred_over_ids or []:
+            pairs += 1
+    ready = pairs >= min_pairs
+    return {
+        "ok": ready,
+        "n_pairs": pairs,
+        "n_ties": ties,
+        "min_pairs": min_pairs,
+        "skills": None,
+        "reason": None if ready else "insufficient_pairs_for_stable_bt",
+        "honesty": (
+            "BT fit is eval-only and gated on pair volume. This call does not "
+            "auto-overwrite ValueProfile weights. Prefer axis weight hints until ready."
+        ),
+        "docs": "research/PREFERENCE_BT_STAGE2.md",
     }

@@ -275,14 +275,14 @@ export default function App() {
 
   function recordFeedback(
     r: Ranked,
-    eventType: "prefer" | "reject" | "already_answered",
+    eventType: "prefer" | "reject" | "already_answered" | "tie",
   ) {
     const qid =
       r.question.id ||
       `rank-${r.rank}-${r.question.question.slice(0, 24).replace(/\s+/g, "_")}`;
     const others = results
       .filter((x) => x.rank !== r.rank)
-      .slice(0, 3)
+      .slice(0, eventType === "tie" ? 1 : 3)
       .map(
         (x) =>
           x.question.id ||
@@ -301,8 +301,12 @@ export default function App() {
         tractability: r.scores.tractability,
         surprise: r.scores.surprise,
       },
-      preferred_over_ids: eventType === "prefer" ? others : [],
-      labels: { position: String(r.rank) },
+      preferred_over_ids:
+        eventType === "prefer" || eventType === "tie" ? others : [],
+      labels: {
+        position: String(r.rank),
+        ...(eventType === "tie" ? { relation: "tie" } : {}),
+      },
     };
     setFeedback((prev) => [...prev, ev]);
     setFeedbackNote(`${eventType} recorded for #${r.rank} (session only)`);
@@ -640,6 +644,13 @@ export default function App() {
                         onClick={() => recordFeedback(r, "prefer")}
                       >
                         Prefer
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-feedback"
+                        onClick={() => recordFeedback(r, "tie")}
+                      >
+                        Tie
                       </button>
                       <button
                         type="button"
