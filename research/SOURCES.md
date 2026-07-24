@@ -30,6 +30,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Bayesian surprise / AutoDiscovery | [`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md) | Experimental surprisal ≠ lit surprise proxy |
 | Dual-use ranking safety | [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md) | Safeguarding AI scientists; Jr. AI risk report → filters |
 | HybridQuestion method note | [`HYBRID_QUESTION.md`](HYBRID_QUESTION.md) | Multi-LLM vote + human foresight divergence |
+| Constitutional / multi-stakeholder curiosity | [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md) | Veto stacks vs fake consensus blends |
+| Constitutional / multi-stakeholder curiosity | [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md) | Veto stacks vs fake consensus blends |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
@@ -84,6 +86,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Risks of AI Scientists (safeguarding) | arXiv:2402.04247 | Human/agent/environment regulation triad |
 | Jr. AI Scientist risk report | arXiv:2511.04583 | Fabrication, review hacking, citation risks |
 | HybridQuestion | arXiv:2602.03849 | Human–AI collaboration on future questions |
+| Abdollahpouri & Burke, multi-stakeholder RS | arXiv:1907.13158 | Multi-party recommendation / fairness taxonomy |
+| EthicAlly (CAI ethics support) | arXiv:2508.00856 | Assist ethics design; don’t replace REC |
 | EmotionBench (Huang et al.) | NeurIPS 2024; arXiv:2308.03656 | LLM emotional alignment fragility |
 | CoRE | arXiv:2508.05880 | Fragile appraisal→emotion reasoning in LLMs |
 | Human-like Affective Cognition in FMs | arXiv:2409.11733 | Structured affective cognition probes |
@@ -141,3 +145,4 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Elicitation A/B protocol example | `examples/elicit_ab_protocol.json` |
 | VOI worksheet template | `examples/voi_worksheet_template.json` |
 | Preference events / weight hints | `preferences.py` |
+| Constitution veto-stack example | `examples/constitution_veto_stack.json` |

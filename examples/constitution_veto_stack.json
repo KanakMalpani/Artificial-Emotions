@@ -1,0 +1,32 @@
+{
+  "name": "constitution_veto_stack_example",
+  "version": "0.1.0",
+  "honesty": "Example only — not a solved multi-stakeholder optimum. See research/CONSTITUTIONAL_CURIOSITY.md.",
+  "constitution_id": "lab_public_demo",
+  "stakeholders": [
+    {
+      "role": "primary",
+      "profile_name": "alignment_lab",
+      "use": "Ranking weights and diversity"
+    },
+    {
+      "role": "safety_veto",
+      "profile_name": "humanity_default",
+      "use": "Hard ceiling on max_risk (take the stricter of primary vs veto)"
+    },
+    {
+      "role": "advisory",
+      "profile_name": "funder_10y",
+      "use": "Show side-by-side scores; do not silently reorder"
+    }
+  ],
+  "rules": [
+    "safety_veto.max_risk is a hard ceiling",
+    "primary drives ranking weights",
+    "advisory scores are annotations unless show_conflicts reorders with explicit flag"
+  ],
+  "forbidden": [
+    "Silent merge into one 'consensus' score",
+    "Claiming Pareto optimality across stakeholders"
+  ]
+}
