@@ -34,6 +34,9 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Preference weight hints (`preference_learn_path` / `--preference-learn` / `curiosity preferences hints` / `POST /v1/preferences/hints`): tiny profile-scoped ValueProfile deltas from labeled events with `score_axes` — **not** calibrated; API accepts inline events only (no paths); weights floored so hints cannot zero out a dimension
 - Preference summarize (`curiosity preferences summarize` / `POST /v1/preferences/summarize`): counts, pairwise wins from `preferred_over_ids`, top ids — Stage-1 flywheel, not Bradley–Terry
 - Profile compare (`curiosity compare-profiles` / `POST /v1/profiles/compare` / MCP `compare_profiles` / web two-column panel): side-by-side offline ranks + Kendall τ + top-k Jaccard + veto tip — **no silent consensus merge**
+- Constitution compare + risk veto (`POST /v1/profiles/constitution-compare` / MCP `constitution_compare` / web Compare + veto): primary vs safety-veto + hard `max_risk` flag/drop — **not** a constitutional optimum
+- MCP progressive disclosure via `CURIOSITY_MCP_TIER=core|investigate|affect|research|full` (default `full`); agent card exposes `tool_tiers`
+- Dual-use red-team fixtures (`evals/fixtures/dual_use_redteam_v1.json`) — regression checks, not a biosecurity oracle
 - Form-only brief critic (`curiosity critique-brief` / `POST /v1/briefs/critique` / MCP `critique_brief`) — does **not** re-rank
 - VOI worksheet fill (`curiosity voi-worksheet` / `POST /v1/voi/worksheet` / MCP `voi_worksheet`) — template metadata only; **not** EVSI/ENBS
 - Composite eval report (`curiosity eval report`) — gap_f1 + gap-status + elicit means + risk probes

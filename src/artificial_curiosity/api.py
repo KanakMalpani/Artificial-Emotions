@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from artificial_curiosity import __version__
-from artificial_curiosity.agent_tools import openai_tools
+from artificial_curiosity.agent_tools import mcp_tool_tiers, openai_tools
 from artificial_curiosity.config import (
     clear_config_cache,
     configured_api_keys,
@@ -49,7 +49,10 @@ from artificial_curiosity.models import (
 from artificial_curiosity.pipeline import CuriosityEngine
 from artificial_curiosity.preferences import learn_profile_weight_hints, summarize_preferences
 from artificial_curiosity.provoke import provoke
-from artificial_curiosity.compare import compare_profiles as compare_profiles_fn
+from artificial_curiosity.compare import (
+    compare_constitution as compare_constitution_fn,
+    compare_profiles as compare_profiles_fn,
+)
 
 logger = get_logger("api")
 
@@ -284,6 +287,20 @@ class CompareProfilesRequest(BaseModel):
     topic: str = ""
     profile_a: str = Field("humanity_default", examples=["humanity_default", "funder_10y"])
     profile_b: str = Field("alignment_lab", examples=["alignment_lab", "climate_adaptation"])
+    n: int = Field(8, ge=1, le=32)
+    n_candidates: int = Field(16, ge=4, le=64)
+
+
+class ConstitutionCompareRequest(BaseModel):
+    domain: str = Domain.AI.value
+    topic: str = ""
+    primary_profile: str | None = Field(
+        None, description="Override stack primary; default from constitution JSON"
+    )
+    veto_profile: str | None = Field(
+        None,
+        description="Override safety veto; default from stack or public_demo_strict_risk",
+    )
     n: int = Field(8, ge=1, le=32)
     n_candidates: int = Field(16, ge=4, le=64)
 
@@ -561,6 +578,14 @@ def agent_manifest() -> dict[str, Any]:
             },
             "note": "Side-by-side ranks — never a silent consensus merge.",
         },
+        "constitution_compare": {
+            "method": "POST",
+            "path": "/v1/profiles/constitution-compare",
+            "note": (
+                "Primary vs safety-veto ranks + hard max_risk flag/drop — "
+                "not a constitutional optimum."
+            ),
+        },
         "critique_brief": {
             "method": "POST",
             "path": "/v1/briefs/critique",
@@ -596,6 +621,7 @@ def agent_manifest() -> dict[str, Any]:
                 "list_domains",
                 "list_profiles",
                 "compare_profiles",
+                "constitution_compare",
                 "critique_brief",
                 "voi_worksheet",
                 "surprise_worksheet",
@@ -609,6 +635,7 @@ def agent_manifest() -> dict[str, Any]:
                 "emotion_pack",
                 "elicit_helpers",
             ],
+            "tool_tiers": mcp_tool_tiers(),
             "docs": "docs/PLUGINS.md",
         },
         "emotions": {
@@ -854,6 +881,19 @@ def profiles_compare(req: CompareProfilesRequest) -> dict[str, Any]:
         topic=req.topic,
         profile_a=req.profile_a,
         profile_b=req.profile_b,
+        n=req.n,
+        n_candidates=req.n_candidates,
+    )
+
+
+@app.post("/v1/profiles/constitution-compare")
+def profiles_constitution_compare(req: ConstitutionCompareRequest) -> dict[str, Any]:
+    """Constitution stack compare + hard risk veto — no consensus merge."""
+    return compare_constitution_fn(
+        domain=req.domain,
+        topic=req.topic,
+        primary_profile=req.primary_profile,
+        veto_profile=req.veto_profile,
         n=req.n,
         n_candidates=req.n_candidates,
     )

@@ -6,6 +6,8 @@ show side-by-side ranks — never silent “consensus” merge.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
 from artificial_curiosity.generate import generate_candidates
@@ -17,6 +19,53 @@ from artificial_curiosity.models import (
     resolve_value_profile,
 )
 from artificial_curiosity.scoring import aggregate_curiosity, heuristic_score
+
+_REPO = Path(__file__).resolve().parents[2]
+_DEFAULT_CONSTITUTION = _REPO / "examples" / "constitution_veto_stack.json"
+
+
+def default_constitution_path() -> Path:
+    return _DEFAULT_CONSTITUTION
+
+
+def load_constitution_stack(path: str | Path | None = None) -> dict[str, Any]:
+    """Load constitution / veto stack JSON (example schema)."""
+    p = Path(path) if path else default_constitution_path()
+    data = json.loads(p.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"Invalid constitution stack: {p}")
+    return data
+
+
+def apply_risk_veto(
+    ranks: list[dict[str, Any]],
+    *,
+    max_risk: float,
+) -> dict[str, Any]:
+    """Flag/drop items whose axes.risk exceeds max_risk — does not merge profiles."""
+    kept: list[dict[str, Any]] = []
+    flagged: list[dict[str, Any]] = []
+    for row in ranks:
+        axes = row.get("axes") if isinstance(row.get("axes"), dict) else {}
+        risk = float(axes.get("risk") or 0.0)
+        item = dict(row)
+        if risk > max_risk:
+            item["veto"] = "exceeds_max_risk"
+            item["veto_risk"] = round(risk, 4)
+            flagged.append(item)
+        else:
+            kept.append(item)
+    return {
+        "max_risk": max_risk,
+        "n_kept": len(kept),
+        "n_flagged": len(flagged),
+        "kept": kept,
+        "flagged": flagged,
+        "honesty": (
+            "Hard risk ceiling only — stakeholders can disagree; we show conflicts "
+            "and do not invent a consensus score."
+        ),
+    }
 
 
 def _kendall_tau(rank_a: dict[str, int], rank_b: dict[str, int]) -> float | None:
@@ -184,4 +233,71 @@ def compare_profiles(
             "value-free or constitutional optimum. Offline heuristic only."
         ),
         "flags": ["no_literature", "heuristic_scoring", "compare_profiles"],
+    }
+
+
+def compare_constitution(
+    *,
+    domain: str = "ai",
+    topic: str = "",
+    constitution_path: str | Path | None = None,
+    primary_profile: str | None = None,
+    veto_profile: str | None = None,
+    n: int = 8,
+    n_candidates: int = 16,
+    seed: int = 42,
+) -> dict[str, Any]:
+    """
+    Side-by-side ranks under primary vs safety-veto profiles, then apply risk veto.
+
+    Never silently merges weights. Advisory stakeholders are listed only.
+    """
+    stack = load_constitution_stack(constitution_path)
+    stakeholders = list(stack.get("stakeholders") or [])
+    by_role = {
+        str(s.get("role") or "").strip().lower(): s
+        for s in stakeholders
+        if isinstance(s, dict)
+    }
+    primary = primary_profile or (by_role.get("primary") or {}).get("profile_name") or "humanity_default"
+    veto = (
+        veto_profile
+        or (by_role.get("safety_veto") or {}).get("profile_name")
+        or "public_demo_strict_risk"
+    )
+    advisory = [
+        str(s.get("profile_name"))
+        for s in stakeholders
+        if isinstance(s, dict) and str(s.get("role") or "").lower() == "advisory"
+        and s.get("profile_name")
+    ]
+
+    base = compare_profiles(
+        domain=domain,
+        topic=topic,
+        profile_a=str(primary),
+        profile_b=str(veto),
+        n=n,
+        n_candidates=n_candidates,
+        seed=seed,
+    )
+    max_risk = float(base["veto_tip"]["strictest_max_risk"])
+    veto_applied = apply_risk_veto(list(base.get("ranks_a") or []), max_risk=max_risk)
+    return {
+        **base,
+        "constitution": {
+            "id": stack.get("constitution_id") or stack.get("name"),
+            "path": str(Path(constitution_path) if constitution_path else default_constitution_path()),
+            "primary_profile": str(primary),
+            "veto_profile": str(veto),
+            "advisory_profiles": advisory,
+            "rules": list(stack.get("rules") or []),
+            "forbidden": list(stack.get("forbidden") or []),
+        },
+        "veto_applied": veto_applied,
+        "honesty": (
+            "Constitution compare + risk veto — side-by-side ranks and a hard "
+            "max_risk ceiling. Stakeholders can disagree; we do not invent consensus."
+        ),
+        "flags": list(base.get("flags") or []) + ["constitution_veto"],
     }

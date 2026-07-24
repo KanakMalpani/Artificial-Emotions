@@ -17,6 +17,7 @@ from artificial_curiosity.mcp_server import handle_message, process_line
 
 def test_mcp_tool_list_has_required_tools():
     names = {t["name"] for t in mcp_tool_list()}
+    assert "constitution_compare" in names
     assert {
         "provoke_curiosity",
         "spark",
@@ -25,6 +26,7 @@ def test_mcp_tool_list_has_required_tools():
         "list_domains",
         "list_profiles",
         "compare_profiles",
+        "constitution_compare",
         "critique_brief",
         "voi_worksheet",
         "surprise_worksheet",

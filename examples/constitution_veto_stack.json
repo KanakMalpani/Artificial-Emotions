@@ -11,7 +11,7 @@
     },
     {
       "role": "safety_veto",
-      "profile_name": "humanity_default",
+      "profile_name": "public_demo_strict_risk",
       "use": "Hard ceiling on max_risk (take the stricter of primary vs veto)"
     },
     {

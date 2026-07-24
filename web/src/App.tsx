@@ -152,6 +152,7 @@ export default function App() {
     Record<string, { result: string; months: string; note: string }>
   >({});
   const [compareB, setCompareB] = useState("alignment_lab");
+  const [vetoProfile, setVetoProfile] = useState("public_demo_strict_risk");
   const [compareOpen, setCompareOpen] = useState(false);
   const [compareBusy, setCompareBusy] = useState(false);
   const [compareErr, setCompareErr] = useState<string | null>(null);
@@ -162,6 +163,13 @@ export default function App() {
     honesty?: string;
     profile_a?: { name?: string };
     profile_b?: { name?: string };
+    veto_applied?: {
+      n_kept?: number;
+      n_flagged?: number;
+      max_risk?: number;
+      flagged?: { rank: number; question: string; veto_risk?: number }[];
+    };
+    constitution?: { id?: string; primary_profile?: string; veto_profile?: string };
   } | null>(null);
 
   const subtitle = useMemo(
@@ -428,6 +436,32 @@ export default function App() {
     }
   }
 
+  async function runConstitutionCompare() {
+    setCompareBusy(true);
+    setCompareErr(null);
+    try {
+      const res = await fetch("/v1/profiles/constitution-compare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          domain,
+          topic,
+          primary_profile: profileName,
+          veto_profile: vetoProfile,
+          n: 6,
+        }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      setCompareData(await res.json());
+      setCompareOpen(true);
+    } catch (e) {
+      setCompareErr(e instanceof Error ? e.message : "Constitution compare failed");
+      setCompareData(null);
+    } finally {
+      setCompareBusy(false);
+    }
+  }
+
   async function suggestPair() {
     if (results.length < 2) {
       setFeedbackNote("Need ≥2 ranked results for a duel suggestion.");
@@ -585,6 +619,19 @@ export default function App() {
                 ))}
             </select>
           </label>
+          <label>
+            Safety veto
+            <select
+              value={vetoProfile}
+              onChange={(e) => setVetoProfile(e.target.value)}
+            >
+              {profiles.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="button"
             className="btn-secondary"
@@ -592,6 +639,14 @@ export default function App() {
             disabled={compareBusy || compareB === profileName}
           >
             {compareBusy ? "Comparing…" : "Side-by-side ranks"}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={runConstitutionCompare}
+            disabled={compareBusy}
+          >
+            Compare + veto
           </button>
         </div>
         {compareErr && <p className="error">{compareErr}</p>}
@@ -637,7 +692,20 @@ export default function App() {
                 : Number(compareData.agreement.top_k_jaccard).toFixed(3)}
               {" — "}
               offline heuristic; no silent merge.
+              {compareData.veto_applied
+                ? ` Veto kept=${compareData.veto_applied.n_kept} flagged=${compareData.veto_applied.n_flagged} (max_risk=${compareData.veto_applied.max_risk}).`
+                : ""}
             </p>
+            {(compareData.veto_applied?.flagged?.length ?? 0) > 0 && (
+              <p className="compare-meta">
+                Flagged over risk ceiling:{" "}
+                {compareData.veto_applied!.flagged!
+                  .slice(0, 3)
+                  .map((f) => `#${f.rank}`)
+                  .join(", ")}
+                {" — stakeholders can disagree; not a consensus score."}
+              </p>
+            )}
           </div>
         )}
       </section>

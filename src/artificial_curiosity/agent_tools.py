@@ -205,6 +205,28 @@ COMPARE_PROFILES_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+CONSTITUTION_COMPARE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "domain": {
+            "type": "string",
+            "enum": list(_DOMAIN_ENUM),
+            "default": "ai",
+        },
+        "topic": {"type": "string", "default": ""},
+        "primary_profile": {
+            "type": "string",
+            "description": "Override constitution primary profile",
+        },
+        "veto_profile": {
+            "type": "string",
+            "description": "Override safety veto profile (e.g. public_demo_strict_risk)",
+        },
+        "n": {"type": "integer", "minimum": 1, "maximum": 32, "default": 8},
+    },
+    "additionalProperties": False,
+}
+
 CRITIQUE_BRIEF_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
@@ -550,6 +572,27 @@ def handle_compare_profiles(
     )
 
 
+def handle_constitution_compare(
+    *,
+    domain: str = "ai",
+    topic: str = "",
+    primary_profile: str | None = None,
+    veto_profile: str | None = None,
+    n: int = 8,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Constitution stack compare + hard risk veto — no consensus merge."""
+    from artificial_curiosity.compare import compare_constitution
+
+    return compare_constitution(
+        domain=domain or "ai",
+        topic=topic or "",
+        primary_profile=primary_profile,
+        veto_profile=veto_profile,
+        n=int(n or 8),
+    )
+
+
 def handle_critique_brief(
     *,
     question: str = "",
@@ -793,6 +836,16 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "handler": handle_compare_profiles,
     },
     {
+        "name": "constitution_compare",
+        "description": (
+            "Load the example constitution/veto stack, compare primary vs safety "
+            "veto profiles side-by-side, then flag items exceeding the stricter "
+            "max_risk. Does not invent a consensus score. Decision aids only."
+        ),
+        "input_schema": CONSTITUTION_COMPARE_SCHEMA,
+        "handler": handle_constitution_compare,
+    },
+    {
         "name": "critique_brief",
         "description": (
             "Form-only critique of an investigation brief / operationalization "
@@ -918,21 +971,86 @@ TOOL_SPECS: list[dict[str, Any]] = [
 
 HANDLERS: dict[str, ToolHandler] = {t["name"]: t["handler"] for t in TOOL_SPECS}
 
+# Progressive disclosure (research/MCP_PROGRESSIVE_DISCLOSURE.md).
+# Default CURIOSITY_MCP_TIER=full keeps current host behavior.
+_TOOL_TIER: dict[str, str] = {
+    "provoke_curiosity": "core",
+    "spark": "core",
+    "rank_unknowns": "core",
+    "run_curiosity": "core",
+    "list_domains": "core",
+    "list_profiles": "core",
+    "compare_profiles": "investigate",
+    "constitution_compare": "investigate",
+    "critique_brief": "investigate",
+    "soundness_pass": "investigate",
+    "cross_model_vote": "research",
+    "export_idea_graph": "research",
+    "surprise_worksheet": "research",
+    "voi_worksheet": "research",
+    "list_epistemic_cues": "affect",
+    "annotate_epistemic": "affect",
+    "emotion_pack": "affect",
+    "elicit_helpers": "affect",
+    "emotion_catalog": "affect",
+    "mix_emotions": "affect",
+}
+_TIER_INCLUDES: dict[str, set[str]] = {
+    "core": {"core"},
+    "investigate": {"core", "investigate"},
+    "affect": {"core", "investigate", "affect"},
+    "research": {"core", "investigate", "research"},
+    "full": {"core", "investigate", "affect", "research"},
+}
 
-def mcp_tool_list() -> list[dict[str, Any]]:
+
+def resolve_mcp_tier(tier: str | None = None) -> str:
+    import os
+
+    raw = (tier or os.environ.get("CURIOSITY_MCP_TIER") or "full").strip().lower()
+    return raw if raw in _TIER_INCLUDES else "full"
+
+
+def mcp_tool_tiers() -> dict[str, Any]:
+    by_tier: dict[str, list[str]] = {
+        "core": [],
+        "investigate": [],
+        "affect": [],
+        "research": [],
+    }
+    for name in HANDLERS:
+        by_tier.setdefault(_TOOL_TIER.get(name, "core"), []).append(name)
+    return {
+        "active": resolve_mcp_tier(),
+        "env": "CURIOSITY_MCP_TIER",
+        "tiers": by_tier,
+        "note": (
+            "Fewer tools ≠ safer if remaining tools overclaim. "
+            "curiosity://limits stays discoverable. Lint still applies."
+        ),
+    }
+
+
+def mcp_tool_list(*, tier: str | None = None) -> list[dict[str, Any]]:
     """MCP `tools/list` payload (name, description, inputSchema)."""
-    return [
-        {
-            "name": t["name"],
-            "description": t["description"],
-            "inputSchema": t["input_schema"],
-        }
-        for t in TOOL_SPECS
-    ]
+    allowed = _TIER_INCLUDES[resolve_mcp_tier(tier)]
+    out = []
+    for t in TOOL_SPECS:
+        if _TOOL_TIER.get(t["name"], "core") not in allowed:
+            continue
+        out.append(
+            {
+                "name": t["name"],
+                "description": t["description"],
+                "inputSchema": t["input_schema"],
+            }
+        )
+    return out
 
 
-def openai_tools() -> list[dict[str, Any]]:
+def openai_tools(*, tier: str | None = None) -> list[dict[str, Any]]:
     """OpenAI / compatible function-calling tool definitions."""
+    allowed = _TIER_INCLUDES[resolve_mcp_tier(tier)]
     return [
         {
             "type": "function",
@@ -943,6 +1061,7 @@ def openai_tools() -> list[dict[str, Any]]:
             },
         }
         for t in TOOL_SPECS
+        if _TOOL_TIER.get(t["name"], "core") in allowed
     ]
 
 
