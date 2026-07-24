@@ -87,6 +87,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Web critique UX | [`WEB_CRITIQUE_UX.md`](WEB_CRITIQUE_UX.md) | Button copy; no silent re-rank |
 | Domain pack quality | [`DOMAIN_PACK_QUALITY.md`](DOMAIN_PACK_QUALITY.md) | Anti-hivemind / dual-use / sprawl pack rules |
 | Outcome flywheel | [`OUTCOME_FLYWHEEL.md`](OUTCOME_FLYWHEEL.md) | Sparse longitudinal calibration from prefs outcomes |
+| Outcome web UX | [`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md) | Capture picker; anti-certificate framing |
+| Public eval archives Bayesian audit | arXiv:2606.17005 | Selective time series; don’t overclaim terminals |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
