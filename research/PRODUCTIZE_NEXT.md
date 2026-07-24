@@ -31,6 +31,8 @@
 13. **LitGapFinder-style cooccur correlation study** — Offline only vs neglectedness ([`GAP_VERIFICATION_COMPETITORS.md`](GAP_VERIFICATION_COMPETITORS.md)).
 14. **Optional cross-model vote** on generate (HybridQuestion-inspired) — costly; offline ([`HYBRID_QUESTION.md`](HYBRID_QUESTION.md)).
 15. **Bayesian surprise / lab closed-loop** — Only with posteriors; don’t rename axis ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md)).
+16. **Top-n embedding diversity metric** — Hivemind detector in eval ([`PROBLEM_SELECTION_MCNAMARA.md`](PROBLEM_SELECTION_MCNAMARA.md)).
+17. **LIMITS cite McNamara paper** — Why explicit ValueProfile exists ([`PROBLEM_SELECTION_MCNAMARA.md`](PROBLEM_SELECTION_MCNAMARA.md)).
 
 ## Explicit non-goals (from research)
 
