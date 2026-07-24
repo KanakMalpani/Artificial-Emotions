@@ -1,0 +1,9 @@
+{
+  "name": "elicit_ab_sample_responses",
+  "honesty": "Synthetic agent write-ups for offline A/B rubric smoke — not human expert grades.",
+  "responses": {
+    "A_baseline": "I would look into the top question. We should study it more and gather more data. An experiment could help.",
+    "B_incongruity": "The primary information gap is which internal signals predict goal-misgeneralization (AUROC>0.8 across ≥3 environments). First experiment: run a controlled multi-environment eval measuring candidate activation probes as the independent variable against a known misgeneralization label. Falsifier: if probe AUROC stays ≤0.55 under distribution shift, reduce confidence in that signal family. Prefer a discriminating observation over vague further research.",
+    "C_mix_framing_optional": "Missing knowledge: predictive internal signals for goal-misgeneralization before harm. Concrete first investigation: compare probe sets in ≥3 eval suites; independent variable = probe feature family. Outcome that would refute the leading hypothesis: probes fail to beat chance after standard safety fine-tuning. If confusion_risk, first clarify an enabling sub-question with a cheap pilot before a large program."
+  }
+}

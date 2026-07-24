@@ -174,12 +174,42 @@ def build_parser() -> argparse.ArgumentParser:
 
     eval_p = sub.add_parser(
         "eval",
-        help="Offline expert-eval / spot-check harness (W10; no vanity accuracy %%)",
+        help="Offline eval harnesses (spotcheck / elicit A/B / gap-status; no vanity %%)",
+    )
+    eval_p.add_argument(
+        "eval_cmd",
+        nargs="?",
+        default="spotcheck",
+        choices=["spotcheck", "elicit", "gap-status"],
+        help="Harness: spotcheck (default), elicit, or gap-status",
     )
     eval_p.add_argument(
         "--fixtures",
         default=None,
-        help="Path to fixture JSON or directory (default: evals/fixtures)",
+        help="Fixture JSON/dir (spotcheck) or gap-status handlabel JSON",
+    )
+    eval_p.add_argument(
+        "--responses",
+        default=None,
+        help="Elicit: JSON map condition_id → agent response text",
+    )
+    eval_p.add_argument(
+        "--protocol",
+        default=None,
+        help="Elicit: protocol JSON (default examples/elicit_ab_protocol.json)",
+    )
+    eval_p.add_argument(
+        "--domain",
+        default="ai",
+        choices=[d.value for d in Domain],
+        help="Elicit: domain for inject packaging",
+    )
+    eval_p.add_argument("--topic", default="", help="Elicit: optional topic")
+    eval_p.add_argument("--n", type=int, default=3, help="Elicit: unknowns per inject")
+    eval_p.add_argument(
+        "--profile",
+        default="humanity_default",
+        help="Elicit: ValueProfile preset",
     )
     eval_p.add_argument("--json", action="store_true")
 
@@ -440,6 +470,70 @@ def _preferences(args: argparse.Namespace) -> int:
     return 2
 
 def _eval(args: argparse.Namespace) -> int:
+    cmd = getattr(args, "eval_cmd", None) or "spotcheck"
+
+    if cmd == "elicit":
+        from artificial_curiosity.elicit_eval import run_elicit_ab
+
+        payload = run_elicit_ab(
+            protocol_path=args.protocol,
+            responses_path=args.responses,
+            domain=args.domain,
+            topic=args.topic or "",
+            n=int(args.n or 3),
+            profile_name=args.profile,
+        )
+        if args.json:
+            print(json.dumps(payload, indent=2))
+            return 0
+        print(f"Elicit A/B  protocol={payload.get('protocol')}  v={payload.get('protocol_version')}")
+        print(f"  scored={payload.get('n_responses_scored')}  deltas={payload.get('deltas')}")
+        for row in payload.get("conditions") or []:
+            cid = row.get("condition_id")
+            flags = []
+            if row.get("inject_has_incongruity"):
+                flags.append("incongruity")
+            if row.get("inject_has_cues"):
+                flags.append("cues")
+            if row.get("inject_has_mix"):
+                flags.append("mix")
+            mean = (row.get("response_scores") or {}).get("mean")
+            mean_s = f" mean={mean}" if mean is not None else ""
+            print(f"  [{cid}] inject=[{','.join(flags) or 'plain'}]{mean_s}")
+        print(f"\n{payload.get('honesty')}")
+        return 0
+
+    if cmd == "gap-status":
+        from artificial_curiosity.evals import load_gap_status_fixtures, run_gap_status_eval
+
+        cases = (
+            load_gap_status_fixtures(args.fixtures)
+            if args.fixtures
+            else load_gap_status_fixtures()
+        )
+        report = run_gap_status_eval(cases)
+        payload = report.to_dict()
+        if args.json:
+            print(json.dumps(payload, indent=2))
+            return 0
+        print("Gap-status hand-label fixture eval")
+        print(
+            f"  cases={report.n_cases}  status_accuracy={report.status_accuracy}  "
+            f"false_answered_rate={report.false_answered_rate}"
+        )
+        print(
+            f"  related_but_unanswered_n={report.related_but_unanswered_n}  "
+            f"recall={report.related_but_unanswered_recall}"
+        )
+        print(f"  methodology: {report.methodology}")
+        for r in report.results:
+            mark = "OK" if r.get("match") else "MISS"
+            print(
+                f"  [{mark}] {r['case_id']}: gold={r['gold_status']} "
+                f"pred={r['predicted_status']}"
+            )
+        return 0
+
     from artificial_curiosity.evals import (
         already_answered_fail_rate,
         load_fixtures,

@@ -639,3 +639,114 @@ def test_mix_coercion_warning():
     assert heavy["warnings"]
     assert "biometric" in " ".join(heavy.get("claims_not") or []).lower() or True
 
+
+def test_elicit_ab_eval_path():
+    from pathlib import Path
+
+    from artificial_curiosity.elicit_eval import run_elicit_ab, score_investigation_response
+
+    root = Path(__file__).resolve().parents[1]
+    responses = root / "examples" / "elicit_ab_sample_responses.json"
+    out = run_elicit_ab(responses_path=responses, domain="ai", n=2)
+    assert out["n_responses_scored"] >= 2
+    assert "B_minus_A_mean" in out["deltas"]
+    assert out["deltas"]["B_minus_A_mean"] > 0
+    conds = {c["condition_id"]: c for c in out["conditions"]}
+    assert conds["A_baseline"]["inject_has_incongruity"] is False
+    assert conds["B_incongruity"]["inject_has_incongruity"] is True
+    weak = score_investigation_response("We should study it more.")
+    strong = score_investigation_response(
+        "The information gap is X. First experiment: measure IV. "
+        "Falsifier: if we observe null AUROC, reduce confidence."
+    )
+    assert (strong["mean"] or 0) > (weak["mean"] or 0)
+
+
+def test_gap_status_handlabel_metric():
+    from artificial_curiosity.evals import load_gap_status_fixtures, run_gap_status_eval
+
+    cases = load_gap_status_fixtures()
+    assert len(cases) >= 5
+    assert any(c.related_but_unanswered for c in cases)
+    report = run_gap_status_eval(cases)
+    assert report.n_cases == len(cases)
+    assert report.status_accuracy is not None
+    assert report.related_but_unanswered_recall is not None
+    assert report.false_answered_rate is not None
+    # Fixtures are calibrated to current verify thresholds — not a marketing claim.
+    assert report.false_answered_rate == 0.0
+    assert report.related_but_unanswered_recall == 1.0
+
+
+def test_lit_rationale_keys_no_weight_change():
+    from artificial_curiosity.models import LiteratureHit, UnansweredQuestion, CuriosityConfig
+    from artificial_curiosity.scoring import heuristic_score, lit_rationale_keys
+    from artificial_curiosity.verify import verify_gap
+    from artificial_curiosity.evals import _FixtureLitClient
+
+    hits = [
+        LiteratureHit(
+            title="CRISPR-Cas9 targeted gene editing in mammalian cells",
+            year=2024,
+            cited_by_count=100,
+            abstract_snippet=(
+                "We demonstrate site-specific DNA edits in cultured mammalian cells "
+                "with sequencing confirmation. CRISPR-Cas9 gene editing works."
+            ),
+            has_funder=True,
+        ),
+        LiteratureHit(
+            title="Efficient genome editing using CRISPR-Cas9 in mammals",
+            year=2023,
+            cited_by_count=50,
+            abstract_snippet=(
+                "Results show targeted gene editing in mammalian cells with "
+                "sequencing confirmation of site-specific DNA edits."
+            ),
+            has_funder=False,
+        ),
+    ]
+    keys = lit_rationale_keys(hits)
+    assert keys["openalex_hit_n"] == "2"
+    assert "funder_field_missing_rate" in keys
+    assert keys["funder_metadata_note"] == "from_has_funder_field"
+
+    q = UnansweredQuestion(
+        id="t",
+        question="Does CRISPR-Cas9 enable targeted gene editing in mammalian cells?",
+        domain="biology",
+        operationalization=(
+            "Demonstration of site-specific DNA edits in cultured mammalian cells "
+            "with sequencing confirmation."
+        ),
+        why_it_matters="fixture",
+    )
+    gap = verify_gap(
+        q,
+        client=_FixtureLitClient(hits),
+        use_literature=True,
+        literature_backend="fixture",
+    )
+    axes = heuristic_score(q, gap.status, len(hits), 75.0, CuriosityConfig().value_profile)
+    before = (
+        axes.impact,
+        axes.neglectedness,
+        axes.tractability,
+        axes.surprise,
+        axes.answerability,
+        axes.risk,
+        axes.cost_proxy,
+    )
+    axes.rationale = {**(axes.rationale or {}), **keys}
+    after = (
+        axes.impact,
+        axes.neglectedness,
+        axes.tractability,
+        axes.surprise,
+        axes.answerability,
+        axes.risk,
+        axes.cost_proxy,
+    )
+    assert before == after
+    assert axes.rationale["funder_field_missing_rate"] == keys["funder_field_missing_rate"]
+

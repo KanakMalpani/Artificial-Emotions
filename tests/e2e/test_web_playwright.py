@@ -76,3 +76,5 @@ def test_web_brand_and_framing_honesty(browser_page) -> None:
         if body.count():
             assert "not" in body.inner_text().lower()
             assert "feel" in body.inner_text().lower() or "ees" in body.inner_text().lower()
+    assert page.get_by_text("Side-by-side ranks").count() >= 1
+    assert page.locator(".compare-panel").count() >= 1

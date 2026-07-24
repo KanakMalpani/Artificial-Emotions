@@ -140,14 +140,22 @@ def load_fixtures(path: str | Path | None = None) -> list[SpotCheckCase]:
         files = [p]
     cases: list[SpotCheckCase] = []
     for f in files:
+        # Hand-label gap-status packs use a different schema (items/…).
+        if f.name.startswith("gap_status_"):
+            continue
         data = json.loads(f.read_text(encoding="utf-8"))
         if isinstance(data, dict) and "cases" in data:
             rows = data["cases"]
         elif isinstance(data, list):
             rows = data
+        elif isinstance(data, dict) and "items" in data:
+            # Not a spot-check pack — skip (gap-status handlabel, etc.).
+            continue
         else:
             rows = [data]
         for raw in rows:
+            if not isinstance(raw, dict) or "question" not in raw:
+                continue
             cases.append(_parse_case(raw))
     return cases
 
@@ -224,3 +232,154 @@ def already_answered_fail_rate(report: HarnessReport) -> float | None:
     if report.n_already_answered_gold == 0:
         return None
     return report.n_missed_answered / report.n_already_answered_gold
+
+
+def _normalize_gold_status(raw: str) -> GapStatus:
+    key = str(raw or "").strip().lower()
+    if key in ("answered", "likely_answered"):
+        return GapStatus.LIKELY_ANSWERED
+    if key in ("partial", "partially_answered"):
+        return GapStatus.PARTIALLY_ANSWERED
+    if key in ("unknown", "unknown_with_caveat"):
+        return GapStatus.UNKNOWN_WITH_CAVEAT
+    return GapStatus.UNANSWERED
+
+
+@dataclass
+class GapStatusCase:
+    case_id: str
+    question: UnansweredQuestion
+    gold_status: GapStatus
+    related_but_unanswered: bool = False
+    hits: list[LiteratureHit] = field(default_factory=list)
+    notes: str = ""
+
+
+@dataclass
+class GapStatusReport:
+    n_cases: int
+    status_accuracy: float | None
+    related_but_unanswered_n: int
+    related_but_unanswered_recall: float | None
+    false_answered_rate: float | None
+    n_false_answered: int
+    results: list[dict[str, Any]] = field(default_factory=list)
+    methodology: str = (
+        "Hand-labeled gap-status fixture eval. Report status_accuracy, "
+        "related_but_unanswered_recall, and false_answered_rate — never a vanity "
+        "single marketing accuracy claim."
+    )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "n_cases": self.n_cases,
+            "status_accuracy": self.status_accuracy,
+            "related_but_unanswered_n": self.related_but_unanswered_n,
+            "related_but_unanswered_recall": self.related_but_unanswered_recall,
+            "false_answered_rate": self.false_answered_rate,
+            "n_false_answered": self.n_false_answered,
+            "methodology": self.methodology,
+            "results": self.results,
+        }
+
+
+def load_gap_status_fixtures(path: str | Path | None = None) -> list[GapStatusCase]:
+    """Load hand-label gap fixtures (template schema or spotcheck-compatible)."""
+    if path is None:
+        path = default_fixtures_dir() / "gap_status_handlabel_v1.json"
+    p = Path(path)
+    data = json.loads(p.read_text(encoding="utf-8"))
+    rows = data.get("items") or data.get("cases") or []
+    out: list[GapStatusCase] = []
+    for raw in rows:
+        if not isinstance(raw, dict):
+            continue
+        qraw = raw.get("question") or {}
+        if isinstance(qraw, str):
+            qraw = {"question": qraw}
+        qtext = str(qraw.get("question") or raw.get("question_text") or "").strip()
+        if not qtext or qtext.startswith("REPLACE"):
+            continue
+        q = UnansweredQuestion(
+            id=str(raw.get("question_id") or raw.get("case_id") or qraw.get("id") or "gap"),
+            question=qtext,
+            domain=qraw.get("domain") or raw.get("domain") or "general",
+            operationalization=str(
+                qraw.get("operationalization")
+                or raw.get("operationalization")
+                or "Hand-label fixture — operationalize with a measurable success criterion."
+            ),
+            why_it_matters=str(qraw.get("why_it_matters") or raw.get("notes") or "fixture"),
+            tags=list(qraw.get("tags") or raw.get("tags") or []),
+            source="gap_status_fixture",
+        )
+        hits = [LiteratureHit.model_validate(h) for h in (raw.get("hits") or [])]
+        out.append(
+            GapStatusCase(
+                case_id=str(raw.get("question_id") or raw.get("case_id") or q.id),
+                question=q,
+                gold_status=_normalize_gold_status(
+                    str(raw.get("gold_status") or GapStatus.UNANSWERED.value)
+                ),
+                related_but_unanswered=bool(raw.get("related_but_unanswered")),
+                hits=hits,
+                notes=str(raw.get("notes") or ""),
+            )
+        )
+    return out
+
+
+def run_gap_status_eval(cases: list[GapStatusCase] | None = None) -> GapStatusReport:
+    """Status accuracy + related-but-unanswered recall (F1 / related≠answered)."""
+    if cases is None:
+        cases = load_gap_status_fixtures()
+    results: list[dict[str, Any]] = []
+    n_match = 0
+    n_rbu = 0
+    n_rbu_ok = 0
+    n_false_answered = 0
+
+    for case in cases:
+        gap = verify_gap(
+            case.question,
+            client=_FixtureLitClient(list(case.hits)),
+            use_literature=True,
+            literature_backend="fixture",
+        )
+        pred = gap.status
+        match = pred == case.gold_status
+        if match:
+            n_match += 1
+        # related-but-unanswered: gold says neighborhood exists but not settled;
+        # success = predicted unanswered or partially_answered (not likely_answered)
+        if case.related_but_unanswered:
+            n_rbu += 1
+            if pred in (GapStatus.UNANSWERED, GapStatus.PARTIALLY_ANSWERED):
+                n_rbu_ok += 1
+        if (
+            case.gold_status != GapStatus.LIKELY_ANSWERED
+            and pred == GapStatus.LIKELY_ANSWERED
+        ):
+            n_false_answered += 1
+        results.append(
+            {
+                "case_id": case.case_id,
+                "gold_status": case.gold_status.value,
+                "predicted_status": pred.value,
+                "match": match,
+                "related_but_unanswered": case.related_but_unanswered,
+                "top_overlap": gap.top_overlap,
+                "strong_match_count": gap.strong_match_count,
+            }
+        )
+
+    n = len(cases)
+    return GapStatusReport(
+        n_cases=n,
+        status_accuracy=(n_match / n) if n else None,
+        related_but_unanswered_n=n_rbu,
+        related_but_unanswered_recall=(n_rbu_ok / n_rbu) if n_rbu else None,
+        false_answered_rate=(n_false_answered / n) if n else None,
+        n_false_answered=n_false_answered,
+        results=results,
+    )

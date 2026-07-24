@@ -26,11 +26,14 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Demo proofs: `docs/PROOFS.md` (includes multi-provider smoke matrix notes — no secrets)
 - CLI, Python API, FastAPI (`:8000`), Vite UI (`:5173`) — UI shows briefs, `[low–high]` bands, and profile name
 - Expert-eval / spot-check harness: `curiosity eval` + `evals/fixtures/` (v1+v2 adversarial) + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**; stratified `by_gold_status`)
+- Elicit A/B process eval: `curiosity eval elicit` + `examples/elicit_ab_protocol.json` (lexical investigation-quality rubric — **not** EES)
+- Gap-status hand-label metric: `curiosity eval gap-status` + `evals/fixtures/gap_status_handlabel_v1.json` (status_accuracy + related_but_unanswered_recall + false_answered_rate)
+- OpenAlex `has_funder` / lit rationale keys (`openalex_hit_n`, `mean_cited_by`, `funder_field_missing_rate`) attach to score rationale only — **no silent neglectedness weight change**
 - Opt-in preference JSONL schema (`preference_log_path` / `--preference-log`) — no DB required (W13); **CLI/config only** (not HTTP body — path injection)
 - Thin preference re-rank (`preference_rerank_path` / `--preference-rerank`): prefer/reject → small profile-scoped score deltas + `preference_rerank` flag — **not** calibrated weight learning; CLI/config only
 - Preference weight hints (`preference_learn_path` / `--preference-learn` / `curiosity preferences hints` / `POST /v1/preferences/hints`): tiny profile-scoped ValueProfile deltas from labeled events with `score_axes` — **not** calibrated; API accepts inline events only (no paths); weights floored so hints cannot zero out a dimension
 - Preference summarize (`curiosity preferences summarize` / `POST /v1/preferences/summarize`): counts, pairwise wins from `preferred_over_ids`, top ids — Stage-1 flywheel, not Bradley–Terry
-- Profile compare (`curiosity compare-profiles` / `POST /v1/profiles/compare` / MCP `compare_profiles`): side-by-side offline ranks + veto tip — **no silent consensus merge**
+- Profile compare (`curiosity compare-profiles` / `POST /v1/profiles/compare` / MCP `compare_profiles` / web two-column panel): side-by-side offline ranks + Kendall τ + top-k Jaccard + veto tip — **no silent consensus merge**
 - Emotion mix soft guards: warn when mix is dominated by fear/anxiety/anger-type ids (annotation still returned)
 - Agent card `/v1/agent` includes affective-safety blurb (not biometric ERS; provoke is opt-in framing)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains

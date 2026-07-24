@@ -311,13 +311,18 @@ def heuristic_score(
             "Citations affect neglectedness only (anti-McNamara). "
             "Neglectedness/cost use thin proxies (density, funding/trend cues, "
             "investigation-scale language) — not funding databases. "
-            "Dual-use via weighted_heuristic_v1 (not a biosafety oracle)."
+            "Dual-use via weighted_heuristic_v1 (not a biosafety oracle). "
+            "openalex_hit_n / mean_cited_by / funder_field_missing_rate are "
+            "rationale keys only — they do not silently rewrite weights."
         ),
         "strong_match_count": str(strong_match_count),
         "value_profile": profile.name,
         "dual_use_method": dual.method,
         "neglectedness_proxy": "density_cites_trend_funding_cues_v1",
         "cost_proxy_method": "investigation_scale_lexicon_v1",
+        # Funding/OpenAlex transparency keys (research/FUNDING_NEGLECT_SIGNALS.md).
+        "openalex_hit_n": str(int(related_count)),
+        "mean_cited_by": f"{float(avg_citations):.1f}",
     }
     if dual.signals:
         rationale["dual_use_signals"] = ",".join(dual.signals[:6])
@@ -334,6 +339,34 @@ def heuristic_score(
         cost_proxy=clamp(cost),
         rationale=rationale,
     )
+
+
+def lit_rationale_keys(related_works: list | None) -> dict[str, str]:
+    """
+    Optional OpenAlex-ish transparency keys for neglectedness *display*.
+
+    Never feed these into weight changes by themselves — attach to rationale only.
+    """
+    works = list(related_works or [])
+    n = len(works)
+    cites = [getattr(h, "cited_by_count", None) for h in works]
+    cite_vals = [float(c) for c in cites if c is not None]
+    mean_cites = sum(cite_vals) / len(cite_vals) if cite_vals else 0.0
+    funder_flags = [getattr(h, "has_funder", None) for h in works]
+    known = [f for f in funder_flags if f is not None]
+    if not known:
+        missing_rate = "1.0"
+        note = "funder_metadata_unavailable"
+    else:
+        missing = sum(1 for f in known if not f) / len(known)
+        missing_rate = f"{missing:.3f}"
+        note = "from_has_funder_field"
+    return {
+        "openalex_hit_n": str(n),
+        "mean_cited_by": f"{mean_cites:.1f}",
+        "funder_field_missing_rate": missing_rate,
+        "funder_metadata_note": note,
+    }
 
 
 def dual_use_flags(text: str, profile: ValueProfile) -> list[str]:

@@ -89,8 +89,20 @@ python -c "from artificial_curiosity.agent_tools import dispatch_tool; print(dis
 ```bash
 curiosity eval
 curiosity eval --json
+curiosity eval elicit --responses examples/elicit_ab_sample_responses.json --json
+curiosity eval gap-status --json
+# Hand-label metrics: status_accuracy, related_but_unanswered_recall, false_answered_rate
+# (not a single marketing accuracy claim)
 pytest tests/test_mid_horizon.py -q
 # Methodology: evals/METHODOLOGY.md — report case-level match + F1 miss rate; no vanity accuracy %
+```
+
+## Profile compare (decision aid)
+
+```bash
+curiosity compare-profiles --domain ai --a humanity_default --b alignment_lab --n 6 --json
+# HTTP: POST /v1/profiles/compare — Kendall τ + top-k Jaccard; no silent weight merge
+# Web: Side-by-side ranks panel (two columns)
 ```
 
 ## Second literature backend (W11)

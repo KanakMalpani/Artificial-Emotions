@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -60,6 +61,27 @@ def test_cli_profiles_and_eval_json(capsys: pytest.CaptureFixture[str]) -> None:
     assert "match_rate" in report
     assert "methodology" in report
     assert "already_answered_fail_rate" in report
+
+    code = main(
+        [
+            "eval",
+            "elicit",
+            "--responses",
+            str(Path(__file__).resolve().parents[2] / "examples" / "elicit_ab_sample_responses.json"),
+            "--json",
+        ]
+    )
+    assert code == 0
+    elicit = json.loads(capsys.readouterr().out)
+    assert elicit["n_responses_scored"] >= 2
+    assert "deltas" in elicit
+
+    code = main(["eval", "gap-status", "--json"])
+    assert code == 0
+    gap = json.loads(capsys.readouterr().out)
+    assert gap["n_cases"] >= 1
+    assert "related_but_unanswered_recall" in gap
+    assert "false_answered_rate" in gap
 
 
 def test_cli_spark_text_mentions_investigate(capsys: pytest.CaptureFixture[str]) -> None:

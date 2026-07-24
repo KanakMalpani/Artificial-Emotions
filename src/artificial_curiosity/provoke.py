@@ -75,6 +75,8 @@ def build_inject_prompt(
     topic: str,
     value_profile: ValueProfile | None = None,
     include_epistemic_framing: bool = True,
+    include_cue_line: bool = True,
+    mix_fragment: str | None = None,
 ) -> str:
     profile = value_profile or ValueProfile()
     lines = [
@@ -85,6 +87,9 @@ def build_inject_prompt(
         "What should we investigate next?",
         "",
     ]
+    if mix_fragment:
+        lines.append(f"Framing mix (annotation only — does not feel): {mix_fragment}")
+        lines.append("")
     for u in unknowns:
         band = u.get("score_band") or [None, None]
         band_s = (
@@ -106,9 +111,10 @@ def build_inject_prompt(
             )
         if u.get("brief"):
             lines.append(f"   Brief: {u['brief'][:280]}")
-        cue_line = format_cues_for_inject(u.get("epistemic_cues"))
-        if cue_line:
-            lines.append(f"   {cue_line}")
+        if include_cue_line:
+            cue_line = format_cues_for_inject(u.get("epistemic_cues"))
+            if cue_line:
+                lines.append(f"   {cue_line}")
         flags = u.get("flags") or []
         if flags:
             lines.append(f"   Flags: {', '.join(flags[:6])}")

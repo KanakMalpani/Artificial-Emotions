@@ -182,6 +182,8 @@ class LiteratureHit(BaseModel):
     # Multi-backend provenance (openalex | semantic_scholar | fixture | …)
     source: str | None = None
     source_id: str | None = None
+    # OpenAlex grants/funder metadata presence (rationale key only — often missing).
+    has_funder: bool | None = None
 
 
 class GapEvidence(BaseModel):

@@ -128,6 +128,18 @@ export default function App() {
   const [mixWarnings, setMixWarnings] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<FeedbackEvent[]>([]);
   const [feedbackNote, setFeedbackNote] = useState<string | null>(null);
+  const [compareB, setCompareB] = useState("alignment_lab");
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [compareBusy, setCompareBusy] = useState(false);
+  const [compareErr, setCompareErr] = useState<string | null>(null);
+  const [compareData, setCompareData] = useState<{
+    ranks_a?: { rank: number; question: string; curiosity_score: number }[];
+    ranks_b?: { rank: number; question: string; curiosity_score: number }[];
+    agreement?: { kendall_tau?: number | null; top_k_jaccard?: number | null };
+    honesty?: string;
+    profile_a?: { name?: string };
+    profile_b?: { name?: string };
+  } | null>(null);
 
   const subtitle = useMemo(
     () =>
@@ -296,6 +308,32 @@ export default function App() {
     setFeedbackNote(`${eventType} recorded for #${r.rank} (session only)`);
   }
 
+  async function runCompare() {
+    setCompareBusy(true);
+    setCompareErr(null);
+    try {
+      const res = await fetch("/v1/profiles/compare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          domain,
+          topic,
+          profile_a: profileName,
+          profile_b: compareB,
+          n: 6,
+        }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      setCompareData(await res.json());
+      setCompareOpen(true);
+    } catch (e) {
+      setCompareErr(e instanceof Error ? e.message : "Compare failed");
+      setCompareData(null);
+    } finally {
+      setCompareBusy(false);
+    }
+  }
+
   async function summarizeFeedback() {
     if (feedback.length < 1) {
       setFeedbackNote("No feedback yet — use Prefer / Reject on cards.");
@@ -385,6 +423,80 @@ export default function App() {
           {profileDescription ?? activeProfileMeta?.description}
         </p>
       )}
+
+      <section className="compare-panel" aria-label="Profile compare">
+        <div className="compare-controls">
+          <label>
+            Compare vs
+            <select
+              value={compareB}
+              onChange={(e) => setCompareB(e.target.value)}
+            >
+              {profiles
+                .filter((p) => p.name !== profileName)
+                .map((p) => (
+                  <option key={p.name} value={p.name}>
+                    {p.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={runCompare}
+            disabled={compareBusy || compareB === profileName}
+          >
+            {compareBusy ? "Comparing…" : "Side-by-side ranks"}
+          </button>
+        </div>
+        {compareErr && <p className="error">{compareErr}</p>}
+        {compareOpen && compareData && (
+          <div className="compare-grid">
+            <div className="compare-col">
+              <h3>{compareData.profile_a?.name ?? profileName}</h3>
+              <ol>
+                {(compareData.ranks_a || []).map((r) => (
+                  <li key={`a-${r.rank}`}>
+                    <span className="compare-rank">#{r.rank}</span>
+                    <span className="compare-q">{r.question}</span>
+                    <span className="compare-score">
+                      {r.curiosity_score.toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className="compare-col">
+              <h3>{compareData.profile_b?.name ?? compareB}</h3>
+              <ol>
+                {(compareData.ranks_b || []).map((r) => (
+                  <li key={`b-${r.rank}`}>
+                    <span className="compare-rank">#{r.rank}</span>
+                    <span className="compare-q">{r.question}</span>
+                    <span className="compare-score">
+                      {r.curiosity_score.toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <p className="compare-meta">
+              τ=
+              {compareData.agreement?.kendall_tau == null
+                ? "n/a"
+                : Number(compareData.agreement.kendall_tau).toFixed(3)}
+              {" · "}
+              top-k Jaccard=
+              {compareData.agreement?.top_k_jaccard == null
+                ? "n/a"
+                : Number(compareData.agreement.top_k_jaccard).toFixed(3)}
+              {" — "}
+              offline heuristic; no silent merge.
+            </p>
+          </div>
+        )}
+      </section>
 
       <section className="mix-panel" aria-label="Investigation framing mix">
         <button

@@ -51,6 +51,8 @@ class OpenAlexClient:
                         pairs.append((p, word))
                 pairs.sort()
                 abstract = " ".join(word for _, word in pairs[:60])
+            grants = w.get("grants") or []
+            has_funder = bool(grants) if isinstance(grants, list) else None
             hits.append(
                 LiteratureHit(
                     title=w.get("title") or "Untitled",
@@ -60,6 +62,8 @@ class OpenAlexClient:
                     cited_by_count=w.get("cited_by_count"),
                     abstract_snippet=abstract,
                     url=w.get("id"),
+                    source="openalex",
+                    has_funder=has_funder,
                 )
             )
         return hits

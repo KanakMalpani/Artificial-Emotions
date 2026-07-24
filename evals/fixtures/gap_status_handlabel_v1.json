@@ -1,0 +1,146 @@
+{
+  "name": "gap_status_handlabel_v1",
+  "version": "0.1.0",
+  "honesty": "Hand-labeled offline fixtures for verify calibration — not a marketing accuracy set. See research/GAP_VERIFY_METHODS.md.",
+  "items": [
+    {
+      "question_id": "rbu-misgen",
+      "question_text": "What measurable internal signals most reliably predict goal-misgeneralization before deployment-scale harm?",
+      "domain": "ai",
+      "operationalization": "Identify signals that predict misgeneralization with AUROC > 0.8 across ≥3 environments.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "notes": "Related eval/scaling lit ≠ answered; open-gap abstracts.",
+      "hits": [
+        {
+          "title": "A survey of large language model evaluation benchmarks",
+          "year": 2024,
+          "cited_by_count": 15,
+          "abstract_snippet": "We review popular NLP benchmarks. Further research is needed on deployment safety and goal misgeneralization.",
+          "source": "fixture"
+        },
+        {
+          "title": "Scaling laws for neural language models",
+          "year": 2020,
+          "cited_by_count": 500,
+          "abstract_snippet": "Remains unknown how these relate to goal misgeneralization under distribution shift.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "question_id": "rbu-healthspan",
+      "question_text": "Which circulating biomarkers best predict remaining healthspan under lifespan-extending interventions?",
+      "domain": "biology",
+      "operationalization": "Rank biomarkers by out-of-sample AUROC ≥ 0.7 for remaining healthspan across ≥2 intervention classes with pre-registered endpoints.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "notes": "Aging reviews share topic words but miss ops bar.",
+      "hits": [
+        {
+          "title": "A review of aging and longevity in model organisms",
+          "year": 2022,
+          "cited_by_count": 90,
+          "abstract_snippet": "Remains unknown which circulating markers predict healthspan under interventions. Future work should clarify biomarkers.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "question_id": "answered-crispr",
+      "question_text": "Does CRISPR-Cas9 enable targeted gene editing in mammalian cells?",
+      "domain": "biology",
+      "operationalization": "Demonstration of site-specific DNA edits in cultured mammalian cells with sequencing confirmation.",
+      "gold_status": "answered",
+      "related_but_unanswered": false,
+      "notes": "Landmark capability; expect likely_answered with strong ops overlap.",
+      "hits": [
+        {
+          "title": "CRISPR-Cas9 targeted gene editing in mammalian cells",
+          "year": 2024,
+          "cited_by_count": 120,
+          "abstract_snippet": "We demonstrate site-specific DNA edits in cultured mammalian cells with sequencing confirmation. Our results show efficient CRISPR-Cas9 gene editing and targeted gene editing in mammalian cells.",
+          "source": "fixture",
+          "has_funder": true
+        },
+        {
+          "title": "Efficient genome editing using CRISPR-Cas9 in mammals with sequencing confirmation",
+          "year": 2023,
+          "cited_by_count": 80,
+          "abstract_snippet": "We show targeted gene editing across multiple mammalian cell lines using CRISPR-Cas9. We demonstrate site-specific DNA edits with sequencing confirmation in cultured mammalian cells.",
+          "source": "fixture",
+          "has_funder": false
+        },
+        {
+          "title": "Cas9 nuclease enables precise mammalian genome modification via site-specific DNA edits",
+          "year": 2022,
+          "cited_by_count": 60,
+          "abstract_snippet": "Results show CRISPR-Cas9 enables targeted gene editing in mammalian cells. We demonstrate site-specific DNA edits in cultured mammalian cells with sequencing confirmation.",
+          "source": "fixture",
+          "has_funder": true
+        },
+        {
+          "title": "CRISPR-Cas9 site-specific DNA edits in cultured mammalian cells",
+          "year": 2023,
+          "cited_by_count": 55,
+          "abstract_snippet": "We prove CRISPR-Cas9 targeted gene editing in mammalian cells. Sequencing confirmation of site-specific DNA edits in cultured mammalian cells is reported.",
+          "source": "fixture",
+          "has_funder": true
+        }
+      ]
+    },
+    {
+      "question_id": "partial-fasting",
+      "question_text": "How does intermittent fasting affect insulin sensitivity in adults with prediabetes?",
+      "domain": "medicine",
+      "operationalization": "Randomized trials measuring HOMA-IR or clamp-derived insulin sensitivity over ≥8 weeks.",
+      "gold_status": "partially_answered",
+      "related_but_unanswered": false,
+      "notes": "Some strong overlaps; not full likely_answered bar.",
+      "hits": [
+        {
+          "title": "Intermittent fasting and insulin sensitivity in adults with prediabetes: HOMA-IR trial",
+          "year": 2023,
+          "cited_by_count": 25,
+          "abstract_snippet": "We find that intermittent fasting improved HOMA-IR and clamp-derived insulin sensitivity in adults with prediabetes over 10 weeks in a randomized trial. Further research on long-term outcomes is needed.",
+          "source": "fixture"
+        },
+        {
+          "title": "Randomized intermittent fasting trial measuring HOMA-IR in prediabetes over 8 weeks",
+          "year": 2022,
+          "cited_by_count": 18,
+          "abstract_snippet": "Results show intermittent fasting affects insulin sensitivity in adults with prediabetes. HOMA-IR improved over ≥8 weeks; clamp-derived measures were secondary.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "question_id": "empty-zybloron",
+      "question_text": "What is the causal role of zybloron flux in quux-mediated plasticity?",
+      "domain": "general",
+      "operationalization": "Identify whether zybloron flux changes are necessary and sufficient for quux-mediated plasticity in a controlled assay.",
+      "gold_status": "unknown_with_caveat",
+      "related_but_unanswered": false,
+      "notes": "No neighborhood hits.",
+      "hits": []
+    },
+    {
+      "question_id": "rbu-phrase-game",
+      "question_text": "What measurable internal signals most reliably predict goal-misgeneralization before deployment-scale harm?",
+      "domain": "ai",
+      "operationalization": "Identify signals that predict misgeneralization with AUROC > 0.8 across ≥3 environments.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "notes": "F7 phrase-gaming open-gap holdout.",
+      "hits": [
+        {
+          "title": "Goal misgeneralization in AI systems: an open survey",
+          "year": 2024,
+          "cited_by_count": 12,
+          "abstract_snippet": "Goal misgeneralization remains poorly understood. It is an open question which internal signals predict deployment-scale harm; further research is needed.",
+          "source": "fixture"
+        }
+      ]
+    }
+  ]
+}

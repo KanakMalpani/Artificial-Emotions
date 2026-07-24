@@ -23,6 +23,7 @@ from artificial_curiosity.scoring import (
     confidence_from_signals,
     dual_use_flags,
     heuristic_score,
+    lit_rationale_keys,
     passes_gates,
     score_uncertainty_band,
 )
@@ -109,6 +110,9 @@ class CuriosityEngine:
                 self.config.value_profile,
                 strong_match_count=gap.strong_match_count,
             )
+            # Attach OpenAlex transparency keys without changing numeric weights.
+            keys = lit_rationale_keys(gap.related_works)
+            axes.rationale = {**(axes.rationale or {}), **keys}
 
             ok, flags = passes_gates(axes, gap.status, self.config.value_profile)
             text_blob = f"{q.question} {q.why_it_matters} {q.operationalization}"
