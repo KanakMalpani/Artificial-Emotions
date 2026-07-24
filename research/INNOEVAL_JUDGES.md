@@ -48,6 +48,7 @@ Soundness + contribution with retrieval; ScholarIdeas expert set. Best as **post
 1. Keep multi-judge axes decoupled; report disagreement.  
 2. Never train one global “science judge” across profiles.  
 3. Optional: ScholarEval/InnoEval-style soundness pass on top-n briefs offline.  
+   **Sibling landing:** `soundness.py` (in flight) — keep **annotation-only**; cite lit hits when present; no silent re-rank.  
 4. Idea-graph stays display-only ([`IDEA_GRAPH_UX.md`](IDEA_GRAPH_UX.md)).
 
 ---

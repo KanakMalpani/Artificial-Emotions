@@ -40,7 +40,7 @@
 17. **Optional idea-graph export** — ✅ landed (`c733edc` / `idea_graph.py`); display only ([`IDEA_GRAPH_UX.md`](IDEA_GRAPH_UX.md)).
 18. **Mix intensity cap** — ✅ landed (`c733edc` / `mix_intensity_cap`); keep epistemic-default docs ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
 19. **SFBench-cousin feasibility_note** — ✅ display-only landed (`90fc51d`); offline calibrate before any axis fold ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
-20. **Offline ScholarEval/InnoEval soundness pass** — Optional on top-n briefs ([`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md)).
+20. **Offline ScholarEval/InnoEval soundness pass** — ✅ heuristic `soundness.py` landing; keep triage-only ([`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md), [`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md)).
 
 ## Explicit non-goals (from research)
 

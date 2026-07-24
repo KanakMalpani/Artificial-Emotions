@@ -63,6 +63,7 @@ Everything under `research/` is design/background material that informed the imp
 | [SFBENCH_CALIBRATION.md](SFBENCH_CALIBRATION.md) | Offline feasibility cousin calibration |
 | [INNOEVAL_JUDGES.md](INNOEVAL_JUDGES.md) | InnoEval / personalized judges / Intern-Atlas |
 | [FEASIBILITY_NOTE_UX.md](FEASIBILITY_NOTE_UX.md) | Display-only feasibility_note presentation |
+| [SOUNDNESS_PASS_UX.md](SOUNDNESS_PASS_UX.md) | Heuristic soundness triage UX |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
