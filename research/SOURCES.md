@@ -67,6 +67,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Artificial Hivemind note | [`HIVEMIND.md`](HIVEMIND.md) | Inter/intra-model homogeneity on open-ended ideation |
 | AI co-scientist landscape | [`CO_SCIENTIST_LANDSCAPE.md`](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist, HeurekaBench, MIND adjacency |
 | Answerability / feasibility axes | [`ANSWERABILITY_FEASIBILITY.md`](ANSWERABILITY_FEASIBILITY.md) | SFBench vs heuristic answerability/tractability |
+| Evolving Idea Graphs adjacency | [`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md) | Persistent claim graph; edit-and-commit |
+| EIG (Dong et al.) | arXiv:2605.04922 | Multi-agent ideation with graph state |
 | Critic / debate for judges | [`CRITIC_DEBATE_JUDGES.md`](CRITIC_DEBATE_JUDGES.md) | Form critique vs axis scoring |
 | Domain pack quality | [`DOMAIN_PACK_QUALITY.md`](DOMAIN_PACK_QUALITY.md) | Anti-hivemind / dual-use / sprawl pack rules |
 | Outcome flywheel | [`OUTCOME_FLYWHEEL.md`](OUTCOME_FLYWHEEL.md) | Sparse longitudinal calibration from prefs outcomes |
