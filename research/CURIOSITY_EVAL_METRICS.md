@@ -24,8 +24,12 @@ Do not optimize a single “novelty” LLM score. Use a **metric stack**: (1) ga
 | **IAScore / Distinctness** ([2409.06185](https://arxiv.org/abs/2409.06185)) | Alignment + diversity of future ideas | Still need human novelty/feasibility |
 | **Ideation–execution gap** ([2506.20803](https://arxiv.org/abs/2506.20803)) | Expert execution of LLM vs human ideas; post-exec reviews | LLM ideas look better pre-exec; gap closes/flips after |
 | **ScholarEval** | Soundness + contribution vs expert rubrics | Downstream of ideation |
+| **InnoEval** ([2602.14367](https://arxiv.org/abs/2602.14367)) | Knowledge-grounded multi-perspective idea eval | Review-board ≈ profiles; keep dimensions decoupled |
+| **Personalized judges** ([2604.22517](https://arxiv.org/abs/2604.22517)) | Evaluator-conditioned > aggregate under disagreement | Profile-scoped prefs; no global judge |
 | **SciMuse** | Expert *interest* prediction | Interest ≠ ITN/VOI |
 | **EIG** ([2605.04922](https://arxiv.org/abs/2605.04922)) | Evolving idea graphs; edit-and-commit | Architecture inspiration for tracking conflicts |
+
+Deep dive: [`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md).
 
 ---
 

@@ -37,9 +37,10 @@
 14. **Optional cross-model vote** — ✅ heuristic proxy (`hybrid_vote.py`); live multi-model offline only ([`HYBRID_VOTE_OFFLINE.md`](HYBRID_VOTE_OFFLINE.md), [`FALSIFYBENCH.md`](FALSIFYBENCH.md)).
 15. **Bayesian surprise closed-loop** — Worksheet template only ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md), `examples/bayesian_surprise_worksheet.json`); no axis rename.
 16. **LIMITS cite McNamara / EVSI / ERS / agentic dual-use** — ✅ largely in `docs/LIMITS.md`; keep BioVeil one-liner if missing ([`LIMITS_PATCHES.md`](LIMITS_PATCHES.md), [`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md)).
-17. **Optional idea-graph export** — ✅ `idea_graph.py` (Jaccard similarity + tag conflict); display only ([`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md)).
-18. **Mix intensity cap (optional)** — Cap non-epistemic mix weights ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
+17. **Optional idea-graph export** — ✅ landed (`c733edc` / `idea_graph.py`); display only ([`IDEA_GRAPH_UX.md`](IDEA_GRAPH_UX.md)).
+18. **Mix intensity cap** — ✅ landed (`c733edc` / `mix_intensity_cap`); keep epistemic-default docs ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
 19. **SFBench-cousin feasibility_note** — Display only; offline calibrate first ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
+20. **Offline ScholarEval/InnoEval soundness pass** — Optional on top-n briefs ([`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md)).
 
 ## Explicit non-goals (from research)
 
