@@ -32,6 +32,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | HybridQuestion method note | [`HYBRID_QUESTION.md`](HYBRID_QUESTION.md) | Multi-LLM vote + human foresight divergence |
 | Constitutional / multi-stakeholder curiosity | [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md) | Veto stacks vs fake consensus blends |
 | Curiosity eval metric stack | [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md) | RINoBench caveats; gap+rank+elicit primary |
+| Gap verify methods (SciFact family) | [`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md) | Claim verify ≠ question settled; escalation pattern |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
@@ -91,6 +92,9 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | RINoBench (novelty judgment) | arXiv:2603.10303 | LLM novelty scores diverge from expert gold |
 | RND relative neighbor density novelty | arXiv:2503.01508 | Cross-domain novelty proxy |
 | Ideation–execution gap | arXiv:2506.20803 | Pre-exec LLM idea advantage can reverse |
+| SciFact / SciFact-Open | arXiv:2004.14974 ; 2210.13777 | Scientific claim verification (+ open-domain drop) |
+| DeepSciVerify | arXiv:2605.27710 | Abstract-first claim–citation escalation |
+| SciClops | arXiv:2110.13090 | Claim extract/cluster for science fact-check |
 | Kumar et al., IAScore / Distinctness | arXiv:2409.06185 | Automated future-idea eval metrics |
 | EmotionBench (Huang et al.) | NeurIPS 2024; arXiv:2308.03656 | LLM emotional alignment fragility |
 | CoRE | arXiv:2508.05880 | Fragile appraisal→emotion reasoning in LLMs |
