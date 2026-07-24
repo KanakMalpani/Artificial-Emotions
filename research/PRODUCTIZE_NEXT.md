@@ -45,9 +45,10 @@
 22. **Web outcome picker** — In-tree; keep sparse honesty ([`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md)).
 23. **Dual-use red-team fixtures** — In-tree (`evals/fixtures/dual_use_redteam_v1.json`) ([`DUAL_USE_REDTEAM.md`](DUAL_USE_REDTEAM.md)).
 24. **MCP tool tiers** — In-tree (`CURIOSITY_MCP_TIER` / [`MCP_TIERS_INTREE.md`](MCP_TIERS_INTREE.md)); keep affect opt-in.
-25. **ErrEval-style diagnose-before-score** — Spec ([`EVAL_REPORT_ORDER.md`](EVAL_REPORT_ORDER.md)); sibling `eval_report.py` in flight.
-26. **Gap handlabel growth** — Continue fixtures (`c05861b`); VERITAS cousins ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
-27. **Failure-knowledge seed phrases** — Stem bank ready ([`FAILURE_SEED_PHRASES.md`](FAILURE_SEED_PHRASES.md)); add ≥1 per pack.
+25. **ErrEval-style diagnose-before-score** — In-tree (`77c2419` / eval diagnostics first) ([`EVAL_REPORT_ORDER.md`](EVAL_REPORT_ORDER.md)).
+26. **Gap handlabel growth** — Continue fixtures; VERITAS cousins ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
+27. **Failure-knowledge seed phrases** — In-tree pack seeds + stem bank ([`FAILURE_SEED_PHRASES.md`](FAILURE_SEED_PHRASES.md)).
+28. **Optional novelty_note** — Display-only only; never replaces gap verify ([`IDEA_NOVELTY_CHECKER.md`](IDEA_NOVELTY_CHECKER.md)).
 
 ## Explicit non-goals (from research)
 
