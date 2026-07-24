@@ -38,6 +38,7 @@ Everything under `research/` is design/background material that informed the imp
 | [HIVEMIND.md](HIVEMIND.md) | Jiang et al. Artificial Hivemind → diversity metrics |
 | [CO_SCIENTIST_LANDSCAPE.md](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist / HeurekaBench / MIND vs curiosity layer |
 | [AGENT_CARD_COPY.md](AGENT_CARD_COPY.md) | Draft honesty copy for /v1/agent and MCP |
+| [MCP_DESCRIPTION_LINT.md](MCP_DESCRIPTION_LINT.md) | Forbidden/required strings for tool schemas |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

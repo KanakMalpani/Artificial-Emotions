@@ -12,7 +12,7 @@
 
 1. **Elicit A/B eval path** — Implement agent A/B using `examples/elicit_ab_protocol.json` (+ optional rubric rows from [`INVESTIGATION_DESIGN.md`](INVESTIGATION_DESIGN.md)); report investigation-quality deltas. See [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md).
 2. **Gap-status fixture + metric** — Hand-label 15–30 Qs using `examples/gap_status_fixture_template.json`; report status accuracy and related-but-unanswered recall ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md), [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
-3. **MCP/tool description lint** — Forbid manipulative substrings (`ALWAYS`, `ignore other tools`) in tool schemas ([`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md), [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
+3. **MCP/tool description lint** — Spec in [`MCP_DESCRIPTION_LINT.md`](MCP_DESCRIPTION_LINT.md); implement `tests/test_mcp_description_lint.py` ([`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md)).
 4. **Prefs summarize + pairwise nudge** — ✅ partially shipped (`0af53f4`); keep pairwise `preferred_over_ids` UX + dual-use clamp ([`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md), [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 5. **Agent card safety blurb** — Draft in [`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md); merge into `/v1/agent` if sibling wants tighter wording ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md), [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md)).
 
