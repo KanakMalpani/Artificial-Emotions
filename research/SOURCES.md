@@ -16,6 +16,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Jr. AI Scientist | arXiv 2511.04583 | Autonomous research risks & limits |
 | Agentic AI Scientists Are Not Built For ASD | arXiv 2605.08956 | Problem-selection bottleneck / McNamara fallacy |
 | Bisht et al. McNamara / hivemind (deep note) | [`PROBLEM_SELECTION_MCNAMARA.md`](PROBLEM_SELECTION_MCNAMARA.md) | Implications for profiles, diversity, ensembles |
+| Hao et al., AI expands impact / contracts focus | Nature 2026 DOI 10.1038/s41586-025-09922-y | Topic-volume shrinkage under AI tools |
+| Artificial Hivemind (Jiang et al.) | arXiv:2510.22954 | Open-ended LM homogeneity |
 | Computational Theories of Curiosity (Oudeyer) | arXiv 1802.10546 | Intrinsic motivation foundations |
 | Large-Scale Curiosity-Driven Learning (Pathak et al.) | arXiv 1808.04355 | RL curiosity ≠ scientific VOI |
 | Emotions in AI / epistemic affect (synthesis) | [`AI_EMOTIONS.md`](AI_EMOTIONS.md) | Monograph: classical theories, CME architectures, ML/RL/LLM stacks, epistemic elicitation ↔ provoke |
@@ -38,6 +40,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Investigation design / falsifiers | [`INVESTIGATION_DESIGN.md`](INVESTIGATION_DESIGN.md) | BoxingGym struggle; elicit rubric upgrades |
 | Problem selection / McNamara (Bisht et al.) | [`PROBLEM_SELECTION_MCNAMARA.md`](PROBLEM_SELECTION_MCNAMARA.md) | Hivemind; co-scientist; diversity |
 | Profile compare UX | [`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md) | Kendall/Spearman; deltas; veto tip |
+| Failure knowledge / publication bias | [`FAILURE_KNOWLEDGE.md`](FAILURE_KNOWLEDGE.md) | Dark reactions; Hao topic contraction |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
