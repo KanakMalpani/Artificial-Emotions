@@ -57,6 +57,7 @@ Everything under `research/` is design/background material that informed the imp
 | [HYBRID_VOTE_OFFLINE.md](HYBRID_VOTE_OFFLINE.md) | Cross-model vote offline protocol (P2) |
 | [WEB_CRITIQUE_UX.md](WEB_CRITIQUE_UX.md) | Critique form button honesty / anti-patterns |
 | [WEB_PAIR_DUEL_UX.md](WEB_PAIR_DUEL_UX.md) | Suggest-next-duel feedback bar honesty |
+| [FALSIFYBENCH.md](FALSIFYBENCH.md) | Negative testing → falsifier-first elicit |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

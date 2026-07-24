@@ -11,6 +11,8 @@
 
 Offline, measure how often model A’s top-n unknowns are endorsed by models B/C under the **same** ValueProfile + domain pack — inspired by HybridQuestion’s AI↔human divergence on *future* questions.
 
+**Sibling landing:** `hybrid_vote.py` implements a **form-critic heuristic proxy** (keep/drop/rewrite + hivemind) for CI — not live multi-LLM. Treat as scaffold until real judges are wired offline.
+
 ---
 
 ## 2. Protocol

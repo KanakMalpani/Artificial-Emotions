@@ -59,6 +59,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Dual-use ranking safety | [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md) | Safeguarding AI scientists; Jr. AI risk report → filters |
 | HybridQuestion method note | [`HYBRID_QUESTION.md`](HYBRID_QUESTION.md) | Multi-LLM vote + human foresight divergence |
 | Hybrid vote offline protocol | [`HYBRID_VOTE_OFFLINE.md`](HYBRID_VOTE_OFFLINE.md) | Keep-rate vs hivemind; no silent re-rank |
+| FALSIFYBENCH (negative testing) | [`FALSIFYBENCH.md`](FALSIFYBENCH.md) | Wason-style; falsify > confirm |
+| FALSIFYBENCH paper | arXiv:2606.04751 | Inductive reasoning / rule discovery games |
 | Constitutional / multi-stakeholder curiosity | [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md) | Veto stacks vs fake consensus blends |
 | Curiosity eval metric stack | [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md) | RINoBench caveats; gap+rank+elicit primary |
 | Gap verify methods (SciFact family) | [`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md) | Claim verify ≠ question settled; escalation pattern |
