@@ -41,12 +41,13 @@
 18. **Mix intensity cap** — ✅ landed (`c733edc` / `mix_intensity_cap`); keep epistemic-default docs ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
 19. **SFBench-cousin feasibility_note** — ✅ display-only landed (`90fc51d`); offline calibrate before any axis fold ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
 20. **Offline soundness pass** — ✅ heuristic triage (`9538e4e` / `soundness.py`) ([`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md)).
-21. **Web constitution compare + veto** — Sibling wiring (`compare.py` / web / constitution JSON); see [`CONSTITUTION_WEB_UX.md`](CONSTITUTION_WEB_UX.md), [`MULTI_STAKEHOLDER_FEASIBLE_SET.md`](MULTI_STAKEHOLDER_FEASIBLE_SET.md).
-22. **Web outcome picker** — ✅ landed (`c05861b`); keep sparse honesty ([`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md)).
-23. **Dual-use red-team fixtures** — ✅ fixture landing (`evals/fixtures/dual_use_redteam_v1.json`); template in examples ([`DUAL_USE_REDTEAM.md`](DUAL_USE_REDTEAM.md)).
-24. **MCP tool tiers** — Optional core/full progressive disclosure ([`MCP_PROGRESSIVE_DISCLOSURE.md`](MCP_PROGRESSIVE_DISCLOSURE.md)).
+21. **Web constitution compare + veto** — In-tree (`constitution_compare`); keep feasible-set honesty ([`CONSTITUTION_WEB_UX.md`](CONSTITUTION_WEB_UX.md), [`MULTI_STAKEHOLDER_FEASIBLE_SET.md`](MULTI_STAKEHOLDER_FEASIBLE_SET.md)).
+22. **Web outcome picker** — In-tree; keep sparse honesty ([`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md)).
+23. **Dual-use red-team fixtures** — In-tree (`evals/fixtures/dual_use_redteam_v1.json`) ([`DUAL_USE_REDTEAM.md`](DUAL_USE_REDTEAM.md)).
+24. **MCP tool tiers** — In-tree (`CURIOSITY_MCP_TIER` / [`MCP_TIERS_INTREE.md`](MCP_TIERS_INTREE.md)); keep affect opt-in.
 25. **ErrEval-style diagnose-before-score** — Critique/soundness sections first in eval report ([`ERREVAL_QG.md`](ERREVAL_QG.md)).
 26. **Gap handlabel growth** — Continue fixtures (`c05861b`); VERITAS cousins ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
+27. **Failure-knowledge seed phrases** — Null/replication gap seeds in packs ([`FAILURE_KNOWLEDGE.md`](FAILURE_KNOWLEDGE.md)).
 
 ## Explicit non-goals (from research)
 

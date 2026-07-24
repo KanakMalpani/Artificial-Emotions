@@ -74,6 +74,7 @@ Everything under `research/` is design/background material that informed the imp
 | [GUIDE_ADVISING.md](GUIDE_ADVISING.md) | Idea advising ≠ unknown ranking; anti-acceptance axis |
 | [AGKA_EPISTEMIC_LABELS.md](AGKA_EPISTEMIC_LABELS.md) | Guideline-augmented epistemic label clarity |
 | [MULTI_STAKEHOLDER_FEASIBLE_SET.md](MULTI_STAKEHOLDER_FEASIBLE_SET.md) | Vendor alignment compression; pluralism mechanics |
+| [MCP_TIERS_INTREE.md](MCP_TIERS_INTREE.md) | CURIOSITY_MCP_TIER contract map |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
