@@ -45,7 +45,7 @@
 22. **Web outcome picker** — In-tree; keep sparse honesty ([`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md)).
 23. **Dual-use red-team fixtures** — In-tree (`evals/fixtures/dual_use_redteam_v1.json`) ([`DUAL_USE_REDTEAM.md`](DUAL_USE_REDTEAM.md)).
 24. **MCP tool tiers** — In-tree (`CURIOSITY_MCP_TIER` / [`MCP_TIERS_INTREE.md`](MCP_TIERS_INTREE.md)); keep affect opt-in.
-25. **ErrEval-style diagnose-before-score** — Critique/soundness sections first in eval report ([`ERREVAL_QG.md`](ERREVAL_QG.md)).
+25. **ErrEval-style diagnose-before-score** — Spec ([`EVAL_REPORT_ORDER.md`](EVAL_REPORT_ORDER.md)); sibling `eval_report.py` in flight.
 26. **Gap handlabel growth** — Continue fixtures (`c05861b`); VERITAS cousins ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
 27. **Failure-knowledge seed phrases** — Stem bank ready ([`FAILURE_SEED_PHRASES.md`](FAILURE_SEED_PHRASES.md)); add ≥1 per pack.
 

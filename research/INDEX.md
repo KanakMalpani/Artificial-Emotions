@@ -76,6 +76,7 @@ Everything under `research/` is design/background material that informed the imp
 | [MULTI_STAKEHOLDER_FEASIBLE_SET.md](MULTI_STAKEHOLDER_FEASIBLE_SET.md) | Vendor alignment compression; pluralism mechanics |
 | [MCP_TIERS_INTREE.md](MCP_TIERS_INTREE.md) | CURIOSITY_MCP_TIER contract map |
 | [FAILURE_SEED_PHRASES.md](FAILURE_SEED_PHRASES.md) | Null/replication gap seed stems for packs |
+| [EVAL_REPORT_ORDER.md](EVAL_REPORT_ORDER.md) | Diagnose-before-score section order |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

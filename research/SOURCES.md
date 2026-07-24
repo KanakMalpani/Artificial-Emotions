@@ -77,6 +77,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | InnoEval / personalized judges | [`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md) | Multi-perspective eval; anti-global-judge |
 | Soundness pass UX | [`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md) | Triage badges; no silent re-rank |
 | ErrEval QG diagnostics | [`ERREVAL_QG.md`](ERREVAL_QG.md) | Error-aware eval before holistic scores |
+| Eval report section order | [`EVAL_REPORT_ORDER.md`](EVAL_REPORT_ORDER.md) | Diagnostics → gap → rank → elicit → hivemind |
 | ErrEval | arXiv:2601.10406 | Diagnose-then-score question generation |
 | GUIDE idea advising | [`GUIDE_ADVISING.md`](GUIDE_ADVISING.md) | Lit-grounded advise; not acceptance VOI |
 | GUIDE | arXiv:2507.08870 | Scalable research idea feedback |
