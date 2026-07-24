@@ -53,6 +53,7 @@ Everything under `research/` is design/background material that informed the imp
 | [SUGGEST_NEXT_PAIR.md](SUGGEST_NEXT_PAIR.md) | Active preference duel UX / tool sketch |
 | [MCP_THREAT_TAXONOMY.md](MCP_THREAT_TAXONOMY.md) | MCP-38 / MSB → lint & agent-card mapping |
 | [EIG_IDEATION_GRAPHS.md](EIG_IDEATION_GRAPHS.md) | Evolving Idea Graphs adjacency (edit-and-commit) |
+| [EMOTION_MIXING_ADDENDUM.md](EMOTION_MIXING_ADDENDUM.md) | Speech/LDL mix literature vs annotation honesty |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

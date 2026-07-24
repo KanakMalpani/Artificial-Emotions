@@ -34,6 +34,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Emotions in AI / epistemic affect (synthesis) | [`AI_EMOTIONS.md`](AI_EMOTIONS.md) | Monograph: classical theories, CME architectures, ML/RL/LLM stacks, epistemic elicitation ↔ provoke |
 | Consumer access to emotion / epistemic tooling | [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) | APIs, SDKs, OCC libs, LLM toolkits, EES, datasets (easy vs locked); minimal public contract |
 | Emotion mixing / blends (synthesis) | [`EMOTION_MIXING.md`](EMOTION_MIXING.md) | PAD interpolation, Plutchik dyads, mixed feelings; % mix schema + honesty limits |
+| Emotion mixing addendum (speech/LDL) | [`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md) | EmoMix/EM2LDL ≠ annotation mix; steering caution |
 | Epistemic elicitation → provoke | [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md) | EES, incongruity paradigms, agent/human A/B protocol |
 | Cue threshold knobs | [`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md) | Profile cue_* presets; persuasion-intensity caution |
 | Hivemind metric spec | [`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md) | Mean/max pairwise cosine eval recipe |

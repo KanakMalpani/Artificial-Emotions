@@ -12,6 +12,8 @@
 
 Psychology and computational emotion models (CMEs) both treat **mixtures** as first-class: same-valence blends are common; cross-valence “mixed feelings” occur; dimensional spaces (PAD/VAD) make **interpolation** natural; Plutchik formalizes **dyads** as adjacent primary compounds; OCC supplies **intensity** variables per category rather than a single % blend API. For this repo, a practical contract is: accept `{emotion_id: percent|weight}`, **normalize to sum 1.0**, return a **blend profile** (weighted PAD anchors + cue tags + framing text) labeled `honesty: annotation_only`. Do **not** claim the AI feels the blend, that weights equal EES scores, or that PAD interpolation is a validated psych instrument.
 
+**Addendum:** Speech mix / LDL literature ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)) — distribution metaphor only; joint steering can break proportional control.
+
 ---
 
 ## 2. Broader emotion sets usable in tools
