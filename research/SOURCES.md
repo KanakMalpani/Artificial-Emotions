@@ -65,6 +65,9 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | FALSIFYBENCH paper | arXiv:2606.04751 | Inductive reasoning / rule discovery games |
 | Constitutional / multi-stakeholder curiosity | [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md) | Veto stacks vs fake consensus blends |
 | Curiosity eval metric stack | [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md) | RINoBench caveats; gap+rank+elicit primary |
+| InnoEval / personalized judges | [`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md) | Multi-perspective eval; anti-global-judge |
+| InnoEval | arXiv:2602.14367 | Knowledge-grounded idea evaluation |
+| Personalized vs aggregate judges | arXiv:2604.22517 | Pluralistic evaluation fragility |
 | Gap verify methods (SciFact family) | [`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md) | Claim verify ≠ question settled; escalation pattern |
 | Funding / OpenAlex neglect signals | [`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md) | Metadata honesty; adapter-only upgrades |
 | Investigation design / falsifiers | [`INVESTIGATION_DESIGN.md`](INVESTIGATION_DESIGN.md) | BoxingGym struggle; elicit rubric upgrades |

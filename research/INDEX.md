@@ -61,6 +61,7 @@ Everything under `research/` is design/background material that informed the imp
 | [BIOVEIL_DUAL_USE.md](BIOVEIL_DUAL_USE.md) | Agentic dual-use uplift → keep risk on inject |
 | [IDEA_GRAPH_UX.md](IDEA_GRAPH_UX.md) | Idea-graph export honesty / consumer UX |
 | [SFBENCH_CALIBRATION.md](SFBENCH_CALIBRATION.md) | Offline feasibility cousin calibration |
+| [INNOEVAL_JUDGES.md](INNOEVAL_JUDGES.md) | InnoEval / personalized judges / Intern-Atlas |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
