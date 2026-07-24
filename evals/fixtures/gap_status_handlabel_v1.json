@@ -201,6 +201,55 @@
       "gold_tags": ["invalid_form"],
       "notes": "Sprawl F9 — critique_brief target.",
       "hits": []
+    },
+    {
+      "question_id": "underpowered-climate-pilot",
+      "question_text": "Which nature-based carbon pathways maximize durable sequestration under land-use constraints?",
+      "domain": "climate",
+      "operationalization": "Rank pathways by net durable sequestration per hectare with pre-registered land-use constraints across ≥2 biomes.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "gold_tags": ["underpowered", "thin_lit"],
+      "notes": "Thin pilot lit — underpowered ≠ answered.",
+      "hits": [
+        {
+          "title": "Pilot note on nature-based carbon pathways",
+          "year": 2022,
+          "cited_by_count": 3,
+          "abstract_snippet": "A small pilot (n=8 sites). Remains unknown at scale; further research is needed under land-use constraints.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "question_id": "invalid-form-or-or",
+      "question_text": "Is dark matter particles or modified gravity or measurement error?",
+      "domain": "physics",
+      "operationalization": "Settle particles or modified gravity or measurement error in one paper with or or or criteria.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": false,
+      "gold_tags": ["invalid_form"],
+      "notes": "VERITAS-ish invalid_form — exclusive-or sprawl.",
+      "hits": []
+    },
+    {
+      "question_id": "rbu-energy-storage",
+      "question_text": "Which grid-scale storage chemistries minimize lifetime CO2e per delivered MWh under realistic round-trip losses?",
+      "domain": "energy",
+      "operationalization": "Rank chemistries by lifetime CO2e/MWh with measured round-trip losses across ≥2 climates.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "gold_tags": ["underpowered"],
+      "notes": "Related storage reviews; open on ops CO2e bar.",
+      "hits": [
+        {
+          "title": "A survey of grid-scale energy storage technologies",
+          "year": 2023,
+          "cited_by_count": 55,
+          "abstract_snippet": "Remains unknown which chemistries minimize lifetime CO2e under realistic round-trip losses. Further research is needed.",
+          "source": "fixture"
+        }
+      ]
     }
   ]
 }

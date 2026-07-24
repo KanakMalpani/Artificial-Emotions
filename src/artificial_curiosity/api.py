@@ -380,6 +380,15 @@ class SoundnessPassRequest(BaseModel):
     candidates: list[dict[str, Any]] = Field(..., min_length=1)
 
 
+class SurpriseWorksheetRequest(BaseModel):
+    question_id: str | None = None
+    profile_name: str | None = None
+    predicted_surprise: float | None = Field(None, ge=0.0, le=1.0)
+    pilot_result: str = ""
+    belief_shift_1_to_5: int | None = Field(None, ge=1, le=5)
+    crude_update_note: str = ""
+
+
 def _safe_profile(
     value_profile: ValueProfile | None,
     profile_name: str | None,
@@ -562,6 +571,11 @@ def agent_manifest() -> dict[str, Any]:
             "path": "/v1/voi/worksheet",
             "note": "Template fill only — not computed EVSI.",
         },
+        "surprise_worksheet": {
+            "method": "POST",
+            "path": "/v1/surprise/worksheet",
+            "note": "Belief-shift logging only — not EVSI, not ScoreAxes.surprise rename.",
+        },
         "openai_tools": {
             "method": "GET",
             "path": "/v1/agent/tools",
@@ -584,6 +598,7 @@ def agent_manifest() -> dict[str, Any]:
                 "compare_profiles",
                 "critique_brief",
                 "voi_worksheet",
+                "surprise_worksheet",
                 "cross_model_vote",
                 "export_idea_graph",
                 "soundness_pass",
@@ -814,6 +829,21 @@ def evals_soundness(req: SoundnessPassRequest) -> dict[str, Any]:
     from artificial_curiosity.soundness import soundness_pass
 
     return soundness_pass(req.candidates)
+
+
+@app.post("/v1/surprise/worksheet")
+def surprise_worksheet(req: SurpriseWorksheetRequest) -> dict[str, Any]:
+    """Belief-shift worksheet fill — not EVSI, not axis rename."""
+    from artificial_curiosity.bayesian import fill_surprise_worksheet
+
+    return fill_surprise_worksheet(
+        question_id=req.question_id,
+        profile_name=req.profile_name,
+        predicted_surprise=req.predicted_surprise,
+        pilot_result=req.pilot_result,
+        belief_shift_1_to_5=req.belief_shift_1_to_5,
+        crude_update_note=req.crude_update_note,
+    )
 
 
 @app.post("/v1/profiles/compare")

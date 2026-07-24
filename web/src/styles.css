@@ -576,6 +576,36 @@ button:disabled {
   color: var(--ink-soft);
 }
 
+.outcome-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: end;
+  margin: 0.55rem 0 0.35rem;
+  padding: 0.45rem 0;
+  border-top: 1px dashed color-mix(in srgb, var(--ink-soft) 35%, transparent);
+}
+
+.outcome-picker label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.outcome-picker select,
+.outcome-picker input {
+  min-width: 7rem;
+  font-size: 0.82rem;
+}
+
+.outcome-hint {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  align-self: center;
+}
+
 @media (max-width: 800px) {
   .controls {
     grid-template-columns: 1fr;

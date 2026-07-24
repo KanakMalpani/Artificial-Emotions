@@ -392,6 +392,19 @@ SOUNDNESS_PASS_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+SURPRISE_WORKSHEET_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "question_id": {"type": "string"},
+        "profile_name": {"type": "string"},
+        "predicted_surprise": {"type": "number", "minimum": 0, "maximum": 1},
+        "pilot_result": {"type": "string"},
+        "belief_shift_1_to_5": {"type": "integer", "minimum": 1, "maximum": 5},
+        "crude_update_note": {"type": "string"},
+    },
+    "additionalProperties": False,
+}
+
 
 def _parse_value_profile(
     raw: Any,
@@ -688,6 +701,29 @@ def handle_soundness_pass(
     return soundness_pass(list(candidates or []))
 
 
+def handle_surprise_worksheet(
+    *,
+    question_id: str | None = None,
+    profile_name: str | None = None,
+    predicted_surprise: float | None = None,
+    pilot_result: str = "",
+    belief_shift_1_to_5: int | None = None,
+    crude_update_note: str = "",
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Belief-shift worksheet — not EVSI / not axis rename."""
+    from artificial_curiosity.bayesian import fill_surprise_worksheet
+
+    return fill_surprise_worksheet(
+        question_id=question_id,
+        profile_name=profile_name,
+        predicted_surprise=predicted_surprise,
+        pilot_result=pilot_result or "",
+        belief_shift_1_to_5=belief_shift_1_to_5,
+        crude_update_note=crude_update_note or "",
+    )
+
+
 # Canonical tool registry: name → (description, schema, handler)
 # Aliases (spark / run_curiosity) share handlers with primary names.
 ToolHandler = Callable[..., dict[str, Any]]
@@ -797,6 +833,16 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": SOUNDNESS_PASS_SCHEMA,
         "handler": handle_soundness_pass,
+    },
+    {
+        "name": "surprise_worksheet",
+        "description": (
+            "Fill a Bayesian-surprise closed-loop belief-shift worksheet for a "
+            "ranked unknown. Manual logging only — not EVSI, does not rename "
+            "ScoreAxes.surprise. Decision aids under an explicit ValueProfile."
+        ),
+        "input_schema": SURPRISE_WORKSHEET_SCHEMA,
+        "handler": handle_surprise_worksheet,
     },
     {
         "name": "voi_worksheet",

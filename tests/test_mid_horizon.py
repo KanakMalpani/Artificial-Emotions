@@ -902,6 +902,8 @@ def test_voi_worksheet_and_eval_report():
     assert "elicit_rubric" in report["sections"]
     assert "risk_flags" in report["sections"]
     assert report["sections"]["rank_spearman"]["value"] is None
+    assert "soundness" in report["sections"]
+    assert report["sections"]["soundness"]["n"] >= 1
 
     client = TestClient(app)
     vres = client.post(
@@ -913,6 +915,78 @@ def test_voi_worksheet_and_eval_report():
     assert agent.status_code == 200
     assert "card" in agent.json()
     assert "critique_brief" in agent.json()["mcp"]["tools"]
+    assert "surprise_worksheet" in agent.json()["mcp"]["tools"]
+
+
+def test_surprise_worksheet_offline():
+    from artificial_curiosity.bayesian import fill_surprise_worksheet
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    sheet = fill_surprise_worksheet(
+        question_id="q-surprise",
+        profile_name="humanity_default",
+        predicted_surprise=0.72,
+        pilot_result="null result vs prior",
+        belief_shift_1_to_5=2,
+        crude_update_note="prior held; slight downshift",
+    )
+    fields = sheet["fields"]
+    assert fields["question_id"] == "q-surprise"
+    assert fields["predicted_surprise"] == 0.72
+    assert fields["belief_shift_1_to_5"] == 2
+    assert fields["logged_at"]
+    assert "EVSI" in (sheet.get("honesty") or "")
+    assert any("rename" in n.lower() for n in sheet.get("non_claims") or [])
+
+    client = TestClient(app)
+    res = client.post(
+        "/v1/surprise/worksheet",
+        json={
+            "question_id": "api-q",
+            "predicted_surprise": 0.5,
+            "belief_shift_1_to_5": 3,
+        },
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["fields"]["question_id"] == "api-q"
+    assert "filled_by" in body
+
+
+def test_preference_outcome_summarize_counts():
+    from artificial_curiosity.preferences import summarize_preferences
+
+    summary = summarize_preferences(
+        [
+            {
+                "event_type": "prefer",
+                "profile_name": "humanity_default",
+                "question_id": "a",
+                "preferred_over_ids": ["b"],
+            },
+            {
+                "event_type": "outcome",
+                "profile_name": "humanity_default",
+                "question_id": "a",
+                "labels": {"result": "partial_progress"},
+            },
+            {
+                "event_type": "outcome",
+                "profile_name": "humanity_default",
+                "question_id": "a",
+                "labels": {"result": "null"},
+            },
+        ],
+        profile_name="humanity_default",
+    )
+    assert summary["outcomes"]["n_outcome"] == 2
+    assert summary["outcomes"]["by_result"]["partial_progress"] == 1
+    assert summary["outcomes"]["by_result"]["null"] == 1
+    assert "certificate" in (summary["honesty"] or "").lower() or "small" in (
+        summary["honesty"] or ""
+    ).lower()
 
 
 def test_cross_model_vote_offline():

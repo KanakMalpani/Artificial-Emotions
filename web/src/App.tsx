@@ -52,8 +52,22 @@ type FeedbackEvent = {
   curiosity_score: number;
   score_axes: Partial<ScoreAxes>;
   preferred_over_ids?: string[];
-  labels?: { position?: string };
+  labels?: {
+    position?: string;
+    result?: string;
+    months?: string;
+    relation?: string;
+  };
+  notes?: string;
 };
+
+const OUTCOME_LABELS = [
+  "partial_progress",
+  "null",
+  "contradicted",
+  "answered_elsewhere",
+  "abandoned",
+] as const;
 
 type ProfileMeta = {
   name: string;
@@ -133,6 +147,10 @@ export default function App() {
   const [feedback, setFeedback] = useState<FeedbackEvent[]>([]);
   const [feedbackNote, setFeedbackNote] = useState<string | null>(null);
   const [critiqueNote, setCritiqueNote] = useState<string | null>(null);
+  const [preferredIds, setPreferredIds] = useState<Set<string>>(new Set());
+  const [outcomeDraft, setOutcomeDraft] = useState<
+    Record<string, { result: string; months: string; note: string }>
+  >({});
   const [compareB, setCompareB] = useState("alignment_lab");
   const [compareOpen, setCompareOpen] = useState(false);
   const [compareBusy, setCompareBusy] = useState(false);
@@ -278,21 +296,22 @@ export default function App() {
     }
   }
 
+  function qidFor(r: Ranked): string {
+    return (
+      r.question.id ||
+      `rank-${r.rank}-${r.question.question.slice(0, 24).replace(/\s+/g, "_")}`
+    );
+  }
+
   function recordFeedback(
     r: Ranked,
     eventType: "prefer" | "reject" | "already_answered" | "tie",
   ) {
-    const qid =
-      r.question.id ||
-      `rank-${r.rank}-${r.question.question.slice(0, 24).replace(/\s+/g, "_")}`;
+    const qid = qidFor(r);
     const others = results
       .filter((x) => x.rank !== r.rank)
       .slice(0, eventType === "tie" ? 1 : 3)
-      .map(
-        (x) =>
-          x.question.id ||
-          `rank-${x.rank}-${x.question.question.slice(0, 24).replace(/\s+/g, "_")}`,
-      );
+      .map((x) => qidFor(x));
     const ev: FeedbackEvent = {
       event_type: eventType,
       profile_name: activeProfile ?? profileName,
@@ -314,7 +333,44 @@ export default function App() {
       },
     };
     setFeedback((prev) => [...prev, ev]);
+    if (eventType === "prefer" || eventType === "tie") {
+      setPreferredIds((prev) => new Set([...prev, qid]));
+    }
     setFeedbackNote(`${eventType} recorded for #${r.rank} (session only)`);
+  }
+
+  function recordOutcome(r: Ranked) {
+    const qid = qidFor(r);
+    const draft = outcomeDraft[qid] || {
+      result: "partial_progress",
+      months: "",
+      note: "",
+    };
+    const labels: FeedbackEvent["labels"] = {
+      position: String(r.rank),
+      result: draft.result,
+    };
+    if (draft.months.trim()) labels.months = draft.months.trim();
+    const ev: FeedbackEvent = {
+      event_type: "outcome",
+      profile_name: activeProfile ?? profileName,
+      question_id: qid,
+      question_text: r.question.question,
+      rank: r.rank,
+      curiosity_score: r.curiosity_score,
+      score_axes: {
+        impact: r.scores.impact,
+        neglectedness: r.scores.neglectedness,
+        tractability: r.scores.tractability,
+        surprise: r.scores.surprise,
+      },
+      labels,
+      notes: draft.note.trim() || undefined,
+    };
+    setFeedback((prev) => [...prev, ev]);
+    setFeedbackNote(
+      `outcome=${draft.result} for #${r.rank} (sparse; not a certificate)`,
+    );
   }
 
   async function critiqueCard(r: Ranked) {
@@ -413,6 +469,8 @@ export default function App() {
       setFeedbackNote(e instanceof Error ? e.message : "Suggest-pair failed");
     }
   }
+
+  async function summarizeFeedback() {
     if (feedback.length < 1) {
       setFeedbackNote("No feedback yet — use Prefer / Reject on cards.");
       return;
@@ -433,10 +491,18 @@ export default function App() {
         .slice(0, 3)
         .map((t: { question_id: string }) => t.question_id)
         .join(", ");
+      const nOut = data.outcomes?.n_outcome ?? 0;
+      const byResult = data.outcomes?.by_result || {};
+      const outBits = Object.entries(byResult)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(",");
       setFeedbackNote(
         `Summary n=${data.n_events} pairwise=${data.n_pairwise}` +
           (top ? ` top=[${top}]` : "") +
-          " — profile-scoped, not calibrated.",
+          (nOut
+            ? ` outcomes=${nOut}${outBits ? ` (${outBits})` : ""}`
+            : "") +
+          " — n is small; not a performance certificate.",
       );
     } catch (e) {
       setFeedbackNote(e instanceof Error ? e.message : "Summarize failed");
@@ -759,6 +825,66 @@ export default function App() {
                         Critique form
                       </button>
                     </div>
+                    {preferredIds.has(qidFor(r)) && (
+                      <div className="outcome-picker">
+                        <label>
+                          Outcome
+                          <select
+                            value={
+                              outcomeDraft[qidFor(r)]?.result ||
+                              "partial_progress"
+                            }
+                            onChange={(e) => {
+                              const id = qidFor(r);
+                              setOutcomeDraft((d) => ({
+                                ...d,
+                                [id]: {
+                                  result: e.target.value,
+                                  months: d[id]?.months || "",
+                                  note: d[id]?.note || "",
+                                },
+                              }));
+                            }}
+                          >
+                            {OUTCOME_LABELS.map((o) => (
+                              <option key={o} value={o}>
+                                {o}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label>
+                          Months
+                          <input
+                            type="number"
+                            min={0}
+                            placeholder="opt"
+                            value={outcomeDraft[qidFor(r)]?.months || ""}
+                            onChange={(e) => {
+                              const id = qidFor(r);
+                              setOutcomeDraft((d) => ({
+                                ...d,
+                                [id]: {
+                                  result: d[id]?.result || "partial_progress",
+                                  months: e.target.value,
+                                  note: d[id]?.note || "",
+                                },
+                              }));
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          className="btn-feedback"
+                          onClick={() => recordOutcome(r)}
+                        >
+                          Log outcome
+                        </button>
+                        <span className="outcome-hint">
+                          Sparse flywheel — not auto-retrain
+                        </span>
+                      </div>
+                    )}
                     <p className="why">
                       <strong>Why it matters.</strong> {r.question.why_it_matters}
                     </p>

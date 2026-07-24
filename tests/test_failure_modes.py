@@ -249,6 +249,21 @@ def test_f7_phrase_gaming_open_gap_damps_overlap():
     assert _effective_overlap(0.35, g) < _effective_overlap(0.35, c)
 
 
+def test_f7_further_research_needed_not_claim():
+    """'Further research is needed' abstracts must damp claim signal (F7)."""
+    from artificial_curiosity.models import LiteratureHit
+    from artificial_curiosity.verify import _abstract_claim_signal
+
+    hit = LiteratureHit(
+        title="Open survey",
+        abstract_snippet=(
+            "It remains poorly understood which signals predict harm. "
+            "Further research is needed; this is an open question."
+        ),
+    )
+    assert _abstract_claim_signal(hit) < 0
+
+
 def test_f7_related_topic_phrase_not_auto_answered():
     """High hit count + weak overlap stays unanswered — related ≠ answered (F7)."""
     status = classify_gap(
@@ -259,6 +274,32 @@ def test_f7_related_topic_phrase_not_auto_answered():
         recent_strong_count=0,
     )
     assert status == GapStatus.UNANSWERED
+
+
+def test_f13_hyphen_and_article_paraphrase_cluster():
+    """F13: article/hyphen paraphrases collapse under diversify."""
+
+    def make(text: str, score: float) -> RankedQuestion:
+        q = _q(text)
+        q.id = f"{score}-{text[:16]}"
+        return RankedQuestion(
+            question=q,
+            scores=_axes(),
+            curiosity_score=score,
+            confidence=0.5,
+            gap=GapEvidence(status=GapStatus.UNANSWERED, confidence=0.5),
+        )
+
+    cluster = [
+        make("How can we quantify expected value of unanswered scientific questions?", 0.91),
+        make("How can we quantify the expected value of unanswered scientific questions?", 0.90),
+        make("How can we quantify expected-value of unanswered scientific questions?", 0.89),
+        make("What host factors predict latent-to-active TB progression?", 0.70),
+    ]
+    out = diversify(cluster, threshold=0.72, n_return=5)
+    texts = [r.question.question for r in out]
+    assert sum("expected" in t.lower() and "value" in t.lower() for t in texts) == 1
+    assert any("tb" in t.lower() or "host factors" in t.lower() for t in texts)
 
 
 def test_f14_cost_blindness_penalizes_aggregate():

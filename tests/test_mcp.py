@@ -27,6 +27,7 @@ def test_mcp_tool_list_has_required_tools():
         "compare_profiles",
         "critique_brief",
         "voi_worksheet",
+        "surprise_worksheet",
         "cross_model_vote",
         "export_idea_graph",
         "soundness_pass",

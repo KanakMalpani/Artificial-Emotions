@@ -187,6 +187,15 @@ curiosity run --domain ai --n 3 --no-literature --llm --judge-model "$LLM_JUDGE_
 
 This repo’s CI/agent sessions do **not** claim live multi-provider passes — only that the client + env matrix are documented and offline demos work without keys.
 
+## VOI + Bayesian surprise worksheets (not EVSI)
+
+```bash
+curiosity voi-worksheet --question-id q1 --question "Which biomarkers?" --json
+curiosity surprise-worksheet --question-id q1 --predicted-surprise 0.7 --belief-shift 2 --json
+# HTTP: POST /v1/voi/worksheet  POST /v1/surprise/worksheet
+# Belief-shift logging only — does not rename ScoreAxes.surprise
+```
+
 ## Offline vs literature compare
 
 ```bash

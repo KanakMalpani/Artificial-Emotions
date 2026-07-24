@@ -497,6 +497,7 @@ def summarize_preferences(
         "honesty": (
             "Preference summary is profile-scoped decision-aid telemetry — "
             "not calibrated ranking, not Bradley–Terry until n is larger, "
+            "not a performance certificate when outcome n is small, "
             "and not a universal science priority. " + _HINT_HONESTY
         ),
         "docs": "research/PREFERENCE_CALIBRATION.md",

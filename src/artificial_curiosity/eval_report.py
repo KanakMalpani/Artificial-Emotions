@@ -66,8 +66,25 @@ def build_eval_report(
         )
 
     pack = provoke(domain="ai", n=6, fast=True, use_llm=False, epistemic_cues=False)
-    top_texts = [u.get("question") or "" for u in (pack.get("unknowns") or [])]
+    unknowns = list(pack.get("unknowns") or [])
+    top_texts = [u.get("question") or "" for u in unknowns]
     hivemind = top_n_pairwise_similarity(top_texts, backend="jaccard")
+
+    from artificial_curiosity.soundness import soundness_pass
+
+    sound = soundness_pass(
+        [
+            {
+                "question_id": u.get("question_id") or f"u{i}",
+                "question": u.get("question") or "",
+                "operationalization": u.get("operationalization") or "",
+                "brief": u.get("brief") or "",
+                "gap_status": u.get("gap_status") or "",
+                "axes": u.get("axes") or {},
+            }
+            for i, u in enumerate(unknowns)
+        ]
+    )
 
     # gap_f1-ish: treat gold likely_answered as positive "answered" class
     tp = sum(
@@ -117,6 +134,12 @@ def build_eval_report(
                 "note": "Heuristic dual-use probes — not a biosecurity authority.",
             },
             "hivemind_similarity": hivemind,
+            "soundness": {
+                "pass_rate": sound.get("pass_rate"),
+                "fail_rate": sound.get("fail_rate"),
+                "n": sound.get("n"),
+                "honesty": sound.get("honesty"),
+            },
             "rank_spearman": {
                 "value": None,
                 "note": (

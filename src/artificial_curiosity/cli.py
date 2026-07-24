@@ -207,6 +207,18 @@ def build_parser() -> argparse.ArgumentParser:
     voi_p.add_argument("--domain", default="")
     voi_p.add_argument("--json", action="store_true")
 
+    surprise_p = sub.add_parser(
+        "surprise-worksheet",
+        help="Fill Bayesian-surprise belief-shift worksheet (not EVSI / not axis rename)",
+    )
+    surprise_p.add_argument("--question-id", default=None)
+    surprise_p.add_argument("--profile", default=None, dest="profile_name")
+    surprise_p.add_argument("--predicted-surprise", type=float, default=None)
+    surprise_p.add_argument("--pilot-result", default="")
+    surprise_p.add_argument("--belief-shift", type=int, default=None)
+    surprise_p.add_argument("--note", default="", dest="crude_update_note")
+    surprise_p.add_argument("--json", action="store_true")
+
     eval_p = sub.add_parser(
         "eval",
         help="Offline eval harnesses (spotcheck / elicit A/B / gap-status; no vanity %%)",
@@ -482,6 +494,29 @@ def _voi_worksheet(args: argparse.Namespace) -> int:
     print("VOI worksheet (template fill — not EVSI)")
     print(f"  decision_problem={payload.get('decision_problem')[:120]}")
     print(f"  link={payload.get('link_to_ranked_question')}")
+    print(f"\n{payload.get('honesty')}")
+    return 0
+
+
+def _surprise_worksheet(args: argparse.Namespace) -> int:
+    from artificial_curiosity.bayesian import fill_surprise_worksheet
+
+    payload = fill_surprise_worksheet(
+        question_id=args.question_id,
+        profile_name=args.profile_name,
+        predicted_surprise=args.predicted_surprise,
+        pilot_result=args.pilot_result or "",
+        belief_shift_1_to_5=args.belief_shift,
+        crude_update_note=args.crude_update_note or "",
+    )
+    if args.json:
+        print(json.dumps(payload, indent=2))
+        return 0
+    fields = payload.get("fields") or {}
+    print("Surprise worksheet (belief-shift log — not EVSI / not axis rename)")
+    print(f"  question_id={fields.get('question_id')}")
+    print(f"  predicted_surprise={fields.get('predicted_surprise')}")
+    print(f"  belief_shift={fields.get('belief_shift_1_to_5')}")
     print(f"\n{payload.get('honesty')}")
     return 0
 
@@ -855,6 +890,7 @@ def main(argv: list[str] | None = None) -> int:
         "compare-profiles",
         "critique-brief",
         "voi-worksheet",
+        "surprise-worksheet",
         "eval",
         "emotions",
         "epistemic",
@@ -879,6 +915,8 @@ def main(argv: list[str] | None = None) -> int:
         return _critique_brief(args)
     if args.command == "voi-worksheet":
         return _voi_worksheet(args)
+    if args.command == "surprise-worksheet":
+        return _surprise_worksheet(args)
     if args.command == "eval":
         return _eval(args)
     if args.command in ("emotions", "epistemic"):
