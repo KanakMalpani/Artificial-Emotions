@@ -368,7 +368,47 @@ export default function App() {
     }
   }
 
-  async function summarizeFeedback() {
+  async function suggestPair() {
+    if (results.length < 2) {
+      setFeedbackNote("Need ≥2 ranked results for a duel suggestion.");
+      return;
+    }
+    try {
+      const candidates = results.map((r) => ({
+        question_id:
+          r.question.id ||
+          `rank-${r.rank}-${r.question.question.slice(0, 24).replace(/\s+/g, "_")}`,
+        rank: r.rank,
+        curiosity_score: r.curiosity_score,
+        question: r.question.question,
+      }));
+      const res = await fetch("/v1/preferences/suggest-pair", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          candidates,
+          events: feedback,
+          profile_name: activeProfile ?? profileName,
+        }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const pair = data.pair;
+      if (!pair) {
+        setFeedbackNote(data.reason || "No pair suggested");
+        return;
+      }
+      const aq = pair.a?.question || pair.a?.question_id;
+      const bq = pair.b?.question || pair.b?.question_id;
+      setFeedbackNote(
+        `Next duel: #${pair.a?.rank} vs #${pair.b?.rank} — prior=${pair.prior_comparisons} (not BT overwrite)`,
+      );
+      void aq;
+      void bq;
+    } catch (e) {
+      setFeedbackNote(e instanceof Error ? e.message : "Suggest-pair failed");
+    }
+  }
     if (feedback.length < 1) {
       setFeedbackNote("No feedback yet — use Prefer / Reject on cards.");
       return;
@@ -608,6 +648,16 @@ export default function App() {
           <span>{feedback.length} feedback event(s) this session</span>
           <button type="button" className="btn-secondary" onClick={summarizeFeedback}>
             Summarize feedback
+          </button>
+          <button type="button" className="btn-secondary" onClick={suggestPair}>
+            Suggest next duel
+          </button>
+        </div>
+      )}
+      {results.length >= 2 && feedback.length === 0 && (
+        <div className="feedback-bar">
+          <button type="button" className="btn-secondary" onClick={suggestPair}>
+            Suggest next duel
           </button>
         </div>
       )}
