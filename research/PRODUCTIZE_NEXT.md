@@ -10,19 +10,19 @@
 
 ## P0 — high leverage, low overclaim
 
-1. **Elicit A/B eval path** — Implement agent A/B using `examples/elicit_ab_protocol.json` (+ optional rubric rows from [`INVESTIGATION_DESIGN.md`](INVESTIGATION_DESIGN.md)); report investigation-quality deltas. See [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md).
-2. **Gap-status fixture + metric** — Hand-label 15–30 Qs using `examples/gap_status_fixture_template.json`; report status accuracy and related-but-unanswered recall ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md), [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
+1. **Elicit A/B eval path** — ✅ landed (`874dd7a`); keep rubric optional rows ([`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md)).
+2. **Gap-status fixture + metric** — ✅ gap-status metric (`874dd7a`); continue hand-label growth ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md)).
 3. **MCP/tool description lint** — Spec in [`MCP_DESCRIPTION_LINT.md`](MCP_DESCRIPTION_LINT.md); implement `tests/test_mcp_description_lint.py` ([`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md)).
 4. **Prefs summarize + pairwise nudge** — ✅ partially shipped (`0af53f4`); keep pairwise `preferred_over_ids` UX + dual-use clamp ([`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md), [`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 5. **Agent card safety blurb** — Draft in [`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md); merge into `/v1/agent` if sibling wants tighter wording ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md), [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md)).
 
 ## P1 — clear product value
 
-6. **`compare_profiles` / veto stack** — ✅ Kendall τ + compare surfaces (`bc7ffa9`); optional fuller web two-column remains ([`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md)).
+6. **`compare_profiles` / veto stack** — ✅ Kendall τ + web profile compare (`bc7ffa9`, `874dd7a`).
 7. **Public-demo profile** — ✅ `public_demo_strict_risk` (`bc7ffa9`).
 8. **Eval report sections** — gap_f1, rank_spearman, elicit_rubric_mean, risk_flags ([`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
 9. **Inject always includes risk** — ✅ inject risk lines (`bc7ffa9`); keep regression coverage ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
-10. **OpenAlex rationale keys only** — `hit_n`, optional `mean_cited_by`, `funder_field_missing_rate` — no silent weight change ([`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md)).
+10. **OpenAlex rationale keys only** — ✅ lit rationale keys (`874dd7a`); keep no silent weight change ([`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md)).
 10b. **Mix safety guards** — ✅ soft guards landed (`0af53f4`); keep epistemic-default docs ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
 10c. **Top-n hivemind similarity metric** — embedding pairwise cosine in eval ([`HIVEMIND.md`](HIVEMIND.md)).
 10d. **Optional `critique_brief`** — form-only critic (F9/falsifier); no silent re-rank ([`CRITIC_DEBATE_JUDGES.md`](CRITIC_DEBATE_JUDGES.md)).

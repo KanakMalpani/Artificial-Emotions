@@ -42,6 +42,7 @@ Everything under `research/` is design/background material that informed the imp
 | [ANSWERABILITY_FEASIBILITY.md](ANSWERABILITY_FEASIBILITY.md) | Axis hygiene; SFBench feasibility vs our proxies |
 | [CRITIC_DEBATE_JUDGES.md](CRITIC_DEBATE_JUDGES.md) | HeurekaBench critic / MPDS debate → form critique |
 | [DOMAIN_PACK_QUALITY.md](DOMAIN_PACK_QUALITY.md) | Seed/pack quality bar beyond CONTRIBUTING |
+| [OUTCOME_FLYWHEEL.md](OUTCOME_FLYWHEEL.md) | Longitudinal outcome events → sparse calibration |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
