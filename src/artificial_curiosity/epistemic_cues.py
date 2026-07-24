@@ -43,11 +43,30 @@ _ALL_TAGS = frozenset(
 def derive_epistemic_cues(
     item: RankedQuestion,
     *,
-    surprise_high: float = 0.55,
-    neglectedness_high: float = 0.55,
-    answerability_low: float = 0.45,
+    surprise_high: float | None = None,
+    neglectedness_high: float | None = None,
+    answerability_low: float | None = None,
+    value_profile: Any | None = None,
 ) -> dict[str, Any]:
     """Heuristic epistemic tags from gap + axes (deterministic, offline-safe)."""
+    profile = value_profile
+    if profile is None:
+        profile = getattr(item, "value_profile", None)
+    sh = (
+        float(surprise_high)
+        if surprise_high is not None
+        else float(getattr(profile, "cue_surprise_high", 0.55) if profile else 0.55)
+    )
+    nh = (
+        float(neglectedness_high)
+        if neglectedness_high is not None
+        else float(getattr(profile, "cue_neglectedness_high", 0.55) if profile else 0.55)
+    )
+    al = (
+        float(answerability_low)
+        if answerability_low is not None
+        else float(getattr(profile, "cue_answerability_low", 0.45) if profile else 0.45)
+    )
     tags: list[str] = []
     status = item.gap.status
     surprise = float(item.scores.surprise)
@@ -67,17 +86,17 @@ def derive_epistemic_cues(
 
     if status in (GapStatus.PARTIALLY_ANSWERED, GapStatus.UNKNOWN_WITH_CAVEAT):
         tags.append(TAG_CONFUSION_RISK)
-    elif answerability < answerability_low and unanswered_like:
+    elif answerability < al and unanswered_like:
         tags.append(TAG_CONFUSION_RISK)
 
-    if surprise >= surprise_high and unanswered_like:
+    if surprise >= sh and unanswered_like:
         tags.append(TAG_SURPRISE_SIGNAL)
         tags.append(TAG_INCONGRUITY)
     elif "related" in notes and "answered" in notes and unanswered_like:
         # Common verify.py phrasing: related literature ≠ answered.
         tags.append(TAG_INCONGRUITY)
 
-    if neglectedness >= neglectedness_high:
+    if neglectedness >= nh:
         tags.append(TAG_BOREDOM_GUARD)
 
     # Dedupe preserving order.
@@ -92,6 +111,11 @@ def derive_epistemic_cues(
     return {
         "tags": ordered,
         "primary": primary,
+        "thresholds": {
+            "surprise_high": sh,
+            "neglectedness_high": nh,
+            "answerability_low": al,
+        },
         "disclaimer": EPISTEMIC_CUE_DISCLAIMER,
         "honesty": "annotation_only",
     }

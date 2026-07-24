@@ -452,6 +452,17 @@ def summarize_preferences(
         )
 
     hints = learn_profile_weight_hints(evs, profile_name=profile_name)
+
+    # Sparse outcome flywheel (research/OUTCOME_FLYWHEEL.md) — counts only.
+    outcome_results: dict[str, int] = {}
+    n_outcome = 0
+    for ev in evs:
+        if (ev.event_type or "").lower() != "outcome":
+            continue
+        n_outcome += 1
+        result = str((ev.labels or {}).get("result") or "unspecified").strip().lower()
+        outcome_results[result] = outcome_results.get(result, 0) + 1
+
     return {
         "n_events": len(evs),
         "profile_name": profile_name,
@@ -459,6 +470,14 @@ def summarize_preferences(
         "domains": dict(sorted(domains.items())),
         "n_pairwise": pairwise_n,
         "top_question_ids": win_rates,
+        "outcomes": {
+            "n_outcome": n_outcome,
+            "by_result": dict(sorted(outcome_results.items())),
+            "note": (
+                "Sparse flywheel breadcrumbs — not a calibration certificate. "
+                "Do not auto-retrain ranks from outcomes without human review."
+            ),
+        },
         "weight_hints": {
             "ok": hints.get("ok"),
             "reason": hints.get("reason"),

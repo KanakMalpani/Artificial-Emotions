@@ -253,6 +253,7 @@ class GapStatusCase:
     related_but_unanswered: bool = False
     hits: list[LiteratureHit] = field(default_factory=list)
     notes: str = ""
+    gold_tags: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -324,6 +325,7 @@ def load_gap_status_fixtures(path: str | Path | None = None) -> list[GapStatusCa
                 related_but_unanswered=bool(raw.get("related_but_unanswered")),
                 hits=hits,
                 notes=str(raw.get("notes") or ""),
+                gold_tags=[str(t) for t in (raw.get("gold_tags") or [])],
             )
         )
     return out
@@ -368,6 +370,7 @@ def run_gap_status_eval(cases: list[GapStatusCase] | None = None) -> GapStatusRe
                 "predicted_status": pred.value,
                 "match": match,
                 "related_but_unanswered": case.related_but_unanswered,
+                "gold_tags": list(case.gold_tags),
                 "top_overlap": gap.top_overlap,
                 "strong_match_count": gap.strong_match_count,
             }

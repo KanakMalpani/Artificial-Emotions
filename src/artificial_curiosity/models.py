@@ -43,6 +43,10 @@ class ValueProfile(BaseModel):
     min_answerability: float = Field(0.45, ge=0.0, le=1.0)
     prefer_interdisciplinary: bool = True
     time_horizon_years: int = Field(10, ge=1, le=100)
+    # Epistemic cue thresholds (UX annotations only — not emotion).
+    cue_surprise_high: float = Field(0.55, ge=0.0, le=1.0)
+    cue_neglectedness_high: float = Field(0.55, ge=0.0, le=1.0)
+    cue_answerability_low: float = Field(0.45, ge=0.0, le=1.0)
 
 
 # Named presets — never a "neutral / value-free" mode (F11).

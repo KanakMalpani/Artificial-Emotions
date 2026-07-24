@@ -676,6 +676,94 @@ def test_gap_status_handlabel_metric():
     # Fixtures are calibrated to current verify thresholds — not a marketing claim.
     assert report.false_answered_rate == 0.0
     assert report.related_but_unanswered_recall == 1.0
+    assert any("invalid_form" in (c.gold_tags or []) for c in cases)
+
+
+def test_cue_thresholds_and_outcome_hivemind():
+    from artificial_curiosity.epistemic_cues import derive_epistemic_cues
+    from artificial_curiosity.hivemind import top_n_pairwise_similarity
+    from artificial_curiosity.models import (
+        GapEvidence,
+        GapStatus,
+        RankedQuestion,
+        ScoreAxes,
+        UnansweredQuestion,
+        ValueProfile,
+    )
+    from artificial_curiosity.preferences import PreferenceEvent, summarize_preferences
+    from artificial_curiosity.provoke import compact_unknown
+
+    q = UnansweredQuestion(
+        id="c1",
+        question="What remains unknown about neglected surprise signals?",
+        domain="ai",
+        operationalization="Measure AUROC of signal X.",
+        why_it_matters="fixture",
+    )
+    item = RankedQuestion(
+        question=q,
+        scores=ScoreAxes(
+            impact=0.5,
+            neglectedness=0.5,
+            tractability=0.5,
+            surprise=0.5,
+            answerability=0.5,
+            risk=0.2,
+            cost_proxy=0.3,
+        ),
+        curiosity_score=0.5,
+        confidence=0.4,
+        gap=GapEvidence(
+            status=GapStatus.UNANSWERED,
+            confidence=0.4,
+            notes="Related literature ≠ answered",
+        ),
+        flags=[],
+    )
+    loose = ValueProfile(name="loose", cue_surprise_high=0.4)
+    tight = ValueProfile(name="tight", cue_surprise_high=0.9)
+    tags_loose = derive_epistemic_cues(item, value_profile=loose)["tags"]
+    tags_tight = derive_epistemic_cues(item, value_profile=tight)["tags"]
+    assert "surprise_signal" in tags_loose
+    assert "surprise_signal" not in tags_tight
+    compact = compact_unknown(item, value_profile=loose)
+    assert compact["epistemic_cues"]["thresholds"]["surprise_high"] == 0.4
+
+    summary = summarize_preferences(
+        [
+            PreferenceEvent(
+                event_type="prefer",
+                profile_name="humanity_default",
+                question_id="q1",
+            ),
+            PreferenceEvent(
+                event_type="outcome",
+                profile_name="humanity_default",
+                question_id="q1",
+                labels={"result": "partial_progress", "months_elapsed": "3"},
+            ),
+            PreferenceEvent(
+                event_type="outcome",
+                profile_name="humanity_default",
+                question_id="q2",
+                labels={"result": "abandoned"},
+            ),
+        ],
+        profile_name="humanity_default",
+    )
+    assert summary["outcomes"]["n_outcome"] == 2
+    assert summary["outcomes"]["by_result"]["partial_progress"] == 1
+    assert summary["outcomes"]["by_result"]["abandoned"] == 1
+
+    sim = top_n_pairwise_similarity(
+        [
+            "What biomarkers predict healthspan under caloric restriction?",
+            "Which circulating biomarkers predict remaining healthspan?",
+            "How does zybloron flux affect quux plasticity?",
+        ]
+    )
+    assert sim["n_pairs"] == 3
+    assert sim["mean_pairwise"] is not None
 
 
 def test_lit_rationale_keys_no_weight_change():

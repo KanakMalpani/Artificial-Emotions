@@ -141,6 +141,36 @@
           "source": "fixture"
         }
       ]
+    },
+    {
+      "question_id": "invalid-form-sprawl",
+      "question_text": "What causes aging and how do we cure cancer and what is consciousness?",
+      "domain": "general",
+      "operationalization": "Answer all three topics in one study with and and and measures.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": false,
+      "gold_tags": ["invalid_form"],
+      "notes": "VERITAS-ish invalid_form — sprawl; critique_brief should flag.",
+      "hits": []
+    },
+    {
+      "question_id": "underpowered-thin",
+      "question_text": "Does intermittent fasting improve insulin sensitivity in prediabetes over 8 weeks?",
+      "domain": "medicine",
+      "operationalization": "Randomized trials measuring HOMA-IR over ≥8 weeks.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "gold_tags": ["underpowered", "thin_lit"],
+      "notes": "Single weak hit — underpowered lit neighborhood; prefer open over answered.",
+      "hits": [
+        {
+          "title": "Pilot n=12 intermittent fasting note",
+          "year": 2021,
+          "cited_by_count": 2,
+          "abstract_snippet": "A small pilot; further research is needed. Remains unknown at scale.",
+          "source": "fixture"
+        }
+      ]
     }
   ]
 }

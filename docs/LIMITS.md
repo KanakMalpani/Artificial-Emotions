@@ -39,6 +39,10 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Composite eval report (`curiosity eval report`) — gap_f1 + gap-status + elicit means + risk probes
 - MCP description lint (`tests/test_mcp_description_lint.py`) — anti-MPMA forbidden phrases + honesty families
 - Agent card honesty block on `GET /v1/agent` (`card` + `honesty` list)
+- ValueProfile cue thresholds (`cue_surprise_high` / `cue_neglectedness_high` / `cue_answerability_low`) drive epistemic tags — annotation only
+- Preference summarize includes sparse `outcomes` breakdown (`event_type=outcome` labels) — not auto-retrain
+- Top-n hivemind similarity in `curiosity eval report` (Jaccard default; optional embedding)
+- Gap-status fixtures may carry VERITAS-ish `gold_tags` (`underpowered`, `invalid_form`) without inventing new GapStatus enums
 - Emotion mix soft guards: warn when mix is dominated by fear/anxiety/anger-type ids (annotation still returned)
 - Agent card `/v1/agent` includes affective-safety blurb (not biometric ERS; provoke is opt-in framing)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains

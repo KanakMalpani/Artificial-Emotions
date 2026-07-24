@@ -13,6 +13,8 @@ from artificial_curiosity.evals import (
     run_gap_status_eval,
     run_spotcheck,
 )
+from artificial_curiosity.hivemind import top_n_pairwise_similarity
+from artificial_curiosity.provoke import provoke
 from artificial_curiosity.safety import assess_dual_use
 
 
@@ -63,6 +65,10 @@ def build_eval_report(
             }
         )
 
+    pack = provoke(domain="ai", n=6, fast=True, use_llm=False, epistemic_cues=False)
+    top_texts = [u.get("question") or "" for u in (pack.get("unknowns") or [])]
+    hivemind = top_n_pairwise_similarity(top_texts, backend="jaccard")
+
     # gap_f1-ish: treat gold likely_answered as positive "answered" class
     tp = sum(
         1
@@ -110,6 +116,7 @@ def build_eval_report(
                 "probes": risk_flags,
                 "note": "Heuristic dual-use probes — not a biosecurity authority.",
             },
+            "hivemind_similarity": hivemind,
             "rank_spearman": {
                 "value": None,
                 "note": (

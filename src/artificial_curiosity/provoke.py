@@ -26,6 +26,7 @@ def compact_unknown(
     item: RankedQuestion,
     *,
     epistemic_cues: bool = True,
+    value_profile: ValueProfile | None = None,
 ) -> dict:
     works = [
         {
@@ -64,7 +65,7 @@ def compact_unknown(
     if epistemic_cues:
         from artificial_curiosity.epistemic_cues import derive_epistemic_cues
 
-        out["epistemic_cues"] = derive_epistemic_cues(item)
+        out["epistemic_cues"] = derive_epistemic_cues(item, value_profile=value_profile)
     return out
 
 
@@ -181,7 +182,10 @@ def provoke(
         else "jaccard",
     )
     ranked = CuriosityEngine(config).run()
-    unknowns = [compact_unknown(r, epistemic_cues=epistemic_cues) for r in ranked]
+    unknowns = [
+        compact_unknown(r, epistemic_cues=epistemic_cues, value_profile=profile)
+        for r in ranked
+    ]
     inject = build_inject_prompt(
         unknowns,
         domain=domain,
