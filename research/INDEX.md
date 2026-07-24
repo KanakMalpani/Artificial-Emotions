@@ -49,6 +49,8 @@ Everything under `research/` is design/background material that informed the imp
 | [VOI_IMPRECISE.md](VOI_IMPRECISE.md) | Credal / multicenter VOI honesty addendum |
 | [CUE_THRESHOLD_KNOBS.md](CUE_THRESHOLD_KNOBS.md) | Profile cue_* presets + elicit A/B |
 | [HIVEMIND_METRIC_SPEC.md](HIVEMIND_METRIC_SPEC.md) | Mean pairwise cosine eval recipe |
+| [LITGAP_CORRELATION_STUDY.md](LITGAP_CORRELATION_STUDY.md) | Offline GapScore ↔ neglectedness protocol |
+| [SUGGEST_NEXT_PAIR.md](SUGGEST_NEXT_PAIR.md) | Active preference duel UX / tool sketch |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

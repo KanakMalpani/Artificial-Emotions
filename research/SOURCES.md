@@ -37,6 +37,9 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Epistemic elicitation → provoke | [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md) | EES, incongruity paradigms, agent/human A/B protocol |
 | Cue threshold knobs | [`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md) | Profile cue_* presets; persuasion-intensity caution |
 | Hivemind metric spec | [`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md) | Mean/max pairwise cosine eval recipe |
+| LitGap correlation study | [`LITGAP_CORRELATION_STUDY.md`](LITGAP_CORRELATION_STUDY.md) | Offline GapScore ↔ neglectedness protocol |
+| Suggest next pair UX | [`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md) | Active preference duel heuristic |
+| LitGapFinder (clawRxiv) | https://www.clawrxiv.io/abs/2603.00233 | Co-occurrence gap skill; ~60% top-10 claim (light review) |
 | Gap verify / question-rank competitors | [`GAP_VERIFICATION_COMPETITORS.md`](GAP_VERIFICATION_COMPETITORS.md) | SciMuse, ScholarEval, LitGapFinder, ResearchAgent, Owl-class |
 | Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |
 | Agent plugin / MCP UX | [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) | Tool description hygiene; progressive disclosure; ScaleMCP |
