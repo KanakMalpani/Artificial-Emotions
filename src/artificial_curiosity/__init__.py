@@ -5,6 +5,7 @@ from artificial_curiosity.emotions import (
     elicit_helpers,
     emotion_catalog,
     emotion_pack,
+    feel,
     list_epistemic_cues,
     mix_emotions,
 )
@@ -34,6 +35,7 @@ __all__ = [
     "elicit_helpers",
     "emotion_catalog",
     "emotion_pack",
+    "feel",
     "get_profile",
     "list_epistemic_cues",
     "list_profile_names",

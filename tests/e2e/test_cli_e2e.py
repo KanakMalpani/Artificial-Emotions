@@ -136,4 +136,5 @@ def test_cli_emotions_cues_annotate_pack(capsys: pytest.CaptureFixture[str]) -> 
     assert code == 0
     mix = json.loads(capsys.readouterr().out)
     assert abs(mix["sum_weights"] - 1.0) < 1e-9
-    assert mix["honesty"] == "annotation_only"
+    assert mix["honesty"] == "computational_affect"
+    assert mix["felt_simulation"]["intensity"] >= 0

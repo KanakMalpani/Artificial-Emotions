@@ -1,21 +1,20 @@
-# Emotions / epistemic cues + mixable catalog
+# Emotions / computational affect + mixable catalog
 
-**Short version:** Artificial Curiosity can tag questions with *epistemic* cues, expose a **named emotion catalog**, and **mix** emotions by percentage (e.g. curiosity 40% + confusion 30% + awe 30%). These are **UX / investigation-framing annotations**. The software does **not** feel emotions.
+**Short version:** Artificial Curiosity exposes a **named emotion catalog** and **percentage mixes** that drive a **felt_simulation** — PAD mood, intensity, and first-person computational affect — as close to “feeling” as a CME-style blend allows. It is **not** biological consciousness or biometric emotion recognition.
 
-Background research (optional): [`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md), [`research/EMOTION_MIXING.md`](../research/EMOTION_MIXING.md), [`research/EMOTION_ACCESS.md`](../research/EMOTION_ACCESS.md).
+Background (optional): [`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md), [`research/EMOTION_MIXING.md`](../research/EMOTION_MIXING.md).
 
 ## What you get
 
 | Output | Meaning |
 |--------|---------|
-| Cue tags | Stable vocabulary: `information_gap`, `curiosity_target`, `confusion_risk`, `surprise_signal`, `incongruity`, `boredom_guard` |
-| Catalog | Named emotions across `epistemic` / `basic` / `social` / `achievement` with optional PAD anchors + elicit hints |
-| Mix | `{id: percent\|weight}` → normalized weights (sum=1), blend PAD, cue tags, inject framing |
-| Annotate | Heuristic tags from gap status + surprise / neglectedness / answerability |
-| Elicit helpers | Short incongruity → investigation framing for inject packs |
-| `affective_science` pack | Ranking seeds about affective science / epistemic elicitation (not a CME) |
+| Cue tags | Epistemic vocabulary: `information_gap`, `curiosity_target`, `confusion_risk`, … |
+| Catalog | Named emotions (`epistemic` / `basic` / `social` / `achievement`) with PAD anchors |
+| Mix / `feel()` | `{id: percent}` → weights + **felt_simulation** (mood, intensity, inner monologue) |
+| Annotate | Heuristic epistemic tags from gap + axes |
+| `affective_science` pack | Ranking seeds about affect science |
 
-Honesty fields on responses: `honesty: "annotation_only"` plus an explicit disclaimer. Error codes: `unknown_emotion`, `empty_mix`, `negative_weight`, …
+Honesty: `computational_affect` — simulated state for investigation framing.
 
 ## Plug-in one-liners
 

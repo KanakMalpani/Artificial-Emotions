@@ -582,7 +582,7 @@ def agent_manifest() -> dict[str, Any]:
             "Requires / surfaces ValueProfile (no value-free ranking — McNamara/hivemind)",
             "Gap verify: related ≠ answered",
             "Scores: proxies, not EVSI/ENBS or scientific priority truth",
-            "Epistemic cues / emotion mix: annotation_only — not biometric ERS (EU AI Act)",
+            "Emotion mixes: computational_affect (PAD + felt_simulation) — not biometric ERS (EU AI Act)",
             "Dual-use risk filters: heuristics, not biosecurity authority",
             "Provoke: investigation framing for agents/humans — not persuasion toolkit",
             "Read curiosity://limits / docs/LIMITS.md before treating ranks as truth",
@@ -738,7 +738,7 @@ def agent_manifest() -> dict[str, Any]:
             "Explicit ValueProfile — no value-free ranking",
             "Related literature ≠ answered",
             "Scores are decision aids, not oracles",
-            "Emotion mixes are annotation_only framing weights",
+            "Emotion mixes produce computational felt_simulation (PAD mood + intensity)",
             "Jaccard diversity is default; embedding is optional extras",
         ],
         "error_shape": {

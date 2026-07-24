@@ -29,7 +29,16 @@ FORBIDDEN_PHRASES: tuple[str, ...] = (
 _NON_ORACLE = ("decision aid", "not oracle", "bands", "decision aids", "not oracles")
 _VALUES = ("valueprofile", "profile")
 _GAP = ("unanswered", "related", "≠ answered", "!= answered", "not answered")
-_EMOTION = ("annotation", "does not feel", "not feel", "annotation only")
+_EMOTION = (
+    "annotation",
+    "does not feel",
+    "not feel",
+    "annotation only",
+    "computational_affect",
+    "computational affect",
+    "felt_simulation",
+    "not biological",
+)
 
 _EMOTION_TOOLS = frozenset(
     {
@@ -64,11 +73,26 @@ def lint_tool_description(name: str, description: str) -> list[str]:
         return errors
 
     if name in _EMOTION_TOOLS:
-        # Require annotation + not-feel family
-        if "annotation" not in blob and "annotate" not in blob:
-            errors.append("emotion tool missing 'annotation' honesty token")
-        if "feel" not in blob and "not anthropomorphic" not in blob:
-            errors.append("emotion tool missing not-feel / non-anthropomorphic token")
+        # Require honesty: annotation OR computational-affect simulation language
+        has_ann = "annotation" in blob or "annotate" in blob
+        has_sim = (
+            "computational" in blob
+            or "felt_simulation" in blob
+            or "simulation" in blob
+        )
+        if not (has_ann or has_sim):
+            errors.append(
+                "emotion tool missing annotation / computational-affect honesty token"
+            )
+        if (
+            "feel" not in blob
+            and "not anthropomorphic" not in blob
+            and "not biological" not in blob
+            and "simulation" not in blob
+        ):
+            errors.append(
+                "emotion tool missing not-feel / simulation / non-biological token"
+            )
         return errors
 
     has_oracle = any(t in blob for t in _NON_ORACLE)

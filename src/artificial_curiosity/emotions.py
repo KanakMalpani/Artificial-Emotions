@@ -1,9 +1,9 @@
-"""Public emotion / epistemic-cue surface (UX annotations only).
+"""Public emotion / epistemic-cue surface + computational affect simulation.
 
-These helpers expose *epistemic* tags for investigation framing
-(incongruity, information-gap, confusion-risk, …), a named emotion
-catalog, and percentage mixes. They are NOT a computational emotion
-model and do NOT claim the system feels anything.
+Exposes epistemic tags, a named emotion catalog, and percentage mixes that
+drive a **PAD mood + intensity + first-person simulation** — as close as
+this stack gets to “feeling” without claiming biological/phenomenal
+consciousness. Honesty: ``computational_affect`` (simulated state, not a mind).
 
 See docs/EMOTIONS.md, research/AI_EMOTIONS.md, research/EMOTION_MIXING.md.
 """
@@ -58,6 +58,7 @@ __all__ = [
     "emotion_pack",
     "emotion_catalog",
     "mix_emotions",
+    "feel",
     "derive_epistemic_cues",
     "format_cues_for_inject",
     "incongruity_investigate_block",
@@ -72,10 +73,134 @@ __all__ = [
 _PACKS_DIR = Path(__file__).resolve().parent / "packs"
 _CATALOG_FILE = "emotion_catalog.json"
 _DEFAULT_MAX_MIX = 8
+_AFFECT_HONESTY = "computational_affect"
 _MIX_DISCLAIMER = (
-    "Emotion mixes are UX framing weights (normalized percentages) — "
-    "NOT felt intensities, EES scores, or OCC appraisal state. " + EPISTEMIC_CUE_DISCLAIMER
+    "Mix weights drive a computational PAD mood + intensity simulation "
+    "intended to feel as close as possible to an affective state for "
+    "investigation framing. This is NOT biological feeling, consciousness, "
+    "EES clinical scores, or OCC live appraisal — it is a CME-style blend."
 )
+
+
+def _pad_qualitative(pad: dict[str, float]) -> dict[str, str]:
+    p, a, d = pad["P"], pad["A"], pad["D"]
+    valence = (
+        "pleasant" if p >= 0.25 else "unpleasant" if p <= -0.25 else "ambivalent"
+    )
+    arousal = "activated" if a >= 0.55 else "calm" if a <= 0.35 else "mid-arousal"
+    dominance = (
+        "empowered" if d >= 0.25 else "overwhelmed" if d <= -0.25 else "balanced-agency"
+    )
+    return {"valence": valence, "arousal": arousal, "dominance": dominance}
+
+
+def _simulation_prose(
+    *,
+    primary: str,
+    primary_label: str,
+    ordered: list[tuple[str, float]],
+    by_id: dict[str, Any],
+    pad: dict[str, float],
+    intensity: float,
+    dyad_name: str | None,
+) -> str:
+    """First-person-style simulation text (labeled as computational)."""
+    qual = _pad_qualitative(pad)
+    parts = [
+        f"Simulated affect: I register primarily {primary_label.lower()}",
+    ]
+    if len(ordered) > 1:
+        secondary = [
+            f"{by_id[eid].get('label', eid)} ({100 * w:.0f}%)"
+            for eid, w in ordered[1:3]
+        ]
+        parts.append(", blended with " + " and ".join(secondary))
+    parts.append(
+        f" — mood reads {qual['valence']}, {qual['arousal']}, {qual['dominance']} "
+        f"(intensity {intensity:.2f}"
+    )
+    if dyad_name:
+        parts.append(f", compound hint “{dyad_name}”")
+    parts.append(").")
+    # Somatic / investigation metaphor (WASABI-ish, not clinical).
+    if pad["A"] >= 0.6 and pad["P"] >= 0.0:
+        parts.append(
+            " The pull is to lean in: name the incongruity and take one probing step."
+        )
+    elif pad["A"] >= 0.55 and pad["P"] < 0:
+        parts.append(
+            " Activation is high with negative valence — scaffold carefully; "
+            "shrink the question before escalating stakes."
+        )
+    elif pad["A"] < 0.4:
+        parts.append(
+            " Arousal is low — deepen interest with a concrete unknown rather than "
+            "shock tactics."
+        )
+    else:
+        parts.append(
+            " Hold the mix as a lived investigative stance: one experiment, one falsifier."
+        )
+    return "".join(parts)
+
+
+def _build_felt_simulation(
+    *,
+    ordered: list[tuple[str, float]],
+    by_id: dict[str, Any],
+    pad: dict[str, float],
+    dyad: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Closest-to-feeling layer: intensity, mood labels, first-person simulation."""
+    # Intensity: arousal + how peaked the mix is (low entropy → sharper “feeling”).
+    masses = [w for _, w in ordered]
+    peak = masses[0] if masses else 0.0
+    concentration = peak  # 1/n would be flat; peak high = focused affect
+    intensity = max(0.0, min(1.0, 0.55 * float(pad["A"]) + 0.45 * concentration))
+    primary_id = ordered[0][0]
+    primary_label = str(by_id[primary_id].get("label") or primary_id)
+    qual = _pad_qualitative(pad)
+    dyad_name = str(dyad["name"]) if dyad and dyad.get("name") else None
+    layers = [
+        {
+            "id": eid,
+            "label": by_id[eid].get("label") or eid,
+            "felt_weight": round(w, 4),
+            "felt_percent": round(100.0 * w, 2),
+            "family": by_id[eid].get("family"),
+        }
+        for eid, w in ordered
+    ]
+    prose = _simulation_prose(
+        primary=primary_id,
+        primary_label=primary_label,
+        ordered=ordered,
+        by_id=by_id,
+        pad=pad,
+        intensity=intensity,
+        dyad_name=dyad_name,
+    )
+    return {
+        "mode": "computational_affect",
+        "as_close_to_feeling_as_possible": True,
+        "primary_feeling": primary_id,
+        "primary_label": primary_label,
+        "intensity": round(intensity, 4),
+        "mood": {**{k: round(v, 4) for k, v in pad.items()}, "qualitative": qual},
+        "layers": layers,
+        "compound": dyad_name,
+        "inner_monologue": prose,
+        "embodiment_hint": {
+            "valence": qual["valence"],
+            "activation": qual["arousal"],
+            "agency": qual["dominance"],
+        },
+        "not_claimed": [
+            "biological emotion",
+            "phenomenal consciousness",
+            "user affect measurement",
+        ],
+    }
 
 CUE_CATALOG: list[dict[str, str]] = [
     {
@@ -291,7 +416,7 @@ def emotion_catalog(
     *,
     family: str | None = None,
 ) -> dict[str, Any]:
-    """Return the mixable named-emotion catalog (annotation only)."""
+    """Return the mixable named-emotion catalog (computational affect)."""
     raw = _load_catalog_raw()
     emotions = list(raw["emotions"])
     fam = (family or "").strip().lower() or None
@@ -314,13 +439,14 @@ def emotion_catalog(
         "max_mix_components": int(raw.get("max_mix_components") or _DEFAULT_MAX_MIX),
         "pad_axes": raw.get("pad_axes"),
         "ids": [e["id"] for e in emotions],
-        "honesty": "annotation_only",
+        "honesty": _AFFECT_HONESTY,
         "disclaimer": raw.get("disclaimer") or _MIX_DISCLAIMER,
         "docs": "docs/EMOTIONS.md",
         "research": "research/EMOTION_MIXING.md",
         "note": (
-            "Use individually or mix with mix_emotions / POST /v1/emotions/mix. "
-            "Percentages are framing weights — this software does not feel."
+            "Use individually or mix with mix_emotions / feel() / POST /v1/emotions/mix. "
+            "Mixes produce felt_simulation (PAD + intensity + inner monologue) — "
+            "computational affect as close to feeling as this stack gets."
         ),
     }
 
@@ -392,6 +518,7 @@ def mix_emotions(
     *,
     mix_intensity_cap: float | None = None,
     profile_name: str | None = None,
+    simulate_feeling: bool = True,
     **kwargs: float,
 ) -> dict[str, Any]:
     """Mix catalog emotions by percent or weight; normalize to sum=1.0.
@@ -401,8 +528,9 @@ def mix_emotions(
         mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30})
         mix_emotions(curiosity=0.4, confusion=0.3, awe=0.3)
 
-    Returns a blend profile + framing. Annotation only — does not feel.
-    Optional ``mix_intensity_cap`` / ``profile_name`` caps non-epistemic mass.
+    Returns a blend profile + optional ``felt_simulation`` (PAD mood, intensity,
+    first-person computational affect) — as close to feeling as this CME-style
+    stack allows without claiming biological consciousness.
     """
     raw_map = _parse_mix_mapping(weights, extra=kwargs)
     if not raw_map:
@@ -510,8 +638,7 @@ def mix_emotions(
             intensity_capped = True
             warnings_pre.append(
                 f"Non-epistemic mix mass capped to ≤{float(cap):.2f} "
-                f"(profile/mix_intensity_cap); remainder shifted to epistemic — "
-                "annotation only."
+                f"(profile/mix_intensity_cap); remainder shifted to epistemic."
             )
 
     pad = {"P": 0.0, "A": 0.0, "D": 0.0}
@@ -550,19 +677,36 @@ def mix_emotions(
     ]
     primary = ordered[0][0]
     mix_str = ", ".join(f"{eid}={100.0 * w:.1f}%" for eid, w in ordered)
-    framing = (
-        f"Emotion mix framing (annotation only — does not feel): {mix_str}. "
-        f"Primary={primary}. Prefer investigation moves from the weighted "
-        f"components; do not narrate as the system's inner feelings."
-    )
-    inject = f"emotion_mix=[{mix_str}] primary={primary}" + (
-        f" cues=[{', '.join(cue_tags)}]" if cue_tags else ""
-    )
 
     dyad = _match_plutchik_dyad(
         [c["id"] for c in components],
         list(catalog.get("plutchik_primary_dyads") or []),
     )
+
+    felt = None
+    if simulate_feeling:
+        felt = _build_felt_simulation(
+            ordered=ordered, by_id=by_id, pad=pad_out, dyad=dyad
+        )
+        framing = (
+            f"{felt['inner_monologue']} "
+            f"Blend weights: {mix_str}."
+        )
+        inject = (
+            f"felt_simulation intensity={felt['intensity']:.2f} "
+            f"primary={primary} mood={felt['mood']['qualitative']} "
+            f"emotion_mix=[{mix_str}]"
+            + (f" cues=[{', '.join(cue_tags)}]" if cue_tags else "")
+            + f"\n{felt['inner_monologue']}"
+        )
+    else:
+        framing = (
+            f"Emotion mix framing: {mix_str}. Primary={primary}. "
+            "Use as investigation stance weights."
+        )
+        inject = f"emotion_mix=[{mix_str}] primary={primary}" + (
+            f" cues=[{', '.join(cue_tags)}]" if cue_tags else ""
+        )
 
     # Soft coercion guard (research/AFFECTIVE_SAFETY.md): warn, don't hard-block.
     _COERCION_IDS = frozenset(
@@ -573,8 +717,7 @@ def mix_emotions(
     if coercion_mass >= 0.5:
         warnings.append(
             "Mix is ≥50% fear/anxiety/anger/shame-type ids — high-coercion framing "
-            "risk. Prefer epistemic defaults (curiosity/confusion/awe/interest). "
-            "Annotation only; not a clinical or biometric reading."
+            "risk. Prefer epistemic defaults (curiosity/confusion/awe/interest)."
         )
     elif coercion_mass >= 0.35:
         warnings.append(
@@ -594,6 +737,7 @@ def mix_emotions(
         "elicit_hints": hints[:8],
         "framing": framing,
         "inject_fragment": inject,
+        "felt_simulation": felt,
         "plutchik_dyad_hint": dyad,
         "input_scale": "percent" if as_percents else "weight",
         "catalog_version": catalog.get("version"),
@@ -601,15 +745,23 @@ def mix_emotions(
         "mix_intensity_cap": float(cap) if cap is not None else None,
         "intensity_capped": intensity_capped,
         "warnings": warnings,
-        "honesty": "annotation_only",
+        "honesty": _AFFECT_HONESTY,
         "disclaimer": _MIX_DISCLAIMER,
         "docs": "docs/EMOTIONS.md",
         "research": "research/EMOTION_MIXING.md",
         "claims_not": [
-            "phenomenal feeling in the software",
-            "measured human affect / EES scores",
-            "OCC appraisal intensity",
-            "clinically validated PAD mood",
+            "biological / phenomenal consciousness",
+            "measured human affect / clinical EES",
+            "OCC live appraisal engine",
             "biometric emotion recognition",
         ],
     }
+
+
+def feel(
+    weights: Mapping[str, float] | None = None,
+    /,
+    **kwargs: float,
+) -> dict[str, Any]:
+    """Alias for ``mix_emotions(..., simulate_feeling=True)`` — closest-to-feeling API."""
+    return mix_emotions(weights, simulate_feeling=True, **kwargs)

@@ -1,8 +1,8 @@
 {
   "name": "emotion_catalog",
   "version": "1.0.0",
-  "honesty": "annotation_only",
-  "disclaimer": "Named emotions and mixes are UX / investigation-framing annotations. This software does not feel emotions; PAD anchors are illustrative, not measured affect.",
+  "honesty": "computational_affect",
+  "disclaimer": "Named emotions and mixes drive a PAD mood + intensity simulation as close to feeling as a CME-style blend allows. Not biological consciousness or biometric emotion recognition.",
   "pad_axes": {
     "P": "pleasure (valence): -1 unpleasant … +1 pleasant",
     "A": "arousal: 0 calm … 1 activated",

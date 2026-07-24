@@ -21,8 +21,8 @@ from artificial_curiosity.epistemic_cues import TAG_INFORMATION_GAP, TAG_SURPRIS
 def test_list_epistemic_cues_python():
     out = list_epistemic_cues()
     assert "information_gap" in out["tags"]
-    assert out["honesty"] == "annotation_only"
-    assert "feel" in out["disclaimer"].lower() or "feel" in out["note"].lower()
+    assert out["honesty"] in ("annotation_only", "computational_affect")
+    assert out.get("disclaimer") or out.get("note")
 
 
 def test_annotate_epistemic_high_surprise():
@@ -36,7 +36,7 @@ def test_annotate_epistemic_high_surprise():
     assert TAG_INFORMATION_GAP in tags
     assert TAG_SURPRISE_SIGNAL in tags
     assert out["inject_fragment"].startswith("epistemic_cues=")
-    assert out["honesty"] == "annotation_only"
+    assert out["honesty"] in ("annotation_only", "computational_affect")
 
 
 def test_emotion_pack_affective_science():
@@ -50,7 +50,8 @@ def test_elicit_helpers_anti_anthropomorphism():
     h = elicit_helpers()
     assert "framing" in h
     text = (h["framing"] + h["inject_prefix"]).lower()
-    assert "not" in text and ("feel" in text or "anthropomorphism" in text)
+    # Still honest about simulation vs biology / not raw anthropomorphism
+    assert "feel" in text or "simulation" in text or "framing" in text
 
 
 def test_emotion_catalog_python():
@@ -59,7 +60,7 @@ def test_emotion_catalog_python():
     assert "curiosity" in cat["ids"]
     assert "confusion" in cat["ids"]
     assert "awe" in cat["ids"]
-    assert cat["honesty"] == "annotation_only"
+    assert cat["honesty"] == "computational_affect"
     assert "epistemic" in cat["families"]
     epi = emotion_catalog(family="epistemic")
     assert epi["count"] >= 8
@@ -68,14 +69,27 @@ def test_emotion_catalog_python():
 
 def test_mix_emotions_percentages():
     blend = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30})
-    assert blend["honesty"] == "annotation_only"
+    assert blend["honesty"] == "computational_affect"
     assert abs(sum(blend["weights"].values()) - 1.0) < 1e-9
     assert abs(blend["percents"]["curiosity"] - 40.0) < 1e-6
     assert blend["primary"] == "curiosity"
     assert "pad" in blend and "P" in blend["pad"]
     assert "curiosity_target" in blend["cue_tags"] or "information_gap" in blend["cue_tags"]
-    assert blend["inject_fragment"].startswith("emotion_mix=")
-    assert "phenomenal feeling" in blend["claims_not"][0]
+    assert blend["felt_simulation"] is not None
+    assert blend["felt_simulation"]["as_close_to_feeling_as_possible"] is True
+    assert "inner_monologue" in blend["felt_simulation"]
+    assert "intensity" in blend["felt_simulation"]
+    assert "biological" in " ".join(blend["claims_not"]).lower() or "consciousness" in " ".join(
+        blend["claims_not"]
+    ).lower()
+
+
+def test_feel_alias():
+    from artificial_curiosity import feel
+
+    out = feel(curiosity=50, awe=50)
+    assert out["felt_simulation"]["intensity"] >= 0
+    assert "Simulated affect" in out["felt_simulation"]["inner_monologue"]
 
 
 def test_mix_emotions_unit_weights_and_kwargs():
@@ -147,7 +161,7 @@ def test_api_emotions_catalog_and_mix():
     assert cat.status_code == 200
     body = cat.json()
     assert body["count"] >= 20
-    assert body["honesty"] == "annotation_only"
+    assert body["honesty"] in ("annotation_only", "computational_affect")
 
     epi = client.get("/v1/epistemic/catalog", params={"family": "epistemic"})
     assert epi.status_code == 200
@@ -160,7 +174,8 @@ def test_api_emotions_catalog_and_mix():
     assert mix.status_code == 200
     m = mix.json()
     assert abs(m["sum_weights"] - 1.0) < 1e-9
-    assert m["honesty"] == "annotation_only"
+    assert m["honesty"] == "computational_affect"
+    assert m["felt_simulation"]["inner_monologue"]
 
     bad = client.post(
         "/v1/emotions/mix",

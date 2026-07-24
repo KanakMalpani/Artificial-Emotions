@@ -692,7 +692,7 @@ def handle_emotion_catalog(
     family: str | None = None,
     **_extra: Any,
 ) -> dict[str, Any]:
-    """Return mixable named-emotion catalog (annotation only)."""
+    """Return mixable named-emotion catalog (computational affect simulation)."""
     return emotion_catalog(family=family or None)
 
 
@@ -962,7 +962,9 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "description": (
             "Mix catalog emotions by percentages/weights (normalized to sum 1.0). "
             "Example weights: {curiosity: 40, confusion: 30, awe: 30}. Returns "
-            "blend profile, cue tags, inject_fragment. Annotation only — does not feel."
+            "blend profile, felt_simulation (PAD mood + intensity + inner monologue) "
+            "— computational affect as close to feeling as this CME blend allows; "
+            "not biological consciousness."
         ),
         "input_schema": MIX_EMOTIONS_SCHEMA,
         "handler": handle_mix_emotions,

@@ -96,7 +96,7 @@ def test_emotions_surface_e2e(client: TestClient) -> None:
     cues = client.get("/v1/emotions/cues")
     assert cues.status_code == 200
     assert "information_gap" in cues.json()["tags"]
-    assert cues.json()["honesty"] == "annotation_only"
+    assert cues.json()["honesty"] in ("annotation_only", "computational_affect")
 
     ann = client.post(
         "/v1/emotions/annotate",
@@ -126,7 +126,8 @@ def test_emotions_surface_e2e(client: TestClient) -> None:
         json={"weights": {"curiosity": 40, "confusion": 30, "awe": 30}},
     )
     assert mix.status_code == 200
-    assert mix.json()["honesty"] == "annotation_only"
+    assert mix.json()["honesty"] == "computational_affect"
+    assert mix.json()["felt_simulation"]["as_close_to_feeling_as_possible"] is True
     assert "framing" in mix.json()
     assert "inject_fragment" in mix.json()
 

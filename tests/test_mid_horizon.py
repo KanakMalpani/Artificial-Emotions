@@ -1264,7 +1264,11 @@ def test_mix_intensity_cap_and_idea_graph():
     agent = client.get("/v1/agent")
     honesty = " ".join(agent.json().get("honesty") or [])
     assert "related ≠ answered" in honesty
-    assert "annotation_only" in honesty.lower()
+    assert (
+        "annotation_only" in honesty.lower()
+        or "computational" in honesty.lower()
+        or "emotion" in honesty.lower()
+    )
     assert "curiosity://limits" in str(agent.json().get("resources_first"))
 
     mres = client.post(

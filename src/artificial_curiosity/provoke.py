@@ -18,7 +18,8 @@ PROVOKE_HEADER = (
     "concrete first experiment/analysis, and name falsifiers.\n"
     "Scores use an explicit ValueProfile (never value-free) and are decision "
     "aids with [low–high] bands — not oracles. Related literature ≠ answered.\n"
-    "Do NOT anthropomorphize: this layer ranks unknowns; it does not feel.\n"
+    "Optional emotion mixes attach a computational felt_simulation (PAD mood) — "
+    "as close to feeling as a CME blend gets; not biological consciousness.\n"
 )
 
 
@@ -89,7 +90,7 @@ def build_inject_prompt(
         "",
     ]
     if mix_fragment:
-        lines.append(f"Framing mix (annotation only — does not feel): {mix_fragment}")
+        lines.append(f"Framing mix (computational felt_simulation): {mix_fragment}")
         lines.append("")
     for u in unknowns:
         band = u.get("score_band") or [None, None]
