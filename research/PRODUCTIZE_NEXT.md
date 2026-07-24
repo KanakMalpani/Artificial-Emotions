@@ -47,7 +47,7 @@
 24. **MCP tool tiers** — In-tree (`CURIOSITY_MCP_TIER` / [`MCP_TIERS_INTREE.md`](MCP_TIERS_INTREE.md)); keep affect opt-in.
 25. **ErrEval-style diagnose-before-score** — Critique/soundness sections first in eval report ([`ERREVAL_QG.md`](ERREVAL_QG.md)).
 26. **Gap handlabel growth** — Continue fixtures (`c05861b`); VERITAS cousins ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
-27. **Failure-knowledge seed phrases** — Null/replication gap seeds in packs ([`FAILURE_KNOWLEDGE.md`](FAILURE_KNOWLEDGE.md)).
+27. **Failure-knowledge seed phrases** — Stem bank ready ([`FAILURE_SEED_PHRASES.md`](FAILURE_SEED_PHRASES.md)); add ≥1 per pack.
 
 ## Explicit non-goals (from research)
 

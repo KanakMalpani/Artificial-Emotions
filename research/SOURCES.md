@@ -92,6 +92,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Problem selection / McNamara (Bisht et al.) | [`PROBLEM_SELECTION_MCNAMARA.md`](PROBLEM_SELECTION_MCNAMARA.md) | Hivemind; co-scientist; diversity |
 | Profile compare UX | [`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md) | Kendall/Spearman; deltas; veto tip |
 | Failure knowledge / publication bias | [`FAILURE_KNOWLEDGE.md`](FAILURE_KNOWLEDGE.md) | Dark reactions; Hao topic contraction |
+| Failure seed phrase bank | [`FAILURE_SEED_PHRASES.md`](FAILURE_SEED_PHRASES.md) | Pack-authoring stems for null/replication gaps |
 | Artificial Hivemind note | [`HIVEMIND.md`](HIVEMIND.md) | Inter/intra-model homogeneity on open-ended ideation |
 | AI co-scientist landscape | [`CO_SCIENTIST_LANDSCAPE.md`](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist, HeurekaBench, MIND adjacency |
 | Answerability / feasibility axes | [`ANSWERABILITY_FEASIBILITY.md`](ANSWERABILITY_FEASIBILITY.md) | SFBench vs heuristic answerability/tractability |
