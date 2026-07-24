@@ -11,32 +11,33 @@
 ## P0 — high leverage, low overclaim
 
 1. **Elicit A/B eval path** — ✅ landed (`874dd7a`); keep rubric optional rows ([`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md)).
-2. **Gap-status fixture + metric** — ✅ gap-status metric (`874dd7a`); continue hand-label growth ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md)).
-3. **MCP/tool description lint** — ✅ landed (`2a33786` / `mcp_lint.py`); keep regression tests green ([`MCP_DESCRIPTION_LINT.md`](MCP_DESCRIPTION_LINT.md)).
-4. **Prefs summarize + pairwise nudge** — ✅ partially shipped (`0af53f4`); next: ties + [`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md) ([`PREFERENCE_BT_STAGE2.md`](PREFERENCE_BT_STAGE2.md)).
-5. **Agent card safety blurb** — Draft in [`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md); merge into `/v1/agent`; see MCP threats ([`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md)).
+2. **Gap-status fixture + metric** — ✅ gap-status metric (`874dd7a`); grow hand-labels + VERITAS cousins ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md), [`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
+3. **MCP/tool description lint** — ✅ landed (`2a33786` / `mcp_lint.py`); keep CI green ([`MCP_DESCRIPTION_LINT.md`](MCP_DESCRIPTION_LINT.md), [`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md)).
+4. **Prefs summarize + pairwise nudge** — ✅ ties + suggest-pair + gated BT (`27eb346`) ([`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md), [`PREFERENCE_BT_STAGE2.md`](PREFERENCE_BT_STAGE2.md)).
+5. **Agent card safety blurb** — Still open: merge [`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md) into `/v1/agent` + LIMITS patches ([`LIMITS_PATCHES.md`](LIMITS_PATCHES.md)).
 
 ## P1 — clear product value
 
-6. **`compare_profiles` / veto stack** — ✅ Kendall τ + web profile compare (`bc7ffa9`, `874dd7a`).
+6. **`compare_profiles` / veto stack** — ✅ (`bc7ffa9`, `874dd7a`).
 7. **Public-demo profile** — ✅ `public_demo_strict_risk` (`bc7ffa9`).
-8. **Eval report sections** — ✅ landed (`2a33786` / `eval_report.py`); add hivemind section next ([`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md), [`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md)).
-9. **Inject always includes risk** — ✅ inject risk lines (`bc7ffa9`); keep regression coverage ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
-10. **OpenAlex rationale keys only** — ✅ lit rationale keys (`874dd7a`); keep no silent weight change ([`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md)).
-10b. **Mix safety guards** — ✅ soft guards landed (`0af53f4`); keep epistemic-default docs ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
-10c. **Top-n hivemind similarity metric** — ✅ landed (`044c75e` / `hivemind.py`); keep CI proxy + embedder id logged ([`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md)).
-10d. **Optional `critique_brief`** — ✅ landed (`2a33786` / `critique.py`); keep no silent re-rank ([`CRITIC_DEBATE_JUDGES.md`](CRITIC_DEBATE_JUDGES.md)).
-10e. **Outcome labels in prefs summarize** — ✅ landed (`044c75e`); keep sparse flywheel docs ([`OUTCOME_FLYWHEEL.md`](OUTCOME_FLYWHEEL.md)).
-10f. **Gap fixture: underpowered / invalid_form** — VERITAS taxonomy ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
+8. **Eval report sections** — ✅ (`2a33786`); ensure hivemind section wired ([`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md)).
+9. **Inject always includes risk** — ✅ (`bc7ffa9`).
+10. **OpenAlex rationale keys only** — ✅ (`874dd7a`).
+10b. **Mix safety guards** — ✅ (`0af53f4`).
+10c. **Top-n hivemind similarity metric** — ✅ (`044c75e` / `hivemind.py`).
+10d. **Optional `critique_brief`** — ✅ (`2a33786`).
+10e. **Outcome labels in prefs summarize** — ✅ (`044c75e`).
+10f. **Gap fixture underpowered / invalid_form** — Template v0.2 ready (`examples/gap_status_fixture_template.json`); grow hand-labels.
 
 ## P2 — research-facing / moonshot-adjacent
 
-11. **VOI worksheet export** — ✅ landed (`2a33786` / `voi.py`); attach profile-compare / credal note ([`VOI_IMPRECISE.md`](VOI_IMPRECISE.md), [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md)).
-12. **Cue threshold knobs** — ✅ fields + product path (`044c75e`); presets in `examples/cue_threshold_presets.json` ([`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md)).
-16. **Top-n embedding diversity metric** — ✅ same as 10c.
-17. **LIMITS cite McNamara paper** — Patch list in [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md); sibling merges into `docs/LIMITS.md`.
-18. **Offline BT fit (eval only)** — After ties + pairs; never auto-overwrite weights ([`PREFERENCE_BT_STAGE2.md`](PREFERENCE_BT_STAGE2.md)).
-19. **`suggest_next_pair` tool + duel UI** — Medium-Δ / connect-components heuristic ([`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md)).
+11. **VOI worksheet export** — ✅ (`2a33786`); optional credal/compare note ([`VOI_IMPRECISE.md`](VOI_IMPRECISE.md)).
+12. **Cue threshold knobs** — ✅ (`044c75e`); presets JSON ([`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md)).
+13. **LitGapFinder cooccur correlation study** — Offline protocol ([`LITGAP_CORRELATION_STUDY.md`](LITGAP_CORRELATION_STUDY.md)).
+14. **Optional cross-model vote** — HybridQuestion-inspired; offline ([`HYBRID_QUESTION.md`](HYBRID_QUESTION.md)).
+15. **Bayesian surprise closed-loop** — Only with posteriors ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md)).
+16. **LIMITS cite McNamara / EVSI / ERS** — [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md).
+17. **Optional idea-graph export** — EIG-inspired debug JSON ([`EIG_IDEATION_GRAPHS.md`](EIG_IDEATION_GRAPHS.md)).
 
 ## Explicit non-goals (from research)
 
@@ -45,27 +46,12 @@
 - Global preference model across profiles  
 - Silent multi-stakeholder “consensus” score  
 - Claiming BoxingGym-level experimental design skill  
+- Claiming MCP-38 / MSB “compliance”
 
 ---
 
-## Research commits this session (main)
-
-| Commit | Topic |
-|--------|-------|
-| `0eb7581` | Elicitation, competitors, safety, MCP UX, VOI |
-| `62c9024` | Preference, ITN, Bayesian surprise |
-| `ef47b19` | Dual-use, HybridQuestion |
-| `60113b8` | Constitutional curiosity |
-| `f487164` | Eval metrics |
-| `960160e` | Gap verify methods (SciFact) |
-| `f4b62b2` | Funding/OpenAlex neglect |
-| `8a78860` | Investigation design / falsifiers |
+## Living pointers
 
 Index: [`INDEX.md`](INDEX.md) · Sources: [`SOURCES.md`](SOURCES.md)
 
-### Later research commits
-
-| Commit | Topic |
-|--------|-------|
-| `78180e6` | LIMITS citation patches |
-| *(this)* | BT stage-2, VERITAS labels, imprecise VOI |
+Recent research commits: `78180e6` LIMITS patches · `fe3e7a4` BT/VERITAS/VOI · `27446b3` cue/hivemind specs · `464715a` LitGap/pair UX · `2906fe4` MCP threats · `6c01702` EIG + gap template
