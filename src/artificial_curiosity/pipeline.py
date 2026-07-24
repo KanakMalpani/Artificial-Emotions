@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 
-from artificial_curiosity.brief import write_brief
+from artificial_curiosity.brief import feasibility_note, write_brief
 from artificial_curiosity.diversity import diversify
 from artificial_curiosity.generate import generate_candidates
 from artificial_curiosity.judge import llm_refine_gap, llm_score_ensemble
@@ -174,6 +174,7 @@ class CuriosityEngine:
             )
             if ok:
                 item.investigation_brief = write_brief(item)
+                item.metadata["feasibility_note"] = feasibility_note(item)
                 scored.append(item)
             else:
                 # Keep rejected for transparency but do not rank in top set.

@@ -49,6 +49,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Optional `mix_intensity_cap` on ValueProfile (public_demo_strict_risk=0.35) caps non-epistemic mix mass
 - EIG-inspired idea-graph export (`POST /v1/evals/idea-graph` / MCP `export_idea_graph`) — display only
 - Offline HybridQuestion-style `cross_model_vote` — form/heuristic proxy; never silent re-rank
+- Briefs include display-only `feasibility_note` (SFBench cousin — not a weighted axis)
 - Agent card `/v1/agent` includes affective-safety blurb (not biometric ERS; provoke is opt-in framing)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon (`research/NEGLECTEDNESS_COST.md`) — **not** funding DBs
@@ -85,7 +86,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; optional `mix_intensity_cap`; agent safety blurb; no silent user-affect inference |
 | No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL + thin re-rank + tiny weight hints; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |
-| Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains | Human review hook + LIMITS residual risk; stronger models later |
+| Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains; agentic scaffolding can uplift dual-use proxies (BioVeil MATRIX) | Human review hook + LIMITS residual; do not strip risk from inject/MCP; not BioVeil-certified |
 | Neglectedness/cost are lexicon/density proxies | No grant/spend APIs wired | Documented spike; optional funding adapters later |
 | LLM paths untested live in CI | `LLM_API_KEY` often unset | Local multi-provider smoke per PROOFS; no secrets in repo |
 | Multi-judge ensemble needs live LLM | Offline uses single heuristic | Documented; disagreement flag only when ≥2 judges return |

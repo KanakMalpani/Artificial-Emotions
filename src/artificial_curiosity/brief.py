@@ -5,6 +5,38 @@ from __future__ import annotations
 from artificial_curiosity.models import RankedQuestion
 
 
+def feasibility_note(item: RankedQuestion) -> str:
+    """
+    Display-only SFBench-cousin note — not a scored axis, not SFBench replication.
+
+    research/SFBENCH_CALIBRATION.md
+    """
+    a = float(item.scores.answerability)
+    t = float(item.scores.tractability)
+    if a < 0.4 and t < 0.45:
+        band = "low"
+        tip = (
+            "as posed, the unknown may need narrowing or more realistic resources "
+            "before a discriminating pilot"
+        )
+    elif a >= 0.65 and t >= 0.55:
+        band = "higher"
+        tip = (
+            "ops look comparatively concrete — still verify related≠answered and "
+            "dual-use gates before pursuing"
+        )
+    else:
+        band = "mixed"
+        tip = (
+            "answerability and tractability diverge — treat as a provisional "
+            "investigation candidate, not a lab-ready claim"
+        )
+    return (
+        f"Feasibility note ({band}, heuristic display only — not SFBench, not a "
+        f"weighted axis): {tip}."
+    )
+
+
 def write_brief(item: RankedQuestion) -> str:
     q = item.question
     s = item.scores
@@ -15,6 +47,7 @@ def write_brief(item: RankedQuestion) -> str:
         )
         or "- No closely related works retrieved."
     )
+    note = feasibility_note(item)
     return (
         f"## Investigation brief\n\n"
         f"**Question.** {q.question}\n\n"
@@ -26,6 +59,7 @@ def write_brief(item: RankedQuestion) -> str:
         f"**Score snapshot.** impact={s.impact:.2f}, neglectedness={s.neglectedness:.2f}, "
         f"tractability={s.tractability:.2f}, surprise={s.surprise:.2f}, "
         f"answerability={s.answerability:.2f}, risk={s.risk:.2f}\n\n"
+        f"**{note}**\n\n"
         f"**Curiosity score.** {item.curiosity_score:.3f} "
         f"(confidence {item.confidence:.2f})\n\n"
         f"**Suggested first moves.**\n"

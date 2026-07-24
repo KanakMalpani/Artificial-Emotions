@@ -1109,3 +1109,44 @@ def test_mix_intensity_cap_and_idea_graph():
     assert gres.status_code == 200
     assert gres.json()["changes_ranks"] is False
 
+
+def test_feasibility_note_display_only():
+    from artificial_curiosity.brief import feasibility_note, write_brief
+    from artificial_curiosity.models import (
+        GapEvidence,
+        GapStatus,
+        RankedQuestion,
+        ScoreAxes,
+        UnansweredQuestion,
+    )
+
+    q = UnansweredQuestion(
+        id="f1",
+        question="Which biomarkers predict healthspan under interventions?",
+        domain="biology",
+        operationalization="AUROC ≥ 0.7 across ≥2 classes with a falsifier.",
+        why_it_matters="fixture",
+    )
+    item = RankedQuestion(
+        question=q,
+        scores=ScoreAxes(
+            impact=0.6,
+            neglectedness=0.5,
+            tractability=0.7,
+            surprise=0.5,
+            answerability=0.75,
+            risk=0.2,
+            cost_proxy=0.3,
+        ),
+        curiosity_score=0.6,
+        confidence=0.5,
+        gap=GapEvidence(status=GapStatus.UNANSWERED, confidence=0.4, notes="Related ≠ answered"),
+        flags=[],
+    )
+    note = feasibility_note(item)
+    assert "not SFBench" in note
+    assert "weighted axis" in note or "display only" in note
+    brief = write_brief(item)
+    assert "Feasibility note" in brief
+    assert item.scores.answerability == 0.75  # unchanged — display only
+

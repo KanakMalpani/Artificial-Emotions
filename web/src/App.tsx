@@ -80,12 +80,16 @@ const DOMAINS = [
   "general",
 ];
 
-const AXIS: { key: keyof ScoreAxes; label: string }[] = [
+const AXIS: { key: keyof ScoreAxes; label: string; tip?: string }[] = [
   { key: "impact", label: "Impact" },
   { key: "neglectedness", label: "Neglected" },
-  { key: "tractability", label: "Tractable" },
+  { key: "tractability", label: "Tractable", tip: "Resource/ops realism (not SFBench)" },
   { key: "surprise", label: "Surprise" },
-  { key: "answerability", label: "Answerable" },
+  {
+    key: "answerability",
+    label: "Answerable",
+    tip: "As-posed specificity — distinct from tractability; not a feasibility score",
+  },
 ];
 
 const FALLBACK_PROFILES: ProfileMeta[] = [
@@ -789,7 +793,7 @@ export default function App() {
                     <div className="bars">
                       {AXIS.map((a) => (
                         <div className="bar-row" key={a.key}>
-                          <span>{a.label}</span>
+                          <span title={a.tip}>{a.label}</span>
                           <div className="bar-track">
                             <div
                               className="bar-fill"
