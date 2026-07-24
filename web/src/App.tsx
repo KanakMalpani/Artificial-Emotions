@@ -128,6 +128,7 @@ export default function App() {
   const [mixWarnings, setMixWarnings] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<FeedbackEvent[]>([]);
   const [feedbackNote, setFeedbackNote] = useState<string | null>(null);
+  const [critiqueNote, setCritiqueNote] = useState<string | null>(null);
   const [compareB, setCompareB] = useState("alignment_lab");
   const [compareOpen, setCompareOpen] = useState(false);
   const [compareBusy, setCompareBusy] = useState(false);
@@ -310,6 +311,35 @@ export default function App() {
     };
     setFeedback((prev) => [...prev, ev]);
     setFeedbackNote(`${eventType} recorded for #${r.rank} (session only)`);
+  }
+
+  async function critiqueCard(r: Ranked) {
+    setCritiqueNote(null);
+    try {
+      const res = await fetch("/v1/briefs/critique", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: r.question.question,
+          operationalization: r.question.operationalization,
+          brief: r.investigation_brief || "",
+          why_it_matters: r.question.why_it_matters,
+        }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const codes = (data.issues || [])
+        .slice(0, 3)
+        .map((i: { code: string }) => i.code)
+        .join(", ");
+      setCritiqueNote(
+        `#${r.rank}: ${data.n_issues} form issue(s)` +
+          (codes ? ` [${codes}]` : " — clean") +
+          " — does not re-rank.",
+      );
+    } catch (e) {
+      setCritiqueNote(e instanceof Error ? e.message : "Critique failed");
+    }
   }
 
   async function runCompare() {
@@ -572,6 +602,7 @@ export default function App() {
       </section>
 
       {feedbackNote && <p className="feedback-note">{feedbackNote}</p>}
+      {critiqueNote && <p className="feedback-note">{critiqueNote}</p>}
       {feedback.length > 0 && (
         <div className="feedback-bar">
           <span>{feedback.length} feedback event(s) this session</span>
@@ -665,6 +696,13 @@ export default function App() {
                         onClick={() => recordFeedback(r, "already_answered")}
                       >
                         Already answered
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-feedback"
+                        onClick={() => critiqueCard(r)}
+                      >
+                        Critique form
                       </button>
                     </div>
                     <p className="why">
