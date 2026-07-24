@@ -72,6 +72,7 @@ Everything under `research/` is design/background material that informed the imp
 | [MCP_PROGRESSIVE_DISCLOSURE.md](MCP_PROGRESSIVE_DISCLOSURE.md) | Core / investigate / affect / research tool tiers |
 | [ERREVAL_QG.md](ERREVAL_QG.md) | Diagnose-then-score QG eval pattern |
 | [GUIDE_ADVISING.md](GUIDE_ADVISING.md) | Idea advising ≠ unknown ranking; anti-acceptance axis |
+| [AGKA_EPISTEMIC_LABELS.md](AGKA_EPISTEMIC_LABELS.md) | Guideline-augmented epistemic label clarity |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

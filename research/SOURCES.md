@@ -77,6 +77,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | ErrEval | arXiv:2601.10406 | Diagnose-then-score question generation |
 | GUIDE idea advising | [`GUIDE_ADVISING.md`](GUIDE_ADVISING.md) | Lit-grounded advise; not acceptance VOI |
 | GUIDE | arXiv:2507.08870 | Scalable research idea feedback |
+| AGKA epistemic labels | [`AGKA_EPISTEMIC_LABELS.md`](AGKA_EPISTEMIC_LABELS.md) | Annotation guidelines → clearer cue defs |
+| AGKA | arXiv:2406.00954 | Educational text / epistemic emotion classification |
 | InnoEval | arXiv:2602.14367 | Knowledge-grounded idea evaluation |
 | Personalized vs aggregate judges | arXiv:2604.22517 | Pluralistic evaluation fragility |
 | Intern-Atlas method graphs | [`INTERN_ATLAS.md`](INTERN_ATLAS.md) | Method lineage ≠ unanswered Qs |
