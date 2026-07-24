@@ -31,6 +31,7 @@ Everything under `research/` is design/background material that informed the imp
 | [GAP_VERIFY_METHODS.md](GAP_VERIFY_METHODS.md) | SciFact-family methods vs related≠answered verify |
 | [FUNDING_NEGLECT_SIGNALS.md](FUNDING_NEGLECT_SIGNALS.md) | OpenAlex/funding metadata as neglectedness adapters |
 | [INVESTIGATION_DESIGN.md](INVESTIGATION_DESIGN.md) | BoxingGym/EIG humility; falsifier rubrics for provoke |
+| [PRODUCTIZE_NEXT.md](PRODUCTIZE_NEXT.md) | Aggregated sibling backlog from research cycles |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
