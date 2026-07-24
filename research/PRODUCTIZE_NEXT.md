@@ -18,12 +18,13 @@
 
 ## P1 — clear product value
 
-6. **`compare_profiles` / veto stack** — ✅ core offline compare + productize pass (`0af53f4`); still add Kendall τ + fuller web two-column ([`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md)).
-7. **Public-demo profile** — Stricter `max_risk` than lab presets ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
+6. **`compare_profiles` / veto stack** — ✅ Kendall τ + compare surfaces (`bc7ffa9`); optional fuller web two-column remains ([`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md)).
+7. **Public-demo profile** — ✅ `public_demo_strict_risk` (`bc7ffa9`).
 8. **Eval report sections** — gap_f1, rank_spearman, elicit_rubric_mean, risk_flags ([`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
-9. **Inject always includes risk** — Regression test ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
+9. **Inject always includes risk** — ✅ inject risk lines (`bc7ffa9`); keep regression coverage ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 10. **OpenAlex rationale keys only** — `hit_n`, optional `mean_cited_by`, `funder_field_missing_rate` — no silent weight change ([`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md)).
 10b. **Mix safety guards** — ✅ soft guards landed (`0af53f4`); keep epistemic-default docs ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
+10c. **Top-n hivemind similarity metric** — embedding pairwise cosine in eval ([`HIVEMIND.md`](HIVEMIND.md)).
 
 ## P2 — research-facing / moonshot-adjacent
 

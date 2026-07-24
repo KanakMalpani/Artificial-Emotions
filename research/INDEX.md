@@ -36,6 +36,7 @@ Everything under `research/` is design/background material that informed the imp
 | [PROFILE_COMPARE_UX.md](PROFILE_COMPARE_UX.md) | Side-by-side ranks; Kendall τ; companion to compare.py |
 | [FAILURE_KNOWLEDGE.md](FAILURE_KNOWLEDGE.md) | Publication bias / dark reactions / topic contraction |
 | [HIVEMIND.md](HIVEMIND.md) | Jiang et al. Artificial Hivemind → diversity metrics |
+| [CO_SCIENTIST_LANDSCAPE.md](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist / HeurekaBench / MIND vs curiosity layer |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

@@ -18,6 +18,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Bisht et al. McNamara / hivemind (deep note) | [`PROBLEM_SELECTION_MCNAMARA.md`](PROBLEM_SELECTION_MCNAMARA.md) | Implications for profiles, diversity, ensembles |
 | Hao et al., AI expands impact / contracts focus | Nature 2026 DOI 10.1038/s41586-025-09922-y | Topic-volume shrinkage under AI tools |
 | Artificial Hivemind (Jiang et al.) | arXiv:2510.22954 | Open-ended LM homogeneity |
+| Co-Scientist (Gottweis et al.) | arXiv:2502.18864 ; Nature | Multi-agent hypothesis tournament (objectives given) |
+| HeurekaBench | arXiv:2601.01678 | Open-ended co-scientist benchmark framework |
 | Computational Theories of Curiosity (Oudeyer) | arXiv 1802.10546 | Intrinsic motivation foundations |
 | Large-Scale Curiosity-Driven Learning (Pathak et al.) | arXiv 1808.04355 | RL curiosity ≠ scientific VOI |
 | Emotions in AI / epistemic affect (synthesis) | [`AI_EMOTIONS.md`](AI_EMOTIONS.md) | Monograph: classical theories, CME architectures, ML/RL/LLM stacks, epistemic elicitation ↔ provoke |
@@ -42,6 +44,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Profile compare UX | [`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md) | Kendall/Spearman; deltas; veto tip |
 | Failure knowledge / publication bias | [`FAILURE_KNOWLEDGE.md`](FAILURE_KNOWLEDGE.md) | Dark reactions; Hao topic contraction |
 | Artificial Hivemind note | [`HIVEMIND.md`](HIVEMIND.md) | Inter/intra-model homogeneity on open-ended ideation |
+| AI co-scientist landscape | [`CO_SCIENTIST_LANDSCAPE.md`](CO_SCIENTIST_LANDSCAPE.md) | Co-Scientist, HeurekaBench, MIND adjacency |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
