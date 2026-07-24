@@ -177,6 +177,16 @@ def test_api_emotions_catalog_and_mix():
     assert m["honesty"] == "computational_affect"
     assert m["felt_simulation"]["inner_monologue"]
 
+    mix_no_feel = client.post(
+        "/v1/emotions/mix",
+        json={
+            "weights": {"curiosity": 40, "confusion": 30, "awe": 30},
+            "simulate_feeling": False,
+        },
+    )
+    assert mix_no_feel.status_code == 200
+    assert mix_no_feel.json()["felt_simulation"] is None
+
     bad = client.post(
         "/v1/emotions/mix",
         json={"weights": {"nope": 100}},
@@ -214,6 +224,16 @@ def test_mcp_emotion_tools():
         {"weights": {"curiosity": 40, "confusion": 30, "awe": 30}},
     )
     assert abs(out["sum_weights"] - 1.0) < 1e-9
+    assert out["felt_simulation"] is not None
+
+    out_no_feel = dispatch_tool(
+        "mix_emotions",
+        {
+            "weights": {"curiosity": 40, "confusion": 30, "awe": 30},
+            "simulate_feeling": False,
+        },
+    )
+    assert out_no_feel["felt_simulation"] is None
     out = dispatch_tool(
         "annotate_epistemic",
         {

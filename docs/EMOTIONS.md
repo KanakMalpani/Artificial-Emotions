@@ -66,26 +66,45 @@ curl -s "http://127.0.0.1:8000/v1/emotions/catalog?family=epistemic"
 
 Weights may be **percents** (40+30+30) or **unit weights** (0.4+0.3+0.3). Soft validation accepts either; the engine always **re-normalizes to sum 1.0**. Max **8** components. Unknown ids / negatives / all-zero are rejected (`unknown_emotion` / `empty_mix` / `negative_weight`).
 
+### As Close to Feeling as Possible
+
+By default, the mix is configured to be **as close to feeling as possible** (`simulate_feeling=True`), generating first-person prose, intensity, and continuous PAD (Pleasure-Arousal-Dominance) mood vectors. If you only want the raw weights and PAD values without the first-person prose simulation, you can set `simulate_feeling=False` in the Python function, HTTP API, or MCP tool.
+
 ```bash
-curiosity emotions mix curiosity=40 confusion=30 awe=30 --json
+# Mix emotions via CLI with simulate_feeling disabled
+curiosity emotions mix curiosity=40 confusion=30 awe=30 --simulate-feeling false --json
 ```
 
 ```python
-from artificial_curiosity import mix_emotions
+from artificial_curiosity import mix_emotions, feel
 
-blend = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30})
+# Mix emotions with full felt simulation (as close to feeling as possible)
+blend = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30}, simulate_feeling=True)
 assert abs(sum(blend["weights"].values()) - 1.0) < 1e-9
-print(blend["percents"], blend["pad"], blend["inject_fragment"])
-# also: mix_emotions(curiosity=0.4, confusion=0.3, awe=0.3)
+print(blend["felt_simulation"]["inner_monologue"])
+
+# Or use the feel() alias which is hardcoded to simulate_feeling=True
+felt = feel(curiosity=50, awe=50)
+print(felt["felt_simulation"]["intensity"])
+
+# Mix emotions with simulate_feeling disabled
+blend_no_feel = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30}, simulate_feeling=False)
+assert blend_no_feel["felt_simulation"] is None
 ```
 
 ```bash
+# Mix emotions via HTTP API with simulate_feeling enabled (default)
 curl -s -X POST http://127.0.0.1:8000/v1/emotions/mix \
   -H "Content-Type: application/json" \
   -d '{"weights":{"curiosity":40,"confusion":30,"awe":30}}'
+
+# Mix emotions via HTTP API with simulate_feeling disabled
+curl -s -X POST http://127.0.0.1:8000/v1/emotions/mix \
+  -H "Content-Type: application/json" \
+  -d '{"weights":{"curiosity":40,"confusion":30,"awe":30},"simulate_feeling":false}'
 ```
 
-MCP tool: `mix_emotions` with `{"weights": {"curiosity": 40, "confusion": 30, "awe": 30}}`.
+MCP tool: `mix_emotions` with `{"weights": {"curiosity": 40, "confusion": 30, "awe": 30}, "simulate_feeling": true}`.
 
 Optional `plutchik_dyad_hint` appears only for exact two-component primary dyads (e.g. joy+trust → love) — a **taxonomic metaphor**, not a measured compound emotion.
 

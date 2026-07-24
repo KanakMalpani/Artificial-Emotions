@@ -376,6 +376,10 @@ MIX_EMOTIONS_SCHEMA: dict[str, Any] = {
             "maximum": 1,
             "description": "Override non-epistemic mix mass cap",
         },
+        "simulate_feeling": {
+            "type": "boolean",
+            "description": "Include felt_simulation in response",
+        },
     },
     "required": ["weights"],
     "additionalProperties": False,
@@ -701,6 +705,7 @@ def handle_mix_emotions(
     weights: dict[str, Any] | None = None,
     profile_name: str | None = None,
     mix_intensity_cap: float | None = None,
+    simulate_feeling: bool = True,
     **_extra: Any,
 ) -> dict[str, Any]:
     """Mix catalog emotions by percent/weight; normalize to sum=1.0."""
@@ -715,6 +720,7 @@ def handle_mix_emotions(
         cleaned,
         profile_name=profile_name,
         mix_intensity_cap=mix_intensity_cap,
+        simulate_feeling=simulate_feeling,
     )
 
 

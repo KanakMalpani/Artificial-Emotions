@@ -18,7 +18,7 @@ It is **not** literature Q&A, citation forecasting, or an end-to-end AI Scientis
 |------|-----|
 | Docs index | [INDEX.md](INDEX.md) |
 | Install / plugins | [PLUGINS.md](PLUGINS.md) |
-| Emotions (annotation only) | [EMOTIONS.md](EMOTIONS.md) |
+| Emotions | [EMOTIONS.md](EMOTIONS.md) — epistemic cues are `annotation_only`; percentage mixes emit `computational_affect` / `felt_simulation`, not biological consciousness or user-affect measurement |
 | Honest bounds | [LIMITS.md](LIMITS.md) |
 | Demo commands | [PROOFS.md](PROOFS.md) |
 | Modules | [ARCHITECTURE.md](ARCHITECTURE.md) |

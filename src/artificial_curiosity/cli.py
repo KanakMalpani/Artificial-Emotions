@@ -290,6 +290,12 @@ def build_parser() -> argparse.ArgumentParser:
             help="emotion_id=percent_or_weight (repeatable)",
         )
         mix_p.add_argument("--json", action="store_true")
+        mix_p.add_argument(
+            "--simulate-feeling",
+            type=str,
+            default="true",
+            help="Include felt_simulation (true|false)",
+        )
 
         ann_p = emo_sub.add_parser("annotate", help="Annotate a question with epistemic cues")
         ann_p.add_argument("question", help="Question text to annotate")
@@ -802,7 +808,8 @@ def _emotions(args: argparse.Namespace) -> int:
     if cmd == "mix":
         try:
             weights = _parse_mix_parts(list(args.parts))
-            payload = mix_emotions(weights)
+            sim_feel = str(getattr(args, "simulate_feeling", "true")).lower() in ("true", "1", "yes")
+            payload = mix_emotions(weights, simulate_feeling=sim_feel)
         except ValueError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1

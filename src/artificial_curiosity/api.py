@@ -416,6 +416,10 @@ class MixEmotionsRequest(BaseModel):
         le=1.0,
         description="Override non-epistemic mix mass cap (None → profile default)",
     )
+    simulate_feeling: bool = Field(
+        True,
+        description="Include felt_simulation (PAD mood, intensity, and first-person prose) in response",
+    )
 
     @field_validator("weights")
     @classmethod
@@ -1037,6 +1041,7 @@ def _emotions_mix(req: MixEmotionsRequest) -> dict[str, Any]:
         req.weights,
         profile_name=req.profile_name,
         mix_intensity_cap=req.mix_intensity_cap,
+        simulate_feeling=req.simulate_feeling,
     )
 
 
