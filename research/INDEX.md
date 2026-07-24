@@ -70,6 +70,7 @@ Everything under `research/` is design/background material that informed the imp
 | [DUAL_USE_REDTEAM.md](DUAL_USE_REDTEAM.md) | Offline dual-use red-team fixture recipe |
 | [INTERN_ATLAS.md](INTERN_ATLAS.md) | Method evolution graph adjacency |
 | [MCP_PROGRESSIVE_DISCLOSURE.md](MCP_PROGRESSIVE_DISCLOSURE.md) | Core / investigate / affect / research tool tiers |
+| [ERREVAL_QG.md](ERREVAL_QG.md) | Diagnose-then-score QG eval pattern |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

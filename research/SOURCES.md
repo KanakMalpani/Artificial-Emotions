@@ -73,6 +73,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Curiosity eval metric stack | [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md) | RINoBench caveats; gap+rank+elicit primary |
 | InnoEval / personalized judges | [`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md) | Multi-perspective eval; anti-global-judge |
 | Soundness pass UX | [`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md) | Triage badges; no silent re-rank |
+| ErrEval QG diagnostics | [`ERREVAL_QG.md`](ERREVAL_QG.md) | Error-aware eval before holistic scores |
+| ErrEval | arXiv:2601.10406 | Diagnose-then-score question generation |
 | InnoEval | arXiv:2602.14367 | Knowledge-grounded idea evaluation |
 | Personalized vs aggregate judges | arXiv:2604.22517 | Pluralistic evaluation fragility |
 | Intern-Atlas method graphs | [`INTERN_ATLAS.md`](INTERN_ATLAS.md) | Method lineage ≠ unanswered Qs |
