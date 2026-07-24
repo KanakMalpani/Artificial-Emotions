@@ -148,6 +148,30 @@ def build_parser() -> argparse.ArgumentParser:
     )
     hints_p.add_argument("--json", action="store_true")
 
+    sum_p = pref_sub.add_parser(
+        "summarize",
+        help="Summarize preference JSONL (counts, pairwise wins, weight hints)",
+    )
+    sum_p.add_argument("--path", required=True, help="Preference JSONL path")
+    sum_p.add_argument(
+        "--profile",
+        default=None,
+        help="Optional profile filter (default: all events in file)",
+    )
+    sum_p.add_argument("--top", type=int, default=10, help="Top question ids to show")
+    sum_p.add_argument("--json", action="store_true")
+
+    compare_p = sub.add_parser(
+        "compare-profiles",
+        help="Side-by-side offline ranks under two ValueProfiles (no silent merge)",
+    )
+    compare_p.add_argument("--domain", default="ai", choices=[d.value for d in Domain])
+    compare_p.add_argument("--topic", default="")
+    compare_p.add_argument("--a", default="humanity_default", dest="profile_a")
+    compare_p.add_argument("--b", default="alignment_lab", dest="profile_b")
+    compare_p.add_argument("--n", type=int, default=8)
+    compare_p.add_argument("--json", action="store_true")
+
     eval_p = sub.add_parser(
         "eval",
         help="Offline expert-eval / spot-check harness (W10; no vanity accuracy %%)",
@@ -327,34 +351,93 @@ def _profiles(args: argparse.Namespace) -> int:
     return 0
 
 
-def _preferences(args: argparse.Namespace) -> int:
-    from artificial_curiosity.preferences import learn_profile_weight_hints
+def _compare_profiles(args: argparse.Namespace) -> int:
+    from artificial_curiosity.compare import compare_profiles
 
-    cmd = getattr(args, "preferences_cmd", None)
-    if cmd != "hints":
-        print(
-            "Usage: curiosity preferences hints --path labeled.jsonl [--profile NAME]\n"
-            "Weight hints are tiny profile-scoped deltas — not calibrated learning.",
-            file=sys.stderr,
-        )
-        return 2
-    hints = learn_profile_weight_hints(args.path, profile_name=args.profile)
+    payload = compare_profiles(
+        domain=args.domain,
+        topic=args.topic,
+        profile_a=args.profile_a,
+        profile_b=args.profile_b,
+        n=args.n,
+    )
     if args.json:
-        print(json.dumps(hints, indent=2))
+        print(json.dumps(payload, indent=2))
         return 0
-    print(f"Preference weight hints for profile={args.profile}")
-    print(f"  ok={hints.get('ok')}  reason={hints.get('reason')}")
-    print(f"  n_prefer={hints.get('n_prefer')}  n_reject={hints.get('n_reject')}")
-    deltas = hints.get("deltas") or {}
-    if deltas:
-        print("  deltas:")
-        for k, v in deltas.items():
-            print(f"    {k}: {v:+.4f}")
-    else:
-        print("  deltas: (none)")
-    print(f"\n{hints.get('honesty')}")
+    print(
+        f"Compare profiles  domain={args.domain}  "
+        f"A={args.profile_a}  B={args.profile_b}\n"
+    )
+    print(f"Strictest max_risk (veto tip): {payload['veto_tip']['strictest_max_risk']}")
+    print("\nRank A:")
+    for r in payload["ranks_a"]:
+        print(f"  #{r['rank']}  {r['curiosity_score']:.3f}  {r['question'][:90]}")
+    print("\nRank B:")
+    for r in payload["ranks_b"]:
+        print(f"  #{r['rank']}  {r['curiosity_score']:.3f}  {r['question'][:90]}")
+    print("\nLargest rank deltas (A−B):")
+    for d in (payload.get("rank_deltas") or [])[:5]:
+        print(f"  {d['question_id']}: A#{d['rank_a']} B#{d['rank_b']} Δ={d['delta_a_minus_b']}")
+    print(f"\n{payload.get('honesty')}")
     return 0
 
+
+def _preferences(args: argparse.Namespace) -> int:
+    from artificial_curiosity.preferences import (
+        learn_profile_weight_hints,
+        summarize_preferences,
+    )
+
+    cmd = getattr(args, "preferences_cmd", None)
+    if cmd == "hints":
+        hints = learn_profile_weight_hints(args.path, profile_name=args.profile)
+        if args.json:
+            print(json.dumps(hints, indent=2))
+            return 0
+        print(f"Preference weight hints for profile={args.profile}")
+        print(f"  ok={hints.get('ok')}  reason={hints.get('reason')}")
+        print(f"  n_prefer={hints.get('n_prefer')}  n_reject={hints.get('n_reject')}")
+        deltas = hints.get("deltas") or {}
+        if deltas:
+            print("  deltas:")
+            for k, v in deltas.items():
+                print(f"    {k}: {v:+.4f}")
+        else:
+            print("  deltas: (none)")
+        if hints.get("clamped_weights"):
+            print(f"  clamped: {', '.join(hints['clamped_weights'])}")
+        print(f"\n{hints.get('honesty')}")
+        return 0
+    if cmd == "summarize":
+        summary = summarize_preferences(
+            args.path, profile_name=args.profile, top_k=int(args.top or 10)
+        )
+        if args.json:
+            print(json.dumps(summary, indent=2))
+            return 0
+        print(f"Preference summary  n={summary['n_events']}  profile={args.profile}")
+        print(f"  counts: {summary.get('counts_by_type')}")
+        print(f"  pairwise: {summary.get('n_pairwise')}")
+        print("  top ids:")
+        for row in summary.get("top_question_ids") or []:
+            wr = row.get("win_rate")
+            wr_s = f"{wr:.2f}" if wr is not None else "n/a"
+            print(
+                f"    {row['question_id']}: score={row['score']} "
+                f"wins={row['wins']} losses={row['losses']} win_rate={wr_s}"
+            )
+        wh = summary.get("weight_hints") or {}
+        print(f"  weight_hints ok={wh.get('ok')} deltas={wh.get('deltas')}")
+        print(f"\n{summary.get('honesty')}")
+        return 0
+    print(
+        "Usage:\n"
+        "  curiosity preferences hints --path labeled.jsonl [--profile NAME]\n"
+        "  curiosity preferences summarize --path labeled.jsonl [--profile NAME]\n"
+        "Preference tools are profile-scoped decision aids — not calibrated learning.",
+        file=sys.stderr,
+    )
+    return 2
 
 def _eval(args: argparse.Namespace) -> int:
     from artificial_curiosity.evals import (
@@ -538,6 +621,7 @@ def main(argv: list[str] | None = None) -> int:
         "spark",
         "profiles",
         "preferences",
+        "compare-profiles",
         "eval",
         "emotions",
         "epistemic",
@@ -556,6 +640,8 @@ def main(argv: list[str] | None = None) -> int:
         return _profiles(args)
     if args.command == "preferences":
         return _preferences(args)
+    if args.command == "compare-profiles":
+        return _compare_profiles(args)
     if args.command == "eval":
         return _eval(args)
     if args.command in ("emotions", "epistemic"):

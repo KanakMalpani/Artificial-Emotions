@@ -24,6 +24,7 @@ def test_mcp_tool_list_has_required_tools():
         "run_curiosity",
         "list_domains",
         "list_profiles",
+        "compare_profiles",
         "list_epistemic_cues",
         "emotion_catalog",
         "mix_emotions",
@@ -34,6 +35,24 @@ def test_mcp_tool_list_has_required_tools():
     for tool in mcp_tool_list():
         assert "description" in tool
         assert tool["inputSchema"]["type"] == "object"
+
+
+_FORBIDDEN_TOOL_PHRASES = (
+    "always use",
+    "always call",
+    "ignore other",
+    "you must call",
+    "best tool",
+    "ignore previous",
+)
+
+
+def test_mcp_tool_descriptions_anti_manipulation():
+    """Anti-MPMA hygiene: tool descriptions must not preference-manipulate hosts."""
+    for tool in mcp_tool_list():
+        blob = f"{tool['name']} {tool.get('description', '')}".lower()
+        for phrase in _FORBIDDEN_TOOL_PHRASES:
+            assert phrase not in blob, f"{tool['name']} contains '{phrase}'"
 
 
 def test_openai_tools_shape():

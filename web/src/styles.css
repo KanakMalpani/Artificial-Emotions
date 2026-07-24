@@ -408,6 +408,52 @@ button:disabled {
   line-height: 1.45;
 }
 
+.mix-warnings {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+  color: var(--danger);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.feedback-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.feedback-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.65rem 0 0.35rem;
+}
+
+.btn-feedback {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.btn-feedback:hover:not(:disabled) {
+  background: rgba(20, 32, 51, 0.05);
+  color: var(--ink);
+  transform: none;
+}
+
 .mix-sliders {
   display: grid;
   gap: 0.65rem;

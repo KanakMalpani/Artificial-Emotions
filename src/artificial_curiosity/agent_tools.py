@@ -181,6 +181,30 @@ LIST_PROFILES_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+COMPARE_PROFILES_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "domain": {
+            "type": "string",
+            "enum": list(_DOMAIN_ENUM),
+            "default": "ai",
+        },
+        "topic": {"type": "string", "default": ""},
+        "profile_a": {
+            "type": "string",
+            "default": "humanity_default",
+            "description": "Primary ValueProfile preset name",
+        },
+        "profile_b": {
+            "type": "string",
+            "default": "alignment_lab",
+            "description": "Comparison ValueProfile preset name",
+        },
+        "n": {"type": "integer", "minimum": 1, "maximum": 32, "default": 8},
+    },
+    "additionalProperties": False,
+}
+
 LIST_EPISTEMIC_CUES_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {},
@@ -411,6 +435,27 @@ def handle_list_profiles(**_extra: Any) -> dict[str, Any]:
     }
 
 
+def handle_compare_profiles(
+    *,
+    domain: str = "ai",
+    topic: str = "",
+    profile_a: str = "humanity_default",
+    profile_b: str = "alignment_lab",
+    n: int = 8,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Side-by-side offline ranks under two ValueProfiles."""
+    from artificial_curiosity.compare import compare_profiles
+
+    return compare_profiles(
+        domain=domain or "ai",
+        topic=topic or "",
+        profile_a=profile_a or "humanity_default",
+        profile_b=profile_b or "alignment_lab",
+        n=int(n or 8),
+    )
+
+
 def handle_list_epistemic_cues(**_extra: Any) -> dict[str, Any]:
     """List epistemic cue tag vocabulary (UX annotations — not felt emotion)."""
     return list_epistemic_cues()
@@ -535,6 +580,16 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": LIST_PROFILES_SCHEMA,
         "handler": handle_list_profiles,
+    },
+    {
+        "name": "compare_profiles",
+        "description": (
+            "Compare the same offline candidate pool under two ValueProfiles; "
+            "returns side-by-side ranks and deltas. Does not merge into a "
+            "silent consensus score. Decision aids only."
+        ),
+        "input_schema": COMPARE_PROFILES_SCHEMA,
+        "handler": handle_compare_profiles,
     },
     {
         "name": "list_epistemic_cues",

@@ -566,6 +566,54 @@
   {
     "type": "function",
     "function": {
+      "name": "compare_profiles",
+      "description": "Compare the same offline candidate pool under two ValueProfiles; returns side-by-side ranks and deltas. Does not merge into a silent consensus score. Decision aids only.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "biology",
+              "physics",
+              "ai",
+              "climate",
+              "medicine",
+              "materials",
+              "social",
+              "energy",
+              "general"
+            ],
+            "default": "ai"
+          },
+          "topic": {
+            "type": "string",
+            "default": ""
+          },
+          "profile_a": {
+            "type": "string",
+            "default": "humanity_default",
+            "description": "Primary ValueProfile preset name"
+          },
+          "profile_b": {
+            "type": "string",
+            "default": "alignment_lab",
+            "description": "Comparison ValueProfile preset name"
+          },
+          "n": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32,
+            "default": 8
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "list_epistemic_cues",
       "description": "List epistemic emotion cue tags (information_gap, incongruity, confusion_risk, \u2026). UX annotations for investigation framing \u2014 NOT claims that the system feels emotions. See docs/EMOTIONS.md.",
       "parameters": {

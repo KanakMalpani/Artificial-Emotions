@@ -316,9 +316,19 @@ def learn_profile_weight_hints(
         deltas[weight_key] = round(nudge, 4)
 
     suggested = base.model_copy(deep=True)
-    for weight_key, nudge in deltas.items():
+    clamped: list[str] = []
+    for weight_key, nudge in list(deltas.items()):
         cur = float(getattr(suggested, weight_key))
-        setattr(suggested, weight_key, float(max(0.0, min(3.0, cur + nudge))))
+        # Guardrail: never drive a weight to 0 or below a floor (profile intent).
+        floor = 0.15
+        new = float(max(floor, min(3.0, cur + nudge)))
+        if new == floor and cur + nudge < floor:
+            clamped.append(weight_key)
+            # Shrink delta to what was actually applied.
+            deltas[weight_key] = round(new - cur, 4)
+        setattr(suggested, weight_key, new)
+    # Drop zero deltas after clamp.
+    deltas = {k: v for k, v in deltas.items() if abs(v) >= 0.005}
     if profile_name or base.name:
         suggested.name = f"{base.name}+pref_hints"
         suggested.description = (
@@ -327,10 +337,11 @@ def learn_profile_weight_hints(
 
     return {
         "ok": bool(deltas),
-        "reason": "ok" if deltas else "axes_too_similar",
+        "reason": "ok" if deltas else ("clamped_to_empty" if clamped else "axes_too_similar"),
         "n_prefer": n_pref,
         "n_reject": n_rej,
         "deltas": deltas,
+        "clamped_weights": clamped,
         "mean_prefer_axes": mean_p,
         "mean_reject_axes": mean_r if reject_axes else {},
         "suggested_profile": suggested.model_dump(mode="json"),
@@ -349,3 +360,116 @@ def apply_weight_hints_to_profile(
     if isinstance(suggested, dict):
         return ValueProfile.model_validate(suggested)
     return profile
+
+
+def _normalize_events(
+    events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
+) -> list[PreferenceEvent]:
+    if isinstance(events, (str, Path)):
+        return load_preference_events(events)
+    out: list[PreferenceEvent] = []
+    for e in events:
+        if isinstance(e, PreferenceEvent):
+            out.append(e)
+        else:
+            try:
+                out.append(PreferenceEvent.model_validate(e))
+            except Exception:  # noqa: BLE001
+                continue
+    return out
+
+
+def summarize_preferences(
+    events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
+    *,
+    profile_name: str | None = None,
+    top_k: int = 10,
+) -> dict[str, Any]:
+    """
+    Stage-1 preference flywheel summary (research/PREFERENCE_CALIBRATION.md).
+
+    Counts by event_type, pairwise win rates from preferred_over_ids, top ids
+    by Borda-ish score, plus weight hints. Profile-scoped when profile_name set.
+    """
+    evs = _normalize_events(events)
+    if profile_name:
+        evs = [e for e in evs if (e.profile_name or "") == profile_name or not e.profile_name]
+
+    counts: dict[str, int] = {}
+    wins: dict[str, int] = {}
+    losses: dict[str, int] = {}
+    prefer_ids: dict[str, int] = {}
+    reject_ids: dict[str, int] = {}
+    pairwise_n = 0
+    domains: dict[str, int] = {}
+
+    for ev in evs:
+        et = (ev.event_type or "unknown").lower()
+        counts[et] = counts.get(et, 0) + 1
+        if ev.domain:
+            domains[str(ev.domain)] = domains.get(str(ev.domain), 0) + 1
+        qid = (ev.question_id or "").strip()
+        if et in ("prefer", "keep") and qid:
+            prefer_ids[qid] = prefer_ids.get(qid, 0) + 1
+            wins[qid] = wins.get(qid, 0) + 1
+        elif et in ("reject", "already_answered") and qid:
+            reject_ids[qid] = reject_ids.get(qid, 0) + 1
+            losses[qid] = losses.get(qid, 0) + 1
+        for other in ev.preferred_over_ids or []:
+            oid = str(other).strip()
+            if not oid:
+                continue
+            pairwise_n += 1
+            if qid:
+                wins[qid] = wins.get(qid, 0) + 1
+            losses[oid] = losses.get(oid, 0) + 1
+
+    # Borda-ish: +2 prefer, +1 pairwise win, -2 reject, -1 pairwise loss
+    scores: dict[str, float] = {}
+    for qid, n in prefer_ids.items():
+        scores[qid] = scores.get(qid, 0.0) + 2.0 * n
+    for qid, n in reject_ids.items():
+        scores[qid] = scores.get(qid, 0.0) - 2.0 * n
+    for qid, n in wins.items():
+        scores[qid] = scores.get(qid, 0.0) + 1.0 * n
+    for qid, n in losses.items():
+        scores[qid] = scores.get(qid, 0.0) - 1.0 * n
+
+    ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[: max(1, top_k)]
+    win_rates = []
+    for qid, _ in ranked:
+        w = wins.get(qid, 0)
+        l = losses.get(qid, 0)
+        denom = w + l
+        win_rates.append(
+            {
+                "question_id": qid,
+                "score": round(scores.get(qid, 0.0), 3),
+                "wins": w,
+                "losses": l,
+                "win_rate": round(w / denom, 3) if denom else None,
+            }
+        )
+
+    hints = learn_profile_weight_hints(evs, profile_name=profile_name)
+    return {
+        "n_events": len(evs),
+        "profile_name": profile_name,
+        "counts_by_type": dict(sorted(counts.items())),
+        "domains": dict(sorted(domains.items())),
+        "n_pairwise": pairwise_n,
+        "top_question_ids": win_rates,
+        "weight_hints": {
+            "ok": hints.get("ok"),
+            "reason": hints.get("reason"),
+            "deltas": hints.get("deltas"),
+            "clamped_weights": hints.get("clamped_weights"),
+            "suggested_profile": hints.get("suggested_profile"),
+        },
+        "honesty": (
+            "Preference summary is profile-scoped decision-aid telemetry — "
+            "not calibrated ranking, not Bradley–Terry until n is larger, "
+            "and not a universal science priority. " + _HINT_HONESTY
+        ),
+        "docs": "research/PREFERENCE_CALIBRATION.md",
+    }

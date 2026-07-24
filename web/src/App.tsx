@@ -34,12 +34,25 @@ type Ranked = {
     related_works?: LitHit[];
   };
   question: {
+    id?: string;
     question: string;
     why_it_matters: string;
     operationalization: string;
     tags: string[];
     domain: string;
   };
+};
+
+type FeedbackEvent = {
+  event_type: string;
+  profile_name: string;
+  question_id: string;
+  question_text: string;
+  rank: number;
+  curiosity_score: number;
+  score_axes: Partial<ScoreAxes>;
+  preferred_over_ids?: string[];
+  labels?: { position?: string };
 };
 
 type ProfileMeta = {
@@ -112,6 +125,9 @@ export default function App() {
   const [mixBlend, setMixBlend] = useState<MixBlend | null>(null);
   const [mixOpen, setMixOpen] = useState(false);
   const [mixBusy, setMixBusy] = useState(false);
+  const [mixWarnings, setMixWarnings] = useState<string[]>([]);
+  const [feedback, setFeedback] = useState<FeedbackEvent[]>([]);
+  const [feedbackNote, setFeedbackNote] = useState<string | null>(null);
 
   const subtitle = useMemo(
     () =>
@@ -234,6 +250,7 @@ export default function App() {
         honesty: data.disclaimer || data.honesty,
         disclaimer: data.disclaimer,
       });
+      setMixWarnings(Array.isArray(data.warnings) ? data.warnings : []);
       setMixOpen(true);
     } catch (e) {
       setError(
@@ -241,6 +258,72 @@ export default function App() {
       );
     } finally {
       setMixBusy(false);
+    }
+  }
+
+  function recordFeedback(
+    r: Ranked,
+    eventType: "prefer" | "reject" | "already_answered",
+  ) {
+    const qid =
+      r.question.id ||
+      `rank-${r.rank}-${r.question.question.slice(0, 24).replace(/\s+/g, "_")}`;
+    const others = results
+      .filter((x) => x.rank !== r.rank)
+      .slice(0, 3)
+      .map(
+        (x) =>
+          x.question.id ||
+          `rank-${x.rank}-${x.question.question.slice(0, 24).replace(/\s+/g, "_")}`,
+      );
+    const ev: FeedbackEvent = {
+      event_type: eventType,
+      profile_name: activeProfile ?? profileName,
+      question_id: qid,
+      question_text: r.question.question,
+      rank: r.rank,
+      curiosity_score: r.curiosity_score,
+      score_axes: {
+        impact: r.scores.impact,
+        neglectedness: r.scores.neglectedness,
+        tractability: r.scores.tractability,
+        surprise: r.scores.surprise,
+      },
+      preferred_over_ids: eventType === "prefer" ? others : [],
+      labels: { position: String(r.rank) },
+    };
+    setFeedback((prev) => [...prev, ev]);
+    setFeedbackNote(`${eventType} recorded for #${r.rank} (session only)`);
+  }
+
+  async function summarizeFeedback() {
+    if (feedback.length < 1) {
+      setFeedbackNote("No feedback yet — use Prefer / Reject on cards.");
+      return;
+    }
+    try {
+      const res = await fetch("/v1/preferences/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          events: feedback,
+          profile_name: activeProfile ?? profileName,
+          top_k: 8,
+        }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const top = (data.top_question_ids || [])
+        .slice(0, 3)
+        .map((t: { question_id: string }) => t.question_id)
+        .join(", ");
+      setFeedbackNote(
+        `Summary n=${data.n_events} pairwise=${data.n_pairwise}` +
+          (top ? ` top=[${top}]` : "") +
+          " — profile-scoped, not calibrated.",
+      );
+    } catch (e) {
+      setFeedbackNote(e instanceof Error ? e.message : "Summarize failed");
     }
   }
 
@@ -346,6 +429,13 @@ export default function App() {
             </button>
             {mixBlend && (
               <div className="mix-result">
+                {mixWarnings.length > 0 && (
+                  <ul className="mix-warnings">
+                    {mixWarnings.map((w) => (
+                      <li key={w.slice(0, 40)}>{w}</li>
+                    ))}
+                  </ul>
+                )}
                 {mixBlend.framing && (
                   <p>
                     <strong>Framing.</strong> {mixBlend.framing}
@@ -364,6 +454,16 @@ export default function App() {
           </div>
         )}
       </section>
+
+      {feedbackNote && <p className="feedback-note">{feedbackNote}</p>}
+      {feedback.length > 0 && (
+        <div className="feedback-bar">
+          <span>{feedback.length} feedback event(s) this session</span>
+          <button type="button" className="btn-secondary" onClick={summarizeFeedback}>
+            Summarize feedback
+          </button>
+        </div>
+      )}
 
       {error && <div className="error">{error}</div>}
 
@@ -421,6 +521,29 @@ export default function App() {
                         <strong>Investigation brief.</strong> {r.investigation_brief}
                       </div>
                     )}
+                    <div className="feedback-actions">
+                      <button
+                        type="button"
+                        className="btn-feedback"
+                        onClick={() => recordFeedback(r, "prefer")}
+                      >
+                        Prefer
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-feedback"
+                        onClick={() => recordFeedback(r, "reject")}
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-feedback"
+                        onClick={() => recordFeedback(r, "already_answered")}
+                      >
+                        Already answered
+                      </button>
+                    </div>
                     <p className="why">
                       <strong>Why it matters.</strong> {r.question.why_it_matters}
                     </p>

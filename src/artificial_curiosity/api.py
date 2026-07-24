@@ -47,8 +47,9 @@ from artificial_curiosity.models import (
     resolve_value_profile,
 )
 from artificial_curiosity.pipeline import CuriosityEngine
-from artificial_curiosity.preferences import learn_profile_weight_hints
+from artificial_curiosity.preferences import learn_profile_weight_hints, summarize_preferences
 from artificial_curiosity.provoke import provoke
+from artificial_curiosity.compare import compare_profiles as compare_profiles_fn
 
 logger = get_logger("api")
 
@@ -270,6 +271,23 @@ class PreferenceHintsRequest(BaseModel):
     max_delta: float = Field(0.08, ge=0.01, le=0.2)
 
 
+class PreferenceSummarizeRequest(BaseModel):
+    """Inline preference events → counts / pairwise wins / hints (no filesystem paths)."""
+
+    events: list[dict[str, Any]] = Field(..., min_length=1, max_length=2000)
+    profile_name: str | None = None
+    top_k: int = Field(10, ge=1, le=50)
+
+
+class CompareProfilesRequest(BaseModel):
+    domain: str = Domain.AI.value
+    topic: str = ""
+    profile_a: str = Field("humanity_default", examples=["humanity_default", "funder_10y"])
+    profile_b: str = Field("alignment_lab", examples=["alignment_lab", "climate_adaptation"])
+    n: int = Field(8, ge=1, le=32)
+    n_candidates: int = Field(16, ge=4, le=64)
+
+
 class AnnotateEmotionsRequest(BaseModel):
     question: str = Field(..., min_length=12)
     gap_status: str = Field(
@@ -402,9 +420,18 @@ def root() -> dict[str, Any]:
         "agent": "GET /v1/agent",
         "tools": "GET /v1/agent/tools",
         "profiles": "GET /v1/profiles",
-        "preferences": "POST /v1/preferences/hints (inline events; no filesystem paths)",
+        "preferences": (
+            "POST /v1/preferences/hints · POST /v1/preferences/summarize "
+            "(inline events; no filesystem paths)"
+        ),
+        "compare_profiles": "POST /v1/profiles/compare",
         "mcp": "curiosity-mcp (stdio) or python -m artificial_curiosity.mcp_server",
         "config": "artificial_curiosity.config / .env.example",
+        "safety": (
+            "Not biometric emotion recognition. Emotion mix/cues are UX annotations. "
+            "Provoke is opt-in investigation framing. Scores need explicit ValueProfile — "
+            "decision aids, not oracles. See docs/LIMITS.md."
+        ),
     }
 
 
@@ -415,7 +442,17 @@ def agent_manifest() -> dict[str, Any]:
         "name": "artificial-curiosity",
         "version": __version__,
         "purpose": "Provoke and rank valuable unanswered scientific questions.",
-        "not": "A Q&A or search engine. Returns unknowns, not answers.",
+        "not": (
+            "A Q&A or search engine. Not biometric emotion recognition. "
+            "Returns unknowns, not answers; emotion mix/cues are UX annotations only."
+        ),
+        "safety": (
+            "Cues and emotion mixes are authoring/framing annotations — the software "
+            "does not feel and does not infer user affect from biometrics. Provoke is "
+            "opt-in investigation framing, not persuasion tooling. Always pass an "
+            "explicit ValueProfile; scores are decision aids with bands, not oracles. "
+            "Read curiosity://limits or docs/LIMITS.md before treating ranks as truth."
+        ),
         "instant_spark": {
             "method": "GET",
             "path": "/v1/curiosity/provoke",
@@ -433,6 +470,17 @@ def agent_manifest() -> dict[str, Any]:
                 "use_llm": False,
                 "profile_name": "humanity_default",
             },
+        },
+        "compare_profiles": {
+            "method": "POST",
+            "path": "/v1/profiles/compare",
+            "body": {
+                "domain": "ai",
+                "profile_a": "humanity_default",
+                "profile_b": "alignment_lab",
+                "n": 8,
+            },
+            "note": "Side-by-side ranks — never a silent consensus merge.",
         },
         "openai_tools": {
             "method": "GET",
@@ -453,6 +501,7 @@ def agent_manifest() -> dict[str, Any]:
                 "run_curiosity",
                 "list_domains",
                 "list_profiles",
+                "compare_profiles",
                 "list_epistemic_cues",
                 "emotion_catalog",
                 "mix_emotions",
@@ -630,6 +679,29 @@ def preference_weight_hints(req: PreferenceHintsRequest) -> dict[str, Any]:
         profile_name=req.profile_name or profile.name,
         base_profile=profile,
         max_delta=req.max_delta,
+    )
+
+
+@app.post("/v1/preferences/summarize")
+def preference_summarize(req: PreferenceSummarizeRequest) -> dict[str, Any]:
+    """Counts, pairwise wins, and weight hints from inline events (no paths)."""
+    return summarize_preferences(
+        req.events,
+        profile_name=req.profile_name,
+        top_k=req.top_k,
+    )
+
+
+@app.post("/v1/profiles/compare")
+def profiles_compare(req: CompareProfilesRequest) -> dict[str, Any]:
+    """Side-by-side offline ranks under two ValueProfiles — no silent merge."""
+    return compare_profiles_fn(
+        domain=req.domain,
+        topic=req.topic,
+        profile_a=req.profile_a,
+        profile_b=req.profile_b,
+        n=req.n,
+        n_candidates=req.n_candidates,
     )
 
 

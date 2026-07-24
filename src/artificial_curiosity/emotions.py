@@ -511,6 +511,24 @@ def mix_emotions(
         list(catalog.get("plutchik_primary_dyads") or []),
     )
 
+    # Soft coercion guard (research/AFFECTIVE_SAFETY.md): warn, don't hard-block.
+    _COERCION_IDS = frozenset(
+        {"fear", "anxiety", "anger", "disgust", "shame", "sadness", "frustration"}
+    )
+    coercion_mass = sum(w for eid, w in ordered if eid in _COERCION_IDS)
+    warnings: list[str] = []
+    if coercion_mass >= 0.5:
+        warnings.append(
+            "Mix is ≥50% fear/anxiety/anger/shame-type ids — high-coercion framing "
+            "risk. Prefer epistemic defaults (curiosity/confusion/awe/interest). "
+            "Annotation only; not a clinical or biometric reading."
+        )
+    elif coercion_mass >= 0.35:
+        warnings.append(
+            "Non-trivial coercive-affect weight in mix — keep investigation framing "
+            "transparent; do not use as persuasion or panic tooling."
+        )
+
     return {
         "components": components,
         "weights": {k: round(v, 6) for k, v in ordered},
@@ -526,6 +544,8 @@ def mix_emotions(
         "plutchik_dyad_hint": dyad,
         "input_scale": "percent" if as_percents else "weight",
         "catalog_version": catalog.get("version"),
+        "coercion_weight": round(coercion_mass, 4),
+        "warnings": warnings,
         "honesty": "annotation_only",
         "disclaimer": _MIX_DISCLAIMER,
         "docs": "docs/EMOTIONS.md",
@@ -535,5 +555,6 @@ def mix_emotions(
             "measured human affect / EES scores",
             "OCC appraisal intensity",
             "clinically validated PAD mood",
+            "biometric emotion recognition",
         ],
     }

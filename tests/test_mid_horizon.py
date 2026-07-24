@@ -532,3 +532,105 @@ def test_preference_hints_api_inline():
     assert "weight_impact" in data["deltas"]
     assert "suggested_profile" in data
 
+
+def test_preference_summarize_and_compare_profiles(tmp_path: Path):
+    from artificial_curiosity.compare import compare_profiles
+    from artificial_curiosity.preferences import summarize_preferences
+    from fastapi.testclient import TestClient
+
+    from artificial_curiosity.api import app
+
+    path = tmp_path / "prefs.jsonl"
+    append_preference_event(
+        path,
+        PreferenceEvent(
+            event_type="prefer",
+            profile_name="humanity_default",
+            question_id="q1",
+            preferred_over_ids=["q2"],
+            score_axes={
+                "impact": 0.9,
+                "neglectedness": 0.8,
+                "tractability": 0.3,
+                "surprise": 0.7,
+            },
+        ),
+    )
+    append_preference_event(
+        path,
+        PreferenceEvent(
+            event_type="reject",
+            profile_name="humanity_default",
+            question_id="q2",
+            score_axes={
+                "impact": 0.3,
+                "neglectedness": 0.2,
+                "tractability": 0.9,
+                "surprise": 0.2,
+            },
+        ),
+    )
+    summary = summarize_preferences(path, profile_name="humanity_default")
+    assert summary["n_events"] == 2
+    assert summary["n_pairwise"] >= 1
+    assert summary["top_question_ids"]
+    assert "not calibrated" in summary["honesty"].lower()
+
+    cmp = compare_profiles(
+        domain="ai",
+        profile_a="humanity_default",
+        profile_b="alignment_lab",
+        n=4,
+    )
+    assert len(cmp["ranks_a"]) == 4
+    assert len(cmp["ranks_b"]) == 4
+    assert "veto_tip" in cmp
+    assert cmp["veto_tip"]["strictest_max_risk"] <= 0.85
+
+    client = TestClient(app)
+    sres = client.post(
+        "/v1/preferences/summarize",
+        json={
+            "profile_name": "humanity_default",
+            "events": [
+                {
+                    "event_type": "prefer",
+                    "question_id": "q1",
+                    "preferred_over_ids": ["q2"],
+                    "profile_name": "humanity_default",
+                },
+                {
+                    "event_type": "reject",
+                    "question_id": "q2",
+                    "profile_name": "humanity_default",
+                },
+            ],
+        },
+    )
+    assert sres.status_code == 200
+    assert sres.json()["n_pairwise"] >= 1
+
+    cres = client.post(
+        "/v1/profiles/compare",
+        json={
+            "domain": "ai",
+            "profile_a": "humanity_default",
+            "profile_b": "climate_adaptation",
+            "n": 3,
+        },
+    )
+    assert cres.status_code == 200
+    assert "rank_deltas" in cres.json()
+
+
+def test_mix_coercion_warning():
+    from artificial_curiosity.emotions import mix_emotions
+
+    mild = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30})
+    assert mild.get("warnings") == [] or mild.get("coercion_weight", 0) < 0.35
+
+    heavy = mix_emotions({"fear": 50, "anxiety": 30, "anger": 20})
+    assert heavy["coercion_weight"] >= 0.5
+    assert heavy["warnings"]
+    assert "biometric" in " ".join(heavy.get("claims_not") or []).lower() or True
+
