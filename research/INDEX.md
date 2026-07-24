@@ -43,6 +43,7 @@ Everything under `research/` is design/background material that informed the imp
 | [CRITIC_DEBATE_JUDGES.md](CRITIC_DEBATE_JUDGES.md) | HeurekaBench critic / MPDS debate → form critique |
 | [DOMAIN_PACK_QUALITY.md](DOMAIN_PACK_QUALITY.md) | Seed/pack quality bar beyond CONTRIBUTING |
 | [OUTCOME_FLYWHEEL.md](OUTCOME_FLYWHEEL.md) | Longitudinal outcome events → sparse calibration |
+| [LIMITS_PATCHES.md](LIMITS_PATCHES.md) | Proposed LIMITS.md citation one-liners for sibling |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
