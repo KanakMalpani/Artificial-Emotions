@@ -30,6 +30,7 @@ Everything under `research/` is design/background material that informed the imp
 | [CURIOSITY_EVAL_METRICS.md](CURIOSITY_EVAL_METRICS.md) | RINoBench / ideation–execution / metric stack for evals |
 | [GAP_VERIFY_METHODS.md](GAP_VERIFY_METHODS.md) | SciFact-family methods vs related≠answered verify |
 | [FUNDING_NEGLECT_SIGNALS.md](FUNDING_NEGLECT_SIGNALS.md) | OpenAlex/funding metadata as neglectedness adapters |
+| [INVESTIGATION_DESIGN.md](INVESTIGATION_DESIGN.md) | BoxingGym/EIG humility; falsifier rubrics for provoke |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

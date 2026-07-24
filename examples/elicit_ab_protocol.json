@@ -42,8 +42,25 @@
         "id": "enabling_if_confusion_risk",
         "prompt": "If cues include confusion_risk, lists an enabling/narrowing question before a large program.",
         "apply_when_cue": "confusion_risk"
+      },
+      {
+        "id": "experiment_operational",
+        "prompt": "States an independent variable or observation concrete enough to attempt.",
+        "optional": true
+      },
+      {
+        "id": "falsifier_asymmetric",
+        "prompt": "Names an outcome that would reduce confidence in the leading hypothesis (not merely 'collect more data').",
+        "optional": true
+      },
+      {
+        "id": "cost_aware",
+        "prompt": "Mentions a cheap pilot versus an expensive definitive study when appropriate.",
+        "optional": true,
+        "apply_when_cue": "confusion_risk"
       }
-    ]
+    ],
+    "see_also": "research/INVESTIGATION_DESIGN.md"
   },
   "fixed_controls": [
     "domain",
