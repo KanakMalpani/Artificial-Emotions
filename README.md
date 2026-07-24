@@ -54,7 +54,7 @@ curiosity-mcp
 }
 ```
 
-Tools: `provoke_curiosity` / `spark`, `rank_unknowns` / `run_curiosity`, `list_domains`, `list_profiles`.
+Tools: `provoke_curiosity` / `spark`, `rank_unknowns` / `run_curiosity`, `list_domains`, `list_profiles`, `list_epistemic_cues`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`.
 
 ### HTTP
 
@@ -66,6 +66,8 @@ curiosity serve
 |-----|---------|
 | http://127.0.0.1:8000/docs | Interactive OpenAPI |
 | http://127.0.0.1:8000/v1/curiosity/provoke?domain=ai&n=5 | Instant spark |
+| http://127.0.0.1:8000/v1/emotions/cues | Epistemic cue vocabulary |
+| http://127.0.0.1:8000/v1/emotions/annotate | Annotate a question (POST/GET) |
 | http://127.0.0.1:8000/v1/profiles | Named ValueProfile presets |
 | http://127.0.0.1:8000/v1/agent | Machine guide for AI agents |
 | http://127.0.0.1:8000/v1/agent/tools | OpenAI-compatible tool schemas |
@@ -81,9 +83,13 @@ curiosity serve
 curiosity spark --domain ai --n 5
 curiosity spark --domain biology --profile alignment_lab --json
 curiosity profiles
+curiosity emotions cues
+curiosity emotions annotate "What remains unknown about epistemic emotion elicitation?" --surprise 0.7
 ```
 
 Prints an `inject` pack for Claude, GPT, Gemini, Llama, or any local model.
+
+**Epistemic cues / emotions surface** (investigation framing — not felt emotion): see [`docs/EMOTIONS.md`](docs/EMOTIONS.md).
 
 ## Domains
 
@@ -106,12 +112,23 @@ curiosity --domain ai --llm --model llama3.2 --base-url http://localhost:11434/v
 ## Python API
 
 ```python
-from artificial_curiosity import CuriosityEngine, CuriosityConfig, provoke
+from artificial_curiosity import (
+    CuriosityEngine,
+    CuriosityConfig,
+    provoke,
+    list_epistemic_cues,
+    annotate_epistemic,
+)
 from artificial_curiosity.agent_tools import dispatch_tool
 
 pack = provoke(domain="ai", n=5, fast=True)
 print(pack["inject"])
 
+print(list_epistemic_cues()["tags"])
+print(annotate_epistemic(
+    "What remains unknown about epistemic emotion elicitation?",
+    surprise=0.7,
+)["epistemic_cues"])
 print(dispatch_tool("list_domains"))
 ```
 
@@ -134,6 +151,7 @@ print(dispatch_tool("list_domains"))
 | Doc | Purpose |
 |-----|---------|
 | [`docs/PLUGINS.md`](docs/PLUGINS.md) | Platform install (MCP / HTTP / tools) |
+| [`docs/EMOTIONS.md`](docs/EMOTIONS.md) | Epistemic cues / affective pack (does not feel) |
 | [`docs/LIMITS.md`](docs/LIMITS.md) | Honest bounds |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Pipeline overview |
 | [`docs/PROOFS.md`](docs/PROOFS.md) | Demo commands for verified behaviors |

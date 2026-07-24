@@ -185,7 +185,17 @@ pytest tests/e2e -q
 # or: pytest -m e2e -q
 ```
 
-Covers: `GET /health` → domains/profiles/agent/tools → fast provoke → `POST /v1/curiosity/run` with `use_literature=false`; CLI `spark` / `run --no-literature` / `profiles` / `eval`.
+Covers: `GET /health` → domains/profiles/agent/tools → fast provoke → `POST /v1/curiosity/run` with `use_literature=false`; emotions (`/v1/emotions/*`); CLI `spark` / `run --no-literature` / `profiles` / `eval` / `emotions`.
+
+## Epistemic cues / emotions (annotation only)
+
+```bash
+curiosity emotions cues --json
+curiosity emotions annotate "What remains unknown about epistemic emotion elicitation?" --surprise 0.7 --json
+curiosity emotions pack --json
+# HTTP: GET /v1/emotions/cues  POST /v1/emotions/annotate  GET /v1/emotions/pack
+# Docs: docs/EMOTIONS.md — does not claim the system feels
+```
 
 Optional literature smoke (may skip when OpenAlex is unreachable):
 

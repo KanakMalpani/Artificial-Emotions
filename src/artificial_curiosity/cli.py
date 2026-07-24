@@ -129,6 +129,49 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to fixture JSON or directory (default: evals/fixtures)",
     )
     eval_p.add_argument("--json", action="store_true")
+
+    for emo_name, emo_help in (
+        ("emotions", "Epistemic emotion cues (UX annotations — does not feel)"),
+        ("epistemic", "Alias of emotions — list/annotate/elicit/pack"),
+    ):
+        emo_p = sub.add_parser(emo_name, help=emo_help)
+        emo_sub = emo_p.add_subparsers(dest="emotions_cmd")
+
+        cues_p = emo_sub.add_parser("cues", help="List epistemic cue tags")
+        cues_p.add_argument("--json", action="store_true")
+
+        ann_p = emo_sub.add_parser(
+            "annotate", help="Annotate a question with epistemic cues"
+        )
+        ann_p.add_argument("question", help="Question text to annotate")
+        ann_p.add_argument(
+            "--gap",
+            default="unanswered",
+            dest="gap_status",
+            help="Gap status (unanswered, partially_answered, …)",
+        )
+        ann_p.add_argument("--surprise", type=float, default=0.5)
+        ann_p.add_argument("--neglectedness", type=float, default=0.5)
+        ann_p.add_argument("--answerability", type=float, default=0.5)
+        ann_p.add_argument("--notes", default="")
+        ann_p.add_argument("--domain", default="ai")
+        ann_p.add_argument("--json", action="store_true")
+
+        elicit_p = emo_sub.add_parser(
+            "elicit", help="Incongruity → investigation framing helpers"
+        )
+        elicit_p.add_argument("--json", action="store_true")
+
+        pack_p = emo_sub.add_parser(
+            "pack", help="Load affective_science (or named) domain pack"
+        )
+        pack_p.add_argument(
+            "--name",
+            default="affective_science",
+            help="Pack id (default: affective_science)",
+        )
+        pack_p.add_argument("--json", action="store_true")
+
     return p
 
 
@@ -179,6 +222,7 @@ def _serve(args: argparse.Namespace) -> int:
     print(
         f"Artificial Curiosity API → http://{args.host}:{args.port}\n"
         f"  Instant spark: GET /v1/curiosity/provoke?domain=ai&n=5\n"
+        f"  Emotions:      GET /v1/emotions/cues  POST /v1/emotions/annotate\n"
         f"  Agent guide:   GET /v1/agent\n"
         f"  Agent tools:   GET /v1/agent/tools\n"
         f"  Profiles:      GET /v1/profiles\n"
@@ -262,6 +306,92 @@ def _eval(args: argparse.Namespace) -> int:
     return 0
 
 
+def _emotions(args: argparse.Namespace) -> int:
+    from artificial_curiosity.emotions import (
+        annotate_epistemic,
+        elicit_helpers,
+        emotion_pack,
+        list_epistemic_cues,
+    )
+
+    cmd = getattr(args, "emotions_cmd", None)
+    if not cmd:
+        print(
+            "Usage: curiosity emotions {cues|annotate|elicit|pack}\n"
+            "  (alias: curiosity epistemic …)\n"
+            "Epistemic cues are UX annotations — this system does not feel.",
+            file=sys.stderr,
+        )
+        return 2
+
+    if cmd == "cues":
+        payload = list_epistemic_cues()
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print("Epistemic cue tags (annotation only — does not feel)\n")
+            for c in payload["cues"]:
+                print(f"  {c['tag']}: {c['meaning']}")
+            print(f"\n{payload['disclaimer']}")
+        return 0
+
+    if cmd == "annotate":
+        try:
+            payload = annotate_epistemic(
+                args.question,
+                gap_status=args.gap_status,
+                surprise=args.surprise,
+                neglectedness=args.neglectedness,
+                answerability=args.answerability,
+                notes=args.notes,
+                domain=args.domain,
+            )
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            cues = payload["epistemic_cues"]
+            print(f"primary={cues['primary']}")
+            print(f"tags={', '.join(cues['tags'])}")
+            if payload.get("inject_fragment"):
+                print(payload["inject_fragment"])
+            print(payload["disclaimer"])
+        return 0
+
+    if cmd == "elicit":
+        payload = elicit_helpers()
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print(payload["framing"])
+            print()
+            print(payload["inject_prefix"])
+        return 0
+
+    if cmd == "pack":
+        try:
+            payload = emotion_pack(args.name)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print(f"{payload['name']} v{payload.get('version')} — {payload['count']} questions")
+            print(payload.get("description") or "")
+            for q in payload["questions"][:5]:
+                print(f"  - {q['id']}: {q['question'][:100]}")
+            if payload["count"] > 5:
+                print(f"  … +{payload['count'] - 5} more (use --json)")
+            print(f"\n{payload['disclaimer']}")
+        return 0
+
+    print(f"Unknown emotions subcommand: {cmd}", file=sys.stderr)
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     parser = build_parser()
@@ -273,6 +403,8 @@ def main(argv: list[str] | None = None) -> int:
         "spark",
         "profiles",
         "eval",
+        "emotions",
+        "epistemic",
         "-h",
         "--help",
     ):
@@ -288,6 +420,8 @@ def main(argv: list[str] | None = None) -> int:
         return _profiles(args)
     if args.command == "eval":
         return _eval(args)
+    if args.command in ("emotions", "epistemic"):
+        return _emotions(args)
     return _run_engine(args)
 
 

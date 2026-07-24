@@ -12,6 +12,12 @@ from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from artificial_curiosity.agent_tools import openai_tools
+from artificial_curiosity.emotions import (
+    annotate_epistemic,
+    elicit_helpers,
+    emotion_pack,
+    list_epistemic_cues,
+)
 from artificial_curiosity.llm import resolve_llm_settings
 from artificial_curiosity.models import (
     CuriosityConfig,
@@ -143,6 +149,19 @@ class ProvokeRequest(BaseModel):
     diversity_backend: str = "jaccard"
 
 
+class AnnotateEmotionsRequest(BaseModel):
+    question: str = Field(..., min_length=12)
+    gap_status: str = Field(
+        "unanswered",
+        description="unanswered | partially_answered | likely_answered | unknown_with_caveat",
+    )
+    surprise: float = Field(0.5, ge=0.0, le=1.0)
+    neglectedness: float = Field(0.5, ge=0.0, le=1.0)
+    answerability: float = Field(0.5, ge=0.0, le=1.0)
+    notes: str = ""
+    domain: str = Domain.AI.value
+
+
 def _safe_profile(
     value_profile: ValueProfile | None,
     profile_name: str | None,
@@ -177,6 +196,8 @@ def root() -> dict:
         "docs": "/docs",
         "provoke": "GET or POST /v1/curiosity/provoke",
         "run": "POST /v1/curiosity/run",
+        "emotions": "GET /v1/emotions/cues · POST /v1/emotions/annotate · GET /v1/emotions/elicit · GET /v1/emotions/pack",
+        "epistemic": "Alias of /v1/emotions/* (same handlers)",
         "agent": "GET /v1/agent",
         "tools": "GET /v1/agent/tools",
         "profiles": "GET /v1/profiles",
@@ -228,8 +249,23 @@ def agent_manifest() -> dict:
                 "run_curiosity",
                 "list_domains",
                 "list_profiles",
+                "list_epistemic_cues",
+                "annotate_epistemic",
+                "emotion_pack",
             ],
             "docs": "docs/PLUGINS.md",
+        },
+        "emotions": {
+            "path": "/v1/emotions/cues",
+            "annotate": "POST /v1/emotions/annotate",
+            "elicit": "GET /v1/emotions/elicit",
+            "pack": "GET /v1/emotions/pack?name=affective_science",
+            "alias": "/v1/epistemic/*",
+            "docs": "docs/EMOTIONS.md",
+            "note": (
+                "Epistemic UX annotations for investigation framing — "
+                "not claims that the system feels emotions."
+            ),
         },
         "value_profiles": {
             "path": "/v1/profiles",
@@ -287,6 +323,9 @@ def agent_tools() -> dict:
             "rank_unknowns": "POST /v1/curiosity/run",
             "list_domains": "GET /v1/domains",
             "list_profiles": "GET /v1/profiles",
+            "list_epistemic_cues": "GET /v1/emotions/cues",
+            "annotate_epistemic": "POST /v1/emotions/annotate",
+            "emotion_pack": "GET /v1/emotions/pack",
         },
     }
 
@@ -406,3 +445,94 @@ def provoke_get(
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# Emotions / epistemic cues (UX annotations — not a CME)
+# Aliases under /v1/epistemic/* for discoverability.
+# ---------------------------------------------------------------------------
+
+
+def _emotions_cues() -> dict:
+    return list_epistemic_cues()
+
+
+def _emotions_annotate(req: AnnotateEmotionsRequest) -> dict:
+    try:
+        return annotate_epistemic(
+            req.question,
+            gap_status=req.gap_status,
+            surprise=req.surprise,
+            neglectedness=req.neglectedness,
+            answerability=req.answerability,
+            notes=req.notes,
+            domain=req.domain,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+def _emotions_elicit() -> dict:
+    return elicit_helpers()
+
+
+def _emotions_pack(name: str = "affective_science") -> dict:
+    try:
+        return emotion_pack(name)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/emotions/cues")
+@app.get("/v1/epistemic/cues")
+def emotions_cues() -> dict:
+    """List epistemic cue tags (investigation framing — not felt emotion)."""
+    return _emotions_cues()
+
+
+@app.post("/v1/emotions/annotate")
+@app.post("/v1/epistemic/annotate")
+def emotions_annotate(req: AnnotateEmotionsRequest) -> dict:
+    """Annotate question text with epistemic cue tags."""
+    return _emotions_annotate(req)
+
+
+@app.get("/v1/emotions/annotate")
+@app.get("/v1/epistemic/annotate")
+def emotions_annotate_get(
+    question: str = Query(..., min_length=12),
+    gap_status: str = Query("unanswered"),
+    surprise: float = Query(0.5, ge=0.0, le=1.0),
+    neglectedness: float = Query(0.5, ge=0.0, le=1.0),
+    answerability: float = Query(0.5, ge=0.0, le=1.0),
+    notes: str = Query(""),
+    domain: str = Query("ai"),
+) -> dict:
+    """GET annotate for curl / browsers."""
+    return _emotions_annotate(
+        AnnotateEmotionsRequest(
+            question=question,
+            gap_status=gap_status,
+            surprise=surprise,
+            neglectedness=neglectedness,
+            answerability=answerability,
+            notes=notes,
+            domain=domain,
+        )
+    )
+
+
+@app.get("/v1/emotions/elicit")
+@app.get("/v1/epistemic/elicit")
+def emotions_elicit() -> dict:
+    """Incongruity → investigation framing + inject helpers."""
+    return _emotions_elicit()
+
+
+@app.get("/v1/emotions/pack")
+@app.get("/v1/epistemic/pack")
+def emotions_pack(
+    name: str = Query("affective_science", description="Bundled pack id"),
+) -> dict:
+    """Affective-science (or named) domain pack — ranking seeds, not an emotion engine."""
+    return _emotions_pack(name)

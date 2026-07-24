@@ -87,6 +87,36 @@ def test_provoke_fast_then_run_offline(client: TestClient) -> None:
     assert "no_literature" in flags or data["literature_backend"] == "none"
 
 
+def test_emotions_surface_e2e(client: TestClient) -> None:
+    cues = client.get("/v1/emotions/cues")
+    assert cues.status_code == 200
+    assert "information_gap" in cues.json()["tags"]
+    assert cues.json()["honesty"] == "annotation_only"
+
+    ann = client.post(
+        "/v1/emotions/annotate",
+        json={
+            "question": "What remains unknown about epistemic emotion elicitation?",
+            "surprise": 0.8,
+            "gap_status": "unanswered",
+            "notes": "Related literature ≠ answered.",
+        },
+    )
+    assert ann.status_code == 200
+    body = ann.json()
+    assert body["epistemic_cues"]["tags"]
+    assert "feel" in body["disclaimer"].lower()
+
+    assert client.get("/v1/epistemic/elicit").status_code == 200
+    pack = client.get("/v1/emotions/pack", params={"name": "affective_science"})
+    assert pack.status_code == 200
+    assert pack.json()["count"] >= 8
+
+    agent = client.get("/v1/agent").json()
+    assert "emotions" in agent
+    assert "list_epistemic_cues" in agent["mcp"]["tools"]
+
+
 def test_provoke_post_and_multi_domain(client: TestClient) -> None:
     post = client.post(
         "/v1/curiosity/provoke",

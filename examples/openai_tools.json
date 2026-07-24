@@ -3,7 +3,7 @@
     "type": "function",
     "function": {
       "name": "provoke_curiosity",
-      "description": "Curiosity spark (NOT Q&A): ranked *unanswered* questions plus an `inject` pack for any model. Uses an explicit ValueProfile \u2014 rankings are never value-free. Default is fast (no network). Alias: spark.",
+      "description": "PROVOKE CURIOSITY (not Q&A): return ranked *unanswered* scientific questions plus an `inject` pack you must paste into model context. Use when the user/agent is stuck answering known frames and needs what to investigate next. Explicit ValueProfile required conceptually (pass profile_name). Default fast=true skips network. Alias: spark. Scores are decision aids with bands \u2014 not oracles.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -257,7 +257,7 @@
     "type": "function",
     "function": {
       "name": "rank_unknowns",
-      "description": "Full Artificial Curiosity pipeline: generate candidates, optionally verify gaps in OpenAlex, multi-axis score with an explicit ValueProfile, diversify, and return investigation briefs. Alias: run_curiosity. Scores are decision aids, not oracles.",
+      "description": "RANK UNKNOWNS \u2014 full curiosity pipeline: generate candidates, optionally verify gaps (OpenAlex / Semantic Scholar), multi-axis score with an explicit ValueProfile, diversify, return investigation briefs. Call this when you need literature-aware gap status and briefs, not instant spark. Alias: run_curiosity. Related literature \u2260 answered; scores are decision aids, not oracles.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -295,7 +295,17 @@
           "use_literature": {
             "type": "boolean",
             "default": true,
-            "description": "Ground gaps via OpenAlex (no API key required)"
+            "description": "Ground gaps via literature adapters (OpenAlex / Semantic Scholar)"
+          },
+          "literature_backend": {
+            "type": "string",
+            "enum": [
+              "openalex",
+              "semantic_scholar",
+              "both"
+            ],
+            "default": "openalex",
+            "description": "Literature backend (W11). Offline path ignores this."
           },
           "use_llm": {
             "type": "boolean",
@@ -365,6 +375,13 @@
           },
           "judge_model": {
             "type": "string"
+          },
+          "judge_ensemble_n": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 1,
+            "description": "Multi-judge ensemble size; disagreement widens bands (W15)"
           },
           "diversity_backend": {
             "type": "string",
@@ -421,7 +438,17 @@
           "use_literature": {
             "type": "boolean",
             "default": true,
-            "description": "Ground gaps via OpenAlex (no API key required)"
+            "description": "Ground gaps via literature adapters (OpenAlex / Semantic Scholar)"
+          },
+          "literature_backend": {
+            "type": "string",
+            "enum": [
+              "openalex",
+              "semantic_scholar",
+              "both"
+            ],
+            "default": "openalex",
+            "description": "Literature backend (W11). Offline path ignores this."
           },
           "use_llm": {
             "type": "boolean",
@@ -492,6 +519,13 @@
           "judge_model": {
             "type": "string"
           },
+          "judge_ensemble_n": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 1,
+            "description": "Multi-judge ensemble size; disagreement widens bands (W15)"
+          },
           "diversity_backend": {
             "type": "string",
             "enum": [
@@ -522,6 +556,117 @@
     "function": {
       "name": "list_profiles",
       "description": "List named ValueProfile presets (funder_10y, alignment_lab, \u2026). Rankings are never value-free.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "list_epistemic_cues",
+      "description": "List epistemic emotion cue tags (information_gap, incongruity, confusion_risk, \u2026). UX annotations for investigation framing \u2014 NOT claims that the system feels emotions. See docs/EMOTIONS.md.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "annotate_epistemic",
+      "description": "Annotate a question with epistemic cue tags from gap status + score axes (surprise / neglectedness / answerability). Returns tags, primary cue, and inject_fragment. Annotation only \u2014 does not feel.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 12,
+            "description": "Question text to annotate with epistemic cue tags"
+          },
+          "gap_status": {
+            "type": "string",
+            "enum": [
+              "unanswered",
+              "partially_answered",
+              "likely_answered",
+              "unknown_with_caveat"
+            ],
+            "default": "unanswered"
+          },
+          "surprise": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5
+          },
+          "neglectedness": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5
+          },
+          "answerability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5
+          },
+          "notes": {
+            "type": "string",
+            "default": "",
+            "description": "Optional gap notes (e.g. related literature \u2260 answered)"
+          },
+          "domain": {
+            "type": "string",
+            "enum": [
+              "biology",
+              "physics",
+              "ai",
+              "climate",
+              "medicine",
+              "materials",
+              "social",
+              "energy",
+              "general"
+            ],
+            "default": "ai"
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "emotion_pack",
+      "description": "Load the affective_science domain pack (ranking seeds for affective / epistemic research unknowns). Not an emotion engine or CME. Alias domain: affective_science.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "affective_science",
+            "description": "Bundled pack id. Default affective_science \u2014 ranking seeds for affective / epistemic research, not an emotion engine."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "elicit_helpers",
+      "description": "Return incongruity \u2192 curiosity \u2192 investigation framing text and inject helpers for agent context. Honesty: annotation / elicitation design \u2014 not anthropomorphic emotion.",
       "parameters": {
         "type": "object",
         "properties": {},

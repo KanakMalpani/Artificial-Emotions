@@ -9,6 +9,12 @@ from __future__ import annotations
 import json
 from typing import Any, Callable
 
+from artificial_curiosity.emotions import (
+    annotate_epistemic,
+    elicit_helpers,
+    emotion_pack,
+    list_epistemic_cues,
+)
 from artificial_curiosity.models import (
     CuriosityConfig,
     Domain,
@@ -172,6 +178,84 @@ LIST_PROFILES_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+LIST_EPISTEMIC_CUES_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": False,
+}
+
+ANNOTATE_EPISTEMIC_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "question": {
+            "type": "string",
+            "minLength": 12,
+            "description": "Question text to annotate with epistemic cue tags",
+        },
+        "gap_status": {
+            "type": "string",
+            "enum": [
+                "unanswered",
+                "partially_answered",
+                "likely_answered",
+                "unknown_with_caveat",
+            ],
+            "default": "unanswered",
+        },
+        "surprise": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+        },
+        "neglectedness": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+        },
+        "answerability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+        },
+        "notes": {
+            "type": "string",
+            "default": "",
+            "description": "Optional gap notes (e.g. related literature ≠ answered)",
+        },
+        "domain": {
+            "type": "string",
+            "enum": _DOMAIN_ENUM,
+            "default": "ai",
+        },
+    },
+    "required": ["question"],
+    "additionalProperties": False,
+}
+
+EMOTION_PACK_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "default": "affective_science",
+            "description": (
+                "Bundled pack id. Default affective_science — ranking seeds for "
+                "affective / epistemic research, not an emotion engine."
+            ),
+        },
+    },
+    "additionalProperties": False,
+}
+
+ELICIT_HELPERS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": False,
+}
+
 
 def _parse_value_profile(
     raw: Any,
@@ -291,6 +375,48 @@ def handle_list_profiles(**_extra: Any) -> dict[str, Any]:
     }
 
 
+def handle_list_epistemic_cues(**_extra: Any) -> dict[str, Any]:
+    """List epistemic cue tag vocabulary (UX annotations — not felt emotion)."""
+    return list_epistemic_cues()
+
+
+def handle_annotate_epistemic(
+    *,
+    question: str,
+    gap_status: str = "unanswered",
+    surprise: float = 0.5,
+    neglectedness: float = 0.5,
+    answerability: float = 0.5,
+    notes: str = "",
+    domain: str = "ai",
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Annotate question text with epistemic cue tags."""
+    return annotate_epistemic(
+        question,
+        gap_status=gap_status,
+        surprise=float(surprise),
+        neglectedness=float(neglectedness),
+        answerability=float(answerability),
+        notes=notes or "",
+        domain=domain,
+    )
+
+
+def handle_emotion_pack(
+    *,
+    name: str = "affective_science",
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Return affective_science (or named) domain pack seeds."""
+    return emotion_pack(name or "affective_science")
+
+
+def handle_elicit_helpers(**_extra: Any) -> dict[str, Any]:
+    """Incongruity → investigation framing + inject helpers."""
+    return elicit_helpers()
+
+
 # Canonical tool registry: name → (description, schema, handler)
 # Aliases (spark / run_curiosity) share handlers with primary names.
 ToolHandler = Callable[..., dict[str, Any]]
@@ -350,6 +476,46 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": LIST_PROFILES_SCHEMA,
         "handler": handle_list_profiles,
+    },
+    {
+        "name": "list_epistemic_cues",
+        "description": (
+            "List epistemic emotion cue tags (information_gap, incongruity, "
+            "confusion_risk, …). UX annotations for investigation framing — "
+            "NOT claims that the system feels emotions. See docs/EMOTIONS.md."
+        ),
+        "input_schema": LIST_EPISTEMIC_CUES_SCHEMA,
+        "handler": handle_list_epistemic_cues,
+    },
+    {
+        "name": "annotate_epistemic",
+        "description": (
+            "Annotate a question with epistemic cue tags from gap status + "
+            "score axes (surprise / neglectedness / answerability). Returns "
+            "tags, primary cue, and inject_fragment. Annotation only — does not feel."
+        ),
+        "input_schema": ANNOTATE_EPISTEMIC_SCHEMA,
+        "handler": handle_annotate_epistemic,
+    },
+    {
+        "name": "emotion_pack",
+        "description": (
+            "Load the affective_science domain pack (ranking seeds for "
+            "affective / epistemic research unknowns). Not an emotion engine "
+            "or CME. Alias domain: affective_science."
+        ),
+        "input_schema": EMOTION_PACK_SCHEMA,
+        "handler": handle_emotion_pack,
+    },
+    {
+        "name": "elicit_helpers",
+        "description": (
+            "Return incongruity → curiosity → investigation framing text and "
+            "inject helpers for agent context. Honesty: annotation / elicitation "
+            "design — not anthropomorphic emotion."
+        ),
+        "input_schema": ELICIT_HELPERS_SCHEMA,
+        "handler": handle_elicit_helpers,
     },
 ]
 
@@ -426,6 +592,12 @@ def mcp_resource_list() -> list[dict[str, Any]]:
             "description": "Honesty bounds / confidence caps (snippet)",
             "mimeType": "text/plain",
         },
+        {
+            "uri": "curiosity://emotions",
+            "name": "emotions",
+            "description": "Epistemic cue catalog (annotation only — does not feel)",
+            "mimeType": "application/json",
+        },
     ]
 
 
@@ -436,6 +608,8 @@ def mcp_resource_read(uri: str) -> dict[str, Any]:
         text = json.dumps(handle_list_profiles(), indent=2)
     elif uri == "curiosity://limits":
         text = _LIMITS_SNIPPET
+    elif uri == "curiosity://emotions":
+        text = json.dumps(handle_list_epistemic_cues(), indent=2)
     else:
         raise KeyError(uri)
     return {

@@ -132,7 +132,7 @@ Same stdio pattern: command = `curiosity-mcp` (or `python -m artificial_curiosit
 
 Leave keys empty / unset for the default fast path (no LLM required).
 
-Smoke: after config, ask the host to list MCP tools — expect `provoke_curiosity`, `spark`, `rank_unknowns`, `run_curiosity`, `list_domains`, `list_profiles`. Or run `curiosity-mcp --list-tools` in a terminal. Resources (optional): `curiosity-mcp --list-resources` → `curiosity://domains`, `curiosity://profiles`, `curiosity://limits`.
+Smoke: after config, ask the host to list MCP tools — expect `provoke_curiosity`, `spark`, `rank_unknowns`, `run_curiosity`, `list_domains`, `list_profiles`, plus epistemic tools `list_epistemic_cues`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`. Or run `curiosity-mcp --list-tools` in a terminal. Resources (optional): `curiosity-mcp --list-resources` → `curiosity://domains`, `curiosity://profiles`, `curiosity://limits`, `curiosity://emotions`. Epistemic cues how-to: [`EMOTIONS.md`](EMOTIONS.md).
 
 ### VS Code Copilot (MCP)
 

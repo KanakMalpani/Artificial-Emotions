@@ -1,5 +1,11 @@
 """Artificial Curiosity — generate and rank valuable unanswered questions."""
 
+from artificial_curiosity.emotions import (
+    annotate_epistemic,
+    elicit_helpers,
+    emotion_pack,
+    list_epistemic_cues,
+)
 from artificial_curiosity.models import (
     CuriosityConfig,
     RankedQuestion,
@@ -17,7 +23,11 @@ __all__ = [
     "RankedQuestion",
     "UnansweredQuestion",
     "ValueProfile",
+    "annotate_epistemic",
+    "elicit_helpers",
+    "emotion_pack",
     "get_profile",
+    "list_epistemic_cues",
     "list_profile_names",
     "provoke",
 ]

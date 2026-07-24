@@ -67,3 +67,30 @@ def test_cli_spark_text_mentions_investigate(capsys: pytest.CaptureFixture[str])
     assert code == 0
     out = capsys.readouterr().out
     assert "What should we investigate next?" in out
+
+
+def test_cli_emotions_cues_annotate_pack(capsys: pytest.CaptureFixture[str]) -> None:
+    code = main(["emotions", "cues", "--json"])
+    assert code == 0
+    cues = json.loads(capsys.readouterr().out)
+    assert "information_gap" in cues["tags"]
+
+    code = main(
+        [
+            "epistemic",
+            "annotate",
+            "What remains unknown about epistemic emotion elicitation?",
+            "--surprise",
+            "0.8",
+            "--json",
+        ]
+    )
+    assert code == 0
+    ann = json.loads(capsys.readouterr().out)
+    assert ann["epistemic_cues"]["tags"]
+
+    code = main(["emotions", "pack", "--json"])
+    assert code == 0
+    pack = json.loads(capsys.readouterr().out)
+    assert pack["count"] >= 8
+    assert pack["name"] == "affective_science"
