@@ -77,6 +77,7 @@ Everything under `research/` is design/background material that informed the imp
 | [MCP_TIERS_INTREE.md](MCP_TIERS_INTREE.md) | CURIOSITY_MCP_TIER contract map |
 | [FAILURE_SEED_PHRASES.md](FAILURE_SEED_PHRASES.md) | Null/replication gap seed stems for packs |
 | [EVAL_REPORT_ORDER.md](EVAL_REPORT_ORDER.md) | Diagnose-before-score section order |
+| [IDEA_NOVELTY_CHECKER.md](IDEA_NOVELTY_CHECKER.md) | Idea novelty RAG ≠ gap verify |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

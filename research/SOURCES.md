@@ -43,6 +43,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Web pair duel UX | [`WEB_PAIR_DUEL_UX.md`](WEB_PAIR_DUEL_UX.md) | Feedback-bar copy; profile-scoped |
 | LitGapFinder (clawRxiv) | https://www.clawrxiv.io/abs/2603.00233 | Co-occurrence gap skill; ~60% top-10 claim (light review) |
 | Gap verify / question-rank competitors | [`GAP_VERIFICATION_COMPETITORS.md`](GAP_VERIFICATION_COMPETITORS.md) | SciMuse, ScholarEval, LitGapFinder, ResearchAgent, Owl-class |
+| Idea Novelty Checker | [`IDEA_NOVELTY_CHECKER.md`](IDEA_NOVELTY_CHECKER.md) | Lit-grounded novelty ≠ unansweredness |
+| Idea Novelty Checker paper | arXiv:2506.22026 | RAG novelty assessment of ideas |
 | Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |
 | Agent plugin / MCP UX | [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) | Tool description hygiene; progressive disclosure; ScaleMCP |
 | MCP threat taxonomy map | [`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md) | MCP-38, MSB, SoK → curiosity mitigations |
