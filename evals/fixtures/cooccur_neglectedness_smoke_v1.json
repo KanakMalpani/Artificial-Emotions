@@ -1,0 +1,14 @@
+{
+  "name": "cooccur_neglectedness_smoke_v1",
+  "honesty": "Synthetic pairs for offline Spearman smoke — not a LitGapFinder reproduction.",
+  "pairs": [
+    {"question_id": "p1", "sim": 0.9, "cooccur": 0, "neglectedness": 0.85},
+    {"question_id": "p2", "sim": 0.85, "cooccur": 1, "neglectedness": 0.75},
+    {"question_id": "p3", "sim": 0.8, "cooccur": 2, "neglectedness": 0.65},
+    {"question_id": "p4", "sim": 0.7, "cooccur": 5, "neglectedness": 0.45},
+    {"question_id": "p5", "sim": 0.6, "cooccur": 10, "neglectedness": 0.35},
+    {"question_id": "p6", "sim": 0.5, "cooccur": 20, "neglectedness": 0.25},
+    {"question_id": "p7", "sim": 0.95, "cooccur": 0, "neglectedness": 0.9},
+    {"question_id": "p8", "sim": 0.4, "cooccur": 30, "neglectedness": 0.2}
+  ]
+}

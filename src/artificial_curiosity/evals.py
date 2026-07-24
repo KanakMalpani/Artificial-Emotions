@@ -141,7 +141,7 @@ def load_fixtures(path: str | Path | None = None) -> list[SpotCheckCase]:
     cases: list[SpotCheckCase] = []
     for f in files:
         # Hand-label gap-status packs use a different schema (items/…).
-        if f.name.startswith("gap_status_"):
+        if f.name.startswith("gap_status_") or f.name.startswith("cooccur_"):
             continue
         data = json.loads(f.read_text(encoding="utf-8"))
         if isinstance(data, dict) and "cases" in data:

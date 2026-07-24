@@ -970,3 +970,28 @@ def test_suggest_next_pair_and_bt_gate():
     assert res.status_code == 200
     assert res.json()["ok"] is True
 
+
+def test_cooccur_correlation_offline():
+    from pathlib import Path
+
+    from artificial_curiosity.cooccur_study import (
+        cooccur_rationale_key,
+        gap_score,
+        run_cooccur_correlation,
+    )
+
+    assert gap_score(1.0, 0) == 1.0
+    assert gap_score(1.0, 1) == 0.5
+    keys = cooccur_rationale_key(0.9, 0)
+    assert keys["cooccur_gap_note"] == "display_only_no_weight_change"
+    path = (
+        Path(__file__).resolve().parents[1]
+        / "evals"
+        / "fixtures"
+        / "cooccur_neglectedness_smoke_v1.json"
+    )
+    out = run_cooccur_correlation(path)
+    assert out["n"] >= 5
+    assert out["spearman_rho"] is not None
+    assert out["spearman_rho"] > 0.5  # synthetic fixture is aligned by construction
+

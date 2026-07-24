@@ -215,8 +215,8 @@ def build_parser() -> argparse.ArgumentParser:
         "eval_cmd",
         nargs="?",
         default="spotcheck",
-        choices=["spotcheck", "elicit", "gap-status", "report"],
-        help="Harness: spotcheck (default), elicit, gap-status, or report",
+        choices=["spotcheck", "elicit", "gap-status", "report", "cooccur"],
+        help="Harness: spotcheck (default), elicit, gap-status, report, or cooccur",
     )
     eval_p.add_argument(
         "--fixtures",
@@ -650,6 +650,24 @@ def _eval(args: argparse.Namespace) -> int:
         )
         el = secs.get("elicit_rubric") or {}
         print(f"  elicit means={el.get('condition_means')}  deltas={el.get('deltas')}")
+        print(f"\n{payload.get('honesty')}")
+        return 0
+
+    if cmd == "cooccur":
+        from artificial_curiosity.cooccur_study import run_cooccur_correlation
+
+        root = Path(__file__).resolve().parents[2]
+        path = args.fixtures or (
+            root / "evals" / "fixtures" / "cooccur_neglectedness_smoke_v1.json"
+        )
+        payload = run_cooccur_correlation(path)
+        if args.json:
+            print(json.dumps(payload, indent=2))
+            return 0
+        print(
+            f"Cooccur study  n={payload.get('n')}  "
+            f"spearman_rho={payload.get('spearman_rho')}"
+        )
         print(f"\n{payload.get('honesty')}")
         return 0
 

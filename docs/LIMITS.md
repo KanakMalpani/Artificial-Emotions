@@ -42,6 +42,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - ValueProfile cue thresholds (`cue_surprise_high` / `cue_neglectedness_high` / `cue_answerability_low`) drive epistemic tags — annotation only
 - Preference summarize includes sparse `outcomes` breakdown (`event_type=outcome` labels) — not auto-retrain
 - Preference `tie` / `both_keep` counted honestly; `suggest_next_pair` + gated `fit_bt_offline` (no auto weight overwrite)
+- Offline LitGap-style cooccur study (`curiosity eval cooccur`) — Spearman smoke + display-only `cooccur_gap` keys; never silent weight change
 - Top-n hivemind similarity in `curiosity eval report` (Jaccard default; optional embedding)
 - Gap-status fixtures may carry VERITAS-ish `gold_tags` (`underpowered`, `invalid_form`) without inventing new GapStatus enums
 - Emotion mix soft guards: warn when mix is dominated by fear/anxiety/anger-type ids (annotation still returned)
