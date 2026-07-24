@@ -35,16 +35,18 @@
 12. **Cue threshold knobs** — ✅ (`044c75e`); presets JSON ([`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md)).
 13. **LitGapFinder cooccur correlation study** — ✅ helpers landed (`04eeebf`); run offline protocol ([`LITGAP_CORRELATION_STUDY.md`](LITGAP_CORRELATION_STUDY.md)).
 14. **Optional cross-model vote** — ✅ heuristic proxy (`hybrid_vote.py`); live multi-model offline only ([`HYBRID_VOTE_OFFLINE.md`](HYBRID_VOTE_OFFLINE.md), [`FALSIFYBENCH.md`](FALSIFYBENCH.md)).
-15. **Bayesian surprise closed-loop** — ✅ worksheet fill (`bayesian.py`); no axis rename ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md), [`EVIDENCE_INFORMED_BELIEFS.md`](EVIDENCE_INFORMED_BELIEFS.md)).
+15. **Bayesian surprise closed-loop** — ✅ worksheet fill shipped (`c05861b` / `bayesian.py`); no axis rename ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md), [`EVIDENCE_INFORMED_BELIEFS.md`](EVIDENCE_INFORMED_BELIEFS.md)).
 16. **LIMITS cite McNamara / EVSI / ERS / agentic dual-use** — ✅ largely in `docs/LIMITS.md`; keep BioVeil one-liner if missing ([`LIMITS_PATCHES.md`](LIMITS_PATCHES.md), [`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md)).
 17. **Optional idea-graph export** — ✅ landed (`c733edc` / `idea_graph.py`); display only ([`IDEA_GRAPH_UX.md`](IDEA_GRAPH_UX.md)).
 18. **Mix intensity cap** — ✅ landed (`c733edc` / `mix_intensity_cap`); keep epistemic-default docs ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
 19. **SFBench-cousin feasibility_note** — ✅ display-only landed (`90fc51d`); offline calibrate before any axis fold ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
 20. **Offline soundness pass** — ✅ heuristic triage (`9538e4e` / `soundness.py`) ([`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md)).
 21. **Web constitution compare + veto** — Wire preset from `examples/constitution_veto_stack.json` ([`CONSTITUTION_WEB_UX.md`](CONSTITUTION_WEB_UX.md)).
-22. **Web outcome picker** — Sparse flywheel capture ([`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md)).
+22. **Web outcome picker** — ✅ landed (`c05861b`); keep sparse honesty ([`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md)).
 23. **Dual-use red-team fixtures** — Template ready ([`DUAL_USE_REDTEAM.md`](DUAL_USE_REDTEAM.md), `examples/dual_use_redteam_fixture_template.json`).
 24. **MCP tool tiers** — Optional core/full progressive disclosure ([`MCP_PROGRESSIVE_DISCLOSURE.md`](MCP_PROGRESSIVE_DISCLOSURE.md)).
+25. **ErrEval-style diagnose-before-score** — Critique/soundness sections first in eval report ([`ERREVAL_QG.md`](ERREVAL_QG.md)).
+26. **Gap handlabel growth** — Continue fixtures (`c05861b`); VERITAS cousins ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
 
 ## Explicit non-goals (from research)
 
