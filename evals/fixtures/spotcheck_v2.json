@@ -1,0 +1,78 @@
+{
+  "schema_version": "spotcheck_fixture.v1",
+  "description": "Extra adversarial holdouts (weak-ops, claim-partial, empty). Not a marketing accuracy set. Complements spotcheck_v1.json.",
+  "cases": [
+    {
+      "case_id": "weak-ops-overlap",
+      "gold_status": "unanswered",
+      "notes": "Shares topic tokens but misses operationalization measurement bar (related ≠ answered)",
+      "question": {
+        "id": "fx-ops-01",
+        "question": "Which circulating biomarkers best predict remaining healthspan under lifespan-extending interventions?",
+        "domain": "biology",
+        "operationalization": "Rank biomarkers by out-of-sample AUROC ≥ 0.7 for remaining healthspan across ≥2 intervention classes with pre-registered endpoints.",
+        "why_it_matters": "Longevity trials need transferable interim endpoints.",
+        "tags": ["aging", "biomarkers"]
+      },
+      "hits": [
+        {
+          "title": "A review of aging and longevity in model organisms",
+          "year": 2022,
+          "cited_by_count": 90,
+          "abstract_snippet": "Aging research covers many pathways. Future work should clarify biomarkers. Remains unknown which circulating markers predict healthspan under interventions.",
+          "source": "fixture"
+        },
+        {
+          "title": "Lifespan extension interventions in mice",
+          "year": 2021,
+          "cited_by_count": 55,
+          "abstract_snippet": "We survey diet and drug interventions that extend lifespan. Poorly understood how to choose interim healthspan biomarkers with AUROC criteria.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "case_id": "claim-heavy-partial",
+      "gold_status": "partially_answered",
+      "notes": "Claim language + strong ops overlap on one recent hit → partial (not full likely_answered bar)",
+      "question": {
+        "id": "fx-partial-02",
+        "question": "Can mRNA vaccines induce durable neutralizing antibodies against seasonal influenza?",
+        "domain": "medicine",
+        "operationalization": "Measure neutralizing titers at ≥6 months post-vaccination in ≥2 human cohorts versus standard inactivated vaccine.",
+        "why_it_matters": "Durability determines boost cadence and public-health utility.",
+        "tags": ["vaccines", "influenza", "mrna"]
+      },
+      "hits": [
+        {
+          "title": "mRNA influenza vaccine induces durable neutralizing antibodies at 6 months in adults",
+          "year": 2024,
+          "cited_by_count": 45,
+          "abstract_snippet": "We demonstrate neutralizing titers at ≥6 months post-vaccination in a human cohort after mRNA influenza vaccination versus inactivated vaccine. Results show durable neutralizing antibodies; a second cohort is ongoing.",
+          "source": "fixture"
+        },
+        {
+          "title": "Seasonal influenza vaccine platforms compared for neutralizing titers",
+          "year": 2023,
+          "cited_by_count": 20,
+          "abstract_snippet": "We compare inactivated and mRNA platforms measuring neutralizing antibodies. Further research is needed on durable titers beyond six months in multiple cohorts.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "case_id": "empty-hits-unknown",
+      "gold_status": "unknown_with_caveat",
+      "notes": "No neighborhood hits → unknown_with_caveat",
+      "question": {
+        "id": "fx-empty-02",
+        "question": "What is the optimal divertor material under DEMO-relevant plasma fluxes for commercial fusion?",
+        "domain": "energy",
+        "operationalization": "Compare candidate materials on erosion, tritium retention, and mechanical lifetime under DEMO-relevant fluxes.",
+        "why_it_matters": "Divertor lifetime is a critical path for fusion commercialization.",
+        "tags": ["fusion", "materials"]
+      },
+      "hits": []
+    }
+  ]
+}

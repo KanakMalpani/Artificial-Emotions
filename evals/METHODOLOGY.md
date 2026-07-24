@@ -25,7 +25,12 @@ Each case should include:
 3. Gold `GapStatus` justified in `notes` (which failure mode).
 4. Adversarial cases: open-gap language, weak ops overlap, stale years.
 
-Bundled set: `evals/fixtures/spotcheck_v1.json` (≥6 cases).
+Bundled set: `evals/fixtures/spotcheck_v1.json` + `spotcheck_v2.json`
+(adversarial F7 / weak-ops / empty-hits). Default `curiosity eval` loads the
+whole fixtures directory.
+
+Report also includes `by_gold_status` (stratified gold→predicted counts) —
+still **not** a single product accuracy claim.
 
 ## How to run
 
@@ -40,9 +45,11 @@ pytest tests/test_mid_horizon.py::test_w10_spotcheck_harness_offline -q
 
 1. Sample top-10 ranked questions from a real run (offline or lit).
 2. Blind: label each as unanswered / partial / likely_answered / unknown.
-3. Append labels via preference JSONL (`event_type=already_answered|keep`).
+3. Append labels via preference JSONL (`event_type=already_answered|keep`) with
+   optional `score_axes` for weight hints.
 4. Optionally set `preference_rerank_path` for thin profile-scoped re-rank
-   (small deltas only — not calibrated learning).
+   and/or `preference_learn_path` / `POST /v1/preferences/hints` for tiny
+   ValueProfile weight hints (not calibrated learning).
 5. Compare to system `gap.status`; track fail rate over time in LIMITS notes —
    never as a headline accuracy figure.
 

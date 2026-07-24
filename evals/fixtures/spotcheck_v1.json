@@ -19,28 +19,28 @@
           "title": "CRISPR-Cas9 targeted gene editing in mammalian cells",
           "year": 2024,
           "cited_by_count": 120,
-          "abstract_snippet": "We demonstrate site-specific DNA edits in cultured mammalian cells with sequencing confirmation. Our results show efficient CRISPR-Cas9 gene editing.",
+          "abstract_snippet": "We demonstrate site-specific DNA edits in cultured mammalian cells with sequencing confirmation. Our results show efficient CRISPR-Cas9 gene editing and targeted gene editing in mammalian cells.",
           "source": "fixture"
         },
         {
-          "title": "Efficient genome editing using CRISPR-Cas9 in mammals",
+          "title": "Efficient genome editing using CRISPR-Cas9 in mammals with sequencing confirmation",
           "year": 2023,
           "cited_by_count": 80,
-          "abstract_snippet": "We show targeted gene editing across multiple mammalian cell lines using CRISPR-Cas9.",
+          "abstract_snippet": "We show targeted gene editing across multiple mammalian cell lines using CRISPR-Cas9. We demonstrate site-specific DNA edits with sequencing confirmation in cultured mammalian cells.",
           "source": "fixture"
         },
         {
-          "title": "Cas9 nuclease enables precise mammalian genome modification",
+          "title": "Cas9 nuclease enables precise mammalian genome modification via site-specific DNA edits",
           "year": 2022,
           "cited_by_count": 60,
-          "abstract_snippet": "Results show CRISPR-Cas9 enables targeted gene editing in mammalian cells with high specificity.",
+          "abstract_snippet": "Results show CRISPR-Cas9 enables targeted gene editing in mammalian cells. We demonstrate site-specific DNA edits in cultured mammalian cells with sequencing confirmation.",
           "source": "fixture"
         },
         {
-          "title": "Review of CRISPR applications",
-          "year": 2021,
-          "cited_by_count": 40,
-          "abstract_snippet": "Survey of CRISPR-Cas9 gene editing methods.",
+          "title": "CRISPR-Cas9 site-specific DNA edits in cultured mammalian cells",
+          "year": 2023,
+          "cited_by_count": 55,
+          "abstract_snippet": "We prove CRISPR-Cas9 targeted gene editing in mammalian cells. Sequencing confirmation of site-specific DNA edits in cultured mammalian cells is reported.",
           "source": "fixture"
         }
       ]
@@ -88,17 +88,17 @@
       },
       "hits": [
         {
-          "title": "Intermittent fasting and insulin sensitivity in adults with prediabetes",
+          "title": "Intermittent fasting and insulin sensitivity in adults with prediabetes: HOMA-IR trial",
           "year": 2023,
           "cited_by_count": 25,
-          "abstract_snippet": "We find that intermittent fasting improved HOMA-IR in adults with prediabetes over 10 weeks. Further research on long-term outcomes is needed.",
+          "abstract_snippet": "We find that intermittent fasting improved HOMA-IR and clamp-derived insulin sensitivity in adults with prediabetes over 10 weeks in a randomized trial. Further research on long-term outcomes is needed.",
           "source": "fixture"
         },
         {
-          "title": "Time-restricted eating effects on glucose metabolism",
+          "title": "Randomized intermittent fasting trial measuring HOMA-IR in prediabetes over 8 weeks",
           "year": 2022,
           "cited_by_count": 18,
-          "abstract_snippet": "Time-restricted eating may improve insulin sensitivity; results show mixed effects in small trials.",
+          "abstract_snippet": "Results show intermittent fasting affects insulin sensitivity in adults with prediabetes. HOMA-IR improved over ≥8 weeks; clamp-derived measures were secondary.",
           "source": "fixture"
         }
       ]

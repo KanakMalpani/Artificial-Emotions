@@ -25,14 +25,14 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Plugin install docs: `docs/PLUGINS.md` (Cursor, Claude Desktop, Claude Code, VS Code Copilot, Continue, Windsurf, HTTP, OpenAI tools)
 - Demo proofs: `docs/PROOFS.md` (includes multi-provider smoke matrix notes — no secrets)
 - CLI, Python API, FastAPI (`:8000`), Vite UI (`:5173`) — UI shows briefs, `[low–high]` bands, and profile name
-- Expert-eval / spot-check harness: `curiosity eval` + `evals/fixtures/` + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**)
+- Expert-eval / spot-check harness: `curiosity eval` + `evals/fixtures/` (v1+v2 adversarial) + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**; stratified `by_gold_status`)
 - Opt-in preference JSONL schema (`preference_log_path` / `--preference-log`) — no DB required (W13); **CLI/config only** (not HTTP body — path injection)
 - Thin preference re-rank (`preference_rerank_path` / `--preference-rerank`): prefer/reject → small profile-scoped score deltas + `preference_rerank` flag — **not** calibrated weight learning; CLI/config only
 - Preference weight hints (`preference_learn_path` / `--preference-learn` / `curiosity preferences hints` / `POST /v1/preferences/hints`): tiny profile-scoped ValueProfile deltas from labeled events with `score_axes` — **not** calibrated; API accepts inline events only (no paths)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon (`research/NEGLECTEDNESS_COST.md`) — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
-- Versioned domain packs (`artificial_curiosity/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment, climate, affective science, and aging biology packs
+- Versioned domain packs (`artificial_curiosity/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment, climate, affective science, aging biology, and materials catalysis packs
 - Vite UI (`:5173`): briefs + bands + profile primary; optional investigation framing mix (annotation only — does not feel); Fast spark via provoke
 - Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness (**503** when not ready)
 - Central env config module (`artificial_curiosity.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS

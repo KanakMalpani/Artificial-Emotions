@@ -58,6 +58,8 @@ class HarnessReport:
     n_false_unknown: int  # predicted unanswered-ish when gold likely_answered
     match_rate: float | None
     results: list[SpotCheckResult] = field(default_factory=list)
+    # gold_status → {predicted_status: count} — stratified, not a single accuracy %
+    by_gold_status: dict[str, dict[str, int]] = field(default_factory=dict)
     methodology: str = (
         "Offline fixture spot-check. Report case-level agreement and F1-style "
         "miss rates — never a single marketing accuracy percentage."
@@ -71,6 +73,7 @@ class HarnessReport:
             "n_missed_answered": self.n_missed_answered,
             "n_false_unknown": self.n_false_unknown,
             "match_rate": self.match_rate,
+            "by_gold_status": self.by_gold_status,
             "methodology": self.methodology,
             "results": [
                 {
@@ -123,9 +126,12 @@ def _parse_case(raw: dict[str, Any]) -> SpotCheckCase:
 
 
 def load_fixtures(path: str | Path | None = None) -> list[SpotCheckCase]:
-    """Load spot-check cases from a JSON file or directory of JSON files."""
+    """Load spot-check cases from a JSON file or directory of JSON files.
+
+    Default loads **all** ``*.json`` under ``evals/fixtures/`` (v1 + adversarial v2).
+    """
     if path is None:
-        path = default_fixtures_dir() / "spotcheck_v1.json"
+        path = default_fixtures_dir()
     p = Path(path)
     files: list[Path]
     if p.is_dir():
@@ -151,7 +157,7 @@ def run_spotcheck(cases: list[SpotCheckCase] | None = None) -> HarnessReport:
     Run offline gap classification against fixture gold labels.
 
     Uses verify_gap with a fixture literature client when hits are provided;
-    otherwise falls back to classify_gap on synthetic overlap stats in the case.
+    empty hits → ``unknown_with_caveat`` via the normal verify path.
     """
     if cases is None:
         cases = load_fixtures()
@@ -161,28 +167,27 @@ def run_spotcheck(cases: list[SpotCheckCase] | None = None) -> HarnessReport:
     n_answered_gold = 0
     n_missed = 0
     n_false_unknown = 0
+    by_gold: dict[str, dict[str, int]] = {}
 
     for case in cases:
-        if case.hits:
-            gap = verify_gap(
-                case.question,
-                client=_FixtureLitClient(case.hits),
-                use_literature=True,
-            )
-            predicted = gap.status
-            top_overlap = gap.top_overlap
-            strong = gap.strong_match_count
-            notes = gap.notes
-        else:
-            # Pure classify_gap path via optional stats on the case notes metadata.
-            predicted = case.gold_status
-            top_overlap = 0.0
-            strong = 0
-            notes = "no hits; skipped verify"
+        gap = verify_gap(
+            case.question,
+            client=_FixtureLitClient(list(case.hits)),
+            use_literature=True,
+            literature_backend="fixture",
+        )
+        predicted = gap.status
+        top_overlap = gap.top_overlap
+        strong = gap.strong_match_count
+        notes = gap.notes
 
         match = predicted == case.gold_status
         if match:
             n_match += 1
+        gold_key = case.gold_status.value
+        pred_key = predicted.value
+        bucket = by_gold.setdefault(gold_key, {})
+        bucket[pred_key] = bucket.get(pred_key, 0) + 1
         if case.gold_status == GapStatus.LIKELY_ANSWERED:
             n_answered_gold += 1
             if predicted != GapStatus.LIKELY_ANSWERED:
@@ -210,6 +215,7 @@ def run_spotcheck(cases: list[SpotCheckCase] | None = None) -> HarnessReport:
         n_false_unknown=n_false_unknown,
         match_rate=(n_match / n) if n else None,
         results=results,
+        by_gold_status=by_gold,
     )
 
 

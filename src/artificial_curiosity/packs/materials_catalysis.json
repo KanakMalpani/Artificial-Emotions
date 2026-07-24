@@ -1,0 +1,25 @@
+{
+  "schema_version": "domain_pack.v1",
+  "name": "materials_catalysis_pack",
+  "version": "0.1.0",
+  "domain": "materials",
+  "description": "Neglected materials / catalysis unknowns with measurable operationalizations.",
+  "questions": [
+    {
+      "id": "matcat-pack-01",
+      "question": "Which descriptors best predict synthesizability of hypothetical inorganic catalysts proposed by generative models under ambient pressure?",
+      "operationalization": "Descriptors that raise prospective lab synthesis success ≥20% absolute over formation-energy-only filters on a held-out set of ≥50 proposals.",
+      "why_it_matters": "Unsynthesizable catalyst proposals waste experimental cycles and slow climate-relevant chemistry.",
+      "tags": ["materials", "catalysis", "synthesizability", "ml"],
+      "assumptions": ["Lab groups report attempt outcomes consistently."]
+    },
+    {
+      "id": "matcat-pack-02",
+      "question": "How does active-site heterogeneity under operando conditions change selectivity predictions from idealized single-site models?",
+      "operationalization": "Quantify prediction error of single-site DFT/ML models vs operando-informed ensembles on ≥3 reactions with measured site distributions.",
+      "why_it_matters": "Idealized active sites mislead catalyst design when real surfaces are dynamic.",
+      "tags": ["catalysis", "operando", "selectivity"],
+      "assumptions": ["Operando spectroscopy can constrain site distributions."]
+    }
+  ]
+}

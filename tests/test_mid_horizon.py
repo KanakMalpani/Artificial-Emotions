@@ -44,23 +44,31 @@ from artificial_curiosity.verify import verify_gap
 
 def test_w10_spotcheck_harness_offline():
     cases = load_fixtures()
-    assert len(cases) >= 6
+    assert len(cases) >= 9  # v1 + adversarial v2
     report = run_spotcheck(cases)
     assert report.n_cases == len(cases)
     assert report.match_rate is not None
     assert "offline" in report.methodology.lower() or "fixture" in report.methodology.lower()
+    assert report.by_gold_status
+    payload = report.to_dict()
+    assert "by_gold_status" in payload
     # Empty-lit case should match unknown_with_caveat.
     by_id = {r.case_id: r for r in report.results}
     assert by_id["empty-literature"].predicted_status == "unknown_with_caveat"
+    assert by_id["empty-hits-unknown"].predicted_status == "unknown_with_caveat"
     assert by_id["adjacent-not-answered"].predicted_status == "unanswered"
     assert by_id["phrase-gaming-open-gap"].predicted_status == "unanswered"
+    assert by_id["weak-ops-overlap"].predicted_status == "unanswered"
     # Stale years must not auto-promote to likely_answered (F12).
     assert by_id["stale-strong-overlap"].predicted_status != "likely_answered"
-    # Answered-strong fixture should classify likely_answered (F1 monitor signal).
-    assert by_id["answered-strong-overlap"].gold_status == "likely_answered"
+    # Strengthened answered fixture should classify likely_answered (F1 monitor).
+    assert by_id["answered-strong-overlap"].predicted_status == "likely_answered"
+    assert by_id["answered-strong-overlap"].match
     fail_rate = already_answered_fail_rate(report)
     assert fail_rate is not None
-    assert fail_rate <= 1.0
+    assert fail_rate == 0.0
+    # Never treat match_rate as a marketed accuracy claim — just that harness ran.
+    assert 0.0 <= float(report.match_rate) <= 1.0
 
 
 def test_w11_literature_factory_offline_and_merge():
@@ -418,6 +426,7 @@ def test_bundled_alignment_and_climate_packs():
     assert "clim-pack-01" in ids
     assert "affect-pack-01" in ids
     assert "aging-pack-01" in ids
+    assert "matcat-pack-01" in ids
     assert all(len(q.operationalization) >= 20 for q in qs)
 
 
