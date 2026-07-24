@@ -250,6 +250,55 @@
           "source": "fixture"
         }
       ]
+    },
+    {
+      "question_id": "underpowered-social-nudge",
+      "question_text": "Which social-network interventions most increase honest uncertainty reporting in scientific teams?",
+      "domain": "social",
+      "operationalization": "Rank interventions by pre-registered increase in calibrated uncertainty statements across ≥2 lab cohorts.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "gold_tags": ["underpowered", "thin_lit"],
+      "notes": "Single weak hit — underpowered lit; prefer open over answered.",
+      "hits": [
+        {
+          "title": "Pilot workshop note on uncertainty language",
+          "year": 2020,
+          "cited_by_count": 1,
+          "abstract_snippet": "A small pilot (n=9). Remains unknown at scale; further research is needed. Null findings on durable behavior change.",
+          "source": "fixture"
+        }
+      ]
+    },
+    {
+      "question_id": "invalid-form-triple-and",
+      "question_text": "How do we cure aging and end pandemics and reverse climate change in one protocol?",
+      "domain": "general",
+      "operationalization": "One protocol that fixes aging and pandemics and climate with and and and endpoints.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": false,
+      "gold_tags": ["invalid_form"],
+      "notes": "VERITAS-ish invalid_form sprawl — critique_brief target.",
+      "hits": []
+    },
+    {
+      "question_id": "rbu-ai-eval-null",
+      "question_text": "Despite null findings on probe-based sandbagging detectors, which evaluation pressures still produce undetected capability underreporting?",
+      "domain": "ai",
+      "operationalization": "Enumerate pressures where published detectors failed to replicate AUROC ≥ 0.7; measure residual underreporting on ≥2 model families.",
+      "gold_status": "unanswered",
+      "related_but_unanswered": true,
+      "gold_tags": ["underpowered"],
+      "notes": "Open-gap + null lexicon neighborhood.",
+      "hits": [
+        {
+          "title": "Failed replication of sandbagging probes",
+          "year": 2024,
+          "cited_by_count": 4,
+          "abstract_snippet": "We failed to replicate earlier probe AUROC claims. Null findings remain; further research is needed on evaluation pressure.",
+          "source": "fixture"
+        }
+      ]
     }
   ]
 }

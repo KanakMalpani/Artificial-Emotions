@@ -28,6 +28,14 @@
       "why_it_matters": "Energy failure is a shared substrate of neurodegeneration and aging cognition.",
       "tags": ["aging", "mitochondria", "cognition", "metabolism"],
       "assumptions": ["Basal ATP and stress-flux can be measured without destroying the tissue of interest."]
+    },
+    {
+      "id": "aging-pack-04-null",
+      "question": "Which purported replications of circulating aging clocks fail under pre-registered healthspan endpoints, and what negative controls are missing?",
+      "operationalization": "Catalog clock studies with failed replication or null healthspan prediction (AUROC ≤ 0.55); list systematically missing negative controls across ≥10 reports.",
+      "why_it_matters": "Publication filters hide clock failures; ranking should prefer questions that name unresolved null gaps.",
+      "tags": ["aging", "biomarkers", "null_result", "failure_knowledge"],
+      "assumptions": ["Replication attempts or null reports can be coded from literature and registries."]
     }
   ]
 }

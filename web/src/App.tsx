@@ -147,6 +147,7 @@ export default function App() {
   const [feedback, setFeedback] = useState<FeedbackEvent[]>([]);
   const [feedbackNote, setFeedbackNote] = useState<string | null>(null);
   const [critiqueNote, setCritiqueNote] = useState<string | null>(null);
+  const [soundnessNote, setSoundnessNote] = useState<string | null>(null);
   const [preferredIds, setPreferredIds] = useState<Set<string>>(new Set());
   const [outcomeDraft, setOutcomeDraft] = useState<
     Record<string, { result: string; months: string; note: string }>
@@ -407,6 +408,46 @@ export default function App() {
       );
     } catch (e) {
       setCritiqueNote(e instanceof Error ? e.message : "Critique failed");
+    }
+  }
+
+  async function soundnessCard(r: Ranked) {
+    setSoundnessNote(null);
+    try {
+      const res = await fetch("/v1/evals/soundness", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          candidates: [
+            {
+              question_id: qidFor(r),
+              question: r.question.question,
+              operationalization: r.question.operationalization,
+              brief: r.investigation_brief || "",
+              gap_status: r.gap?.status || "",
+              axes: {
+                answerability: r.scores.answerability,
+                tractability: r.scores.tractability,
+                risk: r.scores.risk,
+              },
+            },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const row = (data.results || [])[0];
+      const codes = (row?.critique?.issues || [])
+        .slice(0, 2)
+        .map((i: { code?: string }) => i.code || "issue")
+        .join(", ");
+      setSoundnessNote(
+        `#${r.rank}: soundness=${row?.soundness ?? "n/a"}` +
+          (codes ? ` [${codes}]` : "") +
+          " — triage only; does not re-rank.",
+      );
+    } catch (e) {
+      setSoundnessNote(e instanceof Error ? e.message : "Soundness failed");
     }
   }
 
@@ -781,6 +822,7 @@ export default function App() {
 
       {feedbackNote && <p className="feedback-note">{feedbackNote}</p>}
       {critiqueNote && <p className="feedback-note">{critiqueNote}</p>}
+      {soundnessNote && <p className="feedback-note">{soundnessNote}</p>}
       {feedback.length > 0 && (
         <div className="feedback-bar">
           <span>{feedback.length} feedback event(s) this session</span>
@@ -891,6 +933,13 @@ export default function App() {
                         onClick={() => critiqueCard(r)}
                       >
                         Critique form
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-feedback"
+                        onClick={() => soundnessCard(r)}
+                      >
+                        Soundness
                       </button>
                     </div>
                     {preferredIds.has(qidFor(r)) && (

@@ -20,6 +20,14 @@
       "why_it_matters": "Adaptation policy often ignores informal institutions that dominate local resilience.",
       "tags": ["climate", "adaptation", "water", "social"],
       "assumptions": ["Sharing intensity can be proxied from surveys or sensors."]
+    },
+    {
+      "id": "clim-pack-03-null",
+      "question": "Despite null findings on single-hazard early-warning skill, which compound heat–drought indicators still discriminate cascading infrastructure failure?",
+      "operationalization": "Among indicators with published null/inconclusive single-hazard tests, identify those with precision ≥0.6 and lead-time ≥7 days on compound events across ≥2 regions; falsifier: none clear the bar.",
+      "why_it_matters": "Failed single-hazard detectors may still inform compound extremes; naming nulls avoids false settledness.",
+      "tags": ["climate", "adaptation", "null_result", "failure_knowledge"],
+      "assumptions": ["Published null or inconclusive early-warning evaluations exist as references."]
     }
   ]
 }

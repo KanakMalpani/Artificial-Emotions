@@ -12,6 +12,14 @@
       "why_it_matters": "Credit assignment across areas constrains theories of learning and neuromodulation.",
       "tags": ["neuroscience", "plasticity", "credit-assignment"],
       "assumptions": ["Partial observability of inter-area synapses is acceptable."]
+    },
+    {
+      "id": "neuro-pack-02-null",
+      "question": "Which purported replications of multi-area credit-assignment signatures fail under Z measurement protocols, and why?",
+      "operationalization": "Catalog claimed signatures with failed replication under alternate measurement Z; report fraction failing and missing negative controls across ≥5 studies.",
+      "why_it_matters": "Credit-assignment claims may look settled under one assay while failing under another.",
+      "tags": ["neuroscience", "null_result", "failure_knowledge", "replication"],
+      "assumptions": ["Replication attempts can be coded from literature without inventing unpublished labs."]
     }
   ]
 }
