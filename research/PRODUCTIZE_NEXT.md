@@ -18,7 +18,7 @@
 
 ## P1 — clear product value
 
-6. **`compare_profiles` / veto stack** — Score same candidates under two profiles; hard `max_risk` ceiling from strictest stakeholder ([`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md), `examples/constitution_veto_stack.json`).
+6. **`compare_profiles` / veto stack** — ✅ core offline compare landed; add Kendall τ + CLI/MCP/API/web ([`PROFILE_COMPARE_UX.md`](PROFILE_COMPARE_UX.md), [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md)).
 7. **Public-demo profile** — Stricter `max_risk` than lab presets ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 8. **Eval report sections** — gap_f1, rank_spearman, elicit_rubric_mean, risk_flags ([`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md)).
 9. **Inject always includes risk** — Regression test ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).

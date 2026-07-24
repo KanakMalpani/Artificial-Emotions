@@ -33,6 +33,7 @@ Everything under `research/` is design/background material that informed the imp
 | [INVESTIGATION_DESIGN.md](INVESTIGATION_DESIGN.md) | BoxingGym/EIG humility; falsifier rubrics for provoke |
 | [PRODUCTIZE_NEXT.md](PRODUCTIZE_NEXT.md) | Aggregated sibling backlog from research cycles |
 | [PROBLEM_SELECTION_MCNAMARA.md](PROBLEM_SELECTION_MCNAMARA.md) | Bisht et al. McNamara/hivemind → why ValueProfile+diversity |
+| [PROFILE_COMPARE_UX.md](PROFILE_COMPARE_UX.md) | Side-by-side ranks; Kendall τ; companion to compare.py |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
