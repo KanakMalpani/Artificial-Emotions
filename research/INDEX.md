@@ -51,6 +51,7 @@ Everything under `research/` is design/background material that informed the imp
 | [HIVEMIND_METRIC_SPEC.md](HIVEMIND_METRIC_SPEC.md) | Mean pairwise cosine eval recipe |
 | [LITGAP_CORRELATION_STUDY.md](LITGAP_CORRELATION_STUDY.md) | Offline GapScore ↔ neglectedness protocol |
 | [SUGGEST_NEXT_PAIR.md](SUGGEST_NEXT_PAIR.md) | Active preference duel UX / tool sketch |
+| [MCP_THREAT_TAXONOMY.md](MCP_THREAT_TAXONOMY.md) | MCP-38 / MSB → lint & agent-card mapping |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

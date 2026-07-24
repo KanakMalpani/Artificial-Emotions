@@ -32,7 +32,7 @@ Artificial Curiosity ranks **valuable unanswered questions** under an explicit *
 - “The AI is curious” / “detects your emotions”
 - “Optimal trial design” without ENBS inputs
 
-See [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) MPMA lint.
+See [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) MPMA lint · threat map [`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md) (MCP-38 / MSB).
 
 ---
 
@@ -40,4 +40,5 @@ See [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) MPMA lint.
 
 1. Paste short card into `/v1/agent` + MCP instructions.  
 2. Link `curiosity://limits` early in agent guide ordering.  
-3. Keep LIMITS.md as source of truth; this note is draft only.
+3. Keep LIMITS.md as source of truth; this note is draft only.  
+4. After merge: add regression that agent card contains “related ≠ answered” and “annotation_only”.

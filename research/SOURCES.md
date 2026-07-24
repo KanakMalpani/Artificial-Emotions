@@ -43,6 +43,9 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Gap verify / question-rank competitors | [`GAP_VERIFICATION_COMPETITORS.md`](GAP_VERIFICATION_COMPETITORS.md) | SciMuse, ScholarEval, LitGapFinder, ResearchAgent, Owl-class |
 | Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |
 | Agent plugin / MCP UX | [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) | Tool description hygiene; progressive disclosure; ScaleMCP |
+| MCP threat taxonomy map | [`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md) | MCP-38, MSB, SoK → curiosity mitigations |
+| MCP-38 threat taxonomy | arXiv:2603.18063 | Tool-description poisoning taxonomy |
+| MSB MCP Security Bench | arXiv:2510.15994 | Preference manipulation / NRP |
 | Approximate VOI / EVSI spike | [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md) | ISPOR/ConVOI methods; worksheet vs fake EVSI |
 | Imprecise / multicentre VOI addendum | [`VOI_IMPRECISE.md`](VOI_IMPRECISE.md) | Credal VOI (2607.06570); Wynants EVPI clusters |
 | Preference calibration / LTR ladder | [`PREFERENCE_CALIBRATION.md`](PREFERENCE_CALIBRATION.md) | Pairwise prefs → profile weight hints → optional BT |

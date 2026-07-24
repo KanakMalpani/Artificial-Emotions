@@ -14,7 +14,7 @@
 2. **Gap-status fixture + metric** — ✅ gap-status metric (`874dd7a`); continue hand-label growth ([`GAP_VERIFY_METHODS.md`](GAP_VERIFY_METHODS.md)).
 3. **MCP/tool description lint** — ✅ landed (`2a33786` / `mcp_lint.py`); keep regression tests green ([`MCP_DESCRIPTION_LINT.md`](MCP_DESCRIPTION_LINT.md)).
 4. **Prefs summarize + pairwise nudge** — ✅ partially shipped (`0af53f4`); next: ties + [`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md) ([`PREFERENCE_BT_STAGE2.md`](PREFERENCE_BT_STAGE2.md)).
-5. **Agent card safety blurb** — Draft in [`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md); merge into `/v1/agent` if sibling wants tighter wording ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md), [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md)).
+5. **Agent card safety blurb** — Draft in [`AGENT_CARD_COPY.md`](AGENT_CARD_COPY.md); merge into `/v1/agent`; see MCP threats ([`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md)).
 
 ## P1 — clear product value
 
@@ -24,19 +24,16 @@
 9. **Inject always includes risk** — ✅ inject risk lines (`bc7ffa9`); keep regression coverage ([`DUAL_USE_RANKING.md`](DUAL_USE_RANKING.md)).
 10. **OpenAlex rationale keys only** — ✅ lit rationale keys (`874dd7a`); keep no silent weight change ([`FUNDING_NEGLECT_SIGNALS.md`](FUNDING_NEGLECT_SIGNALS.md)).
 10b. **Mix safety guards** — ✅ soft guards landed (`0af53f4`); keep epistemic-default docs ([`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md)).
-10c. **Top-n hivemind similarity metric** — Spec ready; sibling WIP (`hivemind.py`) ([`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md)).
+10c. **Top-n hivemind similarity metric** — ✅ landed (`044c75e` / `hivemind.py`); keep CI proxy + embedder id logged ([`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md)).
 10d. **Optional `critique_brief`** — ✅ landed (`2a33786` / `critique.py`); keep no silent re-rank ([`CRITIC_DEBATE_JUDGES.md`](CRITIC_DEBATE_JUDGES.md)).
-10e. **Outcome labels in prefs summarize** — sparse flywheel ([`OUTCOME_FLYWHEEL.md`](OUTCOME_FLYWHEEL.md)).
+10e. **Outcome labels in prefs summarize** — ✅ landed (`044c75e`); keep sparse flywheel docs ([`OUTCOME_FLYWHEEL.md`](OUTCOME_FLYWHEEL.md)).
 10f. **Gap fixture: underpowered / invalid_form** — VERITAS taxonomy ([`VERITAS_EPISTEMIC_LABELS.md`](VERITAS_EPISTEMIC_LABELS.md)).
 
 ## P2 — research-facing / moonshot-adjacent
 
 11. **VOI worksheet export** — ✅ landed (`2a33786` / `voi.py`); attach profile-compare / credal note ([`VOI_IMPRECISE.md`](VOI_IMPRECISE.md), [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md)).
-12. **Cue threshold knobs** — ✅ fields on `ValueProfile`; expose presets UI + snapshot tests ([`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md), `examples/cue_threshold_presets.json`).
-13. **LitGapFinder-style cooccur correlation study** — Protocol in [`LITGAP_CORRELATION_STUDY.md`](LITGAP_CORRELATION_STUDY.md); offline only.
-14. **Optional cross-model vote** on generate (HybridQuestion-inspired) — costly; offline ([`HYBRID_QUESTION.md`](HYBRID_QUESTION.md)).
-15. **Bayesian surprise / lab closed-loop** — Only with posteriors; don’t rename axis ([`BAYESIAN_SURPRISE.md`](BAYESIAN_SURPRISE.md)).
-16. **Top-n embedding diversity metric** — Same as 10c ([`HIVEMIND_METRIC_SPEC.md`](HIVEMIND_METRIC_SPEC.md)).
+12. **Cue threshold knobs** — ✅ fields + product path (`044c75e`); presets in `examples/cue_threshold_presets.json` ([`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md)).
+16. **Top-n embedding diversity metric** — ✅ same as 10c.
 17. **LIMITS cite McNamara paper** — Patch list in [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md); sibling merges into `docs/LIMITS.md`.
 18. **Offline BT fit (eval only)** — After ties + pairs; never auto-overwrite weights ([`PREFERENCE_BT_STAGE2.md`](PREFERENCE_BT_STAGE2.md)).
 19. **`suggest_next_pair` tool + duel UI** — Medium-Δ / connect-components heuristic ([`SUGGEST_NEXT_PAIR.md`](SUGGEST_NEXT_PAIR.md)).
