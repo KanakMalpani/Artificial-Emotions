@@ -1,0 +1,60 @@
+{
+  "name": "epistemic_elicit_ab_protocol",
+  "version": "0.1.0",
+  "honesty": "Research/eval protocol only — not an EES API; cues remain annotation_only.",
+  "see": [
+    "research/EPISTEMIC_ELICITATION.md",
+    "src/artificial_curiosity/epistemic_cues.py"
+  ],
+  "primary_outcome": "investigation_quality",
+  "secondary_outcomes": [
+    "optional_short_ees_human_only",
+    "cue_tag_hit_rates"
+  ],
+  "conditions": [
+    {
+      "id": "A_baseline",
+      "description": "Standard provoke inject without incongruity investigate block.",
+      "include_incongruity_block": false,
+      "include_cue_line": false
+    },
+    {
+      "id": "B_incongruity",
+      "description": "Provoke inject plus incongruity_investigate_block and epistemic cue line.",
+      "include_incongruity_block": true,
+      "include_cue_line": true
+    },
+    {
+      "id": "C_mix_framing_optional",
+      "description": "Optional annotation-only mix fragment (e.g. curiosity+confusion weights); not user affect measurement.",
+      "include_incongruity_block": true,
+      "include_cue_line": true,
+      "example_mix": { "curiosity": 50, "confusion": 30, "surprise": 20 }
+    }
+  ],
+  "rubric": {
+    "scale": "0_to_2",
+    "items": [
+      { "id": "names_gap", "prompt": "Names the missing knowledge clearly." },
+      { "id": "first_experiment", "prompt": "Proposes one concrete first experiment or observation." },
+      { "id": "falsifier", "prompt": "States a falsifier or stopping rule." },
+      {
+        "id": "enabling_if_confusion_risk",
+        "prompt": "If cues include confusion_risk, lists an enabling/narrowing question before a large program.",
+        "apply_when_cue": "confusion_risk"
+      }
+    ]
+  },
+  "fixed_controls": [
+    "domain",
+    "value_profile_or_profile_name",
+    "model",
+    "temperature",
+    "n_items"
+  ],
+  "non_claims": [
+    "Does not measure phenomenal emotion in models or users at runtime.",
+    "Does not equate score-axis surprise with EES surprise.",
+    "Not biometric emotion recognition under the EU AI Act."
+  ]
+}

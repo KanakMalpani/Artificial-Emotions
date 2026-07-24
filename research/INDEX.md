@@ -15,7 +15,12 @@ Everything under `research/` is design/background material that informed the imp
 | [AI_EMOTIONS.md](AI_EMOTIONS.md) | Emotions in AI — taxonomies, production mechanisms, epistemic emotions ↔ provoke (not anthropomorphic) |
 | [EMOTION_ACCESS.md](EMOTION_ACCESS.md) | Consumer access patterns — APIs/SDKs/datasets; minimal public emotions contract |
 | [EMOTION_MIXING.md](EMOTION_MIXING.md) | Blends / PAD interpolation / Plutchik dyads; % mix API justification + honesty limits |
+| [EPISTEMIC_ELICITATION.md](EPISTEMIC_ELICITATION.md) | EES / incongruity measurement → provoke A/B eval protocol |
+| [GAP_VERIFICATION_COMPETITORS.md](GAP_VERIFICATION_COMPETITORS.md) | Lit gap / idea-rank competitor map (SciMuse, ScholarEval, LitGapFinder, …) |
+| [AFFECTIVE_SAFETY.md](AFFECTIVE_SAFETY.md) | Anyone-can-use safety: AI Act ERS vs annotation; MCP manipulation |
+| [AGENT_PLUGIN_UX.md](AGENT_PLUGIN_UX.md) | MCP / tool-calling UX for curiosity layers |
 | [NEGLECTEDNESS_COST.md](NEGLECTEDNESS_COST.md) | Neglectedness / cost proxy spike notes |
+| [VOI_APPROXIMATIONS.md](VOI_APPROXIMATIONS.md) | ISPOR/ConVOI EVSI methods → honest proxy vs adapter paths |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

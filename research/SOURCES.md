@@ -20,6 +20,11 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Emotions in AI / epistemic affect (synthesis) | [`AI_EMOTIONS.md`](AI_EMOTIONS.md) | Monograph: classical theories, CME architectures, ML/RL/LLM stacks, epistemic elicitation ↔ provoke |
 | Consumer access to emotion / epistemic tooling | [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) | APIs, SDKs, OCC libs, LLM toolkits, EES, datasets (easy vs locked); minimal public contract |
 | Emotion mixing / blends (synthesis) | [`EMOTION_MIXING.md`](EMOTION_MIXING.md) | PAD interpolation, Plutchik dyads, mixed feelings; % mix schema + honesty limits |
+| Epistemic elicitation → provoke | [`EPISTEMIC_ELICITATION.md`](EPISTEMIC_ELICITATION.md) | EES, incongruity paradigms, agent/human A/B protocol |
+| Gap verify / question-rank competitors | [`GAP_VERIFICATION_COMPETITORS.md`](GAP_VERIFICATION_COMPETITORS.md) | SciMuse, ScholarEval, LitGapFinder, ResearchAgent, Owl-class |
+| Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |
+| Agent plugin / MCP UX | [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) | Tool description hygiene; progressive disclosure; ScaleMCP |
+| Approximate VOI / EVSI spike | [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md) | ISPOR/ConVOI methods; worksheet vs fake EVSI |
 | Watson & Stanton, Emotion blends | DOI 10.1177/1754073916639659 | Same-valence blends vs cross-valence mixed feelings |
 | Marsella, Gratch & Petta, CME review | https://people.ict.usc.edu/~gratch/papers/MarGraPet_Review-old.pdf | PAD for continuous blend; appraisal vs dimensional |
 | Plutchik psychoevolutionary theory / dyads | Plutchik 1980/2001 | Primary/secondary/tertiary dyads; intensity rings |
@@ -42,8 +47,28 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Breazeal, Kismet | IJHCS 2003 | Embodied drives + AVS social affect |
 | Pekrun et al., Epistemically-Related Emotion Scales | DOI 10.1080/02699931.2016.1204989 | EES measurement (surprise…boredom) |
 | Vogl et al., surprise/curiosity/confusion → exploration | DOI 10.3389/fpsyg.2019.02474 | High-confidence errors; meta-analytic path |
+| Noordewier & Gocłowska, shared/unique epistemic emotions | DOI 10.1037/emo0001314 | Discrete structure of awe…boredom |
+| Nerantzaki et al., biased-answer feedback → epistemic emotions | DOI 10.5964/ejop.13847 | Negative feedback arousal |
 | Loewenstein, information-gap curiosity | Psych Bulletin 1994 | Classic elicitation account |
-| Yanagisawa & Honda | arXiv:2401.00007 | Epistemic emotions as Bayesian information gain |
+| Yanagisawa & Honda | arXiv:2401.00007 ; Frontiers Psych 2025 | Epistemic emotions as Bayesian information gain / Wundt-like curve |
+| SciMuse (Gu & Krenn) | arXiv:2405.17044 | Expert interest ranking of AI ideas |
+| ResearchAgent | arXiv:2404.07738 | Iterative idea generation + reviewing agents |
+| IdeaSynth | arXiv:2410.04025 | Literature-grounded idea facet canvas |
+| ScholarEval | arXiv:2510.16234 | Soundness + contribution eval of research ideas |
+| IdeaBench / AI Idea Bench 2025 | arXiv:2411.02429 ; 2504.14191 | Idea-generation benchmarks |
+| LitGapFinder | clawRxiv 2603.00233+ | Concept co-occurrence gap → hypotheses (agent skill) |
+| Ai2 Scholar QA | arXiv:2504.10861 | Open scientific QA (contrast class) |
+| Mohammad, Ethics Sheet for AER | arXiv:2109.08256 | ~50 ethical considerations for emotion recognition |
+| Fabiano, affective computing × AI Act / privacy | arXiv:2509.20153 | Regulatory framing |
+| MCP Safety Audit | arXiv:2504.03767 | MCP exploit classes + scanner |
+| MPMA (preference manipulation) | arXiv:2505.11154 | Adversarial MCP descriptions |
+| MSB (MCP Security Bench) | arXiv:2510.15994 | End-to-end MCP attack eval |
+| MCPXKIT | arXiv:2508.12538 | 31 MCP attack methods |
+| ScaleMCP | arXiv:2505.06416 | Dynamic MCP tool retrieval UX |
+| Heath et al., EVSI moment matching | arXiv:1611.01373 ; 1804.09590 | Tractable EVSI approximations |
+| Kunst et al., ConVOI EVSI methods guide | arXiv:1910.03368 | Which approx method given skills/model |
+| Li, Jalal, Heath TGA EVSI | arXiv:2401.17393 | Nonlinear net-benefit correction |
+| Sadatsafavi et al., EVSI for validation | arXiv:2401.01849 | VOI lens on external validation studies |
 | EmotionBench (Huang et al.) | NeurIPS 2024; arXiv:2308.03656 | LLM emotional alignment fragility |
 | CoRE | arXiv:2508.05880 | Fragile appraisal→emotion reasoning in LLMs |
 | Human-like Affective Cognition in FMs | arXiv:2409.11733 | Structured affective cognition probes |
@@ -98,3 +123,5 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Emotions / epistemic public surface | `emotions.py`; `/v1/emotions/*` |
 | Emotion access contract examples | `examples/emotions_*.json` |
 | Affective-science seed pack | `packs/affective_science.json` |
+| Elicitation A/B protocol example | `examples/elicit_ab_protocol.json` |
+| VOI worksheet template | `examples/voi_worksheet_template.json` |
