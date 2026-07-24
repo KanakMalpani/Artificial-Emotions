@@ -46,6 +46,7 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | Affective tooling safety (public use) | [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md) | AI Act ERS vs annotation; manipulation; design restraint |
 | Agent plugin / MCP UX | [`AGENT_PLUGIN_UX.md`](AGENT_PLUGIN_UX.md) | Tool description hygiene; progressive disclosure; ScaleMCP |
 | MCP threat taxonomy map | [`MCP_THREAT_TAXONOMY.md`](MCP_THREAT_TAXONOMY.md) | MCP-38, MSB, SoK → curiosity mitigations |
+| MCP progressive disclosure | [`MCP_PROGRESSIVE_DISCLOSURE.md`](MCP_PROGRESSIVE_DISCLOSURE.md) | Tiered tool surface as catalog grows |
 | MCP-38 threat taxonomy | arXiv:2603.18063 | Tool-description poisoning taxonomy |
 | MSB MCP Security Bench | arXiv:2510.15994 | Preference manipulation / NRP |
 | Approximate VOI / EVSI spike | [`VOI_APPROXIMATIONS.md`](VOI_APPROXIMATIONS.md) | ISPOR/ConVOI methods; worksheet vs fake EVSI |

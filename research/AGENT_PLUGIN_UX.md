@@ -9,7 +9,7 @@
 
 ## 1. Executive summary
 
-MCP made tools first-class with **natural-language metadata**. That is great for discoverability and terrible for security (tool poisoning, preference manipulation, prompt injection in descriptions). A curiosity layer should optimize for: **clear job boundaries** (rank unknowns ≠ answer questions), **small tool surface**, **resources for limits/profiles**, **honest non-superlative descriptions**, and **provoke as explicit opt-in** — not always-on emotion theater. Dynamic tool retrieval (ScaleMCP-style) matters when catalogs grow; we are still small enough for a static curated set.
+MCP made tools first-class with **natural-language metadata**. That is great for discoverability and terrible for security (tool poisoning, preference manipulation, prompt injection in descriptions). A curiosity layer should optimize for: **clear job boundaries** (rank unknowns ≠ answer questions), **small tool surface**, **resources for limits/profiles**, **honest non-superlative descriptions**, and **provoke as explicit opt-in** — not always-on emotion theater. Dynamic tool retrieval (ScaleMCP-style) matters when catalogs grow; we are still small enough for a static curated set — but tiered disclosure helps as tools multiply ([`MCP_PROGRESSIVE_DISCLOSURE.md`](MCP_PROGRESSIVE_DISCLOSURE.md)).
 
 ---
 

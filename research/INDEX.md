@@ -69,6 +69,7 @@ Everything under `research/` is design/background material that informed the imp
 | [EVIDENCE_INFORMED_BELIEFS.md](EVIDENCE_INFORMED_BELIEFS.md) | Non-stationary surprisal; AutoDiscovery follow-on |
 | [DUAL_USE_REDTEAM.md](DUAL_USE_REDTEAM.md) | Offline dual-use red-team fixture recipe |
 | [INTERN_ATLAS.md](INTERN_ATLAS.md) | Method evolution graph adjacency |
+| [MCP_PROGRESSIVE_DISCLOSURE.md](MCP_PROGRESSIVE_DISCLOSURE.md) | Core / investigate / affect / research tool tiers |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code

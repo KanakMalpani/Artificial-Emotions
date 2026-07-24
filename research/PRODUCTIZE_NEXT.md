@@ -40,9 +40,11 @@
 17. **Optional idea-graph export** — ✅ landed (`c733edc` / `idea_graph.py`); display only ([`IDEA_GRAPH_UX.md`](IDEA_GRAPH_UX.md)).
 18. **Mix intensity cap** — ✅ landed (`c733edc` / `mix_intensity_cap`); keep epistemic-default docs ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
 19. **SFBench-cousin feasibility_note** — ✅ display-only landed (`90fc51d`); offline calibrate before any axis fold ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
+20. **Offline soundness pass** — ✅ heuristic triage (`9538e4e` / `soundness.py`) ([`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md)).
 21. **Web constitution compare + veto** — Wire preset from `examples/constitution_veto_stack.json` ([`CONSTITUTION_WEB_UX.md`](CONSTITUTION_WEB_UX.md)).
 22. **Web outcome picker** — Sparse flywheel capture ([`OUTCOME_WEB_UX.md`](OUTCOME_WEB_UX.md)).
 23. **Dual-use red-team fixtures** — Template ready ([`DUAL_USE_REDTEAM.md`](DUAL_USE_REDTEAM.md), `examples/dual_use_redteam_fixture_template.json`).
+24. **MCP tool tiers** — Optional core/full progressive disclosure ([`MCP_PROGRESSIVE_DISCLOSURE.md`](MCP_PROGRESSIVE_DISCLOSURE.md)).
 
 ## Explicit non-goals (from research)
 
@@ -59,4 +61,4 @@
 
 Index: [`INDEX.md`](INDEX.md) · Sources: [`SOURCES.md`](SOURCES.md)
 
-Recent research commits: `78180e6` LIMITS patches · `fe3e7a4` BT/VERITAS/VOI · `27446b3` cue/hivemind specs · `464715a` LitGap/pair UX · `2906fe4` MCP threats · `6c01702` EIG + gap template
+Recent research: `dd2fbe3` evidence-informed beliefs · `36c1e7b` dual-use redteam · `6a8421d` Intern-Atlas · MCP progressive disclosure (this)
