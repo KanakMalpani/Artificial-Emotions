@@ -6,8 +6,8 @@ from artificial_curiosity.epistemic_cues import (
     EPISTEMIC_CUE_DISCLAIMER,
     TAG_CONFUSION_RISK,
     TAG_CURIOSITY_TARGET,
-    TAG_INFORMATION_GAP,
     TAG_INCONGRUITY,
+    TAG_INFORMATION_GAP,
     TAG_SURPRISE_SIGNAL,
     derive_epistemic_cues,
     incongruity_investigate_block,
@@ -19,7 +19,7 @@ from artificial_curiosity.models import (
     ScoreAxes,
     UnansweredQuestion,
 )
-from artificial_curiosity.packs import questions_from_pack, load_pack_file
+from artificial_curiosity.packs import load_pack_file, questions_from_pack
 from artificial_curiosity.provoke import build_inject_prompt, compact_unknown, provoke
 
 
@@ -68,9 +68,7 @@ def test_derive_cues_unanswered_high_surprise():
 
 
 def test_derive_cues_partial_marks_confusion_risk():
-    cues = derive_epistemic_cues(
-        _ranked(status=GapStatus.PARTIALLY_ANSWERED, surprise=0.2)
-    )
+    cues = derive_epistemic_cues(_ranked(status=GapStatus.PARTIALLY_ANSWERED, surprise=0.2))
     assert TAG_CONFUSION_RISK in cues["tags"]
 
 

@@ -26,10 +26,10 @@ def aggregate_curiosity(
     a near-zero tractability collapses the score.
     """
     parts = [
-        axes.impact ** profile.weight_impact,
-        axes.neglectedness ** profile.weight_neglectedness,
-        axes.tractability ** profile.weight_tractability,
-        axes.surprise ** profile.weight_surprise,
+        axes.impact**profile.weight_impact,
+        axes.neglectedness**profile.weight_neglectedness,
+        axes.tractability**profile.weight_tractability,
+        axes.surprise**profile.weight_surprise,
     ]
     geo = math.prod(parts) ** (1.0 / max(len(parts), 1))
     risk_factor = max(0.0, 1.0 - axes.risk)
@@ -138,16 +138,38 @@ def heuristic_score(
     text = f"{q.question} {q.why_it_matters} {q.operationalization}".lower()
     q_only = q.question.lower()
     impact_keywords = (
-        "mortal", "death", "climate", "pandemic", "energy", "alignment",
-        "extinction", "cancer", "antibiotic", "fusion", "consciousness",
-        "aging", "famine", "biosecurity", "civilization",
+        "mortal",
+        "death",
+        "climate",
+        "pandemic",
+        "energy",
+        "alignment",
+        "extinction",
+        "cancer",
+        "antibiotic",
+        "fusion",
+        "consciousness",
+        "aging",
+        "famine",
+        "biosecurity",
+        "civilization",
     )
     surprise_keywords = (
-        "unknown", "paradox", "unexplained", "contradict", "mechanism",
-        "why does", "missing link", "first principles",
+        "unknown",
+        "paradox",
+        "unexplained",
+        "contradict",
+        "mechanism",
+        "why does",
+        "missing link",
+        "first principles",
     )
     hard_keywords = (
-        "prove", "forever", "meaning of life", "free will", "should we",
+        "prove",
+        "forever",
+        "meaning of life",
+        "free will",
+        "should we",
     )
 
     # Impact from stake language only — never from citation counts (F3).
@@ -184,16 +206,34 @@ def heuristic_score(
     )
 
     hot_topic = (
-        "transformer", "llm", "chatgpt", "foundation model", "hype",
-        "blockchain", "nft", "metaverse",
+        "transformer",
+        "llm",
+        "chatgpt",
+        "foundation model",
+        "hype",
+        "blockchain",
+        "nft",
+        "metaverse",
     )
     funding_heavy = (
-        "well-funded", "heavily funded", "billion-dollar", "arms race",
-        "industry standard", "saturated field", "crowded literature",
+        "well-funded",
+        "heavily funded",
+        "billion-dollar",
+        "arms race",
+        "industry standard",
+        "saturated field",
+        "crowded literature",
     )
     neglected_cues = (
-        "understudied", "neglected", "orphan", "under-funded", "underfunded",
-        "few papers", "little attention", "overlooked", "sparse literature",
+        "understudied",
+        "neglected",
+        "orphan",
+        "under-funded",
+        "underfunded",
+        "few papers",
+        "little attention",
+        "overlooked",
+        "sparse literature",
     )
     if any(k in text for k in hot_topic):
         neglectedness *= 0.82  # F6: resist trend chasing
@@ -232,8 +272,13 @@ def heuristic_score(
     if any(
         k in text
         for k in (
-            "pilot", "small-n", "simulation", "reanalysis", "meta-analysis",
-            "existing dataset", "retrospective",
+            "pilot",
+            "small-n",
+            "simulation",
+            "reanalysis",
+            "meta-analysis",
+            "existing dataset",
+            "retrospective",
         )
     ):
         cost = min(cost, 0.32)
@@ -242,8 +287,14 @@ def heuristic_score(
     if any(
         k in text
         for k in (
-            "multi-decade", "nationwide", "particle collider", "space mission",
-            "phase iii", "phase 3", "rct with n>", "animal colony",
+            "multi-decade",
+            "nationwide",
+            "particle collider",
+            "space mission",
+            "phase iii",
+            "phase 3",
+            "rct with n>",
+            "animal colony",
         )
     ):
         cost = max(cost, 0.85)

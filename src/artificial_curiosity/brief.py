@@ -11,8 +11,7 @@ def write_brief(item: RankedQuestion) -> str:
     related = item.gap.related_works[:3]
     related_lines = (
         "\n".join(
-            f"- {h.title} ({h.year or 'n/a'}; cites={h.cited_by_count or 0})"
-            for h in related
+            f"- {h.title} ({h.year or 'n/a'}; cites={h.cited_by_count or 0})" for h in related
         )
         or "- No closely related works retrieved."
     )

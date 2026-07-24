@@ -22,6 +22,11 @@ def test_health_to_domains_to_agent_tools(client: TestClient) -> None:
     assert body["ok"] is True
     assert body["service"] == "artificial-curiosity"
     assert "profiles" in body
+    assert "version" in body
+
+    ready = client.get("/ready")
+    assert ready.status_code == 200
+    assert ready.json()["ready"] is True
 
     root = client.get("/")
     assert root.status_code == 200
@@ -165,7 +170,5 @@ def test_api_run_literature_optional(client: TestClient) -> None:
     assert data["count"] >= 1
     related = any((q.get("gap") or {}).get("related_works") for q in data["questions"])
     if not related:
-        pytest.skip(
-            "No OpenAlex hits (offline or rate-limited); fast-path e2e covers offline"
-        )
+        pytest.skip("No OpenAlex hits (offline or rate-limited); fast-path e2e covers offline")
     assert data["literature_backend"] == "openalex"

@@ -167,6 +167,7 @@ def test_api_emotions_catalog_and_mix():
         json={"weights": {"nope": 100}},
     )
     assert bad.status_code == 400
+    assert bad.json()["error"]["code"] == "unknown_emotion"
 
 
 def test_api_root_mentions_emotions():

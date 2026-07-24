@@ -200,15 +200,36 @@ curiosity serve
 | URL | Purpose |
 |-----|---------|
 | http://127.0.0.1:8000/docs | Interactive OpenAPI |
+| http://127.0.0.1:8000/health | Liveness + config summary |
+| http://127.0.0.1:8000/ready | Readiness (offline spark/emotions) |
 | http://127.0.0.1:8000/v1/curiosity/provoke?domain=ai&n=5 | Instant spark |
 | http://127.0.0.1:8000/v1/curiosity/run | Full pipeline (POST) |
+| http://127.0.0.1:8000/v1/emotions/catalog | Mixable emotion catalog |
+| http://127.0.0.1:8000/v1/emotions/mix | POST mix weights |
 | http://127.0.0.1:8000/v1/agent | Machine guide |
 | http://127.0.0.1:8000/v1/agent/tools | OpenAI-compatible tool schemas |
 | http://127.0.0.1:8000/v1/domains | Domain list |
 
+### Copy-paste curls
+
+```bash
+# Spark (paste `inject` into any model)
+curl -s "http://127.0.0.1:8000/v1/curiosity/provoke?domain=ai&n=5&fast=true"
+
+# Catalog + mix (annotation_only framing weights — does not feel)
+curl -s http://127.0.0.1:8000/v1/emotions/catalog
+curl -s -X POST http://127.0.0.1:8000/v1/emotions/mix \
+  -H "Content-Type: application/json" \
+  -d '{"weights":{"curiosity":40,"confusion":30,"awe":30}}'
+```
+
+Errors use a stable shape: `{"error":{"code":"unknown_emotion","message":"…"}}`.
+
 ### Optional API key (WO-0.4.6)
 
-Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health` and `/` stay open; health reports `api_auth_required`.
+Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health`, `/ready`, and `/` stay open; health reports `api_auth_required`.
+
+Central env reference: `artificial_curiosity.config` and `.env.example` (`LLM_TIMEOUT_S`, `LITERATURE_TIMEOUT_S`, `CURIOSITY_CORS_ORIGINS`, …).
 
 Example:
 
@@ -227,10 +248,14 @@ Load schemas from either:
 - Static file: [`examples/openai_tools.json`](../examples/openai_tools.json)
 - Live: `GET http://127.0.0.1:8000/v1/agent/tools` → use the `tools` array
 
+Includes emotion tools: `emotion_catalog`, `mix_emotions`, `list_epistemic_cues`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`.
+
 Pass them as `tools` to any OpenAI-compatible `/chat/completions` host. When the model emits a tool call, execute it by:
 
 1. Calling the matching HTTP route, or
 2. `from artificial_curiosity.agent_tools import dispatch_tool` then `dispatch_tool(name, arguments)`
+
+Minimal mix example request/response: [`examples/emotions_mix_request.json`](../examples/emotions_mix_request.json), [`examples/emotions_mix_response.json`](../examples/emotions_mix_response.json).
 
 ---
 
@@ -251,3 +276,4 @@ pytest -q
 - Default spark path needs **no** key.
 - OpenAlex literature grounding needs no key (optional `OPENALEX_MAILTO`).
 - Optional LLM: set `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` only in local env or MCP `env`.
+- Quality gate: GitHub Actions `ci.yml` (lint + pytest) runs on every PR/push — independent of PyPI publish billing.

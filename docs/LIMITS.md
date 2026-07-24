@@ -1,8 +1,8 @@
 # Known Limits (verified)
 
-Honest bounds for **v0.3.1** — do not overclaim.
+Honest bounds for **v0.4.0** — do not overclaim.
 
-## Verified working (2026-07-23)
+## Verified working (2026-07-24)
 
 - Offline seed → score → rank → brief pipeline
 - Literature neighborhood fetch via **OpenAlex** (default) and optional **Semantic Scholar** (`literature_backend=semantic_scholar|both`)
@@ -31,7 +31,10 @@ Honest bounds for **v0.3.1** — do not overclaim.
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon (`research/NEGLECTEDNESS_COST.md`) — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
 - Versioned domain packs (`artificial_curiosity/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment + climate packs
-- Automated tests: core, failure-mode, provoke/API, MCP, mid-horizon (W10–W15) — run `pytest -q`
+- Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness
+- Central env config module (`artificial_curiosity.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS
+- CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, e2e — run `pytest -q`
 - Smoke: `curiosity spark`, `curiosity profiles`, `curiosity eval`, `curiosity-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy

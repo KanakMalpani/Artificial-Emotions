@@ -5,8 +5,11 @@ from __future__ import annotations
 import re
 
 from artificial_curiosity.llm import LLMClient
+from artificial_curiosity.logutil import get_logger
 from artificial_curiosity.models import CuriosityConfig, Domain, UnansweredQuestion
 from artificial_curiosity.seeds import seeds_for
+
+logger = get_logger("generate")
 
 
 GENERATE_SYSTEM = """You generate valuable UNANSWERED scientific questions.
@@ -50,9 +53,10 @@ def generate_candidates(config: CuriosityConfig) -> list[UnansweredQuestion]:
         )
         domain_key = str(config.domain).lower()
         for pq in pack_qs:
-            if domain_key in ("general", str(Domain.GENERAL.value)) or str(
-                pq.domain
-            ).lower() in (domain_key, "general"):
+            if domain_key in ("general", str(Domain.GENERAL.value)) or str(pq.domain).lower() in (
+                domain_key,
+                "general",
+            ):
                 base.append(pq)
         # De-dupe by question text, keep order.
         seen: set[str] = set()
@@ -81,7 +85,8 @@ def generate_candidates(config: CuriosityConfig) -> list[UnansweredQuestion]:
     )
     try:
         raw = client.chat_json(GENERATE_SYSTEM, user)
-    except Exception:
+    except Exception as exc:  # noqa: BLE001 — optional LLM soft-fail
+        logger.warning("LLM generate soft-fail; using seeds only: %s", exc)
         return base[: config.n_candidates]
 
     out: list[UnansweredQuestion] = []
@@ -101,6 +106,7 @@ def generate_candidates(config: CuriosityConfig) -> list[UnansweredQuestion]:
                     source="llm",
                 )
             )
-        except Exception:
+        except Exception as exc:  # noqa: BLE001 — skip malformed item
+            logger.warning("Skipping malformed LLM question item: %s", exc)
             continue
     return (out + base)[: config.n_candidates] if out else base[: config.n_candidates]

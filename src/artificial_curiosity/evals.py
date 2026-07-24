@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from artificial_curiosity.models import GapStatus, LiteratureHit, UnansweredQuestion
-from artificial_curiosity.verify import classify_gap, verify_gap
+from artificial_curiosity.verify import verify_gap
 
 
 def default_fixtures_dir() -> Path:
@@ -117,8 +117,7 @@ def _parse_case(raw: dict[str, Any]) -> SpotCheckCase:
         hits=hits,
         notes=str(raw.get("notes") or ""),
         already_answered_fail_if_returned=bool(
-            raw.get("already_answered_fail_if_returned")
-            or gold == GapStatus.LIKELY_ANSWERED
+            raw.get("already_answered_fail_if_returned") or gold == GapStatus.LIKELY_ANSWERED
         ),
     )
 

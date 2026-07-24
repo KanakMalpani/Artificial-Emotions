@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "artificial-curiosity"
-version = "0.3.1"
+version = "0.4.0"
 description = "A curiosity layer for AI: generate and rank valuable unanswered questions"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -19,7 +19,7 @@ keywords = [
   "openalex",
 ]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
@@ -30,9 +30,9 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "pydantic>=2.6",
-  "fastapi>=0.115",
-  "uvicorn[standard]>=0.30",
+  "pydantic>=2.6,<3",
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
 ]
 
 [project.urls]
@@ -40,10 +40,17 @@ Homepage = "https://github.com/KanakMalpani/Artificial-Curiosity"
 Repository = "https://github.com/KanakMalpani/Artificial-Curiosity"
 Issues = "https://github.com/KanakMalpani/Artificial-Curiosity/issues"
 Documentation = "https://github.com/KanakMalpani/Artificial-Curiosity#readme"
+Changelog = "https://github.com/KanakMalpani/Artificial-Curiosity/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "httpx>=0.27", "ruff>=0.6"]
-embeddings = ["sentence-transformers>=3.0"]
+dev = [
+  "pytest>=8.0,<9",
+  "httpx>=0.27,<1",
+  "ruff>=0.6,<1",
+]
+embeddings = [
+  "sentence-transformers>=3.0,<5",
+]
 
 [project.scripts]
 curiosity = "artificial_curiosity.cli:main"
@@ -66,6 +73,7 @@ include = [
   "/LICENSE",
   "/pyproject.toml",
   "/CONTRIBUTING.md",
+  "/CHANGELOG.md",
 ]
 
 [tool.pytest.ini_options]
@@ -75,3 +83,20 @@ markers = [
   "e2e: end-to-end surface tests (API TestClient + CLI main)",
   "slow: optional network/literature tests (may skip offline)",
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = [
+  "E501",   # long docstrings / URLs OK
+  "B008",   # FastAPI Depends / Query in defaults
+  "B905",   # zip(strict=) — gradual; equal-length lists already guarded
+  "UP042",  # Domain/GapStatus stay str,Enum for pydantic/JSON compat
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B018"]

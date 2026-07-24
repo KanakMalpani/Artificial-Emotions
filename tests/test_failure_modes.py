@@ -121,9 +121,7 @@ def test_pipeline_flags_heuristic_when_no_llm():
 
 def test_f3_citations_do_not_inflate_impact():
     """McNamara: citation density must not raise impact — only neglectedness."""
-    base = _q(
-        "What measurable internal signals most reliably predict goal-misgeneralization?"
-    )
+    base = _q("What measurable internal signals most reliably predict goal-misgeneralization?")
     low_cites = heuristic_score(base, GapStatus.UNANSWERED, 2, 5.0, ValueProfile())
     high_cites = heuristic_score(base, GapStatus.UNANSWERED, 2, 500.0, ValueProfile())
     assert high_cites.impact == low_cites.impact

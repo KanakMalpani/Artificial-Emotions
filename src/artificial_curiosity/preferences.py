@@ -7,12 +7,12 @@ or agent expresses preference among ranked unknowns.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from collections.abc import Iterable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any
 
 from pydantic import BaseModel, Field
-
 
 SCHEMA_VERSION = "preference_event.v1"
 
@@ -22,7 +22,7 @@ class PreferenceEvent(BaseModel):
 
     schema_version: str = SCHEMA_VERSION
     ts: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
+        default_factory=lambda: datetime.now(UTC).isoformat(),
         description="ISO-8601 UTC timestamp",
     )
     event_type: str = Field(

@@ -673,5 +673,45 @@
         "additionalProperties": false
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "emotion_catalog",
+      "description": "List mixable named emotions (epistemic, basic, social, achievement) with optional PAD anchors and elicit hints. Annotation only \u2014 does not feel. See docs/EMOTIONS.md.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "family": {
+            "type": "string",
+            "description": "Optional filter: epistemic | basic | social | achievement"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "mix_emotions",
+      "description": "Mix catalog emotions by percentages/weights (normalized to sum 1.0). Example weights: {curiosity: 40, confusion: 30, awe: 30}. Returns blend profile, cue tags, inject_fragment. Annotation only \u2014 not felt emotion.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "weights": {
+            "type": "object",
+            "description": "Map emotion_id \u2192 percent (e.g. 40) or weight (e.g. 0.4). Normalized to sum 1.0. Example: {\"curiosity\": 40, \"confusion\": 30, \"awe\": 30}",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "weights"
+        ],
+        "additionalProperties": false
+      }
+    }
   }
 ]

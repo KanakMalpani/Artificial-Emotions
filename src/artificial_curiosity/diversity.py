@@ -12,7 +12,10 @@ import re
 import unicodedata
 from typing import Literal
 
+from artificial_curiosity.logutil import get_logger
 from artificial_curiosity.models import RankedQuestion, UnansweredQuestion
+
+logger = get_logger("diversity")
 
 DiversityBackend = Literal["jaccard", "embedding"]
 
@@ -73,7 +76,8 @@ def _get_embedding_model():
         # Small, widely cached model — only loaded when embedding backend is requested.
         _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
         return _embedding_model
-    except Exception:
+    except Exception as exc:  # noqa: BLE001 — optional extras soft-fail
+        logger.warning("Embedding model unavailable; Jaccard fallback will be used: %s", exc)
         return None
 
 
@@ -120,9 +124,7 @@ def diversify(
     selected: list[RankedQuestion] = []
     for item in ranked:
         if any(
-            is_near_duplicate(
-                item.question, s.question, threshold, backend=effective
-            )
+            is_near_duplicate(item.question, s.question, threshold, backend=effective)
             for s in selected
         ):
             flags = list(set(item.flags + ["near_duplicate_suppressed"]))

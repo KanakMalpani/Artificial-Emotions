@@ -11,27 +11,76 @@ from __future__ import annotations
 import re
 
 from artificial_curiosity.literature import LiteratureClient
+from artificial_curiosity.logutil import get_logger
 from artificial_curiosity.models import GapEvidence, GapStatus, LiteratureHit, UnansweredQuestion
+
+logger = get_logger("verify")
 
 # Lightweight abstract reading (F7): not full NLP, but better than bag-of-tokens alone.
 _ANSWER_CLAIM = (
-    "we show", "we demonstrate", "we find that", "we prove", "results show",
-    "our results", "we establish", "empirically show", "we solve",
-    "definitively", "conclusively",
+    "we show",
+    "we demonstrate",
+    "we find that",
+    "we prove",
+    "results show",
+    "our results",
+    "we establish",
+    "empirically show",
+    "we solve",
+    "definitively",
+    "conclusively",
 )
 _OPEN_GAP = (
-    "remains unknown", "open question", "poorly understood", "not well understood",
-    "unresolved", "further research", "future work", "gap in", "little is known",
-    "unclear whether", "still unknown", "to be determined",
+    "remains unknown",
+    "open question",
+    "poorly understood",
+    "not well understood",
+    "unresolved",
+    "further research",
+    "future work",
+    "gap in",
+    "little is known",
+    "unclear whether",
+    "still unknown",
+    "to be determined",
 )
 
 
 def _query_from_question(q: UnansweredQuestion) -> str:
     stop = {
-        "what", "which", "when", "where", "why", "how", "does", "do", "is",
-        "are", "the", "a", "an", "of", "in", "to", "for", "and", "or", "with",
-        "most", "best", "can", "we", "our", "that", "this", "under", "when",
-        "appear", "increase", "reduce", "cause", "before",
+        "what",
+        "which",
+        "when",
+        "where",
+        "why",
+        "how",
+        "does",
+        "do",
+        "is",
+        "are",
+        "the",
+        "a",
+        "an",
+        "of",
+        "in",
+        "to",
+        "for",
+        "and",
+        "or",
+        "with",
+        "most",
+        "best",
+        "can",
+        "we",
+        "our",
+        "that",
+        "this",
+        "under",
+        "appear",
+        "increase",
+        "reduce",
+        "cause",
+        "before",
     }
     words = re.findall(r"[A-Za-z0-9\-]+", q.question.lower())
     keep = [w for w in words if w not in stop and len(w) > 2]
@@ -59,7 +108,7 @@ def _token_overlap(a: str, b: str) -> float:
 
 def _bigrams(text: str) -> set[str]:
     toks = re.findall(r"[a-z0-9]+", text.lower())
-    return {f"{toks[i]} {toks[i+1]}" for i in range(len(toks) - 1)}
+    return {f"{toks[i]} {toks[i + 1]}" for i in range(len(toks) - 1)}
 
 
 def _bigram_overlap(a: str, b: str) -> float:
@@ -185,6 +234,7 @@ def verify_gap(
     try:
         hits = client.search_works(query, per_page=10)
     except Exception as exc:  # noqa: BLE001 — network/API soft-fail
+        logger.warning("Literature fetch soft-fail for query=%r: %s", query[:80], exc)
         return GapEvidence(
             status=GapStatus.UNKNOWN_WITH_CAVEAT,
             confidence=0.2,
@@ -198,20 +248,12 @@ def verify_gap(
     ops = question.operationalization or ""
     base_overlaps = [_content_overlap(probe, h, ops=ops) for h in hits]
     claim_signals = [_abstract_claim_signal(h) for h in hits]
-    overlaps = [
-        _effective_overlap(b, c) for b, c in zip(base_overlaps, claim_signals)
-    ]
-    weighted = [
-        o * _recency_weight(h.year) for o, h in zip(overlaps, hits)
-    ]
+    overlaps = [_effective_overlap(b, c) for b, c in zip(base_overlaps, claim_signals)]
+    weighted = [o * _recency_weight(h.year) for o, h in zip(overlaps, hits)]
     top_overlap = max(weighted) if weighted else 0.0
     strong_idxs = [i for i, o in enumerate(overlaps) if o >= 0.28]
     strong_match_count = len(strong_idxs)
-    recent_strong_count = sum(
-        1
-        for i in strong_idxs
-        if _recency_weight(hits[i].year) >= 0.85
-    )
+    recent_strong_count = sum(1 for i in strong_idxs if _recency_weight(hits[i].year) >= 0.85)
     open_gap_hits = sum(1 for c in claim_signals if c < -0.05)
     claim_hits = sum(1 for c in claim_signals if c > 0.1)
     cites = [h.cited_by_count or 0 for h in hits]

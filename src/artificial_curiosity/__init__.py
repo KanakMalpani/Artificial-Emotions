@@ -8,6 +8,7 @@ from artificial_curiosity.emotions import (
     list_epistemic_cues,
     mix_emotions,
 )
+from artificial_curiosity.errors import CuriosityError
 from artificial_curiosity.models import (
     CuriosityConfig,
     RankedQuestion,
@@ -22,6 +23,7 @@ from artificial_curiosity.provoke import provoke
 __all__ = [
     "CuriosityConfig",
     "CuriosityEngine",
+    "CuriosityError",
     "RankedQuestion",
     "UnansweredQuestion",
     "ValueProfile",
@@ -36,4 +38,4 @@ __all__ = [
     "provoke",
 ]
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"

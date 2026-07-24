@@ -102,8 +102,7 @@ VALUE_PROFILE_PRESETS: dict[str, ValueProfile] = {
     "near_term_ops": ValueProfile(
         name="near_term_ops",
         description=(
-            "Prefer answerable, low-cost unknowns that can inform operations within "
-            "1–3 years."
+            "Prefer answerable, low-cost unknowns that can inform operations within 1–3 years."
         ),
         weight_impact=0.9,
         weight_neglectedness=0.7,

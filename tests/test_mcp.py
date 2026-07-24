@@ -101,10 +101,7 @@ def test_mcp_initialize():
 
 
 def test_mcp_initialized_notification_no_response():
-    assert (
-        handle_message({"jsonrpc": "2.0", "method": "notifications/initialized"})
-        is None
-    )
+    assert handle_message({"jsonrpc": "2.0", "method": "notifications/initialized"}) is None
 
 
 def test_mcp_tools_list():

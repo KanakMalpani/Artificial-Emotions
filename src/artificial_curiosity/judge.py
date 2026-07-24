@@ -9,6 +9,7 @@ import statistics
 from typing import Any
 
 from artificial_curiosity.llm import LLMClient
+from artificial_curiosity.logutil import get_logger
 from artificial_curiosity.models import (
     CuriosityConfig,
     GapEvidence,
@@ -16,6 +17,8 @@ from artificial_curiosity.models import (
     ScoreAxes,
     UnansweredQuestion,
 )
+
+logger = get_logger("judge")
 
 JUDGE_SYSTEM = """You score unanswered scientific questions on structured rubrics (0 to 1).
 This is a curiosity judge — NOT a Q&A assistant and NOT a citation forecaster.
@@ -109,7 +112,8 @@ def llm_score(
     try:
         raw: dict[str, Any] = client.chat_json(JUDGE_SYSTEM, user)
         return _parse_axes(raw)
-    except Exception:
+    except Exception as exc:  # noqa: BLE001 — optional LLM soft-fail
+        logger.warning("LLM judge soft-fail; heuristic scores kept: %s", exc)
         return None
 
 
@@ -138,7 +142,15 @@ def mean_axes(scores: list[ScoreAxes]) -> ScoreAxes:
     """Average numeric axes; merge rationales."""
     if len(scores) == 1:
         return scores[0]
-    keys = ("impact", "neglectedness", "tractability", "surprise", "answerability", "risk", "cost_proxy")
+    keys = (
+        "impact",
+        "neglectedness",
+        "tractability",
+        "surprise",
+        "answerability",
+        "risk",
+        "cost_proxy",
+    )
     avg = {k: statistics.fmean(getattr(s, k) for s in scores) for k in keys}
     rationale: dict[str, str] = {"method": "multi_judge_mean"}
     for i, s in enumerate(scores):
@@ -342,5 +354,6 @@ def llm_refine_gap(
             llm_grounded=True,
             literature_backend=gap.literature_backend,
         )
-    except Exception:
+    except Exception as exc:  # noqa: BLE001 — optional LLM gap reader soft-fail
+        logger.warning("LLM gap reader soft-fail; keeping heuristic gap: %s", exc)
         return None

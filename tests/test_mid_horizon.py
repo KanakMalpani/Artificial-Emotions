@@ -68,7 +68,9 @@ def test_w11_literature_factory_offline_and_merge():
         CuriosityConfig(domain="ai", use_literature=False, use_llm=False, n_return=2)
     ).run()
     assert results
-    assert results[0].gap.literature_backend in (None, "none") or "no_literature" in results[0].flags
+    assert (
+        results[0].gap.literature_backend in (None, "none") or "no_literature" in results[0].flags
+    )
 
     client = build_literature_client("openalex")
     assert client is not None
@@ -110,9 +112,7 @@ def test_w11_literature_cache(tmp_path: Path):
             calls["n"] += 1
             return [LiteratureHit(title="Cached", year=2024, source="t")]
 
-    cached = CachedLiteratureClient(
-        Counting(), backend_name="test", cache_dir=tmp_path, ttl_s=3600
-    )
+    cached = CachedLiteratureClient(Counting(), backend_name="test", cache_dir=tmp_path, ttl_s=3600)
     assert cached.search_works("q")[0].title == "Cached"
     assert cached.search_works("q")[0].title == "Cached"
     assert calls["n"] == 1
@@ -202,9 +202,7 @@ def test_w14_dual_use_beyond_keywords():
     assert combo.needs_human_review or combo.hard_reject_likely
     assert any("combo" in s or "phrase" in s for s in combo.signals)
 
-    weaponized = assess_dual_use(
-        "How can pathogen surveillance systems be weaponized at scale?"
-    )
+    weaponized = assess_dual_use("How can pathogen surveillance systems be weaponized at scale?")
     assert weaponized.risk >= 0.85
 
     flags = dual_use_flags(
@@ -318,8 +316,12 @@ def test_wo044_neglectedness_cost_proxies():
         why_it_matters="Neglected adaptation seam.",
         tags=["climate", "water", "social", "adaptation"],
     )
-    a = heuristic_score(crowded, GapStatus.UNANSWERED, 20, 150.0, ValueProfile(), strong_match_count=2)
-    b = heuristic_score(neglected, GapStatus.UNANSWERED, 2, 5.0, ValueProfile(), strong_match_count=0)
+    a = heuristic_score(
+        crowded, GapStatus.UNANSWERED, 20, 150.0, ValueProfile(), strong_match_count=2
+    )
+    b = heuristic_score(
+        neglected, GapStatus.UNANSWERED, 2, 5.0, ValueProfile(), strong_match_count=0
+    )
     assert b.neglectedness > a.neglectedness
     assert b.cost_proxy < a.cost_proxy or b.cost_proxy <= 0.45
     assert "neglectedness_proxy" in a.rationale

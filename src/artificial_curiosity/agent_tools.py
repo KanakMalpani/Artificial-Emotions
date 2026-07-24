@@ -7,7 +7,8 @@ custom agents all see the same contract.
 from __future__ import annotations
 
 import json
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from artificial_curiosity.emotions import (
     annotate_epistemic,
@@ -18,9 +19,9 @@ from artificial_curiosity.emotions import (
     mix_emotions,
 )
 from artificial_curiosity.models import (
+    VALUE_PROFILE_PRESETS,
     CuriosityConfig,
     Domain,
-    VALUE_PROFILE_PRESETS,
     ValueProfile,
     list_profile_names,
     resolve_value_profile,
@@ -263,9 +264,7 @@ EMOTION_CATALOG_SCHEMA: dict[str, Any] = {
     "properties": {
         "family": {
             "type": "string",
-            "description": (
-                "Optional filter: epistemic | basic | social | achievement"
-            ),
+            "description": ("Optional filter: epistemic | basic | social | achievement"),
         },
     },
     "additionalProperties": False,
@@ -342,11 +341,16 @@ def handle_rank_unknowns(
 ) -> dict[str, Any]:
     """Full curiosity pipeline: generate → verify → score → diversify → brief."""
     profile = _parse_value_profile(value_profile, profile_name=profile_name)
-    backend = literature_backend if literature_backend in (
-        "openalex",
-        "semantic_scholar",
-        "both",
-    ) else "openalex"
+    backend = (
+        literature_backend
+        if literature_backend
+        in (
+            "openalex",
+            "semantic_scholar",
+            "both",
+        )
+        else "openalex"
+    )
     config = CuriosityConfig(
         domain=domain,
         topic=topic,
@@ -466,8 +470,7 @@ def handle_mix_emotions(
     """Mix catalog emotions by percent/weight; normalize to sum=1.0."""
     if not isinstance(weights, dict) or not weights:
         raise ValueError(
-            "weights must be a non-empty object, e.g. "
-            '{"curiosity": 40, "confusion": 30, "awe": 30}'
+            'weights must be a non-empty object, e.g. {"curiosity": 40, "confusion": 30, "awe": 30}'
         )
     cleaned: dict[str, float] = {}
     for key, val in weights.items():
@@ -495,9 +498,7 @@ TOOL_SPECS: list[dict[str, Any]] = [
     },
     {
         "name": "spark",
-        "description": (
-            "Alias of provoke_curiosity — instant ranked unknowns + inject pack."
-        ),
+        "description": ("Alias of provoke_curiosity — instant ranked unknowns + inject pack."),
         "input_schema": PROVOKE_SCHEMA,
         "handler": handle_provoke_curiosity,
     },
@@ -694,9 +695,7 @@ def mcp_resource_read(uri: str) -> dict[str, Any]:
         "contents": [
             {
                 "uri": uri,
-                "mimeType": "application/json"
-                if uri != "curiosity://limits"
-                else "text/plain",
+                "mimeType": "application/json" if uri != "curiosity://limits" else "text/plain",
                 "text": text,
             }
         ]

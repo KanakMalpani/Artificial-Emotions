@@ -2,16 +2,24 @@
 
 from __future__ import annotations
 
-import os
 import secrets
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from artificial_curiosity import __version__
 from artificial_curiosity.agent_tools import openai_tools
+from artificial_curiosity.config import (
+    clear_config_cache,
+    configured_api_keys,
+    cors_origins,
+    get_config,
+)
 from artificial_curiosity.emotions import (
     annotate_epistemic,
     elicit_helpers,
@@ -20,17 +28,28 @@ from artificial_curiosity.emotions import (
     list_epistemic_cues,
     mix_emotions,
 )
+from artificial_curiosity.errors import (
+    ERR_AUTH_REQUIRED,
+    ERR_INTERNAL,
+    ERR_VALIDATION,
+    CuriosityError,
+    classify_value_error,
+    error_payload,
+)
 from artificial_curiosity.llm import resolve_llm_settings
+from artificial_curiosity.logutil import get_logger
 from artificial_curiosity.models import (
+    VALUE_PROFILE_PRESETS,
     CuriosityConfig,
     Domain,
-    VALUE_PROFILE_PRESETS,
     ValueProfile,
     list_profile_names,
     resolve_value_profile,
 )
 from artificial_curiosity.pipeline import CuriosityEngine
 from artificial_curiosity.provoke import provoke
+
+logger = get_logger("api")
 
 app = FastAPI(
     title="Artificial Curiosity",
@@ -39,47 +58,27 @@ app = FastAPI(
         "questions. Designed so any human or AI model/provider can download this "
         "repo, start the server, and instantly ask: what should we investigate next?"
     ),
-    version="0.3.1",
+    version=__version__,
 )
 
+_origins = cors_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_origins,
+    allow_credentials=("*" not in _origins),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-def _configured_api_keys() -> set[str]:
-    """
-    Opt-in HTTP API keys (WO-0.4.6).
-
-    Env (any of):
-      CURIOSITY_API_KEY / ARTIFICIAL_CURIOSITY_API_KEY — single key
-      CURIOSITY_API_KEYS — comma-separated list
-
-    Empty → auth disabled (local offline demos unchanged).
-    """
-    keys: set[str] = set()
-    for name in ("CURIOSITY_API_KEY", "ARTIFICIAL_CURIOSITY_API_KEY"):
-        v = (os.environ.get(name) or "").strip()
-        if v:
-            keys.add(v)
-    multi = (os.environ.get("CURIOSITY_API_KEYS") or "").strip()
-    if multi:
-        keys.update(k.strip() for k in multi.split(",") if k.strip())
-    return keys
-
-
-_AUTH_OPEN_PATHS = frozenset({"/", "/health", "/docs", "/openapi.json", "/redoc"})
+_AUTH_OPEN_PATHS = frozenset({"/", "/health", "/ready", "/docs", "/openapi.json", "/redoc"})
 
 
 class OptionalApiKeyMiddleware(BaseHTTPMiddleware):
     """When API keys are configured, require Bearer or X-API-Key on protected routes."""
 
     async def dispatch(self, request: Request, call_next):
-        keys = _configured_api_keys()
+        keys = configured_api_keys()
         if not keys:
             return await call_next(request)
         path = request.url.path
@@ -94,17 +93,61 @@ class OptionalApiKeyMiddleware(BaseHTTPMiddleware):
         if not provided or not any(secrets.compare_digest(provided, k) for k in keys):
             return JSONResponse(
                 status_code=401,
-                content={
-                    "detail": (
+                content=error_payload(
+                    ERR_AUTH_REQUIRED,
+                    (
                         "API key required. Set Authorization: Bearer <key> or "
                         "X-API-Key. Local demos: unset CURIOSITY_API_KEY."
-                    )
-                },
+                    ),
+                ),
             )
         return await call_next(request)
 
 
 app.add_middleware(OptionalApiKeyMiddleware)
+
+
+def _http_error_response(exc: CuriosityError) -> JSONResponse:
+    return JSONResponse(
+        status_code=exc.http_status,
+        content={"error": exc.to_dict(), "detail": exc.message},
+    )
+
+
+@app.exception_handler(CuriosityError)
+async def curiosity_error_handler(_request: Request, exc: CuriosityError) -> JSONResponse:
+    return _http_error_response(exc)
+
+
+@app.exception_handler(ValueError)
+async def value_error_handler(_request: Request, exc: ValueError) -> JSONResponse:
+    return _http_error_response(classify_value_error(exc))
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(_request: Request, exc: RequestValidationError) -> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content=error_payload(
+            ERR_VALIDATION,
+            "Request validation failed",
+            details={"errors": exc.errors()},
+        ),
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(_request: Request, exc: HTTPException) -> JSONResponse:
+    detail = exc.detail
+    if isinstance(detail, dict) and "error" in detail:
+        return JSONResponse(status_code=exc.status_code, content=detail)
+    message = detail if isinstance(detail, str) else str(detail)
+    code = ERR_AUTH_REQUIRED if exc.status_code == 401 else ERR_VALIDATION
+    if exc.status_code >= 500:
+        code = ERR_INTERNAL
+    body = error_payload(code, message)
+    body["detail"] = message
+    return JSONResponse(status_code=exc.status_code, content=body)
 
 
 class RunRequest(BaseModel):
@@ -139,7 +182,9 @@ class ProvokeRequest(BaseModel):
     n: int = Field(5, ge=1, le=16)
     fast: bool = Field(
         True,
-        description="Skip literature for instant local spark (default). Set false for OpenAlex grounding.",
+        description=(
+            "Skip literature for instant local spark (default). Set false for OpenAlex grounding."
+        ),
     )
     use_llm: bool = False
     use_literature: bool | None = None
@@ -171,10 +216,27 @@ class MixEmotionsRequest(BaseModel):
         ...,
         description=(
             "Map of emotion_id → percent (e.g. 40) or weight (e.g. 0.4). "
-            "Normalized to sum 1.0. Example: {\"curiosity\": 40, \"confusion\": 30, \"awe\": 30}"
+            "Normalized to sum 1.0. Example: "
+            '{"curiosity": 40, "confusion": 30, "awe": 30}'
         ),
         min_length=1,
     )
+
+    @field_validator("weights")
+    @classmethod
+    def _weights_must_be_numeric(cls, v: dict[str, Any]) -> dict[str, float]:
+        if not v:
+            raise ValueError("weights must contain at least one emotion_id")
+        out: dict[str, float] = {}
+        for key, val in v.items():
+            kid = str(key).strip()
+            if not kid:
+                raise ValueError("empty emotion id in weights")
+            try:
+                out[kid] = float(val)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"weight for '{kid}' must be a number, got {val!r}") from exc
+        return out
 
 
 def _safe_profile(
@@ -184,31 +246,73 @@ def _safe_profile(
     try:
         return resolve_value_profile(value_profile, profile_name=profile_name)
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise classify_value_error(exc) from exc
 
 
 @app.get("/health")
-def health() -> dict:
+def health() -> dict[str, Any]:
+    """Liveness + config summary (safe; no secrets)."""
+    clear_config_cache()
+    cfg = get_config()
     llm = resolve_llm_settings()
     judge = resolve_llm_settings(judge=True)
     return {
         "ok": True,
         "service": "artificial-curiosity",
+        "version": cfg.version,
+        "status": "alive",
         "llm_configured": llm is not None,
         "llm_model": llm.model if llm else None,
         "judge_model": judge.model if judge else None,
         "llm_base_url": llm.base_url if llm else None,
+        "llm_timeout_s": cfg.llm_timeout_s,
+        "literature_timeout_s": cfg.literature_timeout_s,
+        "s2_key_configured": cfg.s2_configured,
         "profiles": list_profile_names(),
-        "api_auth_required": bool(_configured_api_keys()),
+        "api_auth_required": cfg.api_auth_required,
+        "cors_origins": list(cfg.cors_origins),
+    }
+
+
+@app.get("/ready")
+def ready() -> dict[str, Any]:
+    """Readiness: process can serve offline spark (no network required)."""
+    clear_config_cache()
+    cfg = get_config()
+    checks: dict[str, bool] = {
+        "package_import": True,
+        "emotion_catalog": False,
+        "profiles": False,
+    }
+    try:
+        cat = emotion_catalog()
+        checks["emotion_catalog"] = cat.get("count", 0) >= 1
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("readiness emotion_catalog check failed: %s", exc)
+    try:
+        checks["profiles"] = len(list_profile_names()) >= 1
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("readiness profiles check failed: %s", exc)
+    ok = all(checks.values())
+    return {
+        "ok": ok,
+        "ready": ok,
+        "service": "artificial-curiosity",
+        "version": cfg.version,
+        "checks": checks,
+        "note": ("Ready means offline spark/emotions work. Literature/LLM remain optional."),
     }
 
 
 @app.get("/")
-def root() -> dict:
+def root() -> dict[str, Any]:
     return {
         "service": "Artificial Curiosity",
+        "version": __version__,
         "tagline": "What should we investigate next?",
         "docs": "/docs",
+        "health": "/health",
+        "ready": "/ready",
         "provoke": "GET or POST /v1/curiosity/provoke",
         "run": "POST /v1/curiosity/run",
         "emotions": (
@@ -221,20 +325,22 @@ def root() -> dict:
         "tools": "GET /v1/agent/tools",
         "profiles": "GET /v1/profiles",
         "mcp": "curiosity-mcp (stdio) or python -m artificial_curiosity.mcp_server",
+        "config": "artificial_curiosity.config / .env.example",
     }
 
 
 @app.get("/v1/agent")
-def agent_manifest() -> dict:
+def agent_manifest() -> dict[str, Any]:
     """Machine-readable guide for any AI agent or model provider."""
     return {
         "name": "artificial-curiosity",
+        "version": __version__,
         "purpose": "Provoke and rank valuable unanswered scientific questions.",
         "not": "A Q&A or search engine. Returns unknowns, not answers.",
         "instant_spark": {
             "method": "GET",
             "path": "/v1/curiosity/provoke",
-            "example": "/v1/curiosity/provoke?domain=ai&n=5&fast=true&profile_name=alignment_lab",
+            "example": ("/v1/curiosity/provoke?domain=ai&n=5&fast=true&profile_name=alignment_lab"),
             "use": "Paste response.inject into any model context to provoke curiosity.",
         },
         "full_run": {
@@ -294,11 +400,18 @@ def agent_manifest() -> dict:
         "value_profiles": {
             "path": "/v1/profiles",
             "presets": list_profile_names(),
-            "note": "Rankings are never value-free — pick a named preset or pass value_profile.",
+            "note": ("Rankings are never value-free — pick a named preset or pass value_profile."),
         },
         "any_provider": {
             "protocol": "OpenAI-compatible Chat Completions",
-            "env": ["LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL", "LLM_JUDGE_MODEL"],
+            "env": [
+                "LLM_API_KEY",
+                "LLM_BASE_URL",
+                "LLM_MODEL",
+                "LLM_JUDGE_MODEL",
+                "LLM_TIMEOUT_S",
+                "CURIOSITY_API_KEY",
+            ],
             "examples": {
                 "openai": {
                     "LLM_BASE_URL": "https://api.openai.com/v1",
@@ -324,13 +437,18 @@ def agent_manifest() -> dict:
             "Explicit ValueProfile — no value-free ranking",
             "Related literature ≠ answered",
             "Scores are decision aids, not oracles",
+            "Emotion mixes are annotation_only framing weights",
             "Jaccard diversity is default; embedding is optional extras",
         ],
+        "error_shape": {
+            "body": {"error": {"code": "string", "message": "string", "details": {}}},
+            "docs": "artificial_curiosity.errors",
+        },
     }
 
 
 @app.get("/v1/agent/tools")
-def agent_tools() -> dict:
+def agent_tools() -> dict[str, Any]:
     """OpenAI-compatible function-calling tool definitions for any agent."""
     tools = openai_tools()
     return {
@@ -358,12 +476,12 @@ def agent_tools() -> dict:
 
 
 @app.get("/v1/domains")
-def domains() -> dict:
+def domains() -> dict[str, Any]:
     return {"domains": [d.value for d in Domain]}
 
 
 @app.get("/v1/profiles")
-def profiles() -> dict:
+def profiles() -> dict[str, Any]:
     """List named ValueProfile presets (F11 — no value-free ranking)."""
     return {
         "presets": [
@@ -390,8 +508,9 @@ def profiles() -> dict:
 
 
 @app.post("/v1/curiosity/run")
-def run_curiosity(req: RunRequest) -> dict:
+def run_curiosity(req: RunRequest) -> dict[str, Any]:
     profile = _safe_profile(req.value_profile, req.profile_name)
+    cfg = get_config()
     config = CuriosityConfig(
         domain=req.domain,
         topic=req.topic,
@@ -401,6 +520,7 @@ def run_curiosity(req: RunRequest) -> dict:
         use_literature=req.use_literature,
         literature_backend=req.literature_backend,
         literature_cache_dir=req.literature_cache_dir,
+        literature_timeout_s=cfg.literature_timeout_s,
         value_profile=profile,
         llm_model=req.llm_model or "gpt-4o-mini",
         judge_model=req.judge_model,
@@ -420,25 +540,22 @@ def run_curiosity(req: RunRequest) -> dict:
 
 
 @app.post("/v1/curiosity/provoke")
-def provoke_post(req: ProvokeRequest) -> dict:
+def provoke_post(req: ProvokeRequest) -> dict[str, Any]:
     """Instant curiosity pack — paste `inject` into any model."""
-    try:
-        return provoke(
-            domain=req.domain,
-            topic=req.topic,
-            n=req.n,
-            fast=req.fast,
-            use_llm=req.use_llm,
-            use_literature=req.use_literature,
-            value_profile=req.value_profile,
-            profile_name=req.profile_name,
-            llm_model=req.llm_model,
-            judge_model=req.judge_model,
-            llm_base_url=req.llm_base_url,
-            diversity_backend=req.diversity_backend,
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return provoke(
+        domain=req.domain,
+        topic=req.topic,
+        n=req.n,
+        fast=req.fast,
+        use_llm=req.use_llm,
+        use_literature=req.use_literature,
+        value_profile=req.value_profile,
+        profile_name=req.profile_name,
+        llm_model=req.llm_model,
+        judge_model=req.judge_model,
+        llm_base_url=req.llm_base_url,
+        diversity_backend=req.diversity_backend,
+    )
 
 
 @app.get("/v1/curiosity/provoke")
@@ -454,24 +571,21 @@ def provoke_get(
     llm_base_url: str | None = Query(None),
     profile_name: str | None = Query(None),
     diversity_backend: str = Query("jaccard"),
-) -> dict:
+) -> dict[str, Any]:
     """Instant GET spark for curl, browsers, and agents."""
-    try:
-        return provoke(
-            domain=domain,
-            topic=topic,
-            n=n,
-            fast=fast,
-            use_llm=use_llm,
-            use_literature=use_literature,
-            profile_name=profile_name,
-            llm_model=llm_model,
-            judge_model=judge_model,
-            llm_base_url=llm_base_url,
-            diversity_backend=diversity_backend,
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return provoke(
+        domain=domain,
+        topic=topic,
+        n=n,
+        fast=fast,
+        use_llm=use_llm,
+        use_literature=use_literature,
+        profile_name=profile_name,
+        llm_model=llm_model,
+        judge_model=judge_model,
+        llm_base_url=llm_base_url,
+        diversity_backend=diversity_backend,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -480,53 +594,41 @@ def provoke_get(
 # ---------------------------------------------------------------------------
 
 
-def _emotions_cues() -> dict:
+def _emotions_cues() -> dict[str, Any]:
     return list_epistemic_cues()
 
 
-def _emotions_catalog(family: str | None = None) -> dict:
-    try:
-        return emotion_catalog(family=family)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+def _emotions_catalog(family: str | None = None) -> dict[str, Any]:
+    return emotion_catalog(family=family)
 
 
-def _emotions_mix(req: MixEmotionsRequest) -> dict:
-    try:
-        return mix_emotions(req.weights)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+def _emotions_mix(req: MixEmotionsRequest) -> dict[str, Any]:
+    return mix_emotions(req.weights)
 
 
-def _emotions_annotate(req: AnnotateEmotionsRequest) -> dict:
-    try:
-        return annotate_epistemic(
-            req.question,
-            gap_status=req.gap_status,
-            surprise=req.surprise,
-            neglectedness=req.neglectedness,
-            answerability=req.answerability,
-            notes=req.notes,
-            domain=req.domain,
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+def _emotions_annotate(req: AnnotateEmotionsRequest) -> dict[str, Any]:
+    return annotate_epistemic(
+        req.question,
+        gap_status=req.gap_status,
+        surprise=req.surprise,
+        neglectedness=req.neglectedness,
+        answerability=req.answerability,
+        notes=req.notes,
+        domain=req.domain,
+    )
 
 
-def _emotions_elicit() -> dict:
+def _emotions_elicit() -> dict[str, Any]:
     return elicit_helpers()
 
 
-def _emotions_pack(name: str = "affective_science") -> dict:
-    try:
-        return emotion_pack(name)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+def _emotions_pack(name: str = "affective_science") -> dict[str, Any]:
+    return emotion_pack(name)
 
 
 @app.get("/v1/emotions/cues")
 @app.get("/v1/epistemic/cues")
-def emotions_cues() -> dict:
+def emotions_cues() -> dict[str, Any]:
     """List epistemic cue tags (investigation framing — not felt emotion)."""
     return _emotions_cues()
 
@@ -538,21 +640,21 @@ def emotions_catalog(
         None,
         description="Optional filter: epistemic | basic | social | achievement",
     ),
-) -> dict:
+) -> dict[str, Any]:
     """Named mixable emotion catalog (annotation only)."""
     return _emotions_catalog(family)
 
 
 @app.post("/v1/emotions/mix")
 @app.post("/v1/epistemic/mix")
-def emotions_mix(req: MixEmotionsRequest) -> dict:
+def emotions_mix(req: MixEmotionsRequest) -> dict[str, Any]:
     """Mix catalog emotions by percent/weight; normalize to sum=1.0."""
     return _emotions_mix(req)
 
 
 @app.post("/v1/emotions/annotate")
 @app.post("/v1/epistemic/annotate")
-def emotions_annotate(req: AnnotateEmotionsRequest) -> dict:
+def emotions_annotate(req: AnnotateEmotionsRequest) -> dict[str, Any]:
     """Annotate question text with epistemic cue tags."""
     return _emotions_annotate(req)
 
@@ -567,7 +669,7 @@ def emotions_annotate_get(
     answerability: float = Query(0.5, ge=0.0, le=1.0),
     notes: str = Query(""),
     domain: str = Query("ai"),
-) -> dict:
+) -> dict[str, Any]:
     """GET annotate for curl / browsers."""
     return _emotions_annotate(
         AnnotateEmotionsRequest(
@@ -584,7 +686,7 @@ def emotions_annotate_get(
 
 @app.get("/v1/emotions/elicit")
 @app.get("/v1/epistemic/elicit")
-def emotions_elicit() -> dict:
+def emotions_elicit() -> dict[str, Any]:
     """Incongruity → investigation framing + inject helpers."""
     return _emotions_elicit()
 
@@ -593,6 +695,6 @@ def emotions_elicit() -> dict:
 @app.get("/v1/epistemic/pack")
 def emotions_pack(
     name: str = Query("affective_science", description="Bundled pack id"),
-) -> dict:
+) -> dict[str, Any]:
     """Affective-science (or named) domain pack — ranking seeds, not an emotion engine."""
     return _emotions_pack(name)

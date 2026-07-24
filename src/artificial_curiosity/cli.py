@@ -89,9 +89,7 @@ def build_parser() -> argparse.ArgumentParser:
     serve_p.add_argument("--port", type=int, default=8000)
     serve_p.add_argument("--reload", action="store_true")
 
-    spark_p = sub.add_parser(
-        "spark", help="Instant curiosity pack (inject into any model)"
-    )
+    spark_p = sub.add_parser("spark", help="Instant curiosity pack (inject into any model)")
     spark_p.add_argument("--domain", default="ai", choices=[d.value for d in Domain])
     spark_p.add_argument("--topic", default="")
     spark_p.add_argument("--n", type=int, default=5)
@@ -161,9 +159,7 @@ def build_parser() -> argparse.ArgumentParser:
         )
         mix_p.add_argument("--json", action="store_true")
 
-        ann_p = emo_sub.add_parser(
-            "annotate", help="Annotate a question with epistemic cues"
-        )
+        ann_p = emo_sub.add_parser("annotate", help="Annotate a question with epistemic cues")
         ann_p.add_argument("question", help="Question text to annotate")
         ann_p.add_argument(
             "--gap",
@@ -178,14 +174,10 @@ def build_parser() -> argparse.ArgumentParser:
         ann_p.add_argument("--domain", default="ai")
         ann_p.add_argument("--json", action="store_true")
 
-        elicit_p = emo_sub.add_parser(
-            "elicit", help="Incongruity → investigation framing helpers"
-        )
+        elicit_p = emo_sub.add_parser("elicit", help="Incongruity → investigation framing helpers")
         elicit_p.add_argument("--json", action="store_true")
 
-        pack_p = emo_sub.add_parser(
-            "pack", help="Load affective_science (or named) domain pack"
-        )
+        pack_p = emo_sub.add_parser("pack", help="Load affective_science (or named) domain pack")
         pack_p.add_argument(
             "--name",
             default="affective_science",
@@ -317,10 +309,11 @@ def _eval(args: argparse.Namespace) -> int:
         print(json.dumps(payload, indent=2))
     else:
         print("Expert-eval spot-check (offline fixtures)")
-        print(f"  cases={report.n_cases}  match={report.n_match}  "
-              f"match_rate={report.match_rate}")
-        print(f"  already_answered_gold={report.n_already_answered_gold}  "
-              f"missed_answered={report.n_missed_answered}")
+        print(f"  cases={report.n_cases}  match={report.n_match}  match_rate={report.match_rate}")
+        print(
+            f"  already_answered_gold={report.n_already_answered_gold}  "
+            f"missed_answered={report.n_missed_answered}"
+        )
         print(f"  methodology: {report.methodology}")
         for r in report.results:
             mark = "OK" if r.match else "MISS"
@@ -407,10 +400,7 @@ def _emotions(args: argparse.Namespace) -> int:
         else:
             print(f"primary={payload['primary']}")
             print(
-                "mix="
-                + ", ".join(
-                    f"{c['id']}={c['percent']:.1f}%" for c in payload["components"]
-                )
+                "mix=" + ", ".join(f"{c['id']}={c['percent']:.1f}%" for c in payload["components"])
             )
             if payload.get("cue_tags"):
                 print(f"cues={', '.join(payload['cue_tags'])}")

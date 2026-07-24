@@ -11,21 +11,33 @@ See docs/EMOTIONS.md, research/AI_EMOTIONS.md, research/EMOTION_MIXING.md.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from artificial_curiosity.epistemic_cues import (
     EPISTEMIC_CUE_DISCLAIMER,
     TAG_BOREDOM_GUARD,
     TAG_CONFUSION_RISK,
     TAG_CURIOSITY_TARGET,
-    TAG_INFORMATION_GAP,
     TAG_INCONGRUITY,
+    TAG_INFORMATION_GAP,
     TAG_SURPRISE_SIGNAL,
     derive_epistemic_cues,
     format_cues_for_inject,
     incongruity_investigate_block,
+)
+from artificial_curiosity.errors import (
+    ERR_EMPTY_MIX,
+    ERR_MIX_TOO_LARGE,
+    ERR_NEGATIVE_WEIGHT,
+    ERR_UNKNOWN_EMOTION,
+    ERR_UNKNOWN_FAMILY,
+    ERR_UNKNOWN_GAP_STATUS,
+    ERR_UNKNOWN_PACK,
+    ERR_VALIDATION,
+    CuriosityError,
 )
 from artificial_curiosity.models import (
     GapEvidence,
@@ -62,8 +74,7 @@ _CATALOG_FILE = "emotion_catalog.json"
 _DEFAULT_MAX_MIX = 8
 _MIX_DISCLAIMER = (
     "Emotion mixes are UX framing weights (normalized percentages) — "
-    "NOT felt intensities, EES scores, or OCC appraisal state. "
-    + EPISTEMIC_CUE_DISCLAIMER
+    "NOT felt intensities, EES scores, or OCC appraisal state. " + EPISTEMIC_CUE_DISCLAIMER
 )
 
 CUE_CATALOG: list[dict[str, str]] = [
@@ -105,8 +116,7 @@ def list_epistemic_cues() -> dict[str, Any]:
         "disclaimer": EPISTEMIC_CUE_DISCLAIMER,
         "docs": "docs/EMOTIONS.md",
         "note": (
-            "Epistemic cues annotate investigation framing. "
-            "This software does not feel emotions."
+            "Epistemic cues annotate investigation framing. This software does not feel emotions."
         ),
     }
 
@@ -121,7 +131,11 @@ def _parse_gap_status(raw: str | GapStatus | None) -> GapStatus:
         return GapStatus(key)
     except ValueError as exc:
         known = ", ".join(s.value for s in GapStatus)
-        raise ValueError(f"Unknown gap_status '{raw}'. Known: {known}") from exc
+        raise CuriosityError(
+            ERR_UNKNOWN_GAP_STATUS,
+            f"Unknown gap_status '{raw}'. Known: {known}",
+            details={"known": [s.value for s in GapStatus]},
+        ) from exc
 
 
 def annotate_epistemic(
@@ -142,7 +156,11 @@ def annotate_epistemic(
     """
     q = (question or "").strip()
     if len(q) < 12:
-        raise ValueError("question too short (need ≥12 characters)")
+        raise CuriosityError(
+            ERR_VALIDATION,
+            "question too short (need ≥12 characters)",
+            details={"min_length": 12},
+        )
 
     def _clamp(x: float) -> float:
         return max(0.0, min(1.0, float(x)))
@@ -222,8 +240,10 @@ def emotion_pack(name: str = "affective_science") -> dict[str, Any]:
         filename = _AFFECTIVE_PACK
         pack_key = "affective_science"
     else:
-        raise ValueError(
-            f"Unknown emotion pack '{name}'. Available: affective_science"
+        raise CuriosityError(
+            ERR_UNKNOWN_PACK,
+            f"Unknown emotion pack '{name}'. Available: affective_science",
+            details={"available": ["affective_science"]},
         )
 
     path = Path(__file__).resolve().parent / "packs" / filename
@@ -279,8 +299,10 @@ def emotion_catalog(
         emotions = [e for e in emotions if str(e.get("family", "")).lower() == fam]
         if not emotions:
             known = sorted({str(e.get("family")) for e in raw["emotions"]})
-            raise ValueError(
-                f"Unknown family '{family}'. Known: {', '.join(known)}"
+            raise CuriosityError(
+                ERR_UNKNOWN_FAMILY,
+                f"Unknown family '{family}'. Known: {', '.join(known)}",
+                details={"known": known},
             )
     families = sorted({str(e.get("family")) for e in raw["emotions"]})
     return {
@@ -319,8 +341,10 @@ def _parse_mix_mapping(
             try:
                 num = float(val)
             except (TypeError, ValueError) as exc:
-                raise ValueError(
-                    f"Invalid weight for '{key}': expected a number, got {val!r}"
+                raise CuriosityError(
+                    ERR_VALIDATION,
+                    f"Invalid weight for '{key}': expected a number, got {val!r}",
+                    details={"key": str(key)},
                 ) from exc
             merged[kid] = merged.get(kid, 0.0) + num
     return merged
@@ -378,9 +402,10 @@ def mix_emotions(
     """
     raw_map = _parse_mix_mapping(weights, extra=kwargs)
     if not raw_map:
-        raise ValueError(
+        raise CuriosityError(
+            ERR_EMPTY_MIX,
             "Empty mix. Pass at least one emotion_id=weight, e.g. "
-            "curiosity=40, confusion=30, awe=30"
+            "curiosity=40, confusion=30, awe=30",
         )
 
     catalog = _load_catalog_raw()
@@ -390,33 +415,47 @@ def mix_emotions(
     unknown = sorted(k for k in raw_map if k not in by_id)
     if unknown:
         sample = ", ".join(sorted(by_id)[:12])
-        raise ValueError(
+        raise CuriosityError(
+            ERR_UNKNOWN_EMOTION,
             f"Unknown emotion id(s): {', '.join(unknown)}. "
-            f"See emotion_catalog() ids (e.g. {sample}, …)."
+            f"See emotion_catalog() ids (e.g. {sample}, …).",
+            details={"unknown": unknown},
         )
 
     # Drop exact zeros; reject negatives.
     cleaned: dict[str, float] = {}
     for kid, val in raw_map.items():
         if val < 0:
-            raise ValueError(f"Negative weight not allowed for '{kid}' ({val})")
+            raise CuriosityError(
+                ERR_NEGATIVE_WEIGHT,
+                f"Negative weight not allowed for '{kid}' ({val})",
+                details={"id": kid, "weight": val},
+            )
         if val == 0:
             continue
         cleaned[kid] = val
 
     if not cleaned:
-        raise ValueError("All mix weights are zero — nothing to blend.")
+        raise CuriosityError(
+            ERR_EMPTY_MIX,
+            "All mix weights are zero — nothing to blend.",
+        )
 
     if len(cleaned) > max_n:
-        raise ValueError(
-            f"Too many components ({len(cleaned)}). Max is {max_n}."
+        raise CuriosityError(
+            ERR_MIX_TOO_LARGE,
+            f"Too many components ({len(cleaned)}). Max is {max_n}.",
+            details={"count": len(cleaned), "max": max_n},
         )
 
     values = list(cleaned.values())
     as_percents = _looks_like_percent_scale(values)
     total = sum(values)
     if total <= 0:
-        raise ValueError("Mix weights must sum to a positive total.")
+        raise CuriosityError(
+            ERR_EMPTY_MIX,
+            "Mix weights must sum to a positive total.",
+        )
 
     norm = {k: v / total for k, v in cleaned.items()}
     # Stable order: descending weight, then id.
@@ -454,9 +493,7 @@ def mix_emotions(
     # Round PAD for stable JSON
     pad_out = {k: round(v, 4) for k, v in pad.items()}
     cue_tags = [
-        t
-        for t, _cw in sorted(cue_weights.items(), key=lambda kv: (-kv[1], kv[0]))
-        if _cw >= 0.05
+        t for t, _cw in sorted(cue_weights.items(), key=lambda kv: (-kv[1], kv[0])) if _cw >= 0.05
     ]
     primary = ordered[0][0]
     mix_str = ", ".join(f"{eid}={100.0 * w:.1f}%" for eid, w in ordered)
@@ -465,9 +502,8 @@ def mix_emotions(
         f"Primary={primary}. Prefer investigation moves from the weighted "
         f"components; do not narrate as the system's inner feelings."
     )
-    inject = (
-        f"emotion_mix=[{mix_str}] primary={primary}"
-        + (f" cues=[{', '.join(cue_tags)}]" if cue_tags else "")
+    inject = f"emotion_mix=[{mix_str}] primary={primary}" + (
+        f" cues=[{', '.join(cue_tags)}]" if cue_tags else ""
     )
 
     dyad = _match_plutchik_dyad(

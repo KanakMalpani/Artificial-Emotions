@@ -15,7 +15,35 @@ Background research (optional): [`research/AI_EMOTIONS.md`](../research/AI_EMOTI
 | Elicit helpers | Short incongruity → investigation framing for inject packs |
 | `affective_science` pack | Ranking seeds about affective science / epistemic elicitation (not a CME) |
 
-Honesty fields on responses: `honesty: "annotation_only"` plus an explicit disclaimer.
+Honesty fields on responses: `honesty: "annotation_only"` plus an explicit disclaimer. Error codes: `unknown_emotion`, `empty_mix`, `negative_weight`, …
+
+## Plug-in one-liners
+
+```bash
+# MCP (Cursor / Claude Desktop) — see docs/PLUGINS.md
+curiosity-mcp --list-tools   # expect emotion_catalog, mix_emotions, …
+
+# HTTP
+curiosity serve
+curl -s http://127.0.0.1:8000/v1/emotions/catalog
+curl -s -X POST http://127.0.0.1:8000/v1/emotions/mix \
+  -H "Content-Type: application/json" \
+  -d '{"weights":{"curiosity":40,"confusion":30,"awe":30}}'
+curl -s "http://127.0.0.1:8000/v1/curiosity/provoke?domain=ai&n=3&fast=true"
+
+# OpenAI tools JSON
+# examples/openai_tools.json  OR  GET /v1/agent/tools
+```
+
+```python
+from artificial_curiosity import emotion_catalog, mix_emotions, provoke
+
+print(emotion_catalog()["ids"][:5])
+print(mix_emotions(curiosity=40, confusion=30, awe=30)["inject_fragment"])
+print(provoke(domain="ai", n=3, fast=True)["inject"][:120])
+```
+
+Examples: [`emotions_mix_request.json`](../examples/emotions_mix_request.json), [`emotions_mix_response.json`](../examples/emotions_mix_response.json), [`emotions_catalog_response.json`](../examples/emotions_catalog_response.json).
 
 ## Individual emotions
 
@@ -37,7 +65,7 @@ curl -s "http://127.0.0.1:8000/v1/emotions/catalog?family=epistemic"
 
 ## Percentage mixes
 
-Weights may be **percents** (40+30+30) or **unit weights** (0.4+0.3+0.3). Soft validation accepts either; the engine always **re-normalizes to sum 1.0**. Max **8** components. Unknown ids / negatives / all-zero are rejected.
+Weights may be **percents** (40+30+30) or **unit weights** (0.4+0.3+0.3). Soft validation accepts either; the engine always **re-normalizes to sum 1.0**. Max **8** components. Unknown ids / negatives / all-zero are rejected (`unknown_emotion` / `empty_mix` / `negative_weight`).
 
 ```bash
 curiosity emotions mix curiosity=40 confusion=30 awe=30 --json

@@ -44,7 +44,7 @@ def questions_from_pack(data: dict[str, Any]) -> list[UnansweredQuestion]:
                 f"Pack question[{i}] operationalization too short "
                 f"(need ≥20 chars; see CONTRIBUTING seed bar)"
             )
-        qid = str(raw.get("id") or f"{domain}-pack-{i+1:02d}")
+        qid = str(raw.get("id") or f"{domain}-pack-{i + 1:02d}")
         out.append(
             UnansweredQuestion(
                 id=qid,

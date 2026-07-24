@@ -116,8 +116,7 @@ class CuriosityEngine:
                     "passed_gates": ok,
                     "judge_disagreement_entropy": disagree,
                     "n_judges": len(judge_members),
-                    "literature_backend": gap.literature_backend
-                    or self.config.literature_backend,
+                    "literature_backend": gap.literature_backend or self.config.literature_backend,
                 },
                 score_low=score_low,
                 score_high=score_high,

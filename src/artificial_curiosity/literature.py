@@ -15,20 +15,22 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
+from artificial_curiosity.logutil import get_logger
 from artificial_curiosity.models import LiteratureHit
 from artificial_curiosity.openalex import OpenAlexClient
+
+logger = get_logger("literature")
 
 
 @runtime_checkable
 class LiteratureClient(Protocol):
     """Minimal search interface shared by all literature adapters."""
 
-    def search_works(self, query: str, per_page: int = 8) -> list[LiteratureHit]:
-        ...
+    def search_works(self, query: str, per_page: int = 8) -> list[LiteratureHit]: ...
 
 
 def _cache_key(backend: str, query: str, per_page: int) -> str:
-    raw = f"{backend}|{query}|{per_page}".encode("utf-8")
+    raw = f"{backend}|{query}|{per_page}".encode()
     return hashlib.sha256(raw).hexdigest()[:32]
 
 
@@ -60,8 +62,8 @@ class CachedLiteratureClient:
                 payload = json.loads(path.read_text(encoding="utf-8"))
                 if now - float(payload.get("ts", 0)) <= self.ttl_s:
                     return [LiteratureHit.model_validate(h) for h in payload.get("hits", [])]
-            except Exception:  # noqa: BLE001 — corrupt cache → refetch
-                pass
+            except Exception as exc:  # noqa: BLE001 — corrupt cache → refetch
+                logger.warning("Literature cache read failed; refetching: %s", exc)
         hits = self.inner.search_works(query, per_page=per_page)
         try:
             path.write_text(
@@ -76,8 +78,8 @@ class CachedLiteratureClient:
                 ),
                 encoding="utf-8",
             )
-        except Exception:  # noqa: BLE001 — cache write is best-effort
-            pass
+        except Exception as exc:  # noqa: BLE001 — cache write is best-effort
+            logger.warning("Literature cache write failed: %s", exc)
         return hits
 
 
@@ -90,8 +92,8 @@ class SemanticScholarClient:
         import os
 
         self.timeout_s = timeout_s
-        self.api_key = api_key or os.environ.get("S2_API_KEY") or os.environ.get(
-            "SEMANTIC_SCHOLAR_API_KEY"
+        self.api_key = (
+            api_key or os.environ.get("S2_API_KEY") or os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
         )
 
     def _get(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
@@ -137,7 +139,9 @@ class SemanticScholarClient:
                 LiteratureHit(
                     title=w.get("title") or "Untitled",
                     year=w.get("year"),
-                    doi=f"https://doi.org/{doi}" if doi and not str(doi).startswith("http") else doi,
+                    doi=f"https://doi.org/{doi}"
+                    if doi and not str(doi).startswith("http")
+                    else doi,
                     openalex_id=None,
                     cited_by_count=w.get("citationCount"),
                     abstract_snippet=snippet,
@@ -167,7 +171,9 @@ class MergedLiteratureClient:
 
     @staticmethod
     def _norm_title(t: str) -> str:
-        return " ".join("".join(c.lower() if c.isalnum() or c.isspace() else " " for c in t).split())
+        return " ".join(
+            "".join(c.lower() if c.isalnum() or c.isspace() else " " for c in t).split()
+        )
 
     def search_works(self, query: str, per_page: int = 8) -> list[LiteratureHit]:
         primary_hits = self.primary.search_works(query, per_page=per_page)
@@ -223,6 +229,7 @@ def build_literature_client(
     """
     key = (backend or "openalex").strip().lower()
     oa = OpenAlexClient(timeout_s=timeout_s)
+
     # Tag OpenAlex hits with source for multi-backend transparency.
     class _TaggedOpenAlex:
         def search_works(self, query: str, per_page: int = 8) -> list[LiteratureHit]:

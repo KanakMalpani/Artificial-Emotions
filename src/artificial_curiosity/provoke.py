@@ -162,7 +162,9 @@ def provoke(
         llm_model=llm_model or "gpt-4o-mini",
         judge_model=judge_model,
         llm_base_url=llm_base_url,
-        diversity_backend=diversity_backend if diversity_backend in ("jaccard", "embedding") else "jaccard",
+        diversity_backend=diversity_backend
+        if diversity_backend in ("jaccard", "embedding")
+        else "jaccard",
     )
     ranked = CuriosityEngine(config).run()
     unknowns = [compact_unknown(r, epistemic_cues=epistemic_cues) for r in ranked]

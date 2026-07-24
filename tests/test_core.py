@@ -282,9 +282,7 @@ def test_embedding_backend_falls_back_without_extra():
             ),
             curiosity_score=score,
             confidence=0.5,
-            gap=__import__(
-                "artificial_curiosity.models", fromlist=["GapEvidence"]
-            ).GapEvidence(
+            gap=__import__("artificial_curiosity.models", fromlist=["GapEvidence"]).GapEvidence(
                 status=GapStatus.UNANSWERED,
                 confidence=0.5,
             ),

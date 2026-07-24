@@ -61,8 +61,7 @@ def resolve_llm_settings(
 
     # Local servers often need no key; remote usually do.
     local = any(
-        h in url.lower()
-        for h in ("localhost", "127.0.0.1", "0.0.0.0", "host.docker.internal")
+        h in url.lower() for h in ("localhost", "127.0.0.1", "0.0.0.0", "host.docker.internal")
     )
     if not key and not local:
         return None
@@ -71,8 +70,7 @@ def resolve_llm_settings(
         api_key=key or "local",
         model=mdl,
         base_url=url.rstrip("/"),
-        require_json_mode=os.environ.get("LLM_JSON_MODE", "").lower()
-        in ("1", "true", "yes"),
+        require_json_mode=os.environ.get("LLM_JSON_MODE", "").lower() in ("1", "true", "yes"),
     )
 
 
@@ -116,11 +114,18 @@ class LLMClient:
 
     @classmethod
     def from_settings(cls, settings: LLMSettings) -> LLMClient:
+        try:
+            from artificial_curiosity.config import llm_timeout_s
+
+            timeout = llm_timeout_s()
+        except Exception:  # noqa: BLE001 — config optional at import time
+            timeout = 90.0
         return cls(
             settings.api_key,
             settings.model,
             settings.base_url,
             require_json_mode=settings.require_json_mode,
+            timeout_s=timeout,
         )
 
     @classmethod
@@ -186,13 +191,10 @@ class LLMClient:
 
         return body["choices"][0]["message"]["content"]
 
-    def chat_json(
-        self, system: str, user: str, *, temperature: float = 0.7
-    ) -> dict[str, Any]:
+    def chat_json(self, system: str, user: str, *, temperature: float = 0.7) -> dict[str, Any]:
         # Soft JSON instruction so Ollama/Groq/etc. work without json_object mode.
         system_json = (
-            system
-            + "\n\nRespond with a single valid JSON object only. No markdown fences."
+            system + "\n\nRespond with a single valid JSON object only. No markdown fences."
         )
         content = self.chat(system_json, user, temperature=temperature)
         return _extract_json(content)

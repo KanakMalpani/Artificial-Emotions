@@ -1,7 +1,7 @@
 # Artificial Curiosity — Agent Playbook & Roadmap
 
 **Status:** Living operational plan (not a commitment ledger)  
-**Product version today:** `0.3.1` (see `pyproject.toml`)  
+**Product version today:** `0.4.0` (see `pyproject.toml`)  
 **Workspace (only):** `<local-clone>`  
 **Public repo:** https://github.com/KanakMalpani/Artificial-Curiosity  
 **Companion:** [`ROADMAP_SUMMARY.md`](ROADMAP_SUMMARY.md) (1-page)  

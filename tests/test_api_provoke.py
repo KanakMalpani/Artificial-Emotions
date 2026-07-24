@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import os
-
 from fastapi.testclient import TestClient
 
 from artificial_curiosity.api import app
-from artificial_curiosity.llm import resolve_llm_settings, _extract_json
+from artificial_curiosity.llm import _extract_json, resolve_llm_settings
 from artificial_curiosity.provoke import provoke
 
 
@@ -97,16 +95,20 @@ def test_resolve_judge_model_env(monkeypatch):
 
 
 def test_optional_api_key_auth(monkeypatch):
+    from artificial_curiosity.config import clear_config_cache
+
     client = TestClient(app)
     # Disabled by default — health and provoke open.
     assert client.get("/health").status_code == 200
     assert client.get("/v1/curiosity/provoke", params={"n": 1, "fast": True}).status_code == 200
 
     monkeypatch.setenv("CURIOSITY_API_KEY", "test-secret-key")
+    clear_config_cache()
     # Health stays open; protected routes need key.
     assert client.get("/health").json()["api_auth_required"] is True
     denied = client.get("/v1/curiosity/provoke", params={"n": 1, "fast": True})
     assert denied.status_code == 401
+    assert denied.json()["error"]["code"] == "auth_required"
     ok = client.get(
         "/v1/curiosity/provoke",
         params={"n": 1, "fast": True},
@@ -119,3 +121,4 @@ def test_optional_api_key_auth(monkeypatch):
     )
     assert ok2.status_code == 200
     monkeypatch.delenv("CURIOSITY_API_KEY", raising=False)
+    clear_config_cache()
