@@ -40,11 +40,12 @@ Grant design literature ([2410.12356](https://arxiv.org/abs/2410.12356)): alloca
 
 ## 4. Productize next (sibling)
 
-1. **Rationale keys only:** `openalex_hit_n`, `mean_cited_by` (if cheap), `funder_field_missing_rate`.  
+1. **Rationale keys only:** `openalex_hit_n`, `mean_cited_by` (if cheap), `funder_field_missing_rate` — ✅ largely shipped in `scoring.py` / `openalex.py`.  
 2. **No new default weight** until fixture correlation with human neglectedness labels.  
-3. **LIMITS:** OpenAlex metadata incompleteness one-liner.  
-4. Optional research script (not core): sample concept co-occurrence for LitGapFinder-style score vs our neglectedness.  
-5. Keep NIH/NSF APIs as separate future adapters — not blocking.
+3. **LIMITS:** OpenAlex metadata incompleteness one-liner — see [`LIMITS_PATCHES.md`](LIMITS_PATCHES.md).  
+4. Optional research script: LitGap co-occurrence vs neglectedness — ✅ helpers (`04eeebf`); run study offline.  
+5. Keep NIH/NSF APIs as separate future adapters — not blocking.  
+6. Next wedge: correlation notebook results → decide whether any funder key becomes a *display badge* only.
 
 ---
 
