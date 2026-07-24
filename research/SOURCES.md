@@ -70,6 +70,8 @@ Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product d
 | FALSIFYBENCH paper | arXiv:2606.04751 | Inductive reasoning / rule discovery games |
 | Constitutional / multi-stakeholder curiosity | [`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md) | Veto stacks vs fake consensus blends |
 | Constitution web UX | [`CONSTITUTION_WEB_UX.md`](CONSTITUTION_WEB_UX.md) | Compare + hard risk veto flow |
+| Multi-stakeholder feasible set | [`MULTI_STAKEHOLDER_FEASIBLE_SET.md`](MULTI_STAKEHOLDER_FEASIBLE_SET.md) | Alignment compresses negotiable trade-offs |
+| Behavioural feasible set | arXiv:2603.21435 | Vendor value constraints on AI advice |
 | Curiosity eval metric stack | [`CURIOSITY_EVAL_METRICS.md`](CURIOSITY_EVAL_METRICS.md) | RINoBench caveats; gap+rank+elicit primary |
 | InnoEval / personalized judges | [`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md) | Multi-perspective eval; anti-global-judge |
 | Soundness pass UX | [`SOUNDNESS_PASS_UX.md`](SOUNDNESS_PASS_UX.md) | Triage badges; no silent re-rank |

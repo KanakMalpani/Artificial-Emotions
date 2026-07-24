@@ -73,6 +73,7 @@ Everything under `research/` is design/background material that informed the imp
 | [ERREVAL_QG.md](ERREVAL_QG.md) | Diagnose-then-score QG eval pattern |
 | [GUIDE_ADVISING.md](GUIDE_ADVISING.md) | Idea advising ≠ unknown ranking; anti-acceptance axis |
 | [AGKA_EPISTEMIC_LABELS.md](AGKA_EPISTEMIC_LABELS.md) | Guideline-augmented epistemic label clarity |
+| [MULTI_STAKEHOLDER_FEASIBLE_SET.md](MULTI_STAKEHOLDER_FEASIBLE_SET.md) | Vendor alignment compression; pluralism mechanics |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
