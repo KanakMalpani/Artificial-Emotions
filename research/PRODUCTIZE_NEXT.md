@@ -39,7 +39,7 @@
 16. **LIMITS cite McNamara / EVSI / ERS / agentic dual-use** — ✅ largely in `docs/LIMITS.md`; keep BioVeil one-liner if missing ([`LIMITS_PATCHES.md`](LIMITS_PATCHES.md), [`BIOVEIL_DUAL_USE.md`](BIOVEIL_DUAL_USE.md)).
 17. **Optional idea-graph export** — ✅ landed (`c733edc` / `idea_graph.py`); display only ([`IDEA_GRAPH_UX.md`](IDEA_GRAPH_UX.md)).
 18. **Mix intensity cap** — ✅ landed (`c733edc` / `mix_intensity_cap`); keep epistemic-default docs ([`EMOTION_MIXING_ADDENDUM.md`](EMOTION_MIXING_ADDENDUM.md)).
-19. **SFBench-cousin feasibility_note** — Display only; offline calibrate first ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
+19. **SFBench-cousin feasibility_note** — ✅ display-only landed (`90fc51d`); offline calibrate before any axis fold ([`SFBENCH_CALIBRATION.md`](SFBENCH_CALIBRATION.md)).
 20. **Offline ScholarEval/InnoEval soundness pass** — Optional on top-n briefs ([`INNOEVAL_JUDGES.md`](INNOEVAL_JUDGES.md)).
 
 ## Explicit non-goals (from research)

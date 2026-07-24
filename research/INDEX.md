@@ -62,6 +62,7 @@ Everything under `research/` is design/background material that informed the imp
 | [IDEA_GRAPH_UX.md](IDEA_GRAPH_UX.md) | Idea-graph export honesty / consumer UX |
 | [SFBENCH_CALIBRATION.md](SFBENCH_CALIBRATION.md) | Offline feasibility cousin calibration |
 | [INNOEVAL_JUDGES.md](INNOEVAL_JUDGES.md) | InnoEval / personalized judges / Intern-Atlas |
+| [FEASIBILITY_NOTE_UX.md](FEASIBILITY_NOTE_UX.md) | Display-only feasibility_note presentation |
 | [README.md](README.md) | Archive orientation |
 
 ## Product code
