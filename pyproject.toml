@@ -36,11 +36,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/KanakMalpani/Artificial-Curiosity"
-Repository = "https://github.com/KanakMalpani/Artificial-Curiosity"
-Issues = "https://github.com/KanakMalpani/Artificial-Curiosity/issues"
-Documentation = "https://github.com/KanakMalpani/Artificial-Curiosity#readme"
-Changelog = "https://github.com/KanakMalpani/Artificial-Curiosity/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/KanakMalpani/Artificial-Emotions"
+Repository = "https://github.com/KanakMalpani/Artificial-Emotions"
+Issues = "https://github.com/KanakMalpani/Artificial-Emotions/issues"
+Documentation = "https://github.com/KanakMalpani/Artificial-Emotions#readme"
+Changelog = "https://github.com/KanakMalpani/Artificial-Emotions/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [

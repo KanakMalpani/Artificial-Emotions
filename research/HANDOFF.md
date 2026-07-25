@@ -1,7 +1,7 @@
 # Agent Handoff — Artificial Curiosity
 
 **Repo root:** this clone  
-**Remote:** https://github.com/KanakMalpani/Artificial-Curiosity.git  
+**Remote:** https://github.com/KanakMalpani/Artificial-Emotions.git  
 **Goal:** Curiosity layer — generate & rank valuable *unanswered* questions (not Q&A).  
 **Entry docs:** Product → root `README.md` + `docs/`. Research archive → `research/` (`FIRST_PRINCIPLES`, `RESEARCH`, `FAILURE_MODES`, …).  
 **Version:** `0.3.0`
@@ -45,7 +45,7 @@
 ## Commands
 
 ```bash
-cd Artificial-Curiosity   # or your local clone path
+cd Artificial-Emotions   # or your local clone path
 pip install -e ".[dev]"
 pytest -q
 curiosity spark --domain ai --n 5 --profile alignment_lab

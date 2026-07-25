@@ -12,7 +12,7 @@ Once configured, GitHub Actions can publish without a long-lived API token.
 
 1. On [PyPI](https://pypi.org/manage/account/publishing/), add a **Trusted Publisher** for this project:
    - Owner: `KanakMalpani`
-   - Repository: `Artificial-Curiosity`
+   - Repository: `Artificial-Emotions`
    - Workflow: `publish.yml`
    - Environment: leave blank (or match a GitHub Environment if you add one later)
 2. In `.github/workflows/publish.yml`, enable OIDC by setting job `permissions.id-token: write` and remove the `password:` input from `pypa/gh-action-pypi-publish` (or keep token as fallback only while migrating).

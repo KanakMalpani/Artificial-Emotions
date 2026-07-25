@@ -6,7 +6,7 @@ Artificial Curiosity is a curiosity layer for people and agents deciding what to
 investigate next. It turns a domain, topic, and explicit `ValueProfile` into
 ranked unknowns, gap evidence, uncertainty bands, and investigation briefs.
 
-[![CI](https://github.com/KanakMalpani/Artificial-Curiosity/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Curiosity/actions/workflows/ci.yml)
+[![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
@@ -19,8 +19,8 @@ ranked unknowns, gap evidence, uncertainty bands, and investigation briefs.
 Clone the repository and install it from that local checkout:
 
 ```bash
-git clone https://github.com/KanakMalpani/Artificial-Curiosity.git
-cd Artificial-Curiosity
+git clone https://github.com/KanakMalpani/Artificial-Emotions.git
+cd Artificial-Emotions
 python -m venv .venv
 ```
 
@@ -130,7 +130,7 @@ bare command on `PATH`:
 {
   "mcpServers": {
     "artificial-curiosity": {
-      "command": "C:\\path\\to\\Artificial-Curiosity\\.venv\\Scripts\\python.exe",
+      "command": "C:\\path\\to\\Artificial-Emotions\\.venv\\Scripts\\python.exe",
       "args": ["-m", "artificial_curiosity.mcp_server"]
     }
   }

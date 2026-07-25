@@ -5,8 +5,8 @@ Thanks for interest in **Artificial Curiosity** — a curiosity layer that ranks
 ## Setup
 
 ```bash
-git clone https://github.com/KanakMalpani/Artificial-Curiosity.git
-cd Artificial-Curiosity
+git clone https://github.com/KanakMalpani/Artificial-Emotions.git
+cd Artificial-Emotions
 python -m venv .venv
 # macOS / Linux: source .venv/bin/activate
 # Windows: .venv\Scripts\activate

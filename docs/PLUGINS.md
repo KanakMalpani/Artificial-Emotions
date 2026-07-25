@@ -3,8 +3,8 @@
 No vendor lock-in. After clone:
 
 ```bash
-git clone https://github.com/KanakMalpani/Artificial-Curiosity.git
-cd Artificial-Curiosity
+git clone https://github.com/KanakMalpani/Artificial-Emotions.git
+cd Artificial-Emotions
 python -m venv .venv
 ```
 
@@ -93,7 +93,7 @@ Windows example:
 {
   "mcpServers": {
     "artificial-curiosity": {
-      "command": "C:\\path\\to\\Artificial-Curiosity\\.venv\\Scripts\\python.exe",
+      "command": "C:\\path\\to\\Artificial-Emotions\\.venv\\Scripts\\python.exe",
       "args": ["-m", "artificial_curiosity.mcp_server"]
     }
   }
