@@ -184,8 +184,7 @@ def provoke(
     )
     ranked = CuriosityEngine(config).run()
     unknowns = [
-        compact_unknown(r, epistemic_cues=epistemic_cues, value_profile=profile)
-        for r in ranked
+        compact_unknown(r, epistemic_cues=epistemic_cues, value_profile=profile) for r in ranked
     ]
     inject = build_inject_prompt(
         unknowns,

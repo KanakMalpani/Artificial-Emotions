@@ -14,13 +14,11 @@ from typing import Any
 from artificial_curiosity.emotions import mix_emotions
 from artificial_curiosity.models import resolve_value_profile
 from artificial_curiosity.provoke import build_inject_prompt, provoke
-
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-_DEFAULT_PROTOCOL = _REPO_ROOT / "examples" / "elicit_ab_protocol.json"
+from artificial_curiosity.resources import find_data_file
 
 
 def default_protocol_path() -> Path:
-    return _DEFAULT_PROTOCOL
+    return find_data_file("examples/elicit_ab_protocol.json")
 
 
 def load_elicit_protocol(path: str | Path | None = None) -> dict[str, Any]:
@@ -237,9 +235,7 @@ def run_elicit_ab(
     if "A_baseline" in means and "B_incongruity" in means:
         deltas["B_minus_A_mean"] = round(means["B_incongruity"] - means["A_baseline"], 4)
     if "A_baseline" in means and "C_mix_framing_optional" in means:
-        deltas["C_minus_A_mean"] = round(
-            means["C_mix_framing_optional"] - means["A_baseline"], 4
-        )
+        deltas["C_minus_A_mean"] = round(means["C_mix_framing_optional"] - means["A_baseline"], 4)
 
     return {
         "protocol": proto.get("name"),

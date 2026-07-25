@@ -24,8 +24,37 @@ permissions:
   contents: read
 
 jobs:
+  # Never upload something the suite has not passed on.
+  test:
+    name: Lint + pytest before release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package + dev extras
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Ruff check
+        run: ruff check src tests
+
+      - name: Ruff format (check)
+        run: ruff format --check src tests
+
+      - name: Pytest + coverage gate
+        run: pytest -q --cov --cov-report=term-missing
+
   build:
     name: Build sdist and wheel
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,10 +66,36 @@ jobs:
           python-version: "3.12"
 
       - name: Install build
-        run: python -m pip install --upgrade pip build
+        run: python -m pip install --upgrade pip build twine
 
       - name: Build package
         run: python -m build
+
+      - name: Check distribution metadata
+        run: twine check dist/*
+
+      # The artifact about to be uploaded is the one we verify — not the repo.
+      - name: Verify the wheel works outside a checkout
+        run: |
+          python -m venv /tmp/relcheck
+          /tmp/relcheck/bin/pip install --upgrade pip
+          /tmp/relcheck/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/relcheck/bin/python - <<'PY'
+          from artificial_curiosity.bayesian import fill_surprise_worksheet
+          from artificial_curiosity.compare import load_constitution_stack
+          from artificial_curiosity.elicit_eval import load_elicit_protocol
+          from artificial_curiosity.evals import load_fixtures
+          from artificial_curiosity.voi import fill_voi_worksheet
+
+          assert fill_surprise_worksheet(question_id="q")["fields"]
+          assert fill_voi_worksheet(question_id="q")
+          assert load_constitution_stack()
+          assert load_elicit_protocol()["conditions"]
+          assert load_fixtures()
+          PY
+          /tmp/relcheck/bin/curiosity spark --domain ai --n 3 --json > /dev/null
+          /tmp/relcheck/bin/curiosity-mcp --list-tools > /dev/null
 
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v4

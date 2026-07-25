@@ -30,15 +30,76 @@
 | brief | `brief.py` | Investigation briefs |
 | pipeline | `pipeline.py` | Orchestration (`CuriosityEngine`) |
 | provoke | `provoke.py` | Instant spark + inject pack |
-| emotions | `emotions.py` | Catalog / mix / cues (annotation only) |
+| emotions | `emotions.py` | Catalog / mix / cues (`annotation_only` + `computational_affect`) |
+| resources | `resources.py` | Packaged data paths for worksheets / eval fixtures |
 | preferences | `preferences.py` | Opt-in preference JSONL + thin hints |
-| agent_tools | `agent_tools.py` | Shared MCP / OpenAI / HTTP tool schemas |
+| agent_tools | `agent_tools.py` → `agent_tools_pkg/` | Shared MCP / OpenAI / HTTP tool schemas |
 | mcp_server | `mcp_server.py` | Stdio MCP (stdlib JSON-RPC) |
-| api | `api.py` | FastAPI |
-| cli | `cli.py` | `curiosity run \| spark \| serve \| …` |
+| api | `api.py` → `api_pkg/` | FastAPI (see below) |
+| cli | `cli.py` → `cli_pkg/` | `curiosity run \| spark \| serve \| …` |
 | llm | `llm.py` | Provider-agnostic OpenAI-compatible client |
 | config | `config.py` | Central env knobs |
 | evals | `evals.py`, `eval_report.py` | Offline expert-eval / composite report |
+
+## HTTP layer
+
+`artificial_curiosity.api:app` is the stable entry point (uvicorn target,
+`curiosity serve`, `TestClient`). It is a thin re-export; the implementation is
+split by concern:
+
+| Module | Holds |
+|--------|-------|
+| `api_pkg/__init__.py` | `create_app()` — middleware, error handlers, router wiring |
+| `api_pkg/security.py` | Opt-in API-key middleware and path/key helpers |
+| `api_pkg/error_handlers.py` | Exception → stable `{"error": {...}}` envelope |
+| `api_pkg/schemas.py` | Pydantic request models (names are public OpenAPI schemas) |
+| `api_pkg/routers/meta.py` | `/`, `/health`, `/ready`, `/v1/agent`, `/v1/domains` |
+| `api_pkg/routers/profiles.py` | `/v1/profiles`, compare, constitution-compare |
+| `api_pkg/routers/curiosity.py` | `/v1/curiosity/run`, `/v1/curiosity/provoke` |
+| `api_pkg/routers/preferences.py` | `/v1/preferences/*` |
+| `api_pkg/routers/evaluation.py` | `/v1/evals/*`, worksheets, brief critique |
+| `api_pkg/routers/emotions.py` | `/v1/emotions/*` and the `/v1/epistemic/*` alias |
+
+Routers spell out full paths (no `prefix=`) so any route can be found by
+grepping its literal URL. `tests/test_api_wiring.py` pins the served path set,
+middleware order, and that every router module is actually included.
+
+## CLI layer
+
+`artificial_curiosity.cli:main` is the `curiosity` console script.
+
+| Module | Holds |
+|--------|-------|
+| `cli_pkg/__init__.py` | `main()` and the subcommand dispatch table |
+| `cli_pkg/parser.py` | Every argparse definition, in one readable place |
+| `cli_pkg/commands/ranking.py` | `run`, `spark`, `serve` |
+| `cli_pkg/commands/profiles.py` | `profiles`, `compare-profiles` |
+| `cli_pkg/commands/worksheets.py` | `critique-brief`, `voi-worksheet`, `surprise-worksheet` |
+| `cli_pkg/commands/preferences.py` | `preferences hints \| summarize \| suggest-pair` |
+| `cli_pkg/commands/evaluation.py` | `eval spotcheck \| elicit \| gap-status \| report \| cooccur` |
+| `cli_pkg/commands/emotions.py` | `emotions` / `epistemic` subcommands |
+
+The bare-flag fallback (`curiosity --domain ai` → `run`) reads subcommand names
+off the parser rather than a hardcoded list, so the two cannot drift apart.
+
+## Agent tool layer
+
+`artificial_curiosity.agent_tools` is the stable import path. Dependencies run
+strictly one way — nothing imports backwards:
+
+```
+schemas.py → handlers.py → registry.py → mcp_resources.py
+```
+
+| Module | Holds |
+|--------|-------|
+| `agent_tools_pkg/schemas.py` | JSON Schema fragments (MCP `inputSchema` / OpenAI `parameters`) |
+| `agent_tools_pkg/handlers.py` | Tool implementations |
+| `agent_tools_pkg/registry.py` | `TOOL_SPECS`, tier filtering, `dispatch_tool` |
+| `agent_tools_pkg/mcp_resources.py` | `curiosity://` resource list and read |
+
+`TOOL_SPECS` is the single source of truth: the MCP tool list, the OpenAI tool
+list, and dispatch all derive from it.
 
 ## Product surfaces
 
@@ -58,7 +119,8 @@
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path / SSRF hygiene).
 - Literature classifier is heuristic — confidence reflected in output.
 - Rankings require an explicit `ValueProfile` (defaults provided, not hidden).
-- Emotion / mix surfaces are `annotation_only` — not felt affect.
+- Emotion cues are `annotation_only`; mixes emit `computational_affect` /
+  `felt_simulation` — not biological consciousness or user-affect measurement.
 
 ## Extension points
 

@@ -18,14 +18,12 @@ from artificial_curiosity.models import (
     ValueProfile,
     resolve_value_profile,
 )
+from artificial_curiosity.resources import find_data_file
 from artificial_curiosity.scoring import aggregate_curiosity, heuristic_score
-
-_REPO = Path(__file__).resolve().parents[2]
-_DEFAULT_CONSTITUTION = _REPO / "examples" / "constitution_veto_stack.json"
 
 
 def default_constitution_path() -> Path:
-    return _DEFAULT_CONSTITUTION
+    return find_data_file("examples/constitution_veto_stack.json")
 
 
 def load_constitution_stack(path: str | Path | None = None) -> dict[str, Any]:
@@ -255,11 +253,11 @@ def compare_constitution(
     stack = load_constitution_stack(constitution_path)
     stakeholders = list(stack.get("stakeholders") or [])
     by_role = {
-        str(s.get("role") or "").strip().lower(): s
-        for s in stakeholders
-        if isinstance(s, dict)
+        str(s.get("role") or "").strip().lower(): s for s in stakeholders if isinstance(s, dict)
     }
-    primary = primary_profile or (by_role.get("primary") or {}).get("profile_name") or "humanity_default"
+    primary = (
+        primary_profile or (by_role.get("primary") or {}).get("profile_name") or "humanity_default"
+    )
     veto = (
         veto_profile
         or (by_role.get("safety_veto") or {}).get("profile_name")
@@ -268,7 +266,8 @@ def compare_constitution(
     advisory = [
         str(s.get("profile_name"))
         for s in stakeholders
-        if isinstance(s, dict) and str(s.get("role") or "").lower() == "advisory"
+        if isinstance(s, dict)
+        and str(s.get("role") or "").lower() == "advisory"
         and s.get("profile_name")
     ]
 
@@ -287,7 +286,9 @@ def compare_constitution(
         **base,
         "constitution": {
             "id": stack.get("constitution_id") or stack.get("name"),
-            "path": str(Path(constitution_path) if constitution_path else default_constitution_path()),
+            "path": str(
+                Path(constitution_path) if constitution_path else default_constitution_path()
+            ),
             "primary_profile": str(primary),
             "veto_profile": str(veto),
             "advisory_profiles": advisory,

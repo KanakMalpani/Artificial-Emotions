@@ -20,7 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        # Must cover every version in the pyproject classifiers.
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout
@@ -43,5 +44,58 @@ jobs:
       - name: Ruff format (check)
         run: ruff format --check src tests
 
-      - name: Pytest
-        run: pytest -q
+      - name: Pytest + coverage gate
+        run: pytest -q --cov --cov-report=term-missing
+
+  packaging:
+    name: Wheel installs and finds its data files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+
+      # Guards the class of bug where a runtime data file resolves only from a
+      # source checkout: install the built wheel somewhere with no repo nearby.
+      - name: Install the wheel into a clean environment
+        run: |
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install --upgrade pip
+          /tmp/clean/bin/pip install dist/*.whl
+
+      - name: Smoke-test packaged data from outside the checkout
+        working-directory: /tmp
+        run: |
+          /tmp/clean/bin/python - <<'PY'
+          from artificial_curiosity.bayesian import fill_surprise_worksheet
+          from artificial_curiosity.compare import load_constitution_stack
+          from artificial_curiosity.elicit_eval import load_elicit_protocol
+          from artificial_curiosity.evals import load_fixtures
+          from artificial_curiosity.voi import fill_voi_worksheet
+
+          assert fill_surprise_worksheet(question_id="q")["fields"]
+          assert fill_voi_worksheet(question_id="q")
+          assert load_constitution_stack()
+          assert load_elicit_protocol()["conditions"]
+          assert load_fixtures()
+          print("packaged data OK")
+          PY
+
+      - name: Smoke-test the console scripts
+        working-directory: /tmp
+        run: |
+          /tmp/clean/bin/curiosity spark --domain ai --n 3 --json > /dev/null
+          /tmp/clean/bin/curiosity eval report --json > /dev/null
+          /tmp/clean/bin/curiosity eval cooccur --json > /dev/null
+          /tmp/clean/bin/curiosity voi-worksheet --json > /dev/null
+          /tmp/clean/bin/curiosity surprise-worksheet --json > /dev/null

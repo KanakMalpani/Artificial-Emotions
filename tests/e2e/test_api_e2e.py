@@ -172,6 +172,7 @@ def test_emotions_surface_e2e(client: TestClient) -> None:
     assert "emotion_catalog" in agent["mcp"]["tools"]
     assert "preferences" in client.get("/").json()
 
+
 def test_provoke_post_and_multi_domain(client: TestClient) -> None:
     post = client.post(
         "/v1/curiosity/provoke",

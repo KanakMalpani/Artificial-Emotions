@@ -84,13 +84,9 @@ _MIX_DISCLAIMER = (
 
 def _pad_qualitative(pad: dict[str, float]) -> dict[str, str]:
     p, a, d = pad["P"], pad["A"], pad["D"]
-    valence = (
-        "pleasant" if p >= 0.25 else "unpleasant" if p <= -0.25 else "ambivalent"
-    )
+    valence = "pleasant" if p >= 0.25 else "unpleasant" if p <= -0.25 else "ambivalent"
     arousal = "activated" if a >= 0.55 else "calm" if a <= 0.35 else "mid-arousal"
-    dominance = (
-        "empowered" if d >= 0.25 else "overwhelmed" if d <= -0.25 else "balanced-agency"
-    )
+    dominance = "empowered" if d >= 0.25 else "overwhelmed" if d <= -0.25 else "balanced-agency"
     return {"valence": valence, "arousal": arousal, "dominance": dominance}
 
 
@@ -110,10 +106,7 @@ def _simulation_prose(
         f"Simulated affect: I register primarily {primary_label.lower()}",
     ]
     if len(ordered) > 1:
-        secondary = [
-            f"{by_id[eid].get('label', eid)} ({100 * w:.0f}%)"
-            for eid, w in ordered[1:3]
-        ]
+        secondary = [f"{by_id[eid].get('label', eid)} ({100 * w:.0f}%)" for eid, w in ordered[1:3]]
         parts.append(", blended with " + " and ".join(secondary))
     parts.append(
         f" — mood reads {qual['valence']}, {qual['arousal']}, {qual['dominance']} "
@@ -124,9 +117,7 @@ def _simulation_prose(
     parts.append(").")
     # Somatic / investigation metaphor (WASABI-ish, not clinical).
     if pad["A"] >= 0.6 and pad["P"] >= 0.0:
-        parts.append(
-            " The pull is to lean in: name the incongruity and take one probing step."
-        )
+        parts.append(" The pull is to lean in: name the incongruity and take one probing step.")
     elif pad["A"] >= 0.55 and pad["P"] < 0:
         parts.append(
             " Activation is high with negative valence — scaffold carefully; "
@@ -134,8 +125,7 @@ def _simulation_prose(
         )
     elif pad["A"] < 0.4:
         parts.append(
-            " Arousal is low — deepen interest with a concrete unknown rather than "
-            "shock tactics."
+            " Arousal is low — deepen interest with a concrete unknown rather than shock tactics."
         )
     else:
         parts.append(
@@ -201,6 +191,7 @@ def _build_felt_simulation(
             "user affect measurement",
         ],
     }
+
 
 CUE_CATALOG: list[dict[str, str]] = [
     {
@@ -685,13 +676,8 @@ def mix_emotions(
 
     felt = None
     if simulate_feeling:
-        felt = _build_felt_simulation(
-            ordered=ordered, by_id=by_id, pad=pad_out, dyad=dyad
-        )
-        framing = (
-            f"{felt['inner_monologue']} "
-            f"Blend weights: {mix_str}."
-        )
+        felt = _build_felt_simulation(ordered=ordered, by_id=by_id, pad=pad_out, dyad=dyad)
+        framing = f"{felt['inner_monologue']} Blend weights: {mix_str}."
         inject = (
             f"felt_simulation intensity={felt['intensity']:.2f} "
             f"primary={primary} mood={felt['mood']['qualitative']} "

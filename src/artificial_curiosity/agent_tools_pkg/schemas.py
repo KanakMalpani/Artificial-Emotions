@@ -1,0 +1,411 @@
+"""JSON Schema fragments shared by MCP `inputSchema` and OpenAI `parameters`.
+
+One definition per tool so Cursor / Claude Desktop / Copilot / custom agents
+all see the same contract."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from artificial_curiosity.models import (
+    Domain,
+    list_profile_names,
+)
+
+_DOMAIN_ENUM = [d.value for d in Domain]
+_PROFILE_ENUM = list_profile_names()
+
+_VALUE_PROFILE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": (
+        "Explicit stakeholder values — rankings are never value-free. "
+        "Prefer profile_name for named presets; or pass a full object."
+    ),
+    "properties": {
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "weight_impact": {"type": "number", "minimum": 0, "maximum": 3},
+        "weight_neglectedness": {"type": "number", "minimum": 0, "maximum": 3},
+        "weight_tractability": {"type": "number", "minimum": 0, "maximum": 3},
+        "weight_surprise": {"type": "number", "minimum": 0, "maximum": 3},
+        "max_risk": {"type": "number", "minimum": 0, "maximum": 1},
+        "min_answerability": {"type": "number", "minimum": 0, "maximum": 1},
+        "prefer_interdisciplinary": {"type": "boolean"},
+        "time_horizon_years": {"type": "integer", "minimum": 1, "maximum": 100},
+    },
+    "additionalProperties": False,
+}
+
+PROVOKE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "domain": {
+            "type": "string",
+            "enum": _DOMAIN_ENUM,
+            "default": "ai",
+            "description": "Scientific / research domain",
+        },
+        "topic": {
+            "type": "string",
+            "default": "",
+            "description": "Optional topic focus within the domain",
+        },
+        "n": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16,
+            "default": 5,
+            "description": "How many ranked unknowns to return",
+        },
+        "fast": {
+            "type": "boolean",
+            "default": True,
+            "description": (
+                "If true (default), skip OpenAlex for an instant local spark. "
+                "Set false for literature-grounded gap checks."
+            ),
+        },
+        "use_llm": {
+            "type": "boolean",
+            "default": False,
+            "description": "Use configured OpenAI-compatible LLM if available",
+        },
+        "profile_name": {
+            "type": "string",
+            "enum": _PROFILE_ENUM,
+            "description": "Named ValueProfile preset (F11). Prefer over inventing weights.",
+        },
+        "value_profile": _VALUE_PROFILE_SCHEMA,
+        "judge_model": {
+            "type": "string",
+            "description": "Optional judge/gap-reader model distinct from generator",
+        },
+        "diversity_backend": {
+            "type": "string",
+            "enum": ["jaccard", "embedding"],
+            "default": "jaccard",
+            "description": "Near-dup backend; embedding needs optional extras",
+        },
+    },
+    "additionalProperties": False,
+}
+
+RANK_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "domain": {
+            "type": "string",
+            "enum": _DOMAIN_ENUM,
+            "default": "ai",
+        },
+        "topic": {"type": "string", "default": ""},
+        "n_return": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32,
+            "default": 8,
+        },
+        "n_candidates": {
+            "type": "integer",
+            "minimum": 4,
+            "maximum": 64,
+            "default": 16,
+        },
+        "use_literature": {
+            "type": "boolean",
+            "default": True,
+            "description": "Ground gaps via literature adapters (OpenAlex / Semantic Scholar)",
+        },
+        "literature_backend": {
+            "type": "string",
+            "enum": ["openalex", "semantic_scholar", "both"],
+            "default": "openalex",
+            "description": "Literature backend (W11). Offline path ignores this.",
+        },
+        "use_llm": {
+            "type": "boolean",
+            "default": False,
+        },
+        "profile_name": {
+            "type": "string",
+            "enum": _PROFILE_ENUM,
+        },
+        "value_profile": _VALUE_PROFILE_SCHEMA,
+        "judge_model": {"type": "string"},
+        "judge_ensemble_n": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 1,
+            "description": "Multi-judge ensemble size; disagreement widens bands (W15)",
+        },
+        "diversity_backend": {
+            "type": "string",
+            "enum": ["jaccard", "embedding"],
+            "default": "jaccard",
+        },
+    },
+    "additionalProperties": False,
+}
+
+LIST_DOMAINS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": False,
+}
+
+LIST_PROFILES_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": False,
+}
+
+COMPARE_PROFILES_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "domain": {
+            "type": "string",
+            "enum": list(_DOMAIN_ENUM),
+            "default": "ai",
+        },
+        "topic": {"type": "string", "default": ""},
+        "profile_a": {
+            "type": "string",
+            "default": "humanity_default",
+            "description": "Primary ValueProfile preset name",
+        },
+        "profile_b": {
+            "type": "string",
+            "default": "alignment_lab",
+            "description": "Comparison ValueProfile preset name",
+        },
+        "n": {"type": "integer", "minimum": 1, "maximum": 32, "default": 8},
+    },
+    "additionalProperties": False,
+}
+
+CONSTITUTION_COMPARE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "domain": {
+            "type": "string",
+            "enum": list(_DOMAIN_ENUM),
+            "default": "ai",
+        },
+        "topic": {"type": "string", "default": ""},
+        "primary_profile": {
+            "type": "string",
+            "description": "Override constitution primary profile",
+        },
+        "veto_profile": {
+            "type": "string",
+            "description": "Override safety veto profile (e.g. public_demo_strict_risk)",
+        },
+        "n": {"type": "integer", "minimum": 1, "maximum": 32, "default": 8},
+    },
+    "additionalProperties": False,
+}
+
+CRITIQUE_BRIEF_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "question": {"type": "string", "default": ""},
+        "operationalization": {"type": "string", "default": ""},
+        "brief": {"type": "string", "default": ""},
+        "why_it_matters": {"type": "string", "default": ""},
+    },
+    "additionalProperties": False,
+}
+
+CROSS_MODEL_VOTE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "object"},
+            "description": "Candidate unknowns with question / operationalization",
+        },
+        "judges": {"type": "integer", "minimum": 1, "maximum": 6, "default": 1},
+    },
+    "required": ["candidates"],
+    "additionalProperties": False,
+}
+
+VOI_WORKSHEET_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "question_id": {"type": "string", "default": ""},
+        "question": {"type": "string", "default": ""},
+        "operationalization": {"type": "string", "default": ""},
+        "profile_name": {"type": "string", "default": ""},
+        "domain": {"type": "string", "default": ""},
+    },
+    "additionalProperties": False,
+}
+
+LIST_EPISTEMIC_CUES_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": False,
+}
+
+ANNOTATE_EPISTEMIC_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "question": {
+            "type": "string",
+            "minLength": 12,
+            "description": "Question text to annotate with epistemic cue tags",
+        },
+        "gap_status": {
+            "type": "string",
+            "enum": [
+                "unanswered",
+                "partially_answered",
+                "likely_answered",
+                "unknown_with_caveat",
+            ],
+            "default": "unanswered",
+        },
+        "surprise": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+        },
+        "neglectedness": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+        },
+        "answerability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+        },
+        "notes": {
+            "type": "string",
+            "default": "",
+            "description": "Optional gap notes (e.g. related literature ≠ answered)",
+        },
+        "domain": {
+            "type": "string",
+            "enum": _DOMAIN_ENUM,
+            "default": "ai",
+        },
+    },
+    "required": ["question"],
+    "additionalProperties": False,
+}
+
+EMOTION_PACK_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "default": "affective_science",
+            "description": (
+                "Bundled pack id. Default affective_science — ranking seeds for "
+                "affective / epistemic research, not an emotion engine."
+            ),
+        },
+    },
+    "additionalProperties": False,
+}
+
+ELICIT_HELPERS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": False,
+}
+
+EMOTION_CATALOG_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "family": {
+            "type": "string",
+            "description": ("Optional filter: epistemic | basic | social | achievement"),
+        },
+    },
+    "additionalProperties": False,
+}
+
+MIX_EMOTIONS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "weights": {
+            "type": "object",
+            "description": (
+                "Map emotion_id → percent (e.g. 40) or weight (e.g. 0.4). "
+                "Normalized to sum 1.0. Example: "
+                '{"curiosity": 40, "confusion": 30, "awe": 30}'
+            ),
+            "additionalProperties": {"type": "number"},
+        },
+        "profile_name": {
+            "type": "string",
+            "description": "Optional ValueProfile for mix_intensity_cap",
+        },
+        "mix_intensity_cap": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Override non-epistemic mix mass cap",
+        },
+        "simulate_feeling": {
+            "type": "boolean",
+            "description": "Include felt_simulation in response",
+        },
+    },
+    "required": ["weights"],
+    "additionalProperties": False,
+}
+
+IDEA_GRAPH_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "object"},
+        },
+        "similarity_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.28,
+        },
+    },
+    "required": ["candidates"],
+    "additionalProperties": False,
+}
+
+SOUNDNESS_PASS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "object"},
+            "description": "Top-n unknowns with question / operationalization / brief",
+        },
+    },
+    "required": ["candidates"],
+    "additionalProperties": False,
+}
+
+SURPRISE_WORKSHEET_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "question_id": {"type": "string"},
+        "profile_name": {"type": "string"},
+        "predicted_surprise": {"type": "number", "minimum": 0, "maximum": 1},
+        "pilot_result": {"type": "string"},
+        "belief_shift_1_to_5": {"type": "integer", "minimum": 1, "maximum": 5},
+        "crude_update_note": {"type": "string"},
+    },
+    "additionalProperties": False,
+}

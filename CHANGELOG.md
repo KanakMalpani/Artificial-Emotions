@@ -1,5 +1,78 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Worksheet templates and eval fixtures now work when installed.** `bayesian`,
+  `voi`, `compare`, `elicit_eval`, `evals`, and the `curiosity eval` /
+  `voi-worksheet` / `surprise-worksheet` commands resolved data via
+  `Path(__file__).parents[2]`, a path that only exists in a source checkout —
+  every `pip install` hit `FileNotFoundError`. Data files are now force-included
+  into the wheel and resolved by `artificial_curiosity.resources`, which prefers
+  the packaged copy and falls back to the checkout.
+- `classify_value_error` returned `unknown_emotion` for "unknown emotion pack"
+  messages, because the general check ran before the specific one. Pack errors
+  now classify as `unknown_pack`. Error codes are public contract.
+- CI had been failing on every push since the workflow was added (14 ruff
+  errors, 20 files off `ruff format`). Lint and formatting are clean.
+- **Ranked output was not reproducible.** Flag lists were rebuilt with
+  `list(set(...))`, so their order followed PYTHONHASHSEED and an identical run
+  emitted different JSON on every invocation — breaking run-to-run diffs,
+  caching, and golden-output tests. Replaced with an order-preserving
+  `scoring.dedupe_flags`; `tests/test_output_determinism.py` runs the CLI under
+  three different hash seeds to keep it fixed.
+- `test_soundness_pass_offline` was defined twice in `tests/test_mid_horizon.py`;
+  the second silently replaced the first, so the surprise-worksheet assertions
+  never ran and `bayesian.py` sat at 0% coverage. Renamed to
+  `test_surprise_worksheet_offline`.
+
+### Changed
+- `ruff` pinned to `>=0.15,<0.16` — `ruff format --check` is version-sensitive,
+  so the previous `>=0.6,<1` range let CI reformat the tree and go red on its own.
+- CI matrix adds Python 3.13 (already advertised in the classifiers), enforces a
+  coverage floor, and gained a `packaging` job that installs the built wheel into
+  a clean environment and exercises the data files and console scripts from
+  outside the checkout.
+
+- The PyPI publish workflow built and uploaded without running the test suite or
+  checking that the artifact worked. It now runs lint + pytest first, runs
+  `twine check`, and installs the built wheel into a clean environment to
+  exercise its data files and console scripts before upload.
+
+### Added
+- `artificial_curiosity.resources` — package-first data file resolution.
+- Test coverage for surfaces that had none: the MCP stdio read loop and
+  `curiosity-mcp` argv handling, the full CLI subcommand surface, the
+  OpenAI-compatible client (credential precedence, tolerant JSON extraction,
+  the `response_format` retry that keeps local providers working), the
+  Semantic Scholar backend, and the judge's soft-fail and
+  anti-hallucination-grounding contracts. All offline — no network, no keys.
+- Coverage 78% → 87%; 146 → 327 tests. Floor enforced at 85%.
+
+### Internal
+- `api.py` (1141 lines) split into `api_pkg/`: app assembly, `security.py`,
+  `error_handlers.py`, `schemas.py`, and six routers grouped by URL prefix.
+  `artificial_curiosity.api:app` and every previously importable name still
+  resolve from `artificial_curiosity.api` — the generated OpenAPI (32 paths,
+  18 component schemas) and the middleware order are byte-identical to before.
+  Added `tests/test_api_wiring.py` to pin the served path set, the
+  auth-wraps-CORS ordering, and that no router module can be left un-included.
+- `cli.py` (929 lines) split into `cli_pkg/`: parser definitions plus one module
+  per subcommand group. Verified against a captured baseline — the full argparse
+  contract (every subcommand, option, default, and help string) and all 20
+  sampled command outputs are unchanged. The bare-flag fallback now derives
+  subcommand names from the parser instead of a second hardcoded list.
+- `agent_tools.py` (1147 lines) split into `agent_tools_pkg/` as
+  schemas → handlers → registry → mcp_resources, a one-way dependency chain.
+  The captured tool contract — every schema, tier listing, `curiosity://`
+  resource, and dispatch result — is byte-identical.
+- No source or test file now exceeds 800 lines.
+- `test_mid_horizon.py` (1375 lines) split by theme into
+  `test_wedges_literature_gap.py`, `test_wedges_preferences.py`,
+  `test_wedges_safety_packs.py`, and `test_wedges_worksheets.py`. No test
+  bodies changed.
+- `config.py` env reference now lists `CURIOSITY_MCP_TIER`.
+
 ## 0.4.0 — 2026-07-24
 
 Production-ready hardening of the public surface (emotions + API + plugins).

@@ -6,8 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-_REPO = Path(__file__).resolve().parents[2]
-_DEFAULT_TEMPLATE = _REPO / "examples" / "voi_worksheet_template.json"
+from artificial_curiosity.resources import find_data_file
 
 __all__ = [
     "default_voi_template_path",
@@ -17,7 +16,7 @@ __all__ = [
 
 
 def default_voi_template_path() -> Path:
-    return _DEFAULT_TEMPLATE
+    return find_data_file("examples/voi_worksheet_template.json")
 
 
 def load_voi_template(path: str | Path | None = None) -> dict[str, Any]:
@@ -56,8 +55,7 @@ def fill_voi_worksheet(
         sheet["proposed_study"]["endpoints"] = [operationalization[:240]]
     sheet["filled_by"] = "artificial_curiosity.fill_voi_worksheet"
     sheet["honesty"] = (
-        sheet.get("honesty")
-        or "Not computed EVSI. External decision model + utilities required."
+        sheet.get("honesty") or "Not computed EVSI. External decision model + utilities required."
     )
     sheet["imprecise_note"] = (
         "If stakeholders disagree on utilities, prefer profile-compare + veto "

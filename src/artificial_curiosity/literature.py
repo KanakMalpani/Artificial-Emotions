@@ -64,9 +64,7 @@ class CachedLiteratureClient:
                 try:
                     payload = json.loads(path.read_text(encoding="utf-8"))
                     if now - float(payload.get("ts", 0)) <= self.ttl_s:
-                        return [
-                            LiteratureHit.model_validate(h) for h in payload.get("hits", [])
-                        ]
+                        return [LiteratureHit.model_validate(h) for h in payload.get("hits", [])]
                 except Exception as exc:  # noqa: BLE001 — corrupt cache → refetch
                     logger.warning("Literature cache read failed; refetching: %s", exc)
         hits = self.inner.search_works(query, per_page=per_page)

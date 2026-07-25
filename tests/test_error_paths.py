@@ -83,10 +83,11 @@ def test_health_and_ready_detail():
 
 
 def test_ready_returns_503_when_checks_fail(monkeypatch):
-    import artificial_curiosity.api as api_mod
+    # Patch where /ready resolves the symbol, i.e. the router module it lives in.
+    from artificial_curiosity.api_pkg.routers import meta as meta_router
 
     monkeypatch.setattr(
-        api_mod,
+        meta_router,
         "emotion_catalog",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("boom")),
     )

@@ -86,7 +86,11 @@ def test_compact_unknown_can_disable_cues():
 def test_inject_includes_framing_and_anti_anthropomorphism():
     u = compact_unknown(_ranked())
     text = build_inject_prompt([u], domain="ai", topic="affect")
-    assert "does not feel" in text.lower() or "not feel" in text.lower() or "simulation" in text.lower()
+    assert (
+        "does not feel" in text.lower()
+        or "not feel" in text.lower()
+        or "simulation" in text.lower()
+    )
     assert "epistemic_cues=" in text
     assert "falsifier" in text.lower()
     assert "risk:" in text.lower()

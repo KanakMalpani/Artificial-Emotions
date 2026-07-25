@@ -68,8 +68,7 @@ def critique_brief(
                 "code": "missing_falsifier",
                 "severity": "info",
                 "detail": (
-                    "No clear falsifier / discriminating observation phrasing in "
-                    "ops or brief."
+                    "No clear falsifier / discriminating observation phrasing in ops or brief."
                 ),
             }
         )
@@ -88,9 +87,7 @@ def critique_brief(
             {
                 "code": "overclaim_settled",
                 "severity": "warn",
-                "detail": (
-                    "Language sounds settled/overclaimed without gap-status evidence."
-                ),
+                "detail": ("Language sounds settled/overclaimed without gap-status evidence."),
             }
         )
 

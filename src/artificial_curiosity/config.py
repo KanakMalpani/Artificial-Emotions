@@ -14,6 +14,7 @@ Env reference (see also ``.env.example``)::
     CURIOSITY_API_KEY / ARTIFICIAL_CURIOSITY_API_KEY / CURIOSITY_API_KEYS
     CURIOSITY_CORS_ORIGINS — comma list; default ``*`` (local demos)
     CURIOSITY_HOST / CURIOSITY_PORT — serve defaults
+    CURIOSITY_MCP_TIER     — MCP tool tier (core|investigate|affect|research|full)
     OPENALEX_MAILTO
     S2_API_KEY / SEMANTIC_SCHOLAR_API_KEY
     LITERATURE_TIMEOUT_S   — literature HTTP timeout (default 12)

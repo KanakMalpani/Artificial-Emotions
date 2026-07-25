@@ -70,12 +70,14 @@ def classify_value_error(exc: ValueError) -> CuriosityError:
         return exc
     msg = str(exc)
     lower = msg.lower()
+    # Pack check must precede the emotion check: "unknown emotion pack" contains
+    # "unknown emotion", so the general branch would otherwise shadow it.
+    if "unknown emotion pack" in lower or "unknown pack" in lower:
+        return CuriosityError(ERR_UNKNOWN_PACK, msg)
     if "unknown emotion" in lower:
         return CuriosityError(ERR_UNKNOWN_EMOTION, msg)
     if "unknown family" in lower:
         return CuriosityError(ERR_UNKNOWN_FAMILY, msg)
-    if "unknown emotion pack" in lower or "unknown pack" in lower:
-        return CuriosityError(ERR_UNKNOWN_PACK, msg)
     if "unknown profile" in lower or "unknown valueprofile" in lower:
         return CuriosityError(ERR_UNKNOWN_PROFILE, msg)
     if "unknown gap_status" in lower or "unknown gap status" in lower:

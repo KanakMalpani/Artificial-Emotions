@@ -38,13 +38,9 @@ def soundness_pass_item(item: RankedQuestion | dict[str, Any]) -> dict[str, Any]
         axes = item.get("axes") if isinstance(item.get("axes"), dict) else {}
         feas = str(item.get("feasibility_note") or "")
 
-    critique = critique_brief(
-        question=q, operationalization=ops, brief=brief, why_it_matters=why
-    )
+    critique = critique_brief(question=q, operationalization=ops, brief=brief, why_it_matters=why)
     gap_ok = "answered" not in gap.lower() or "likely_answered" in gap
-    related_honesty = ("related" in brief.lower() and "answered" in brief.lower()) or bool(
-        gap
-    )
+    related_honesty = ("related" in brief.lower() and "answered" in brief.lower()) or bool(gap)
     codes = {i["code"] for i in critique.get("issues") or []}
     sound = "pass"
     if "sprawl_multi_question" in codes or "anthropomorphism" in codes:

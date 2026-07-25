@@ -239,11 +239,7 @@ def _axes_from_event(ev: PreferenceEvent) -> dict[str, float] | None:
     meta = ev.metadata or {}
     raw = meta.get("score_axes") or meta.get("scores")
     if isinstance(raw, dict):
-        out = {
-            k: float(raw[k])
-            for k in _AXIS_TO_WEIGHT
-            if k in raw and raw[k] is not None
-        }
+        out = {k: float(raw[k]) for k in _AXIS_TO_WEIGHT if k in raw and raw[k] is not None}
         if len(out) >= 2:
             return out
     return None
@@ -463,16 +459,16 @@ def summarize_preferences(
     ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[: max(1, top_k)]
     win_rates = []
     for qid, _ in ranked:
-        w = wins.get(qid, 0)
-        l = losses.get(qid, 0)
-        denom = w + l
+        n_wins = wins.get(qid, 0)
+        n_losses = losses.get(qid, 0)
+        denom = n_wins + n_losses
         win_rates.append(
             {
                 "question_id": qid,
                 "score": round(scores.get(qid, 0.0), 3),
-                "wins": w,
-                "losses": l,
-                "win_rate": round(w / denom, 3) if denom else None,
+                "wins": n_wins,
+                "losses": n_losses,
+                "win_rate": round(n_wins / denom, 3) if denom else None,
             }
         )
 

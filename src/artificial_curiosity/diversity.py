@@ -14,6 +14,7 @@ from typing import Literal
 
 from artificial_curiosity.logutil import get_logger
 from artificial_curiosity.models import RankedQuestion, UnansweredQuestion
+from artificial_curiosity.scoring import dedupe_flags
 
 logger = get_logger("diversity")
 
@@ -127,13 +128,13 @@ def diversify(
             is_near_duplicate(item.question, s.question, threshold, backend=effective)
             for s in selected
         ):
-            flags = list(set(item.flags + ["near_duplicate_suppressed"]))
+            flags = dedupe_flags(item.flags, "near_duplicate_suppressed")
             if backend == "embedding" and effective == "jaccard":
-                flags = list(set(flags + ["embedding_fallback_jaccard"]))
+                flags = dedupe_flags(flags, "embedding_fallback_jaccard")
             item.flags = flags
             continue
         if backend == "embedding" and effective == "jaccard":
-            item.flags = list(set(item.flags + ["embedding_fallback_jaccard"]))
+            item.flags = dedupe_flags(item.flags, "embedding_fallback_jaccard")
         selected.append(item)
         if len(selected) >= n_return:
             break

@@ -75,33 +75,23 @@ def lint_tool_description(name: str, description: str) -> list[str]:
     if name in _EMOTION_TOOLS:
         # Require honesty: annotation OR computational-affect simulation language
         has_ann = "annotation" in blob or "annotate" in blob
-        has_sim = (
-            "computational" in blob
-            or "felt_simulation" in blob
-            or "simulation" in blob
-        )
+        has_sim = "computational" in blob or "felt_simulation" in blob or "simulation" in blob
         if not (has_ann or has_sim):
-            errors.append(
-                "emotion tool missing annotation / computational-affect honesty token"
-            )
+            errors.append("emotion tool missing annotation / computational-affect honesty token")
         if (
             "feel" not in blob
             and "not anthropomorphic" not in blob
             and "not biological" not in blob
             and "simulation" not in blob
         ):
-            errors.append(
-                "emotion tool missing not-feel / simulation / non-biological token"
-            )
+            errors.append("emotion tool missing not-feel / simulation / non-biological token")
         return errors
 
     has_oracle = any(t in blob for t in _NON_ORACLE)
     has_values = any(t in blob for t in _VALUES)
     has_gap = any(t in blob for t in _GAP)
     if not (has_oracle or has_values or has_gap):
-        errors.append(
-            "missing honesty family (need decision-aid / ValueProfile / gap token)"
-        )
+        errors.append("missing honesty family (need decision-aid / ValueProfile / gap token)")
 
     return errors
 

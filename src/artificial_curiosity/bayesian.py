@@ -10,12 +10,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-_REPO = Path(__file__).resolve().parents[2]
-_DEFAULT = _REPO / "examples" / "bayesian_surprise_worksheet.json"
+from artificial_curiosity.resources import find_data_file
 
 
 def default_surprise_worksheet_path() -> Path:
-    return _DEFAULT
+    return find_data_file("examples/bayesian_surprise_worksheet.json")
 
 
 def fill_surprise_worksheet(
@@ -44,12 +43,9 @@ def fill_surprise_worksheet(
     fields["logged_at"] = datetime.now(UTC).isoformat()
     sheet["fields"] = fields
     sheet["filled_by"] = "artificial_curiosity.fill_surprise_worksheet"
-    sheet["honesty"] = (
-        sheet.get("honesty")
-        or (
-            "Manual belief-shift logging only — not EVSI, not axis rename, "
-            "not AutoDiscovery Bayesian surprise."
-        )
+    sheet["honesty"] = sheet.get("honesty") or (
+        "Manual belief-shift logging only — not EVSI, not axis rename, "
+        "not AutoDiscovery Bayesian surprise."
     )
     sheet["non_claims"] = [
         "Does not rename ScoreAxes.surprise",

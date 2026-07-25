@@ -6,6 +6,9 @@ Artificial Curiosity is a curiosity layer for people and agents deciding what to
 investigate next. It turns a domain, topic, and explicit `ValueProfile` into
 ranked unknowns, gap evidence, uncertainty bands, and investigation briefs.
 
+Public repository: [KanakMalpani/Artificial-Emotions](https://github.com/KanakMalpani/Artificial-Emotions)
+(Python package name remains `artificial-curiosity`).
+
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
@@ -278,7 +281,8 @@ Trust boundaries:
   biosafety decision.
 - Scores remain stakeholder-dependent because the `ValueProfile` is explicit.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module map and
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module map (including
+the `api_pkg` / `cli_pkg` / `agent_tools_pkg` splits) and
 [docs/LIMITS.md](docs/LIMITS.md) for the full bounds.
 
 ## Verification, status, and limits
@@ -286,6 +290,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module map and
 | Area | Current behavior |
 |---|---|
 | Version | `0.4.0` ([pyproject.toml](pyproject.toml)) |
+| Public repo | [Artificial-Emotions](https://github.com/KanakMalpani/Artificial-Emotions) |
 | Default path | Curated seeds + heuristic ranking; no LLM key or network required |
 | Literature | OpenAlex by default; optional Semantic Scholar; gap checks remain provisional |
 | LLM | Optional OpenAI-compatible provider configured by environment |
@@ -293,18 +298,22 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module map and
 | Scores | Explicit-value decision aids with provisional bands, not oracle outputs |
 | Affect | `annotation_only` cues; `computational_affect` emotion-mix simulation |
 | Safety | Heuristic dual-use signals and human-review flags, not a biosafety oracle |
-| CI | Ruff and pytest run on push and pull request |
+| Packaging | Wheel force-includes worksheet/eval data; resolved via `resources.py` |
+| Determinism | Ranked flag lists are order-stable across `PYTHONHASHSEED` values |
+| CI | Ruff + pytest with ≥85% coverage on 3.11–3.13; packaging smoke on the built wheel |
 
 Run the locally supported checks:
 
 ```bash
-pytest -q
+pip install -e ".[dev]"
+pytest -q --cov --cov-report=term-missing
 pytest tests/e2e -q
 curiosity eval
 curiosity-mcp --list-tools
 ```
 
-Read [docs/PROOFS.md](docs/PROOFS.md) for behavior-specific commands and
+Read [docs/PROOFS.md](docs/PROOFS.md) for behavior-specific commands,
+[CHANGELOG.md](CHANGELOG.md) for recent packaging/refactor notes, and
 [docs/LIMITS.md](docs/LIMITS.md) before relying on a rank in a real decision.
 
 ## Documentation

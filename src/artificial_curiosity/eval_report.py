@@ -36,9 +36,7 @@ def build_eval_report(
     miss = already_answered_fail_rate(spot)
 
     gap_cases = (
-        load_gap_status_fixtures(gap_fixtures)
-        if gap_fixtures
-        else load_gap_status_fixtures()
+        load_gap_status_fixtures(gap_fixtures) if gap_fixtures else load_gap_status_fixtures()
     )
     gap = run_gap_status_eval(gap_cases)
 

@@ -79,9 +79,10 @@ def test_mix_emotions_percentages():
     assert blend["felt_simulation"]["as_close_to_feeling_as_possible"] is True
     assert "inner_monologue" in blend["felt_simulation"]
     assert "intensity" in blend["felt_simulation"]
-    assert "biological" in " ".join(blend["claims_not"]).lower() or "consciousness" in " ".join(
-        blend["claims_not"]
-    ).lower()
+    assert (
+        "biological" in " ".join(blend["claims_not"]).lower()
+        or "consciousness" in " ".join(blend["claims_not"]).lower()
+    )
 
 
 def test_feel_alias():

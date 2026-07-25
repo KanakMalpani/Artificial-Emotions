@@ -38,6 +38,16 @@ def aggregate_curiosity(
     return float(max(0.0, min(1.5, score)))
 
 
+def dedupe_flags(flags: list[str], *extra: str) -> list[str]:
+    """Append flags, de-duplicated, preserving first-seen order.
+
+    Flag lists used to be rebuilt with ``list(set(...))``, so their order tracked
+    PYTHONHASHSEED and the same run emitted different JSON each time. Ordering is
+    part of the output contract — keep it insertion-stable.
+    """
+    return list(dict.fromkeys([*flags, *extra]))
+
+
 def passes_gates(
     axes: ScoreAxes,
     gap_status: GapStatus,

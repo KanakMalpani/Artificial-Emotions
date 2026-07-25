@@ -67,7 +67,9 @@ def test_cli_profiles_and_eval_json(capsys: pytest.CaptureFixture[str]) -> None:
             "eval",
             "elicit",
             "--responses",
-            str(Path(__file__).resolve().parents[2] / "examples" / "elicit_ab_sample_responses.json"),
+            str(
+                Path(__file__).resolve().parents[2] / "examples" / "elicit_ab_sample_responses.json"
+            ),
             "--json",
         ]
     )

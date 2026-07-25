@@ -12,17 +12,12 @@ from pathlib import Path
 from typing import Any
 
 from artificial_curiosity.models import GapStatus, LiteratureHit, UnansweredQuestion
+from artificial_curiosity.resources import find_data_dir
 from artificial_curiosity.verify import verify_gap
 
 
 def default_fixtures_dir() -> Path:
-    # Prefer repo-level evals/fixtures when installed editable / cwd is repo root.
-    root = Path(__file__).resolve().parents[2]
-    candidate = root / "evals" / "fixtures"
-    if candidate.is_dir():
-        return candidate
-    # Fallback: package-adjacent
-    return Path(__file__).resolve().parent.parent.parent / "evals" / "fixtures"
+    return find_data_dir("evals/fixtures")
 
 
 @dataclass
@@ -358,10 +353,7 @@ def run_gap_status_eval(cases: list[GapStatusCase] | None = None) -> GapStatusRe
             n_rbu += 1
             if pred in (GapStatus.UNANSWERED, GapStatus.PARTIALLY_ANSWERED):
                 n_rbu_ok += 1
-        if (
-            case.gold_status != GapStatus.LIKELY_ANSWERED
-            and pred == GapStatus.LIKELY_ANSWERED
-        ):
+        if case.gold_status != GapStatus.LIKELY_ANSWERED and pred == GapStatus.LIKELY_ANSWERED:
             n_false_answered += 1
         results.append(
             {

@@ -9,7 +9,12 @@ from artificial_curiosity.diversity import diversify
 from artificial_curiosity.generate import generate_candidates
 from artificial_curiosity.judge import llm_refine_gap, llm_score_ensemble
 from artificial_curiosity.literature import build_literature_client
-from artificial_curiosity.models import CuriosityConfig, GapEvidence, RankedQuestion, UnansweredQuestion
+from artificial_curiosity.models import (
+    CuriosityConfig,
+    GapEvidence,
+    RankedQuestion,
+    UnansweredQuestion,
+)
 from artificial_curiosity.preferences import (
     PreferenceEvent,
     append_preference_event,
@@ -21,6 +26,7 @@ from artificial_curiosity.preferences import (
 from artificial_curiosity.scoring import (
     aggregate_curiosity,
     confidence_from_signals,
+    dedupe_flags,
     dual_use_flags,
     heuristic_score,
     lit_rationale_keys,
@@ -116,7 +122,7 @@ class CuriosityEngine:
 
             ok, flags = passes_gates(axes, gap.status, self.config.value_profile)
             text_blob = f"{q.question} {q.why_it_matters} {q.operationalization}"
-            flags = list(set(flags + dual_use_flags(text_blob, self.config.value_profile)))
+            flags = dedupe_flags(flags, *dual_use_flags(text_blob, self.config.value_profile))
 
             curiosity = aggregate_curiosity(axes, self.config.value_profile)
             conf = confidence_from_signals(
@@ -128,21 +134,21 @@ class CuriosityEngine:
                 disagreement_entropy=disagree,
             )
             if llm_axes is None:
-                flags = list(set(flags + ["heuristic_scoring"]))
+                flags = dedupe_flags(flags, "heuristic_scoring")
             if refined is not None:
-                flags = list(set(flags + ["llm_gap_reader"]))
+                flags = dedupe_flags(flags, "llm_gap_reader")
                 if gap.llm_grounded is False:
-                    flags = list(set(flags + ["llm_gap_ungrounded"]))
+                    flags = dedupe_flags(flags, "llm_gap_ungrounded")
                 elif gap.llm_grounded is True:
-                    flags = list(set(flags + ["llm_gap_grounded"]))
+                    flags = dedupe_flags(flags, "llm_gap_grounded")
             if not self.config.use_literature:
-                flags = list(set(flags + ["no_literature"]))
+                flags = dedupe_flags(flags, "no_literature")
             if disagree >= 0.35:
-                flags = list(set(flags + ["judge_disagreement"]))
+                flags = dedupe_flags(flags, "judge_disagreement")
             if self.config.use_literature and int(self.config.literature_workers or 1) > 1:
-                flags = list(set(flags + ["lit_parallel"]))
+                flags = dedupe_flags(flags, "lit_parallel")
             if weight_hint_meta:
-                flags = list(set(flags + ["preference_weight_hints"]))
+                flags = dedupe_flags(flags, "preference_weight_hints")
 
             score_low, score_high = score_uncertainty_band(
                 curiosity,
@@ -178,7 +184,7 @@ class CuriosityEngine:
                 scored.append(item)
             else:
                 # Keep rejected for transparency but do not rank in top set.
-                item.flags = list(set(item.flags + ["gate_failed"]))
+                item.flags = dedupe_flags(item.flags, "gate_failed")
                 item.metadata["rejected"] = True
                 rejected_for_log.append(item)
 
