@@ -2,9 +2,9 @@
 
 **Status:** Product-design research (how *anyone* can reach affect / epistemic tooling).  
 **Scope:** APIs, libraries, HRI stacks, LLM toolkits, measurement instruments, datasets — what’s easy vs locked.  
-**Honesty bar:** Same as [`AI_EMOTIONS.md`](AI_EMOTIONS.md) — detection, modeling, display, and elicitation are not “having feelings.” Artificial Curiosity ships **epistemic cue annotations + investigation ranking**, not a CME or affect sensor.
+**Honesty bar:** Same as [`AI_EMOTIONS.md`](AI_EMOTIONS.md) — detection, modeling, display, and elicitation are not “having feelings.” Artificial Emotions ships **epistemic cue annotations + investigation ranking**, not a CME or affect sensor.
 
-**Related:** [`AI_EMOTIONS.md`](AI_EMOTIONS.md) (theory / mechanisms), [`SOURCES.md`](SOURCES.md), [`CAPABILITY.md`](CAPABILITY.md), `src/artificial_curiosity/emotions.py`, example schemas under `examples/emotions_*.json`.
+**Related:** [`AI_EMOTIONS.md`](AI_EMOTIONS.md) (theory / mechanisms), [`SOURCES.md`](SOURCES.md), [`CAPABILITY.md`](CAPABILITY.md), `src/artificial_emotions/emotions.py`, example schemas under `examples/emotions_*.json`.
 
 ---
 
@@ -19,7 +19,7 @@
 | Text emotion labels | HF Transformers + GoEmotions; prompt/JSON classifiers | Culture/taxonomy mismatch; sarcasm |
 | LLM “emotional alignment” eval | EmotionBench, CAREBench, CAPE (research) | Non-commercial licenses on some; not product APIs |
 | *Epistemic* emotion (curiosity, confusion, …) | Psych scales (EES) + behavioral exploration; **this repo’s cue tags** | No mass-market EES API; almost no consumer SDK for epistemic affect |
-| Rank *what to investigate next* with epistemic framing | **Artificial Curiosity** (library / CLI / HTTP / MCP) | Not a FER/SER product; no biosignal path |
+| Rank *what to investigate next* with epistemic framing | **Artificial Emotions** (library / CLI / HTTP / MCP) | Not a FER/SER product; no biosignal path |
 
 **Product implication for this repo:** Do not compete with Hume/Py-Feat on face/voice. Own the **easy public contract for epistemic investigation framing** — resources, JSON schemas, examples, and thin HTTP/MCP surfaces that third parties can wire into agents, tutors, and research tools without pretending the engine feels.
 
@@ -37,7 +37,7 @@ Consumer / developer intent
         └─▶ Elicit investigation ──────── information-gap UX + ranked unknowns  ← this repo
 ```
 
-| Pattern | What “access” means | Typical consumer | Fit for Artificial Curiosity |
+| Pattern | What “access” means | Typical consumer | Fit for Artificial Emotions |
 |---------|---------------------|------------------|------------------------------|
 | **A. Cloud recognition API** | `POST media → emotion scores` | App/product teams | Out of scope (privacy + wrong job) |
 | **B. Local SDK / toolbox** | `pip install` / Unity package | Researchers, indie games | Adjacent (interop docs only) |
@@ -81,7 +81,7 @@ Consumer / developer intent
 | **EMA** (Marsella & Gratch) | Research Soar integration | Hard | Appraisal dynamics + coping — not a consumer SDK |
 | **ALMA / WASABI** | Papers + research code lineages | Hard | OCC+PAD / PAD+BDI |
 
-**Takeaway:** If a third party wants *character emotions*, point them to **GAMYGDALA (JS)** or **FAtiMA (C#/Unity)** — not to Artificial Curiosity. This repo should **interop by vocabulary** (honest disclaimers), not reimplement OCC.
+**Takeaway:** If a third party wants *character emotions*, point them to **GAMYGDALA (JS)** or **FAtiMA (C#/Unity)** — not to Artificial Emotions. This repo should **interop by vocabulary** (honest disclaimers), not reimplement OCC.
 
 ### 3.4 LLM emotion toolkits & benchmarks
 
@@ -103,7 +103,7 @@ Consumer / developer intent
 | **Behavioral exploration** (Vogl et al., Frontiers 2019) | Paradigm replication | Medium | Clicks for explanations — good A/B for provoke packs |
 | **This repo epistemic cues** | Library + HTTP | **Yes** | Tags only — not EES scores; see §5 |
 
-**Gap:** There is **no** widely deployed commercial “EES-as-a-Service.” Epistemic emotion remains a **psychometrics + study design** problem. Artificial Curiosity can (1) emit framing tags, (2) document EES as optional human eval, (3) never claim cue tags = EES scores.
+**Gap:** There is **no** widely deployed commercial “EES-as-a-Service.” Epistemic emotion remains a **psychometrics + study design** problem. Artificial Emotions can (1) emit framing tags, (2) document EES as optional human eval, (3) never claim cue tags = EES scores.
 
 ### 3.6 Open datasets — easy vs locked
 
@@ -161,7 +161,7 @@ Consumer / developer intent
 
 | Surface | Path / entry | Notes |
 |---------|--------------|-------|
-| Python | `artificial_curiosity.emotions` | `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `elicit_helpers`, `emotion_pack` |
+| Python | `artificial_emotions.emotions` | `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `elicit_helpers`, `emotion_pack` |
 | HTTP | `/v1/emotions/*` (+ `/v1/epistemic/*` aliases) | cues, **catalog**, **mix**, annotate, elicit, pack |
 | Agent / MCP | `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, … | Same JSON |
 | CLI | `curiosity emotions {cues\|catalog\|mix\|…}` | Mirror HTTP |
@@ -345,13 +345,13 @@ Third parties who only want **spark + framing**:
 ### 5.4 Library contract (Python one-liners)
 
 ```python
-from artificial_curiosity.emotions import (
+from artificial_emotions.emotions import (
     list_epistemic_cues,
     annotate_epistemic,
     elicit_helpers,
     emotion_pack,
 )
-from artificial_curiosity import provoke  # ranked unknowns + inject
+from artificial_emotions import provoke  # ranked unknowns + inject
 ```
 
 ### 5.5 Example files
@@ -392,7 +392,7 @@ Broad access amplifies dual-use. Design defaults:
 
 ---
 
-## 7. Recommendations for Artificial Curiosity product design
+## 7. Recommendations for Artificial Emotions product design
 
 1. **Own pattern F** (epistemic cue + rank). Advertise “investigation framing for agents & humans,” not “Emotion AI.”  
 2. **Publish the minimal contract** (§5) + `examples/emotions_*.json` so third parties integrate without reading the monograph.  
@@ -430,4 +430,4 @@ Broad access amplifies dual-use. Design defaults:
 
 ## 9. One-paragraph bottom line
 
-Consumer “emotion AI” access is easy for **cloud expression / empathic voice**, **local FER toolboxes**, **game OCC middleware**, and **LLM text affect** — and increasingly **locked** for platform face-emotion APIs and gold-standard face datasets. **Epistemic** emotion (curiosity, confusion, …) has strong psychometrics (EES) but almost no mass-market SDK. Artificial Curiosity should make *that* gap easy: a **minimal public contract** of cue vocabulary, annotate/elicit/pack resources, example JSON, and compose-with-provoke HTTP/MCP — always labeled `annotation_only` — while pointing builders elsewhere for face, OCC, and companion affect, with consent and anti-manipulation defaults.
+Consumer “emotion AI” access is easy for **cloud expression / empathic voice**, **local FER toolboxes**, **game OCC middleware**, and **LLM text affect** — and increasingly **locked** for platform face-emotion APIs and gold-standard face datasets. **Epistemic** emotion (curiosity, confusion, …) has strong psychometrics (EES) but almost no mass-market SDK. Artificial Emotions should make *that* gap easy: a **minimal public contract** of cue vocabulary, annotate/elicit/pack resources, example JSON, and compose-with-provoke HTTP/MCP — always labeled `annotation_only` — while pointing builders elsewhere for face, OCC, and companion affect, with consent and anti-manipulation defaults.

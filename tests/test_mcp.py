@@ -6,13 +6,13 @@ import json
 
 from fastapi.testclient import TestClient
 
-from artificial_curiosity.agent_tools import (
+from artificial_emotions.agent_tools import (
     dispatch_tool,
     mcp_tool_list,
     openai_tools,
 )
-from artificial_curiosity.api import app
-from artificial_curiosity.mcp_server import handle_message, process_line
+from artificial_emotions.api import app
+from artificial_emotions.mcp_server import handle_message, process_line
 
 
 def test_mcp_tool_list_has_required_tools():
@@ -123,7 +123,7 @@ def test_mcp_initialize():
     res = handle_message(req)
     assert res is not None
     assert res["id"] == 1
-    assert res["result"]["serverInfo"]["name"] == "artificial-curiosity"
+    assert res["result"]["serverInfo"]["name"] == "artificial-emotions"
     assert "tools" in res["result"]["capabilities"]
 
 

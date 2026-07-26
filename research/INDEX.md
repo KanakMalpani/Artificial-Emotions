@@ -84,7 +84,7 @@ Everything under `research/` is design/background material that informed the imp
 
 | Path | Role |
 |------|------|
-| `src/artificial_curiosity/` | Curiosity engine (generate → verify → score → rank → brief) |
+| `src/artificial_emotions/` | Curiosity engine (generate → verify → score → rank → brief) |
 | `tests/` | Unit + failure-mode adversarial tests |
 | `examples/` | Offline/literature experiment JSON + eval harness |
 | `docs/` | Product docs (PLUGINS, LIMITS, ARCHITECTURE, PROOFS) |

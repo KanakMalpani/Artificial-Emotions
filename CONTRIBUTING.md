@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for interest in **Artificial Curiosity** — a curiosity layer that ranks valuable *unanswered* questions (not Q&A).
+Thanks for interest in **Artificial Emotions** — a curiosity layer that ranks valuable *unanswered* questions (not Q&A).
 
 ## Setup
 
@@ -46,10 +46,10 @@ CI runs ruff + pytest on every PR/push (`.github/workflows/ci.yml`).
 
 | Concern | Location |
 |---------|----------|
-| Shared tool contracts (MCP / OpenAI / HTTP) | `src/artificial_curiosity/agent_tools.py` |
-| ValueProfile presets | `src/artificial_curiosity/models.py` (`VALUE_PROFILE_PRESETS`) |
-| Offline seeds | `src/artificial_curiosity/seeds.py` |
-| Domain packs (JSON) | `src/artificial_curiosity/packs/*.json` + `packs.py` |
+| Shared tool contracts (MCP / OpenAI / HTTP) | `src/artificial_emotions/agent_tools.py` |
+| ValueProfile presets | `src/artificial_emotions/models.py` (`VALUE_PROFILE_PRESETS`) |
+| Offline seeds | `src/artificial_emotions/seeds.py` |
+| Domain packs (JSON) | `src/artificial_emotions/packs/*.json` + `packs.py` |
 | Product docs | `docs/` — start at [`docs/INDEX.md`](docs/INDEX.md) |
 | Examples / protocols | [`examples/README.md`](examples/README.md) |
 | Research (optional) | [`research/INDEX.md`](research/INDEX.md) |
@@ -57,7 +57,7 @@ CI runs ruff + pytest on every PR/push (`.github/workflows/ci.yml`).
 
 ## Adding a domain seed
 
-Edit `src/artificial_curiosity/seeds.py` (`SEED_QUESTIONS`).
+Edit `src/artificial_emotions/seeds.py` (`SEED_QUESTIONS`).
 
 ### Schema (required fields)
 
@@ -79,7 +79,7 @@ Edit `src/artificial_curiosity/seeds.py` (`SEED_QUESTIONS`).
 
 ## Adding a domain pack
 
-Versioned packs live under `src/artificial_curiosity/packs/` (`domain_pack.v1`). Enable with `CuriosityConfig(load_bundled_packs=True)` or `domain_pack_paths=[...]`.
+Versioned packs live under `src/artificial_emotions/packs/` (`domain_pack.v1`). Enable with `CuriosityConfig(load_bundled_packs=True)` or `domain_pack_paths=[...]`.
 
 Minimum shape:
 

@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from artificial_curiosity.agent_tools import mcp_tool_list, openai_tools
-from artificial_curiosity.mcp_lint import FORBIDDEN_PHRASES, lint_tool_specs
+from artificial_emotions.agent_tools import mcp_tool_list, openai_tools
+from artificial_emotions.mcp_lint import FORBIDDEN_PHRASES, lint_tool_specs
 
 
 def test_mcp_descriptions_pass_lint():

@@ -1,6 +1,6 @@
 # Docs
 
-Product documentation for **Artificial Curiosity** (v0.4.0). Start at the root [README](../README.md).
+Product documentation for **Artificial Emotions** (v0.4.0). Start at the root [README](../README.md).
 
 | Doc | Purpose |
 |-----|---------|

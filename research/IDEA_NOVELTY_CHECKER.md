@@ -17,7 +17,7 @@ AgentEconomist ([2604.27725](https://arxiv.org/abs/2604.27725)): intuition → l
 
 ## 2. Differentiation table
 
-| Object | Novelty Checker | Artificial Curiosity |
+| Object | Novelty Checker | Artificial Emotions |
 |--------|-----------------|----------------------|
 | Unit | Research *idea* / claim | *Unknown* / question |
 | Lit role | “Has this idea been done?” | “Is this question settled?” (related≠answered) |

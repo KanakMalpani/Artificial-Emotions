@@ -9,7 +9,7 @@
 
 ## 1. Short card (≤80 words)
 
-Artificial Curiosity ranks **valuable unanswered questions** under an explicit **ValueProfile**. It verifies literature neighborhoods without equating related work with answered questions, then returns briefs and optional **provoke** inject packs for investigation. Scores and epistemic cues are **decision aids / UX annotations**, not oracles, EVSI, emotion recognition, or proof the system “feels” curious. Use as a **co-scientist upstream layer** — not a replacement for human judgment or closed-loop labs.
+Artificial Emotions ranks **valuable unanswered questions** under an explicit **ValueProfile**. It verifies literature neighborhoods without equating related work with answered questions, then returns briefs and optional **provoke** inject packs for investigation. Scores and epistemic cues are **decision aids / UX annotations**, not oracles, EVSI, emotion recognition, or proof the system “feels” curious. Use as a **co-scientist upstream layer** — not a replacement for human judgment or closed-loop labs.
 
 ---
 

@@ -82,11 +82,11 @@ jobs:
           /tmp/relcheck/bin/pip install dist/*.whl
           cd /tmp
           /tmp/relcheck/bin/python - <<'PY'
-          from artificial_curiosity.bayesian import fill_surprise_worksheet
-          from artificial_curiosity.compare import load_constitution_stack
-          from artificial_curiosity.elicit_eval import load_elicit_protocol
-          from artificial_curiosity.evals import load_fixtures
-          from artificial_curiosity.voi import fill_voi_worksheet
+          from artificial_emotions.bayesian import fill_surprise_worksheet
+          from artificial_emotions.compare import load_constitution_stack
+          from artificial_emotions.elicit_eval import load_elicit_protocol
+          from artificial_emotions.evals import load_fixtures
+          from artificial_emotions.voi import fill_voi_worksheet
 
           assert fill_surprise_worksheet(question_id="q")["fields"]
           assert fill_voi_worksheet(question_id="q")

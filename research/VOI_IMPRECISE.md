@@ -18,7 +18,7 @@
 - EVPI is concave over the credal set; endpoints behave differently for lower vs upper envelopes.
 - Gamma-maximin value can **exceed** the entire envelope — rule choice is not recoverable from envelope ends alone.
 
-**Transfer to Artificial Curiosity:**
+**Transfer to Artificial Emotions:**
 
 | Concept | Product analogue |
 |---------|------------------|

@@ -1,6 +1,6 @@
 # Emotion mixing / blends — research notes for percentage mixes
 
-**Status:** Durable design research for Artificial Curiosity’s **mixable emotion catalog** (UX annotations only).  
+**Status:** Durable design research for Artificial Emotions’s **mixable emotion catalog** (UX annotations only).  
 **Honesty bar:** Same as [`AI_EMOTIONS.md`](AI_EMOTIONS.md) — percentages are **framing weights**, not intensities of felt emotion in the software, and not clinical diagnoses of users.  
 **Related:** [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) (public contract), [`SOURCES.md`](SOURCES.md), product surface `GET /v1/emotions/catalog` · `POST /v1/emotions/mix`.
 

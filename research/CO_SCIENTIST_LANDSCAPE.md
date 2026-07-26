@@ -9,7 +9,7 @@
 
 ## 1. Positioning sentence
 
-| System | Job | Gap vs Artificial Curiosity |
+| System | Job | Gap vs Artificial Emotions |
 |--------|-----|------------------------------|
 | **Google Co-Scientist** ([2502.18864](https://arxiv.org/abs/2502.18864); *Nature*) | Multi-agent Gemini; tournament evolution of hypotheses conditioned on **user research objectives** + evidence; biomedical validations | Objectives given; strong on generate/critique; not general VOI-rank of open unknowns |
 | **HeurekaBench / sc-HeurekaBench** ([2601.01678](https://arxiv.org/abs/2601.01678); ICLR 2026) | Benchmarks open-ended research Qs grounded in papers+code; critic module helps | Eval framework we can learn from; domain-specific instantiation |
@@ -22,7 +22,7 @@
 
 ## 2. Shared pattern (and our wedge)
 
-Almost every co-scientist paper **conditions on human research objectives**. Bisht et al. argue that’s why they’re co-scientists, not autonomous. Artificial Curiosity’s wedge is making **objective/value choice explicit and multi-axis** before (or beside) hypothesis tournaments.
+Almost every co-scientist paper **conditions on human research objectives**. Bisht et al. argue that’s why they’re co-scientists, not autonomous. Artificial Emotions’s wedge is making **objective/value choice explicit and multi-axis** before (or beside) hypothesis tournaments.
 
 **Integration sketch (sibling, optional):**  
 `provoke` / ranked unknowns → paste as Co-Scientist / agent “research objective” pack — we don’t reimplement their tournament.

@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from artificial_curiosity.models import CuriosityConfig, Domain
-from artificial_curiosity.pipeline import CuriosityEngine
+from artificial_emotions.models import CuriosityConfig, Domain
+from artificial_emotions.pipeline import CuriosityEngine
 
 
 def main() -> None:

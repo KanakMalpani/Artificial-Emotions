@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from artificial_curiosity.api import app
+from artificial_emotions.api import app
 
 pytestmark = pytest.mark.e2e
 
@@ -20,7 +20,7 @@ def test_health_to_domains_to_agent_tools(client: TestClient) -> None:
     assert health.status_code == 200
     body = health.json()
     assert body["ok"] is True
-    assert body["service"] == "artificial-curiosity"
+    assert body["service"] == "artificial-emotions"
     assert "profiles" in body
     assert "version" in body
 

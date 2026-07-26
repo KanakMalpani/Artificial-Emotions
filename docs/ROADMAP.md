@@ -1,4 +1,4 @@
-# Artificial Curiosity — Agent Playbook & Roadmap
+# Artificial Emotions — Agent Playbook & Roadmap
 
 **Status:** Living operational plan (not a commitment ledger)  
 **Product version today:** `0.4.0` (see `pyproject.toml`)  
@@ -42,7 +42,7 @@
 | **Unsure what already ships** | **§1 Current truth** + [`LIMITS.md`](LIMITS.md) | Do **not** reimplement pipeline / MCP / provoke |
 | **Unsure why design is this way** | [`research/`](../research/) (optional) | Prefer product docs for “what works now” |
 | **About to market a claim** | [`LIMITS.md`](LIMITS.md) + **§10** | Update LIMITS **before** README/marketing text |
-| **Need a demo that works** | [`PROOFS.md`](PROOFS.md) | `curiosity spark`, `pytest -q`, MCP `--list-tools` |
+| **Need a demo that works** | [`PROOFS.md`](PROOFS.md) | `emotions spark`, `pytest -q`, MCP `--list-tools` |
 | **Integrating into an IDE/agent** | [`PLUGINS.md`](PLUGINS.md) | `mcp_server.py`, `agent_tools.py` |
 | **Module layout / trust boundary** | [`ARCHITECTURE.md`](ARCHITECTURE.md) | `pipeline.py` as spine |
 | **Prior session state** | [`research/HANDOFF.md`](../research/HANDOFF.md) | Sync “Done / Not finished” if you finish a wedge |
@@ -190,11 +190,11 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 
 | Step | Action |
 |------|--------|
-| 1 | Read `src/artificial_curiosity/verify.py` — overlap gate + phrase claim/open-gap logic |
+| 1 | Read `src/artificial_emotions/verify.py` — overlap gate + phrase claim/open-gap logic |
 | 2 | Check `openalex.py` query construction (tags, compounds, recency) |
-| 3 | Run `pytest tests/test_failure_modes.py -q` and `curiosity run --domain ai --n 5 --json` |
+| 3 | Run `pytest tests/test_failure_modes.py -q` and `emotions run --domain ai --n 5 --json` |
 | 4 | Inspect `gap.status`, `gap.related_works`, `gap.notes` (“Related ≠ answered”) |
-| 5 | Offline path: `curiosity run --domain ai --no-literature --n 5 --json` → expect `unknown_with_caveat` |
+| 5 | Offline path: `emotions run --domain ai --no-literature --n 5 --json` → expect `unknown_with_caveat` |
 | 6 | Update LIMITS if behavior/claim changes; never equate “related works found” with “answered” |
 
 ### LLM provider issues
@@ -204,8 +204,8 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 | Step | Action |
 |------|--------|
 | 1 | Check env: `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` (aliases `OPENAI_*` may apply) — see `.env.example` |
-| 2 | Read `src/artificial_curiosity/llm.py` — provider-agnostic client |
-| 3 | Confirm offline path still works **without** keys (`curiosity spark`) |
+| 2 | Read `src/artificial_emotions/llm.py` — provider-agnostic client |
+| 3 | Confirm offline path still works **without** keys (`emotions spark`) |
 | 4 | Judge path: `judge.py`; generation: `generate.py` |
 | 5 | Never commit `.env` or keys; document smoke in PROOFS without secrets |
 | 6 | If adding `judge_model`, wire flag through CLI/API and update LIMITS |
@@ -216,11 +216,11 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 
 | Step | Action |
 |------|--------|
-| 1 | `curiosity-mcp --list-tools` or `python -m artificial_curiosity.mcp_server --list-tools` |
+| 1 | `emotions-mcp --list-tools` or `python -m artificial_emotions.mcp_server --list-tools` |
 | 2 | Read `mcp_server.py` + shared `agent_tools.py` |
 | 3 | Run `pytest tests/test_mcp.py -q` |
-| 4 | Follow [`PLUGINS.md`](PLUGINS.md) for host JSON (`command`: `curiosity-mcp`) |
-| 5 | HTTP fallback: `curiosity serve` + `GET /v1/agent/tools` / provoke |
+| 4 | Follow [`PLUGINS.md`](PLUGINS.md) for host JSON (`command`: `emotions-mcp`) |
+| 5 | HTTP fallback: `emotions serve` + `GET /v1/agent/tools` / provoke |
 | 6 | OpenAI tools: `examples/openai_tools.json` |
 | 7 | Do not claim “works on host X” until recipe + smoke note exist |
 
@@ -254,8 +254,8 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 
 | Step | Action |
 |------|--------|
-| 1 | `curiosity spark --domain ai --n 5` (and biology/physics) |
-| 2 | `curiosity serve` → provoke endpoint; or MCP `provoke_curiosity` |
+| 1 | `emotions spark --domain ai --n 5` (and biology/physics) |
+| 2 | `emotions serve` → provoke endpoint; or MCP `provoke_curiosity` |
 | 3 | Follow [`PROOFS.md`](PROOFS.md) end-to-end |
 | 4 | Compare offline vs lit: `python examples/_run_compare.py` |
 | 5 | If seeds thin: extend `seeds.py` with operationalized unknowns (W9 bar) |
@@ -274,7 +274,7 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 
 | Step | Action |
 |------|--------|
-| 1 | Confirm cwd is `Artificial Curiosity` only — do not edit sibling repos |
+| 1 | Confirm cwd is `Artificial Emotions` only — do not edit sibling repos |
 | 2 | Re-read §1 + [`research/HANDOFF.md`](../research/HANDOFF.md) |
 | 3 | Pick one wedge from §2; ignore moonshots |
 | 4 | Do not commit unless user asks; do not push unless user asks |
@@ -543,7 +543,7 @@ Source definitions: [`research/FAILURE_MODES.md`](../research/FAILURE_MODES.md).
 
 ## 9. Workstreams (file owners)
 
-Use when a wedge spans versions. **Key files** are under `src/artificial_curiosity/` unless noted.
+Use when a wedge spans versions. **Key files** are under `src/artificial_emotions/` unless noted.
 
 | WS | Focus | Key files | Next agent focus |
 |----|-------|-----------|------------------|
@@ -713,7 +713,7 @@ Stay in the wedge. Absorb ideas as modules, not mission creep.
 | Capability contract | `research/CAPABILITY.md` |
 | Agent handoff | `research/HANDOFF.md` |
 | Sources | `research/SOURCES.md` |
-| Engine | `src/artificial_curiosity/` |
+| Engine | `src/artificial_emotions/` |
 | Tests | `tests/` |
 | Web | `web/` |
 | Examples | `examples/` |

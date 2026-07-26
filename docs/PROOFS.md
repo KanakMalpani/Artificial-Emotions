@@ -11,14 +11,14 @@ pip install -e ".[dev]"
 ## Related literature ≠ answered (F1 / F7)
 
 ```bash
-curiosity run --domain ai --n 5 --json
+emotions run --domain ai --n 5 --json
 # Inspect: gap.status, gap.related_works, gap.notes (“Related ≠ answered”)
 ```
 
 Offline degrade (F15):
 
 ```bash
-curiosity run --domain ai --no-literature --n 5 --json
+emotions run --domain ai --no-literature --n 5 --json
 # gap.status == unknown_with_caveat; flags include no_literature; confidence lowered
 ```
 
@@ -38,24 +38,24 @@ Optional semantic path (not default):
 
 ```bash
 pip install -e ".[embeddings]"
-curiosity run --domain ai --n 5 --no-literature --diversity embedding
+emotions run --domain ai --n 5 --no-literature --diversity embedding
 # Falls back to Jaccard if sentence-transformers is missing
 ```
 
 ## ValueProfile presets (F11)
 
 ```bash
-curiosity profiles
-curiosity spark --domain ai --n 3 --profile alignment_lab
+emotions profiles
+emotions spark --domain ai --n 3 --profile alignment_lab
 # inject and value_profile.name both show the preset
-curl "http://127.0.0.1:8000/v1/profiles"   # after curiosity serve
+curl "http://127.0.0.1:8000/v1/profiles"   # after emotions serve
 ```
 
 ## Instant spark + explicit ValueProfile (F11)
 
 ```bash
-curiosity spark --domain biology --n 5
-curiosity spark --domain physics --json
+emotions spark --domain biology --n 5
+emotions spark --domain physics --json
 # inject states ValueProfile; pack includes value_profile + capability disclaimer
 ```
 
@@ -63,35 +63,35 @@ curiosity spark --domain physics --json
 
 ```bash
 # Generator vs judge can differ (no live call required for offline path)
-curiosity run --domain ai --n 3 --no-literature --model gen-model --judge-model judge-model
+emotions run --domain ai --n 3 --no-literature --model gen-model --judge-model judge-model
 # Or set LLM_JUDGE_MODEL in .env (never commit .env)
 ```
 
 ## Multi-domain seeds
 
 ```bash
-curiosity spark --domain climate --n 3
-curiosity spark --domain energy --n 3
-curiosity spark --domain materials --n 3
-curiosity spark --domain social --n 3
+emotions spark --domain climate --n 3
+emotions spark --domain energy --n 3
+emotions spark --domain materials --n 3
+emotions spark --domain social --n 3
 ```
 
 ## MCP / agent UX (curiosity ≠ Q&A)
 
 ```bash
-curiosity-mcp --list-tools
-curiosity-mcp --list-resources
-python -c "from artificial_curiosity.agent_tools import dispatch_tool; print(dispatch_tool('list_profiles'))"
+emotions-mcp --list-tools
+emotions-mcp --list-resources
+python -c "from artificial_emotions.agent_tools import dispatch_tool; print(dispatch_tool('list_profiles'))"
 ```
 
 ## Expert-eval / spot-check harness (W10)
 
 ```bash
-curiosity eval
-curiosity eval --json
-curiosity eval elicit --responses examples/elicit_ab_sample_responses.json --json
-curiosity eval gap-status --json
-curiosity eval report --json
+emotions eval
+emotions eval --json
+emotions eval elicit --responses examples/elicit_ab_sample_responses.json --json
+emotions eval gap-status --json
+emotions eval report --json
 # Hand-label metrics: status_accuracy, related_but_unanswered_recall, false_answered_rate
 # Composite report: gap_f1 + elicit means + risk probes (not a vanity %)
 pytest tests/test_mid_horizon.py -q
@@ -101,7 +101,7 @@ pytest tests/test_mid_horizon.py -q
 ## Profile compare (decision aid)
 
 ```bash
-curiosity compare-profiles --domain ai --a humanity_default --b alignment_lab --n 6 --json
+emotions compare-profiles --domain ai --a humanity_default --b alignment_lab --n 6 --json
 # HTTP: POST /v1/profiles/compare — Kendall τ + top-k Jaccard; no silent weight merge
 # Web: Side-by-side ranks panel (two columns)
 ```
@@ -109,8 +109,8 @@ curiosity compare-profiles --domain ai --a humanity_default --b alignment_lab --
 ## Critique brief + VOI worksheet
 
 ```bash
-curiosity critique-brief --question "What is A? What is B?" --ops "do everything" --json
-curiosity voi-worksheet --question "Which biomarkers…?" --profile humanity_default --json
+emotions critique-brief --question "What is A? What is B?" --ops "do everything" --json
+emotions voi-worksheet --question "Which biomarkers…?" --profile humanity_default --json
 # HTTP: POST /v1/briefs/critique  POST /v1/voi/worksheet — form-only / template fill (not EVSI)
 ```
 
@@ -118,10 +118,10 @@ curiosity voi-worksheet --question "Which biomarkers…?" --profile humanity_def
 
 ```bash
 # Default remains OpenAlex. Semantic Scholar / merge are config switches.
-curiosity run --domain ai --n 3 --literature-backend openalex --json
+emotions run --domain ai --n 3 --literature-backend openalex --json
 # Optional (network): --literature-backend semantic_scholar | both
 # Offline path unchanged:
-curiosity run --domain ai --n 3 --no-literature --json
+emotions run --domain ai --n 3 --no-literature --json
 ```
 
 ## Grounded LLM gap reader (W12)
@@ -134,10 +134,10 @@ Live LLM smoke is optional (keys often absent).
 ## Preference JSONL (W13)
 
 ```bash
-curiosity run --domain ai --n 3 --no-literature --preference-log prefs.jsonl
+emotions run --domain ai --n 3 --no-literature --preference-log prefs.jsonl
 # Appends PreferenceEvent rows (schema preference_event.v1); no DB required
-curiosity preferences summarize --path prefs.jsonl --json
-curiosity preferences suggest-pair --candidates a,b,c --path prefs.jsonl --json
+emotions preferences summarize --path prefs.jsonl --json
+emotions preferences suggest-pair --candidates a,b,c --path prefs.jsonl --json
 # HTTP: POST /v1/preferences/suggest-pair — next duel heuristic; not BT weight overwrite
 # Web: Prefer / Tie / Reject on result cards
 ```
@@ -155,7 +155,7 @@ pytest tests/test_mid_horizon.py::test_w14_dual_use_beyond_keywords -q
 # Offline unit: disagreement entropy widens bands
 pytest tests/test_mid_horizon.py::test_w15_multi_judge_disagreement_widens_bands -q
 # Live (optional keys): --judge-ensemble 2 or LLM_JUDGE_MODELS=a,b
-curiosity run --domain ai --n 3 --no-literature --llm --judge-ensemble 2
+emotions run --domain ai --n 3 --no-literature --llm --judge-ensemble 2
 ```
 
 ## Multi-provider LLM smoke matrix (ops)
@@ -174,15 +174,15 @@ Smoke (run **once** locally with your own keys; do not paste secrets into docs/g
 
 ```bash
 # 1) Confirm resolution without calling the network:
-python -c "from artificial_curiosity.llm import resolve_llm_settings; print(resolve_llm_settings())"
+python -c "from artificial_emotions.llm import resolve_llm_settings; print(resolve_llm_settings())"
 
 # 2) Offline path must still work with no keys:
-curiosity spark --domain ai --n 3
+emotions spark --domain ai --n 3
 
 # 3) Optional live (only if you set LLM_* in local .env):
-curiosity run --domain ai --n 3 --no-literature --llm
+emotions run --domain ai --n 3 --no-literature --llm
 # Optional distinct judge:
-curiosity run --domain ai --n 3 --no-literature --llm --judge-model "$LLM_JUDGE_MODEL"
+emotions run --domain ai --n 3 --no-literature --llm --judge-model "$LLM_JUDGE_MODEL"
 ```
 
 This repo’s CI/agent sessions do **not** claim live multi-provider passes — only that the client + env matrix are documented and offline demos work without keys.
@@ -190,8 +190,8 @@ This repo’s CI/agent sessions do **not** claim live multi-provider passes — 
 ## VOI + Bayesian surprise worksheets (not EVSI)
 
 ```bash
-curiosity voi-worksheet --question-id q1 --question "Which biomarkers?" --json
-curiosity surprise-worksheet --question-id q1 --predicted-surprise 0.7 --belief-shift 2 --json
+emotions voi-worksheet --question-id q1 --question "Which biomarkers?" --json
+emotions surprise-worksheet --question-id q1 --predicted-surprise 0.7 --belief-shift 2 --json
 # HTTP: POST /v1/voi/worksheet  POST /v1/surprise/worksheet
 # Belief-shift logging only — does not rename ScoreAxes.surprise
 ```
@@ -233,9 +233,9 @@ pytest tests/e2e/test_web_playwright.py -q
 ## Epistemic cues / emotions (annotation only)
 
 ```bash
-curiosity emotions cues --json
-curiosity emotions annotate "What remains unknown about epistemic emotion elicitation?" --surprise 0.7 --json
-curiosity emotions pack --json
+emotions cues --json
+emotions annotate "What remains unknown about epistemic emotion elicitation?" --surprise 0.7 --json
+emotions pack --json
 # HTTP: GET /v1/emotions/cues  POST /v1/emotions/annotate  GET /v1/emotions/pack
 # Docs: docs/EMOTIONS.md — does not claim the system feels
 ```

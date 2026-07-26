@@ -17,7 +17,7 @@ Factors studied: model size, context length, confidence estimation, structured r
 
 ## 2. Transfer
 
-| GUIDE | Artificial Curiosity |
+| GUIDE | Artificial Emotions |
 |-------|----------------------|
 | Advise / refine ideas | Optional after rank (critique, soundness, feasibility_note) |
 | Lit DB grounding | OpenAlex neighborhood — related≠answered still primary |

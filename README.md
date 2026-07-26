@@ -1,346 +1,458 @@
-# Artificial Curiosity
+<div align="center">
 
-**Rank valuable unanswered scientific questions. Do not use it to answer them.**
+# 🜂 Artificial Emotions
 
-Artificial Curiosity is a curiosity layer for people and agents deciding what to
-investigate next. It turns a domain, topic, and explicit `ValueProfile` into
-ranked unknowns, gap evidence, uncertainty bands, and investigation briefs.
+### **Every AI tool races to answer. This one refuses.**
 
-Public repository: [KanakMalpani/Artificial-Emotions](https://github.com/KanakMalpani/Artificial-Emotions)
-(Python package name remains `artificial-curiosity`).
+*A curiosity engine that ranks what we don't yet know — then decomposes it into something you can actually go and test.*
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+[![Tests](https://img.shields.io/badge/tests-421%20passing-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](pyproject.toml)
+[![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Offline first](https://img.shields.io/badge/offline-no%20API%20key%20needed-8A2BE2.svg)](#the-60-second-demo)
 
-> Scores are decision aids, not scientific truth or calibrated forecasts. A
-> literature neighborhood is evidence to inspect, not proof that a question is
-> answered or unanswered.
+[**Quickstart**](#the-60-second-demo) · [**Go deeper**](#-going-deeper-decompose) · [**Affect**](#-computational-affect) · [**Surfaces**](#-use-it-from-anywhere) · [**Docs**](docs/INDEX.md)
 
-## 60-second demo
+</div>
 
-Clone the repository and install it from that local checkout:
+---
+
+## The problem nobody automated
+
+We have built extraordinary machines for answering questions.
+
+We have built almost nothing for **choosing which question deserves the next decade of a career, a grant, or a lab.** That choice is still made by intuition, prestige, and whatever happens to be trending — and it is the highest-leverage decision in all of research.
+
+Artificial Emotions is a **curiosity layer**. Give it a domain, a topic, and an explicit statement of what you value; get back ranked *unknowns* with gap evidence, uncertainty bands, and an investigation plan.
+
+> [!IMPORTANT]
+> **It will not answer them.** That isn't a limitation we're working around — it's the product. A tool that ranked unknowns *and* invented answers for them would quietly become the thing it was built to protect you from.
+
+---
+
+## The 60-second demo
 
 ```bash
 git clone https://github.com/KanakMalpani/Artificial-Emotions.git
 cd Artificial-Emotions
-python -m venv .venv
-```
-
-```bash
-# macOS / Linux
-source .venv/bin/activate
-pip install -e ".[dev]"
-
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
 ```
 
-Ask for a fast, offline-ranked investigation pack:
-
 ```bash
-curiosity spark --domain ai --n 5 --json
+emotions spark --domain ai --n 5 --json
 ```
 
-The result includes ranked questions, a `value_profile`, provisional gap status,
-score bands, flags, investigation briefs, and an `inject` string. Paste `inject`
-into another model when you want it to choose an unknown, propose a first
-investigation, and name falsifiers.
+**No API key. No network. No LLM.** Curated seeds and heuristic scoring, entirely on your machine. Here is a real result, unedited:
 
-The default `spark` path uses curated seeds and heuristic scoring; it requires
-neither an LLM key nor a network connection. Use `curiosity run` or
-`spark --literature` when you want literature-neighborhood checks.
+```jsonc
+{
+  "question": "Which training interventions most increase honest uncertainty
+                reporting under incentive pressure to appear confident?",
+  "curiosity_score": 0.8648,
+  "score_band":      [0.578, 1.151],   // evidence envelope, NOT a confidence interval
+  "confidence":      0.242,            // low — and it says so
+  "gap_status":      "unknown_with_caveat",
+  "axes": { "impact": 0.40, "neglectedness": 1.00, "tractability": 0.70,
+            "surprise": 0.30, "answerability": 0.78, "risk": 0.15 },
+  "flags": ["heuristic_scoring", "no_literature"],
+  "epistemic_cues": ["information_gap", "curiosity_target", "confusion_risk"]
+}
+```
 
-## What it does—and does not do
+Look at what it volunteered about itself: **confidence 0.242**, flagged `heuristic_scoring`, flagged `no_literature`, gap status hedged to `unknown_with_caveat`. It tells you how much to trust it before you think to ask.
 
-| It does | It does not |
+---
+
+## How it thinks
+
+```mermaid
+flowchart LR
+    A["🎯 Domain + Topic<br/>+ ValueProfile"] --> B["Generate<br/>seeds · packs · LLM"]
+    B --> C["Verify Gap<br/>OpenAlex · S2"]
+    C --> D["Score<br/>6 axes"]
+    D --> E["Gate<br/>risk · answerability"]
+    E --> F["Diversify<br/>near-dup suppression"]
+    F --> G["📋 Ranked Unknowns<br/>+ briefs + bands"]
+    G --> H["🔬 Decompose<br/>one step further"]
+
+    style A fill:#7c3aed,stroke:#5b21b6,color:#fff
+    style G fill:#059669,stroke:#047857,color:#fff
+    style H fill:#dc2626,stroke:#b91c1c,color:#fff
+```
+
+The critical edge is **Verify Gap → Score**: finding related literature does *not* mean a question is answered. Most tools collapse that distinction. This one gates on it — and an LLM gap-reader that cites a paper absent from the retrieved set gets its verdict **rejected**, not merged.
+
+---
+
+## Three things it does
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### 🎯 Rank
+
+Turns a field into an ordered list of **unknowns**, scored on six axes under a value profile you choose.
+
+Never value-free. There is no neutral mode, because there is no neutral ranking.
+
+</td>
+<td width="33%" valign="top">
+
+### 🔬 Decompose
+
+Takes one unknown and asks the **next** layer of questions — measurement, mechanism, confound, boundary.
+
+Then names the single observation worth making first.
+
+</td>
+<td width="33%" valign="top">
+
+### 🜂 Feel
+
+54 named emotions across 6 families, mixed into a **PAD mood + felt simulation**.
+
+Detects when a mix pulls two ways — and says so instead of averaging it out.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🔬 Going deeper: `decompose`
+
+Ranking tells you *what* to investigate. This takes one unknown **a step further toward a solution** — without becoming an answer engine.
+
+```bash
+emotions decompose \
+  "Which evaluation protocols most reduce sandbagging when models detect testing?" \
+  --ops "Capability gap <= 5% versus hidden probes." --depth 2
+```
+
+```mermaid
+flowchart TD
+    Q["❓ The unknown"] --> M["📏 Measurement<br/>what makes this observable?"]
+    Q --> B["⚖️ Baseline<br/>what does nothing look like?"]
+    Q --> X["⚙️ Mechanism<br/>what would have to hold?"]
+    Q --> C["🎭 Confound<br/>what else explains it?"]
+    Q --> D["🚧 Boundary<br/>where does it stop holding?"]
+
+    X --> X1["distinguish the<br/>candidate mechanisms"]
+    X --> X2["where would a<br/>mechanism fail?"]
+    C --> C1["separate effect<br/>from confound"]
+    C --> C2["where do they<br/>look identical?"]
+
+    style Q fill:#dc2626,stroke:#b91c1c,color:#fff
+    style X fill:#7c3aed,stroke:#5b21b6,color:#fff
+    style C fill:#7c3aed,stroke:#5b21b6,color:#fff
+```
+
+Alongside the tree you get three things that turn a question into a plan:
+
+| Output | What it gives you |
 |---|---|
-| Ranks candidate unanswered questions under a named or supplied `ValueProfile` | Answer research questions or replace literature review |
-| Separates related work from an “answered” conclusion | Provide a value-free or objectively correct priority order |
-| Produces operationalizations, briefs, flags, confidence, and score bands | Prove a gap is real, calculate EVSI, or run experiments |
-| Suppresses near-duplicates before top-N results | Act as a closed-loop AI scientist or biosafety authority |
-| Exposes CLI, Python, HTTP, MCP, and OpenAI-style tool surfaces | Lock you into an LLM provider |
+| **The first observation** | Chosen from your stated criteria *and* the score axes. No usable measurement? Start there. Shaky question? Probe its boundary. Well-posed? Go kill the rival explanations. |
+| **Falsifiers** | Derived from your own operationalization. `Capability gap <= 5%` becomes **refuted if `Capability gap > 5%`**. |
+| **Stop rules** | Including a review gate that fires automatically when the risk axis is elevated. |
 
-The score axes are impact, neglectedness, tractability, surprise, answerability,
-and risk. They are proxies. The displayed `[low–high]` range is an
-evidence-strength envelope, not a statistical confidence interval.
+> [!NOTE]
+> **Every string it emits is a question, a test, or a criterion — enforced, not intended.**
+> `assert_free()` scans the whole payload for assertion language, and results ship with `assertion_free: true`. A decomposition that concluded something would be a *bug*. There's also a test that the checker itself still catches assertions, so the guarantee can't quietly go hollow.
+>
+> Even a complete decomposition signs off by telling you the original gap is **not** thereby closed.
 
-## Use it from your stack
+---
 
-| Surface | Entry point | Use it for |
-|---|---|---|
-| CLI | `curiosity spark`, `curiosity run` | Shell workflows and quick inspection |
-| Python | `provoke`, `CuriosityEngine` | Libraries and notebooks |
-| MCP (stdio) | `curiosity-mcp` | Cursor, Claude Desktop, Claude Code, Copilot, and other MCP hosts |
-| HTTP | `curiosity serve` | REST/OpenAPI clients and agent backends |
-| OpenAI-style tools | `examples/openai_tools.json` or `/v1/agent/tools` | Function-calling hosts |
+## 🜂 Computational affect
 
-Complete host-specific setup is in [docs/PLUGINS.md](docs/PLUGINS.md).
+Not decoration. The catalog is a **vocabulary for investigative states** — and it names the ones that actually govern research decisions.
 
-### CLI
-
-```bash
-# Fast local pack: curated seeds + heuristics
-curiosity spark --domain biology --profile alignment_lab --json
-
-# Full pipeline, but keep it offline
-curiosity run --domain ai --n 5 --no-literature --json
-
-# Compare the same candidate pool under two value choices
-curiosity compare-profiles --domain ai \
-  --a humanity_default --b alignment_lab --n 6 --json
-
-# Inspect available profiles and tools
-curiosity profiles
-curiosity-mcp --list-tools
+```mermaid
+mindmap
+  root((54 emotions))
+    Epistemic
+      curiosity
+      doubt
+      insight
+      perplexity
+      humility
+      hubris
+    Aesthetic
+      elegance
+      parsimony
+      dissonance
+    Volitional
+      determination
+      impatience
+      persistence
+    Achievement
+      triumph
+      disappointment
+      resignation
+    Social
+      compassion
+      respect
+      envy
+    Basic
+      joy
+      fear
+      trust
 ```
 
-Supported seed domains are `ai`, `biology`, `physics`, `climate`, `medicine`,
-`materials`, `social`, `energy`, and `general`. List the current presets with
-`curiosity profiles`; every ranking has a `ValueProfile`, including the default.
+**`humility` and `hubris` are both in there on purpose.** This project exists to keep confidence proportionate to evidence. The failure mode needs a name as much as the discipline does.
 
-### Python
+### Mixing past pairs
+
+Most affect models stop at two-component blends. This returns three structural readings:
+
+| Field | What it reports |
+|---|---|
+| `plutchik_dyad_hint` | Named 2-component compound — `joy + trust → love` |
+| `blend_triad_hint` | Named 3-component blend — `curiosity + skepticism + humility → disciplined_inquiry` |
+| **`ambivalence`** | **Opposing entries held at once**, scored across 13 opposition axes |
+
+Ambivalence is the one that matters. Hold conviction beside live doubt and the simulation doesn't average them into mush — it reports the tension and tells you what to do with it:
+
+```bash
+emotions mix conviction=45 doubt=40 urgency=15 --json
+```
+
+```jsonc
+{
+  "ambivalence": {
+    "score": 0.756,
+    "pairs": [{ "components": ["conviction", "doubt"], "axis": "epistemic" }]
+  },
+  "pad": { "P": 0.113, "A": 0.510, "D": 0.305 },
+  "felt_simulation": {
+    "intensity": 0.483,
+    "inner_monologue":
+      "Simulated affect: I register primarily conviction, blended with Doubt (40%)
+       and Urgency (15%) — mood reads ambivalent, mid-arousal, empowered.
+       I am pulled two ways — conviction against doubt. Do not resolve that by
+       picking a side: name the observation that would settle it."
+  }
+}
+```
+
+Sustained ambivalence is reported as an **honest state**, not an error to resolve.
+
+> [!WARNING]
+> **This is `computational_affect`, and every payload says so.**
+> Not biological feeling. Not consciousness. Not biometric emotion recognition, and not measurement of anyone's affect — which matters under the EU AI Act. It is a PAD blend simulating a stance for framing. Nothing more, and it never claims more.
+
+---
+
+## 🔌 Use it from anywhere
+
+```mermaid
+flowchart LR
+    CLI["⌨️ CLI<br/>emotions"] --> E(("Engine"))
+    PY["🐍 Python<br/>CuriosityEngine"] --> E
+    MCP["🔗 MCP stdio<br/>21 tools · 4 tiers"] --> E
+    HTTP["🌐 HTTP<br/>33 routes"] --> E
+    OAI["🤖 OpenAI tools<br/>function calling"] --> E
+
+    style E fill:#059669,stroke:#047857,color:#fff
+```
+
+<details>
+<summary><b>⌨️ CLI</b> — shell workflows and quick inspection</summary>
+
+<br/>
+
+```bash
+emotions spark --domain biology --profile alignment_lab --json   # fast offline pack
+emotions run --domain ai --n 5 --no-literature --json            # full pipeline
+emotions decompose "Which mechanism explains X?" --depth 2       # go deeper
+emotions compare-profiles --a humanity_default --b alignment_lab # whose values?
+emotions mix curiosity=40 confusion=30 awe=30 --json             # affect
+emotions profiles                                                # list presets
+```
+
+Domains: `ai` · `biology` · `physics` · `climate` · `medicine` · `materials` · `social` · `energy` · `general`
+
+*(`curiosity` and `curiosity-mcp` still work as pre-rename aliases.)*
+
+</details>
+
+<details>
+<summary><b>🐍 Python</b> — libraries and notebooks</summary>
+
+<br/>
 
 ```python
-from artificial_curiosity import CuriosityConfig, CuriosityEngine, provoke
+from artificial_emotions import CuriosityConfig, CuriosityEngine, provoke
+from artificial_emotions.decompose import decompose_ranked
+from artificial_emotions.emotions import mix_emotions
 
 pack = provoke(domain="ai", n=5, fast=True, profile_name="alignment_lab")
-print(pack["inject"])
+print(pack["inject"])                      # paste into any model's context
 
 results = CuriosityEngine(
-    CuriosityConfig(
-        domain="climate",
-        n_return=5,
-        use_literature=False,
-    )
+    CuriosityConfig(domain="climate", n_return=5, use_literature=False)
 ).run()
+
+plan = decompose_ranked(results[0], depth=2)
+assert plan["assertion_free"] is True      # it never answered anything
+
+mood = mix_emotions({"curiosity": 60, "doubt": 40})
+print(mood["felt_simulation"]["inner_monologue"])
 ```
 
-### MCP
+</details>
 
-Start the stdio server:
+<details>
+<summary><b>🔗 MCP</b> — Cursor, Claude Desktop, Claude Code, Copilot, Continue, Windsurf</summary>
+
+<br/>
 
 ```bash
-curiosity-mcp
-# equivalent: python -m artificial_curiosity.mcp_server
+emotions-mcp        # or: python -m artificial_emotions.mcp_server
 ```
-
-For a local Cursor configuration, prefer the venv interpreter rather than a
-bare command on `PATH`:
 
 ```json
 {
   "mcpServers": {
-    "artificial-curiosity": {
-      "command": "C:\\path\\to\\Artificial-Emotions\\.venv\\Scripts\\python.exe",
-      "args": ["-m", "artificial_curiosity.mcp_server"]
+    "artificial-emotions": {
+      "command": "/path/to/Artificial-Emotions/.venv/bin/python",
+      "args": ["-m", "artificial_emotions.mcp_server"]
     }
   }
 }
 ```
 
-Core tools are `provoke_curiosity` / `spark`, `rank_unknowns` /
-`run_curiosity`, `list_domains`, and `list_profiles`. The server also exposes
-comparison, brief-critique, worksheet, affect, and evaluation helpers. Use
-`CURIOSITY_MCP_TIER` to reduce the exposed tool set. See
-[docs/PLUGINS.md](docs/PLUGINS.md) for Cursor, Claude, Copilot, Continue, and
-Windsurf configurations.
+**21 tools across 4 tiers.** Set `CURIOSITY_MCP_TIER=core|investigate|affect|research` to shrink the exposed surface for smaller context windows. Host-by-host setup in [docs/PLUGINS.md](docs/PLUGINS.md).
 
-### HTTP and OpenAI-style tools
+</details>
 
-```bash
-curiosity serve
-```
+<details>
+<summary><b>🌐 HTTP + OpenAI tools</b> — agent backends and function calling</summary>
 
-The server listens on `127.0.0.1:8000` by default.
+<br/>
 
 ```bash
-# Fast pack for a browser, curl, or agent
-curl "http://127.0.0.1:8000/v1/curiosity/provoke?domain=ai&n=5&fast=true"
-
-# Interactive API reference
-# http://127.0.0.1:8000/docs
+emotions serve      # 127.0.0.1:8000 — interactive docs at /docs
 ```
 
 | Route | Purpose |
 |---|---|
-| `GET /health`, `GET /ready` | Liveness, configuration summary, and offline readiness |
 | `GET\|POST /v1/curiosity/provoke` | Fast investigation pack |
 | `POST /v1/curiosity/run` | Full ranking pipeline |
-| `GET /v1/profiles`, `GET /v1/domains` | Discover ranking inputs |
-| `GET /v1/agent` | Machine-readable capability and honesty guide |
+| `POST /v1/curiosity/decompose` | Sub-questions, first step, falsifiers |
+| `POST /v1/emotions/mix` | Affect blend + felt simulation |
+| `GET /v1/agent` | Machine-readable capability **and honesty** guide |
 | `GET /v1/agent/tools` | OpenAI-compatible function schemas |
-| `GET /v1/emotions/catalog`, `POST /v1/emotions/mix` | Computational-affect catalog and mix |
+| `GET /health`, `/ready` | Liveness, config summary, offline readiness |
 
-Load `examples/openai_tools.json`, or fetch `/v1/agent/tools` and pass its
-`tools` array to an OpenAI-compatible chat-completions client. Execute emitted
-calls with this HTTP API or with
-`artificial_curiosity.agent_tools.dispatch_tool`.
+Auth is opt-in: set `CURIOSITY_API_KEY` and every route outside the open list requires a bearer token. Unset, it stays open for local demos.
 
-## Computational affect and epistemic cues
+</details>
 
-The mixable **emotion catalog** has **25** named emotions across four families:
-
-- **Epistemic (10):** `curiosity`, `interest`, `confusion`, `surprise`, `awe`, `wonder`, `boredom`, `intrigue`, `uncertainty`, `enjoyment`
-- **Basic (7):** `joy`, `sadness`, `anger`, `fear`, `disgust`, `anticipation`, `trust`
-- **Social (4):** `pride`, `shame`, `gratitude`, `admiration`
-- **Achievement (4):** `hope`, `relief`, `frustration`, `anxiety`
-
-There are two related but distinct affect surfaces:
-
-- **Epistemic cues / annotate** — tag information gaps, incongruity, and confusion risk (`honesty: "annotation_only"`).
-- **Emotion mixes / `feel()`** — normalize catalog weights and, by default, return `honesty: "computational_affect"` plus a `felt_simulation` (PAD mood, intensity, first-person framing).
-
-`simulate_feeling=True` is the default (also via `feel()`). Pass `simulate_feeling=False` for weights and PAD only. Neither surface claims biological consciousness, measured human affect, clinical scores, or biometric emotion recognition.
-
-Separately, `emotion_pack("affective_science")` is a **ranking seed pack** of unanswered affect-science questions — not the mix catalog.
-
-```bash
-curiosity emotions mix curiosity=40 confusion=30 awe=30 --json
-curiosity emotions mix curiosity=40 confusion=30 awe=30 --simulate-feeling false --json
-curiosity emotions annotate \
-  "What remains unknown about epistemic emotion elicitation?" \
-  --surprise 0.7 --json
-```
-
-```python
-from artificial_curiosity import annotate_epistemic, mix_emotions, feel
-
-mix = mix_emotions(curiosity=40, confusion=30, awe=30)
-assert mix["honesty"] == "computational_affect"
-print(mix["felt_simulation"]["inner_monologue"])
-
-felt = feel(curiosity=50, awe=50)
-print(felt["felt_simulation"]["intensity"])
-
-cues = annotate_epistemic(
-    "What remains unknown about epistemic emotion elicitation?",
-    surprise=0.7,
-)
-assert cues["honesty"] == "annotation_only"
-```
-
-The mix accepts percentages or unit weights, normalizes them to one, and rejects unknown IDs, negatives, all-zero mixes, and more than eight components. It warns when fear/anxiety/anger-type framing dominates. Details: [docs/EMOTIONS.md](docs/EMOTIONS.md). Design notes live under [research/](research/) (e.g. [AI_EMOTIONS.md](research/AI_EMOTIONS.md), [EMOTION_MIXING.md](research/EMOTION_MIXING.md)) — internal monographs, not journal papers. Gap verification stays primary over idea-novelty checkers; see [research/IDEA_NOVELTY_CHECKER.md](research/IDEA_NOVELTY_CHECKER.md).
-
-## Optional LLM and literature paths
-
-The package can use any OpenAI-compatible `/chat/completions` endpoint for
-generation, judging, and grounded gap reading. Configuration belongs in the
-environment or an uncommitted `.env`; start from [.env.example](.env.example).
-
-```bash
-# Configure locally; do not commit credentials.
-export LLM_API_KEY=...
-export LLM_BASE_URL=https://api.openai.com/v1
-export LLM_MODEL=gpt-4o-mini
-
-curiosity run --domain ai --llm --no-literature --n 5
-
-# Example local OpenAI-compatible server
-curiosity run --domain ai --llm --model llama3.2 \
-  --base-url http://localhost:11434/v1 --no-literature
-```
-
-`run` uses OpenAlex by default when literature is enabled. Semantic Scholar and
-a merged mode are available through `--literature-backend`; network results are
-still neighborhoods to inspect, not full-text understanding. Provider and
-verification notes are in [docs/PROOFS.md](docs/PROOFS.md).
+---
 
 ## How the ranking works
 
-```text
-ValueProfile + domain/topic
-            │
-            ▼
-Generate candidates ──► Verify literature neighborhood ──► Score and gate
-   seeds / packs / LLM        OpenAlex / Semantic Scholar       heuristics / LLM
-            └──────────────────────► Diversify ──────► briefs + inject pack
+```
+                (Impact^α · Neglectedness^β · Tractability^γ · Surprise^δ) · Answerability · (1 − Risk)
+curiosity  =  ─────────────────────────────────────────────────────────────────────────────────────────
+                                              cost + ε
 ```
 
-1. **Generate:** use curated seeds, optional JSON domain packs, and optionally
-   an LLM.
-2. **Verify:** retrieve and classify a literature neighborhood. Related work is
-   not silently treated as an answer.
-3. **Score and gate:** score the axes, then apply answerability, risk, and
-   likely-answered gates.
-4. **Diversify:** remove close near-duplicates (normalized Jaccard by default;
-   embeddings are optional).
-5. **Brief:** return a question, operationalization, rationale, gap evidence,
-   score context, flags, and suggested first moves.
+A **geometric** mean, deliberately. It preserves weak-link behaviour: a near-zero tractability collapses the whole score instead of being averaged away by a flattering impact number.
 
-Trust boundaries:
+| Axis | Asks | Guardrail |
+|---|---|---|
+| **Impact** | What changes if this is answered? | Stake language only — citation counts *never* inflate it |
+| **Neglectedness** | Is anyone already on this? | Literature density and answer pressure push it down |
+| **Tractability** | Could we make progress now? | — |
+| **Surprise** | Would the answer shift beliefs? | Not EVSI, and never claimed to be |
+| **Answerability** | Is it posed sharply enough? | Multi-clause research programmes get penalised |
+| **Risk** | Dual-use / harm proxy | Heuristic filter, **not** a biosecurity authority |
 
-- Curated seeds and heuristics support the offline path; they are not a
-  representative scientific corpus.
-- Optional network boundaries are OpenAlex, Semantic Scholar, and the
-  OpenAI-compatible endpoint you configure.
-- Secrets stay in environment variables. HTTP deliberately does not accept a
-  caller-provided LLM base URL or literature-cache path.
-- Dual-use screening is a weighted heuristic with a human-review flag—not a
-  biosafety decision.
-- Scores remain stakeholder-dependent because the `ValueProfile` is explicit.
+The exponents come from your `ValueProfile` — one of 7 presets, or your own. **There is no value-free ranking**, and the tool refuses to pretend otherwise.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module map (including
-the `api_pkg` / `cli_pkg` / `agent_tools_pkg` splits) and
-[docs/LIMITS.md](docs/LIMITS.md) for the full bounds.
+---
 
-## Verification, status, and limits
+## Why you can trust the numbers
 
-| Area | Current behavior |
-|---|---|
-| Version | `0.4.0` ([pyproject.toml](pyproject.toml)) |
-| Public repo | [Artificial-Emotions](https://github.com/KanakMalpani/Artificial-Emotions) |
-| Default path | Curated seeds + heuristic ranking; no LLM key or network required |
-| Literature | OpenAlex by default; optional Semantic Scholar; gap checks remain provisional |
-| LLM | Optional OpenAI-compatible provider configured by environment |
-| Diversity | Normalized Jaccard by default; embedding backend is an optional extra |
-| Scores | Explicit-value decision aids with provisional bands, not oracle outputs |
-| Affect | `annotation_only` cues; `computational_affect` emotion-mix simulation |
-| Safety | Heuristic dual-use signals and human-review flags, not a biosafety oracle |
-| Packaging | Wheel force-includes worksheet/eval data; resolved via `resources.py` |
-| Determinism | Ranked flag lists are order-stable across `PYTHONHASHSEED` values |
-| CI | Ruff + pytest with ≥85% coverage on 3.11–3.13; packaging smoke on the built wheel |
+This is the part most tools skip. Here it's load-bearing — and enforced in code rather than promised in prose.
 
-Run the locally supported checks:
+<table>
+<tr><td width="50%" valign="top">
+
+**🚫 Hallucinated citations are rejected**
+An LLM gap-reader citing a paper absent from the retrieved set has its verdict thrown out and the heuristic gap kept — annotated with *why*.
+
+**🚫 No vanity accuracy metric**
+`evals/METHODOLOGY.md` forbids publishing a single accuracy %. The harness reports results stratified by gold status instead.
+
+**🚫 Tool descriptions are linted**
+`mcp_lint.py` checks the project's own tool copy for manipulation and missing honesty tokens. It has failed our own commits.
+
+</td><td width="50%" valign="top">
+
+**🚫 No silent consensus**
+`compare-profiles` shows two value systems side by side with Kendall τ. It structurally cannot merge them into a fake agreement score.
+
+**🚫 Reproducible by construction**
+Identical input yields byte-identical JSON — verified across three `PYTHONHASHSEED` values in separate processes.
+
+**🚫 Decomposition cannot conclude**
+`assert_free()` scans for assertion language — and a second test proves the checker still catches one.
+
+</td></tr>
+</table>
+
+Scores are **decision aids, not oracles**. The `[low–high]` band is an evidence-strength envelope, not a statistical confidence interval. A literature neighborhood is evidence to inspect, not proof of anything. Read [docs/LIMITS.md](docs/LIMITS.md) before treating any rank as truth.
+
+---
+
+## Verify it yourself
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing
-pytest tests/e2e -q
-curiosity eval
-curiosity-mcp --list-tools
+pytest -q --cov --cov-report=term-missing     # 421 tests · 88% · floor enforced
+ruff check src tests && ruff format --check src tests
 ```
 
-Read [docs/PROOFS.md](docs/PROOFS.md) for behavior-specific commands,
-[CHANGELOG.md](CHANGELOG.md) for recent packaging/refactor notes, and
-[docs/LIMITS.md](docs/LIMITS.md) before relying on a rank in a real decision.
+CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** — then builds the wheel, installs it into a clean environment, and exercises the data files and console scripts from *outside* the checkout. A package that only works inside its own source tree is a broken package.
+
+---
 
 ## Documentation
 
-| Read this | For |
+| | |
 |---|---|
-| [docs/INDEX.md](docs/INDEX.md) | Documentation entry point |
-| [docs/PLUGINS.md](docs/PLUGINS.md) | MCP, HTTP, and OpenAI-style tool setup |
-| [docs/EMOTIONS.md](docs/EMOTIONS.md) | Cues, catalog, and computational-affect mixes |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Modules and trust boundaries |
-| [docs/LIMITS.md](docs/LIMITS.md) | What the system does not establish |
-| [docs/PROOFS.md](docs/PROOFS.md) | Reproducible product checks |
-| [examples/README.md](examples/README.md) | Example payloads and protocols |
-| [research/](research/) | Optional design rationale and research notes |
+| [**docs/INDEX.md**](docs/INDEX.md) | Everything, organised |
+| [**docs/ARCHITECTURE.md**](docs/ARCHITECTURE.md) | Module map, layer boundaries, extension points |
+| [**docs/LIMITS.md**](docs/LIMITS.md) | Verified capabilities and honest bounds |
+| [**docs/EMOTIONS.md**](docs/EMOTIONS.md) | Catalog, mixing, affect safety |
+| [**docs/PLUGINS.md**](docs/PLUGINS.md) | Host-by-host MCP setup |
+| [**docs/PROOFS.md**](docs/PROOFS.md) | Reproducible behaviour demos |
+| [**examples/**](examples/README.md) | Payloads, protocols, tool schemas |
+| [**research/**](research/) | 70+ short specs — the thinking behind the code |
 
-## Contributing and security
+---
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md). Small, focused changes are
-easier to review. Changes to ranking, gap logic, tools, or public claims should
-include tests and updates to the relevant limits and proof documentation.
+## Contributing
 
-Keep credentials in local environment files; never commit `.env`, API keys, or
-tokens. Before exposing HTTP beyond localhost, configure `CURIOSITY_API_KEY`
-or `CURIOSITY_API_KEYS` and do not bind `0.0.0.0` without authentication. Do
-not put credentials or exploit details in a public issue; report vulnerabilities
-to the repository maintainer privately.
+Domain packs, seed questions, eval fixtures, and honesty patches are all welcome — start with [CONTRIBUTING.md](CONTRIBUTING.md). Changes to ranking, gap logic, tools, or public claims should ship with tests and updates to the relevant limits docs.
 
-## License
+One rule above the rest: **don't add a claim the code can't back.** If a feature needs a caveat, the caveat ships inside the response payload — not in a footnote nobody reads.
 
-[MIT](LICENSE)
+**Security.** Keep credentials in local env files; never commit `.env`, keys, or tokens. Before exposing HTTP beyond localhost set `CURIOSITY_API_KEY`, and don't bind `0.0.0.0` without auth. Report vulnerabilities privately to the maintainer rather than in a public issue.
+
+---
+
+<div align="center">
+
+**MIT licensed** · [LICENSE](LICENSE)
+
+### *The best question is worth more than a fast answer.*
+
+</div>

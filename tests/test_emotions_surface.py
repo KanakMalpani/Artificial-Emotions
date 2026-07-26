@@ -5,17 +5,17 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from artificial_curiosity import (
+from artificial_emotions import (
     annotate_epistemic,
     emotion_catalog,
     emotion_pack,
     list_epistemic_cues,
     mix_emotions,
 )
-from artificial_curiosity.agent_tools import dispatch_tool
-from artificial_curiosity.api import app
-from artificial_curiosity.emotions import elicit_helpers
-from artificial_curiosity.epistemic_cues import TAG_INFORMATION_GAP, TAG_SURPRISE_SIGNAL
+from artificial_emotions.agent_tools import dispatch_tool
+from artificial_emotions.api import app
+from artificial_emotions.emotions import elicit_helpers
+from artificial_emotions.epistemic_cues import TAG_INFORMATION_GAP, TAG_SURPRISE_SIGNAL
 
 
 def test_list_epistemic_cues_python():
@@ -86,7 +86,7 @@ def test_mix_emotions_percentages():
 
 
 def test_feel_alias():
-    from artificial_curiosity import feel
+    from artificial_emotions import feel
 
     out = feel(curiosity=50, awe=50)
     assert out["felt_simulation"]["intensity"] >= 0
@@ -204,7 +204,7 @@ def test_api_root_mentions_emotions():
 
 
 def test_mcp_emotion_tools():
-    from artificial_curiosity.agent_tools import mcp_tool_list
+    from artificial_emotions.agent_tools import mcp_tool_list
 
     names = {t["name"] for t in mcp_tool_list()}
     assert {

@@ -9,13 +9,13 @@
 
 ## 1. Executive summary
 
-Most “AI for science” tools **answer questions**, **synthesize literature**, or **generate ideas**. Fewer **verify unansweredness** against literature with an explicit related≠answered gate, then **rank unknowns under declared values**. Closest neighbors: SciMuse (interest ranking of ideas), ScholarEval (idea evaluation grounded in lit), LitGapFinder-style concept co-occurrence gaps, ResearchAgent/IdeaSynth (ideation loops). Differentiation for Artificial Curiosity: **VOI-style axes + ValueProfile + dual-use/risk + MCP/HTTP provoke**, not end-to-end paper writing.
+Most “AI for science” tools **answer questions**, **synthesize literature**, or **generate ideas**. Fewer **verify unansweredness** against literature with an explicit related≠answered gate, then **rank unknowns under declared values**. Closest neighbors: SciMuse (interest ranking of ideas), ScholarEval (idea evaluation grounded in lit), LitGapFinder-style concept co-occurrence gaps, ResearchAgent/IdeaSynth (ideation loops). Differentiation for Artificial Emotions: **VOI-style axes + ValueProfile + dual-use/risk + MCP/HTTP provoke**, not end-to-end paper writing.
 
 ---
 
 ## 2. Competitor / neighbor matrix
 
-| System | What it optimizes | Gap / verify? | Ranking object | vs Artificial Curiosity |
+| System | What it optimizes | Gap / verify? | Ranking object | vs Artificial Emotions |
 |--------|-------------------|---------------|----------------|-------------------------|
 | **Elicit / Consensus** | Answers & evidence for a *given* Q | Evidence retrieval | Answer quality | Opposite job: they close gaps; we surface them |
 | **ResearchRabbit / Connected Papers** | Citation graph exploration | No | Relatedness | Discovery UX, not value-rank of unknowns |
@@ -78,7 +78,7 @@ Supervised nets on KG features + zero-shot LLM ELO tournaments predict expert in
 | Calibrated VOI / EVSI | Moonshot | Nobody credible at consumer scale |
 
 **Positioning sentence (safe):**  
-*Artificial Curiosity ranks valuable unanswered questions under an explicit value profile, with literature gap checks that refuse to equate related work with answered questions — unlike answer engines, idea chatbots, or interest-only generators.*
+*Artificial Emotions ranks valuable unanswered questions under an explicit value profile, with literature gap checks that refuse to equate related work with answered questions — unlike answer engines, idea chatbots, or interest-only generators.*
 
 ---
 

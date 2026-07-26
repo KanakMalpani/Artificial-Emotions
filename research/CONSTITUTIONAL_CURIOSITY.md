@@ -9,7 +9,7 @@
 
 ## 1. Executive summary
 
-Artificial Curiosity already requires an explicit `ValueProfile`. Constitutional curiosity would let **several** profiles (funder, lab, public safety, domain community) constrain or blend ranks — similar in spirit to Constitutional AI’s principle lists and to multi-stakeholder recommender systems (providers, consumers, society). Practical near-term: **profile sets + veto rules** (e.g. safety profile `max_risk` is a hard floor) rather than opaque scalar blends of incompatible values.
+Artificial Emotions already requires an explicit `ValueProfile`. Constitutional curiosity would let **several** profiles (funder, lab, public safety, domain community) constrain or blend ranks — similar in spirit to Constitutional AI’s principle lists and to multi-stakeholder recommender systems (providers, consumers, society). Practical near-term: **profile sets + veto rules** (e.g. safety profile `max_risk` is a hard floor) rather than opaque scalar blends of incompatible values.
 
 ---
 

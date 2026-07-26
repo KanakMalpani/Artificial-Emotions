@@ -4,32 +4,32 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from artificial_curiosity.evals import (
+from artificial_emotions.evals import (
     already_answered_fail_rate,
     load_fixtures,
     run_spotcheck,
 )
-from artificial_curiosity.judge import (
+from artificial_emotions.judge import (
     ScoreAxes,
     disagreement_entropy,
     evidence_titles_grounded,
     mean_axes,
     validate_gap_reader_grounding,
 )
-from artificial_curiosity.literature import (
+from artificial_emotions.literature import (
     CachedLiteratureClient,
     MergedLiteratureClient,
     build_literature_client,
 )
-from artificial_curiosity.models import (
+from artificial_emotions.models import (
     CuriosityConfig,
     GapStatus,
     LiteratureHit,
     UnansweredQuestion,
 )
-from artificial_curiosity.pipeline import CuriosityEngine
-from artificial_curiosity.scoring import heuristic_score, score_uncertainty_band
-from artificial_curiosity.verify import verify_gap
+from artificial_emotions.pipeline import CuriosityEngine
+from artificial_emotions.scoring import heuristic_score, score_uncertainty_band
+from artificial_emotions.verify import verify_gap
 
 
 def test_w10_spotcheck_harness_offline():
@@ -210,10 +210,10 @@ def test_w15_multi_judge_disagreement_widens_bands():
 
 
 def test_lit_rationale_keys_no_weight_change():
-    from artificial_curiosity.evals import _FixtureLitClient
-    from artificial_curiosity.models import CuriosityConfig, LiteratureHit, UnansweredQuestion
-    from artificial_curiosity.scoring import lit_rationale_keys
-    from artificial_curiosity.verify import verify_gap
+    from artificial_emotions.evals import _FixtureLitClient
+    from artificial_emotions.models import CuriosityConfig, LiteratureHit, UnansweredQuestion
+    from artificial_emotions.scoring import lit_rationale_keys
+    from artificial_emotions.verify import verify_gap
 
     hits = [
         LiteratureHit(
@@ -283,7 +283,7 @@ def test_lit_rationale_keys_no_weight_change():
 
 
 def test_gap_status_handlabel_metric():
-    from artificial_curiosity.evals import load_gap_status_fixtures, run_gap_status_eval
+    from artificial_emotions.evals import load_gap_status_fixtures, run_gap_status_eval
 
     cases = load_gap_status_fixtures()
     assert len(cases) >= 5
@@ -302,7 +302,7 @@ def test_gap_status_handlabel_metric():
 def test_cooccur_correlation_offline():
     from pathlib import Path
 
-    from artificial_curiosity.cooccur_study import (
+    from artificial_emotions.cooccur_study import (
         cooccur_rationale_key,
         gap_score,
         run_cooccur_correlation,
@@ -325,8 +325,8 @@ def test_cooccur_correlation_offline():
 
 
 def test_feasibility_note_display_only():
-    from artificial_curiosity.brief import feasibility_note, write_brief
-    from artificial_curiosity.models import (
+    from artificial_emotions.brief import feasibility_note, write_brief
+    from artificial_emotions.models import (
         GapEvidence,
         RankedQuestion,
         ScoreAxes,
@@ -367,8 +367,8 @@ def test_feasibility_note_display_only():
 def test_soundness_pass_offline():
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
-    from artificial_curiosity.soundness import soundness_pass
+    from artificial_emotions.api import app
+    from artificial_emotions.soundness import soundness_pass
 
     out = soundness_pass(
         [

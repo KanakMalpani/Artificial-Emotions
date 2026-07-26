@@ -4,7 +4,7 @@
   "honesty": "Research/eval protocol only — not an EES API; cues remain annotation_only.",
   "see": [
     "research/EPISTEMIC_ELICITATION.md",
-    "src/artificial_curiosity/epistemic_cues.py"
+    "src/artificial_emotions/epistemic_cues.py"
   ],
   "primary_outcome": "investigation_quality",
   "secondary_outcomes": [

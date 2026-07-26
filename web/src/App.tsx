@@ -593,7 +593,7 @@ export default function App() {
 
   return (
     <main className="shell">
-      <h1 className="brand">Artificial Curiosity</h1>
+      <h1 className="brand">Artificial Emotions</h1>
       <p className="lede">{subtitle}</p>
 
       <div className="controls">

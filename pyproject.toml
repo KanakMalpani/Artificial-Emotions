@@ -3,14 +3,16 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "artificial-curiosity"
+name = "artificial-emotions"
 version = "0.4.0"
-description = "A curiosity layer for AI: generate and rank valuable unanswered questions"
+description = "Computational affect + a curiosity layer for AI: mix emotions, rank valuable unanswered questions, and decompose them into investigable steps"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-authors = [{ name = "Artificial Curiosity" }]
+authors = [{ name = "Artificial Emotions" }]
 keywords = [
+  "emotions",
+  "affective-computing",
   "curiosity",
   "research",
   "mcp",
@@ -56,11 +58,16 @@ embeddings = [
 ]
 
 [project.scripts]
-curiosity = "artificial_curiosity.cli:main"
-curiosity-mcp = "artificial_curiosity.mcp_server:main"
+# Canonical names follow the package.
+emotions = "artificial_emotions.cli:main"
+emotions-mcp = "artificial_emotions.mcp_server:main"
+# Pre-rename aliases. MCP host configs and published docs reference these, and
+# they cost one line each — drop them once the ecosystem has moved.
+curiosity = "artificial_emotions.cli:main"
+curiosity-mcp = "artificial_emotions.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/artificial_curiosity"]
+packages = ["src/artificial_emotions"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src" = ""
@@ -68,14 +75,14 @@ packages = ["src/artificial_curiosity"]
 # Worksheet templates and eval fixtures are read at runtime (bayesian, voi,
 # compare, elicit_eval, evals, `curiosity evals …`). Without this they only
 # exist in a source checkout and pip-installed users hit FileNotFoundError.
-# Resolution lives in artificial_curiosity/resources.py.
+# Resolution lives in artificial_emotions/resources.py.
 [tool.hatch.build.targets.wheel.force-include]
-"examples/bayesian_surprise_worksheet.json" = "artificial_curiosity/data/examples/bayesian_surprise_worksheet.json"
-"examples/constitution_veto_stack.json" = "artificial_curiosity/data/examples/constitution_veto_stack.json"
-"examples/elicit_ab_protocol.json" = "artificial_curiosity/data/examples/elicit_ab_protocol.json"
-"examples/elicit_ab_sample_responses.json" = "artificial_curiosity/data/examples/elicit_ab_sample_responses.json"
-"examples/voi_worksheet_template.json" = "artificial_curiosity/data/examples/voi_worksheet_template.json"
-"evals/fixtures" = "artificial_curiosity/data/evals/fixtures"
+"examples/bayesian_surprise_worksheet.json" = "artificial_emotions/data/examples/bayesian_surprise_worksheet.json"
+"examples/constitution_veto_stack.json" = "artificial_emotions/data/examples/constitution_veto_stack.json"
+"examples/elicit_ab_protocol.json" = "artificial_emotions/data/examples/elicit_ab_protocol.json"
+"examples/elicit_ab_sample_responses.json" = "artificial_emotions/data/examples/elicit_ab_sample_responses.json"
+"examples/voi_worksheet_template.json" = "artificial_emotions/data/examples/voi_worksheet_template.json"
+"evals/fixtures" = "artificial_emotions/data/evals/fixtures"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -100,7 +107,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/artificial_curiosity"]
+source = ["src/artificial_emotions"]
 branch = false
 
 [tool.coverage.report]

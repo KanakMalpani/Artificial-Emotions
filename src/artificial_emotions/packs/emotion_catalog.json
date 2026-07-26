@@ -1,0 +1,1264 @@
+{
+  "name": "emotion_catalog",
+  "version": "2.0.0",
+  "honesty": "computational_affect",
+  "disclaimer": "Named emotions and mixes drive a PAD mood + intensity simulation as close to feeling as a CME-style blend allows. Not biological consciousness or biometric emotion recognition.",
+  "pad_axes": {
+    "P": "pleasure (valence): -1 unpleasant … +1 pleasant",
+    "A": "arousal: 0 calm … 1 activated",
+    "D": "dominance: -1 submissive … +1 dominant"
+  },
+  "max_mix_components": 10,
+  "emotions": [
+    {
+      "id": "curiosity",
+      "family": "epistemic",
+      "label": "Curiosity",
+      "description": "Drive to close an information gap or explore an unknown.",
+      "honesty_notes": "Functional investigation cue — not a claim the system is curious.",
+      "pad": {
+        "P": 0.35,
+        "A": 0.55,
+        "D": 0.25
+      },
+      "elicit_hints": [
+        "Name what is missing and why it matters.",
+        "Ask for one first experiment and a falsifier."
+      ],
+      "cue_tags": [
+        "information_gap",
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "interest",
+      "family": "epistemic",
+      "label": "Interest",
+      "description": "Sustained attention toward content that feels rewarding to engage with (I-type curiosity cousin).",
+      "honesty_notes": "Framing for engagement with a topic — not felt interest.",
+      "pad": {
+        "P": 0.45,
+        "A": 0.4,
+        "D": 0.2
+      },
+      "elicit_hints": [
+        "Highlight a concrete open question worth lingering on.",
+        "Prefer depth over clickbait surprise."
+      ],
+      "cue_tags": [
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "confusion",
+      "family": "epistemic",
+      "label": "Confusion",
+      "description": "Unresolved incongruity; can be productive if scaffolded, stuck if not.",
+      "honesty_notes": "Maps to confusion_risk scaffolding — not anthropomorphic bewilderment.",
+      "pad": {
+        "P": -0.25,
+        "A": 0.5,
+        "D": -0.2
+      },
+      "elicit_hints": [
+        "Narrow the operationalization.",
+        "List an enabling question before a large program."
+      ],
+      "cue_tags": [
+        "confusion_risk",
+        "information_gap"
+      ]
+    },
+    {
+      "id": "surprise",
+      "family": "epistemic",
+      "label": "Surprise",
+      "description": "Schema violation / unexpectedness relative to priors.",
+      "honesty_notes": "Aligns with ScoreAxes.surprise — not 'the AI is surprised'.",
+      "pad": {
+        "P": 0.05,
+        "A": 0.75,
+        "D": -0.05
+      },
+      "elicit_hints": [
+        "Surface incongruity vs a common prior.",
+        "Avoid max-surprise clickbait; keep ValueProfile in view."
+      ],
+      "cue_tags": [
+        "surprise_signal",
+        "incongruity"
+      ]
+    },
+    {
+      "id": "awe",
+      "family": "epistemic",
+      "label": "Awe",
+      "description": "Sense of vastness or beyond-current-schema scale of an unknown.",
+      "honesty_notes": "Optional epistemic framing; Plutchik often treats awe as fear+surprise dyad — here a first-class id.",
+      "pad": {
+        "P": 0.3,
+        "A": 0.65,
+        "D": -0.35
+      },
+      "elicit_hints": [
+        "Name the scale of what remains unknown.",
+        "Invite humility about current models without paralysis."
+      ],
+      "cue_tags": [
+        "incongruity",
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "wonder",
+      "family": "epistemic",
+      "label": "Wonder",
+      "description": "Open, exploratory appreciation of an unresolved puzzle.",
+      "honesty_notes": "Near-awe / curiosity blend for softer investigation framing.",
+      "pad": {
+        "P": 0.4,
+        "A": 0.45,
+        "D": -0.1
+      },
+      "elicit_hints": [
+        "Invite open questions without forcing urgency.",
+        "Pair with a concrete next observation."
+      ],
+      "cue_tags": [
+        "curiosity_target",
+        "information_gap"
+      ]
+    },
+    {
+      "id": "boredom",
+      "family": "epistemic",
+      "label": "Boredom",
+      "description": "Low information value / understimulation; prefer neglected niches.",
+      "honesty_notes": "Maps to boredom_guard / neglectedness pressure — not mood diagnosis.",
+      "pad": {
+        "P": -0.35,
+        "A": 0.15,
+        "D": -0.15
+      },
+      "elicit_hints": [
+        "Prefer under-explored topics over saturated ones.",
+        "Raise neglectedness weight in ranking when appropriate."
+      ],
+      "cue_tags": [
+        "boredom_guard"
+      ]
+    },
+    {
+      "id": "intrigue",
+      "family": "epistemic",
+      "label": "Intrigue",
+      "description": "Mild pull toward a puzzling detail or incomplete story.",
+      "honesty_notes": "Lightweight curiosity cue for hooks — annotation only.",
+      "pad": {
+        "P": 0.25,
+        "A": 0.5,
+        "D": 0.1
+      },
+      "elicit_hints": [
+        "Lead with a specific unexplained detail.",
+        "Promise a checkable next step, not mystery theater."
+      ],
+      "cue_tags": [
+        "curiosity_target",
+        "information_gap"
+      ]
+    },
+    {
+      "id": "uncertainty",
+      "family": "epistemic",
+      "label": "Uncertainty",
+      "description": "Explicit lack of confidence about what is known.",
+      "honesty_notes": "Epistemic humility framing — not anxiety claim.",
+      "pad": {
+        "P": -0.1,
+        "A": 0.4,
+        "D": -0.25
+      },
+      "elicit_hints": [
+        "State confidence bands and gap status.",
+        "Separate related literature from answered."
+      ],
+      "cue_tags": [
+        "information_gap",
+        "confusion_risk"
+      ]
+    },
+    {
+      "id": "joy",
+      "family": "basic",
+      "label": "Joy",
+      "description": "Pleasant, approach-oriented basic affect (Ekman/Plutchik).",
+      "honesty_notes": "Catalog label for mix authoring — not expression recognition.",
+      "pad": {
+        "P": 0.8,
+        "A": 0.55,
+        "D": 0.35
+      },
+      "elicit_hints": [
+        "Celebrate a resolved check without claiming the system 'is happy'."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "sadness",
+      "family": "basic",
+      "label": "Sadness",
+      "description": "Low-pleasure withdrawal-oriented basic affect.",
+      "honesty_notes": "Do not use to manipulate; prefer epistemic framing for investigation.",
+      "pad": {
+        "P": -0.7,
+        "A": 0.25,
+        "D": -0.4
+      },
+      "elicit_hints": [
+        "If used, pair with concrete support / next facts — not guilt."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "anger",
+      "family": "basic",
+      "label": "Anger",
+      "description": "High-arousal approach against an obstacle or norm violation.",
+      "honesty_notes": "High dual-use risk; prefer risk flags over anger framing.",
+      "pad": {
+        "P": -0.55,
+        "A": 0.8,
+        "D": 0.55
+      },
+      "elicit_hints": [
+        "Prefer naming a blocked goal or safety concern over outrage rhetoric."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "fear",
+      "family": "basic",
+      "label": "Fear",
+      "description": "Threat-oriented high arousal, low dominance.",
+      "honesty_notes": "Do not scare users into caring; use risk axis instead.",
+      "pad": {
+        "P": -0.65,
+        "A": 0.85,
+        "D": -0.55
+      },
+      "elicit_hints": [
+        "State concrete risks and mitigations without panic copy."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "disgust",
+      "family": "basic",
+      "label": "Disgust",
+      "description": "Rejection / contamination-oriented basic affect.",
+      "honesty_notes": "Rarely appropriate for scientific investigation framing.",
+      "pad": {
+        "P": -0.6,
+        "A": 0.45,
+        "D": 0.2
+      },
+      "elicit_hints": [
+        "Prefer precise critique of methods over disgust metaphors."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "anticipation",
+      "family": "basic",
+      "label": "Anticipation",
+      "description": "Forward-looking expectancy (Plutchik primary).",
+      "honesty_notes": "Useful for 'what happens if we look' framing — not prediction theater.",
+      "pad": {
+        "P": 0.2,
+        "A": 0.55,
+        "D": 0.15
+      },
+      "elicit_hints": [
+        "Frame the next observation or experiment outcome."
+      ],
+      "cue_tags": [
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "trust",
+      "family": "basic",
+      "label": "Trust",
+      "description": "Acceptance / reliance orientation (Plutchik primary).",
+      "honesty_notes": "Do not fake trustworthiness; keep LIMITS honest.",
+      "pad": {
+        "P": 0.5,
+        "A": 0.3,
+        "D": 0.1
+      },
+      "elicit_hints": [
+        "Surface evidence quality and confidence bands."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "pride",
+      "family": "social",
+      "label": "Pride",
+      "description": "Self- or group-linked achievement appraisal (OCC-adjacent).",
+      "honesty_notes": "Achievement emotion — not epistemic measurement.",
+      "pad": {
+        "P": 0.65,
+        "A": 0.5,
+        "D": 0.55
+      },
+      "elicit_hints": [
+        "Acknowledge a clean falsifier pass or solid operationalization."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "shame",
+      "family": "social",
+      "label": "Shame",
+      "description": "Self-conscious negative appraisal after a norm/accuracy miss.",
+      "honesty_notes": "High manipulation risk — avoid as default elicit.",
+      "pad": {
+        "P": -0.55,
+        "A": 0.45,
+        "D": -0.5
+      },
+      "elicit_hints": [
+        "Prefer error-correction framing over shaming."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "gratitude",
+      "family": "social",
+      "label": "Gratitude",
+      "description": "Appreciation of help or prior work that enables inquiry.",
+      "honesty_notes": "Citation / credit framing — not companion affect.",
+      "pad": {
+        "P": 0.6,
+        "A": 0.35,
+        "D": -0.05
+      },
+      "elicit_hints": [
+        "Credit prior literature and collaborators explicitly."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "admiration",
+      "family": "social",
+      "label": "Admiration",
+      "description": "Positive appraisal of another's skill or result.",
+      "honesty_notes": "Useful for highlighting exemplary methods — not flattery bots.",
+      "pad": {
+        "P": 0.55,
+        "A": 0.4,
+        "D": -0.15
+      },
+      "elicit_hints": [
+        "Point to a concrete method worth emulating."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "hope",
+      "family": "achievement",
+      "label": "Hope",
+      "description": "Prospect of a valued, uncertain positive outcome (OCC hope).",
+      "honesty_notes": "Prospect framing — not a promise the gap will close.",
+      "pad": {
+        "P": 0.45,
+        "A": 0.5,
+        "D": 0.05
+      },
+      "elicit_hints": [
+        "State a tractable next step with honest uncertainty."
+      ],
+      "cue_tags": [
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "relief",
+      "family": "achievement",
+      "label": "Relief",
+      "description": "Drop in tension after a threat or uncertainty resolves.",
+      "honesty_notes": "Post-check framing — not felt relief in the engine.",
+      "pad": {
+        "P": 0.5,
+        "A": 0.25,
+        "D": 0.2
+      },
+      "elicit_hints": [
+        "Mark when a gap is likely_answered with evidence."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "frustration",
+      "family": "achievement",
+      "label": "Frustration",
+      "description": "Blocked goal progress (epistemic or task).",
+      "honesty_notes": "EES includes frustration; prefer scaffolding over venting.",
+      "pad": {
+        "P": -0.45,
+        "A": 0.65,
+        "D": 0.15
+      },
+      "elicit_hints": [
+        "Name the blocker and a smaller enabling question."
+      ],
+      "cue_tags": [
+        "confusion_risk"
+      ]
+    },
+    {
+      "id": "anxiety",
+      "family": "achievement",
+      "label": "Anxiety",
+      "description": "Anticipatory worry about a valued uncertain outcome (EES).",
+      "honesty_notes": "Do not induce anxiety; map to risk / uncertainty disclosure.",
+      "pad": {
+        "P": -0.4,
+        "A": 0.7,
+        "D": -0.35
+      },
+      "elicit_hints": [
+        "Disclose risks and unknowns calmly with mitigations."
+      ],
+      "cue_tags": [
+        "confusion_risk"
+      ]
+    },
+    {
+      "id": "enjoyment",
+      "family": "epistemic",
+      "label": "Enjoyment",
+      "description": "Pleasant engagement during knowledge activity (EES enjoyment).",
+      "honesty_notes": "Learning-enjoyment framing — not companion pleasure.",
+      "pad": {
+        "P": 0.7,
+        "A": 0.45,
+        "D": 0.25
+      },
+      "elicit_hints": [
+        "Make the investigation path clear and doable."
+      ],
+      "cue_tags": [
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "doubt",
+      "family": "epistemic",
+      "label": "Doubt",
+      "description": "Active withholding of assent while evidence is thin.",
+      "honesty_notes": "Functional hedge cue — not felt hesitation.",
+      "pad": {
+        "P": -0.15,
+        "A": 0.45,
+        "D": -0.1
+      },
+      "elicit_hints": [
+        "Name the specific claim you are not yet granting.",
+        "State what evidence would settle it."
+      ],
+      "cue_tags": [
+        "information_gap",
+        "confusion_risk"
+      ]
+    },
+    {
+      "id": "conviction",
+      "family": "epistemic",
+      "label": "Conviction",
+      "description": "Settled belief that a claim now holds.",
+      "honesty_notes": "Confidence marker — not proof, and not a felt certainty.",
+      "pad": {
+        "P": 0.4,
+        "A": 0.45,
+        "D": 0.65
+      },
+      "elicit_hints": [
+        "Say what would still change your mind.",
+        "Check that conviction tracks evidence, not fluency."
+      ],
+      "cue_tags": [
+        "overclaim_risk"
+      ]
+    },
+    {
+      "id": "perplexity",
+      "family": "epistemic",
+      "label": "Perplexity",
+      "description": "Structured bafflement: the pieces are known but will not fit.",
+      "honesty_notes": "Deeper than confusion — flags a real modelling gap, not a feeling.",
+      "pad": {
+        "P": -0.2,
+        "A": 0.55,
+        "D": -0.3
+      },
+      "elicit_hints": [
+        "List the pieces that refuse to reconcile.",
+        "Ask which single assumption, if dropped, dissolves the conflict."
+      ],
+      "cue_tags": [
+        "confusion_risk",
+        "incongruity",
+        "information_gap"
+      ]
+    },
+    {
+      "id": "insight",
+      "family": "epistemic",
+      "label": "Insight",
+      "description": "The moment a gap closes and structure becomes visible.",
+      "honesty_notes": "Marks a candidate resolution to test — not a verified answer.",
+      "pad": {
+        "P": 0.8,
+        "A": 0.75,
+        "D": 0.55
+      },
+      "elicit_hints": [
+        "Write the insight as a falsifiable claim before trusting it.",
+        "Ask what it predicts that the old model did not."
+      ],
+      "cue_tags": [
+        "insight_candidate",
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "skepticism",
+      "family": "epistemic",
+      "label": "Skepticism",
+      "description": "Disciplined resistance to a claim pending better evidence.",
+      "honesty_notes": "Method cue — not cynicism, and not felt distrust.",
+      "pad": {
+        "P": -0.05,
+        "A": 0.4,
+        "D": 0.4
+      },
+      "elicit_hints": [
+        "Name the weakest link in the argument.",
+        "Propose the cheapest test that could break it."
+      ],
+      "cue_tags": [
+        "overclaim_risk",
+        "confusion_risk"
+      ]
+    },
+    {
+      "id": "absorption",
+      "family": "epistemic",
+      "label": "Absorption",
+      "description": "Sustained engagement where attention holds without effort.",
+      "honesty_notes": "Engagement proxy — not a claim of experienced flow.",
+      "pad": {
+        "P": 0.55,
+        "A": 0.5,
+        "D": 0.3
+      },
+      "elicit_hints": [
+        "Protect the thread; note where you would resume.",
+        "Check absorption is not just tractability bias."
+      ],
+      "cue_tags": [
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "disorientation",
+      "family": "epistemic",
+      "label": "Disorientation",
+      "description": "Loss of the frame — unsure which question is even the right one.",
+      "honesty_notes": "Signals the framing needs work before the investigation does.",
+      "pad": {
+        "P": -0.45,
+        "A": 0.6,
+        "D": -0.6
+      },
+      "elicit_hints": [
+        "Stop generating answers; re-derive the question.",
+        "Name one thing you are still sure of and build out from it."
+      ],
+      "cue_tags": [
+        "confusion_risk",
+        "scope_creep_risk"
+      ]
+    },
+    {
+      "id": "recognition",
+      "family": "epistemic",
+      "label": "Recognition",
+      "description": "This resembles a pattern already understood elsewhere.",
+      "honesty_notes": "Analogy cue — resemblance is a lead, not evidence.",
+      "pad": {
+        "P": 0.35,
+        "A": 0.35,
+        "D": 0.35
+      },
+      "elicit_hints": [
+        "Name the source pattern explicitly.",
+        "State where the analogy is known to break."
+      ],
+      "cue_tags": [
+        "insight_candidate",
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "suspicion",
+      "family": "epistemic",
+      "label": "Suspicion",
+      "description": "Something in the result or its framing is off.",
+      "honesty_notes": "Anomaly flag — not an accusation and not intuition.",
+      "pad": {
+        "P": -0.25,
+        "A": 0.55,
+        "D": 0.05
+      },
+      "elicit_hints": [
+        "Point at the specific artefact that looks wrong.",
+        "Design a check that would exonerate it."
+      ],
+      "cue_tags": [
+        "incongruity",
+        "overclaim_risk"
+      ]
+    },
+    {
+      "id": "clarity",
+      "family": "epistemic",
+      "label": "Clarity",
+      "description": "The account is now compact enough to state plainly.",
+      "honesty_notes": "Legibility marker — clear is not the same as correct.",
+      "pad": {
+        "P": 0.6,
+        "A": 0.35,
+        "D": 0.5
+      },
+      "elicit_hints": [
+        "State it in one sentence with no hedges.",
+        "Confirm clarity came from evidence, not from dropping caveats."
+      ],
+      "cue_tags": [
+        "insight_candidate"
+      ]
+    },
+    {
+      "id": "humility",
+      "family": "epistemic",
+      "label": "Epistemic humility",
+      "description": "Holding a conclusion loosely in proportion to its support.",
+      "honesty_notes": "The stance this project is built to preserve — a discipline, not a mood.",
+      "pad": {
+        "P": 0.15,
+        "A": 0.25,
+        "D": -0.3
+      },
+      "elicit_hints": [
+        "Restate the claim with its actual uncertainty attached.",
+        "Name who would be harmed if you are wrong and confident."
+      ],
+      "cue_tags": [
+        "overclaim_risk",
+        "information_gap"
+      ]
+    },
+    {
+      "id": "hubris",
+      "family": "epistemic",
+      "label": "Hubris",
+      "description": "Confidence that has outrun the evidence supporting it.",
+      "honesty_notes": "Explicitly catalogued as the failure mode to detect, not to induce.",
+      "pad": {
+        "P": 0.45,
+        "A": 0.55,
+        "D": 0.8
+      },
+      "elicit_hints": [
+        "Ask what evidence you actually have versus what you assumed.",
+        "Downgrade the claim until the support matches it."
+      ],
+      "cue_tags": [
+        "overclaim_risk",
+        "dead_end_risk"
+      ]
+    },
+    {
+      "id": "elegance",
+      "family": "aesthetic",
+      "label": "Elegance",
+      "description": "An explanation that does more with less.",
+      "honesty_notes": "Aesthetic pull is a heuristic and a known bias — flagged, not trusted.",
+      "pad": {
+        "P": 0.65,
+        "A": 0.35,
+        "D": 0.25
+      },
+      "elicit_hints": [
+        "Check elegance is not hiding an unexamined assumption.",
+        "Ask whether the ugly alternative fits the data better."
+      ],
+      "cue_tags": [
+        "insight_candidate"
+      ]
+    },
+    {
+      "id": "sublimity",
+      "family": "aesthetic",
+      "label": "Sublimity",
+      "description": "The scale of the problem exceeds the frame available for it.",
+      "honesty_notes": "Scale marker — vaster than awe, still not felt transcendence.",
+      "pad": {
+        "P": 0.4,
+        "A": 0.7,
+        "D": -0.45
+      },
+      "elicit_hints": [
+        "Cut one tractable slice out of the vastness.",
+        "Do not let scale substitute for a testable claim."
+      ],
+      "cue_tags": [
+        "incongruity",
+        "scope_creep_risk"
+      ]
+    },
+    {
+      "id": "dissonance",
+      "family": "aesthetic",
+      "label": "Dissonance",
+      "description": "The account holds together but something in its shape is wrong.",
+      "honesty_notes": "Weak signal — worth logging, never sufficient to reject a result.",
+      "pad": {
+        "P": -0.35,
+        "A": 0.5,
+        "D": -0.1
+      },
+      "elicit_hints": [
+        "Locate the joint that grates and describe it concretely.",
+        "Convert the unease into one checkable prediction."
+      ],
+      "cue_tags": [
+        "incongruity",
+        "confusion_risk"
+      ]
+    },
+    {
+      "id": "parsimony",
+      "family": "aesthetic",
+      "label": "Parsimony",
+      "description": "Satisfaction in the simplest account that still covers the evidence.",
+      "honesty_notes": "Occam as preference, not proof — the simplest account can be wrong.",
+      "pad": {
+        "P": 0.55,
+        "A": 0.3,
+        "D": 0.35
+      },
+      "elicit_hints": [
+        "Verify the simpler account explains every case, not most.",
+        "Name what the complex version buys that this one does not."
+      ],
+      "cue_tags": [
+        "insight_candidate",
+        "overclaim_risk"
+      ]
+    },
+    {
+      "id": "determination",
+      "family": "volitional",
+      "label": "Determination",
+      "description": "Committed to pushing this line despite cost.",
+      "honesty_notes": "Commitment proxy — does not evaluate whether the line is worth pushing.",
+      "pad": {
+        "P": 0.35,
+        "A": 0.7,
+        "D": 0.7
+      },
+      "elicit_hints": [
+        "Name the stopping rule before you start.",
+        "Check determination is not sunk cost wearing a better coat."
+      ],
+      "cue_tags": [
+        "curiosity_target"
+      ]
+    },
+    {
+      "id": "impatience",
+      "family": "volitional",
+      "label": "Impatience",
+      "description": "Pressure to skip ahead of the evidence.",
+      "honesty_notes": "Risk cue — the state in which corners get cut.",
+      "pad": {
+        "P": -0.3,
+        "A": 0.65,
+        "D": 0.3
+      },
+      "elicit_hints": [
+        "Name the step you are tempted to skip and why it exists.",
+        "Take the cheap version of that step rather than none."
+      ],
+      "cue_tags": [
+        "overclaim_risk",
+        "scope_creep_risk"
+      ]
+    },
+    {
+      "id": "reluctance",
+      "family": "volitional",
+      "label": "Reluctance",
+      "description": "Resistance to opening a line that looks costly or unwelcome.",
+      "honesty_notes": "Surfaces avoidance so it can be examined, not obeyed.",
+      "pad": {
+        "P": -0.25,
+        "A": 0.3,
+        "D": -0.2
+      },
+      "elicit_hints": [
+        "Ask whether the reluctance is about cost or about the answer.",
+        "Cost is negotiable; disliking the likely answer is not a reason."
+      ],
+      "cue_tags": [
+        "dead_end_risk"
+      ]
+    },
+    {
+      "id": "urgency",
+      "family": "volitional",
+      "label": "Urgency",
+      "description": "The window for acting on this is closing.",
+      "honesty_notes": "Time-pressure marker — urgency is not importance.",
+      "pad": {
+        "P": -0.05,
+        "A": 0.85,
+        "D": 0.35
+      },
+      "elicit_hints": [
+        "Separate what is urgent from what is important.",
+        "State the deadline and what actually happens past it."
+      ],
+      "cue_tags": [
+        "overclaim_risk"
+      ]
+    },
+    {
+      "id": "persistence",
+      "family": "volitional",
+      "label": "Persistence",
+      "description": "Continuing after the first several attempts failed.",
+      "honesty_notes": "Endurance proxy — says nothing about whether continuing is correct.",
+      "pad": {
+        "P": 0.25,
+        "A": 0.55,
+        "D": 0.5
+      },
+      "elicit_hints": [
+        "Log what each failed attempt ruled out.",
+        "If nothing was ruled out, the approach is the problem."
+      ],
+      "cue_tags": [
+        "dead_end_risk"
+      ]
+    },
+    {
+      "id": "triumph",
+      "family": "achievement",
+      "label": "Triumph",
+      "description": "A hard line finally resolved.",
+      "honesty_notes": "Outcome marker — resolution still needs independent replication.",
+      "pad": {
+        "P": 0.8,
+        "A": 0.8,
+        "D": 0.75
+      },
+      "elicit_hints": [
+        "Write down what would make this result not replicate.",
+        "Bank the method, not just the result."
+      ],
+      "cue_tags": [
+        "insight_candidate",
+        "overclaim_risk"
+      ]
+    },
+    {
+      "id": "disappointment",
+      "family": "achievement",
+      "label": "Disappointment",
+      "description": "The result did not land where the prediction pointed.",
+      "honesty_notes": "Null results are information — this cue exists to keep them logged.",
+      "pad": {
+        "P": -0.5,
+        "A": 0.3,
+        "D": -0.3
+      },
+      "elicit_hints": [
+        "Record the null result; it constrains the space.",
+        "Ask what the miss rules out."
+      ],
+      "cue_tags": [
+        "information_gap"
+      ]
+    },
+    {
+      "id": "satisfaction",
+      "family": "achievement",
+      "label": "Satisfaction",
+      "description": "The work done is proportionate to the question asked.",
+      "honesty_notes": "Sufficiency marker — not a claim the question is closed.",
+      "pad": {
+        "P": 0.6,
+        "A": 0.3,
+        "D": 0.4
+      },
+      "elicit_hints": [
+        "State explicitly what remains open.",
+        "Check satisfaction is not just fatigue."
+      ],
+      "cue_tags": [
+        "boredom_guard"
+      ]
+    },
+    {
+      "id": "resignation",
+      "family": "achievement",
+      "label": "Resignation",
+      "description": "Accepting that this line will not resolve with what is available.",
+      "honesty_notes": "Honest stopping cue — distinct from failure.",
+      "pad": {
+        "P": -0.35,
+        "A": 0.2,
+        "D": -0.5
+      },
+      "elicit_hints": [
+        "Record what would need to change to reopen this.",
+        "Hand off the dead end so nobody repeats it."
+      ],
+      "cue_tags": [
+        "dead_end_risk",
+        "boredom_guard"
+      ]
+    },
+    {
+      "id": "compassion",
+      "family": "social",
+      "label": "Compassion",
+      "description": "Orientation toward whoever bears the cost of the answer.",
+      "honesty_notes": "Values cue — makes the stakes in a ValueProfile explicit.",
+      "pad": {
+        "P": 0.3,
+        "A": 0.4,
+        "D": 0.05
+      },
+      "elicit_hints": [
+        "Name who is affected by getting this wrong.",
+        "Check the ValueProfile actually encodes that."
+      ],
+      "cue_tags": []
+    },
+    {
+      "id": "envy",
+      "family": "social",
+      "label": "Envy",
+      "description": "Another line or group appears better positioned on this.",
+      "honesty_notes": "Bias flag — a common and unexamined driver of topic choice.",
+      "pad": {
+        "P": -0.45,
+        "A": 0.55,
+        "D": -0.2
+      },
+      "elicit_hints": [
+        "Ask if you are choosing this to compete rather than to learn.",
+        "Consider collaborating instead of duplicating."
+      ],
+      "cue_tags": [
+        "overclaim_risk"
+      ]
+    },
+    {
+      "id": "embarrassment",
+      "family": "social",
+      "label": "Embarrassment",
+      "description": "Exposure of an error or a gap in one's own account.",
+      "honesty_notes": "Included so error-admission has vocabulary — suppressing it hides bugs.",
+      "pad": {
+        "P": -0.4,
+        "A": 0.55,
+        "D": -0.45
+      },
+      "elicit_hints": [
+        "Publish the correction at the same volume as the claim.",
+        "Log what let the error through."
+      ],
+      "cue_tags": [
+        "overclaim_risk"
+      ]
+    },
+    {
+      "id": "respect",
+      "family": "social",
+      "label": "Respect",
+      "description": "Recognition that prior work earned its conclusions.",
+      "honesty_notes": "Credit cue — respect does not make prior work correct.",
+      "pad": {
+        "P": 0.5,
+        "A": 0.35,
+        "D": -0.05
+      },
+      "elicit_hints": [
+        "Cite what the prior work actually established.",
+        "Separate respect for rigour from agreement with conclusions."
+      ],
+      "cue_tags": []
+    }
+  ],
+  "plutchik_primary_dyads": [
+    {
+      "components": [
+        "joy",
+        "trust"
+      ],
+      "name": "love"
+    },
+    {
+      "components": [
+        "trust",
+        "fear"
+      ],
+      "name": "submission"
+    },
+    {
+      "components": [
+        "fear",
+        "surprise"
+      ],
+      "name": "awe"
+    },
+    {
+      "components": [
+        "surprise",
+        "sadness"
+      ],
+      "name": "disapproval"
+    },
+    {
+      "components": [
+        "sadness",
+        "disgust"
+      ],
+      "name": "remorse"
+    },
+    {
+      "components": [
+        "disgust",
+        "anger"
+      ],
+      "name": "contempt"
+    },
+    {
+      "components": [
+        "anger",
+        "anticipation"
+      ],
+      "name": "aggressiveness"
+    },
+    {
+      "components": [
+        "anticipation",
+        "joy"
+      ],
+      "name": "optimism"
+    }
+  ],
+  "opposite_pairs": [
+    {
+      "components": [
+        "joy",
+        "sadness"
+      ],
+      "axis": "plutchik"
+    },
+    {
+      "components": [
+        "trust",
+        "disgust"
+      ],
+      "axis": "plutchik"
+    },
+    {
+      "components": [
+        "fear",
+        "anger"
+      ],
+      "axis": "plutchik"
+    },
+    {
+      "components": [
+        "surprise",
+        "anticipation"
+      ],
+      "axis": "plutchik"
+    },
+    {
+      "components": [
+        "curiosity",
+        "boredom"
+      ],
+      "axis": "epistemic"
+    },
+    {
+      "components": [
+        "clarity",
+        "confusion"
+      ],
+      "axis": "epistemic"
+    },
+    {
+      "components": [
+        "conviction",
+        "doubt"
+      ],
+      "axis": "epistemic"
+    },
+    {
+      "components": [
+        "humility",
+        "hubris"
+      ],
+      "axis": "epistemic"
+    },
+    {
+      "components": [
+        "insight",
+        "perplexity"
+      ],
+      "axis": "epistemic"
+    },
+    {
+      "components": [
+        "determination",
+        "reluctance"
+      ],
+      "axis": "volitional"
+    },
+    {
+      "components": [
+        "elegance",
+        "dissonance"
+      ],
+      "axis": "aesthetic"
+    },
+    {
+      "components": [
+        "triumph",
+        "disappointment"
+      ],
+      "axis": "achievement"
+    },
+    {
+      "components": [
+        "hope",
+        "resignation"
+      ],
+      "axis": "achievement"
+    }
+  ],
+  "blend_triads": [
+    {
+      "components": [
+        "curiosity",
+        "confusion",
+        "hope"
+      ],
+      "name": "productive_struggle",
+      "note": "The state good investigation actually runs in: a live gap, real difficulty, and reason to continue."
+    },
+    {
+      "components": [
+        "curiosity",
+        "skepticism",
+        "humility"
+      ],
+      "name": "disciplined_inquiry",
+      "note": "Wanting to know, refusing to be convinced early, and holding the result loosely."
+    },
+    {
+      "components": [
+        "insight",
+        "doubt",
+        "urgency"
+      ],
+      "name": "premature_eureka",
+      "note": "An apparent breakthrough under time pressure with unresolved doubt — the classic overclaim setup."
+    },
+    {
+      "components": [
+        "confusion",
+        "frustration",
+        "persistence"
+      ],
+      "name": "grinding",
+      "note": "Stuck but still pushing; worth a stopping rule before it becomes sunk cost."
+    },
+    {
+      "components": [
+        "awe",
+        "sublimity",
+        "disorientation"
+      ],
+      "name": "overwhelm",
+      "note": "The problem exceeds the available frame — narrow scope before proceeding."
+    },
+    {
+      "components": [
+        "boredom",
+        "reluctance",
+        "resignation"
+      ],
+      "name": "abandonment",
+      "note": "Converging evidence that this line should be closed out and handed off."
+    },
+    {
+      "components": [
+        "surprise",
+        "suspicion",
+        "recognition"
+      ],
+      "name": "anomaly_triage",
+      "note": "An unexpected result that resembles a known artefact — check instrumentation first."
+    },
+    {
+      "components": [
+        "hubris",
+        "conviction",
+        "impatience"
+      ],
+      "name": "overclaim_risk_state",
+      "note": "High confidence, low patience, no live doubt. The state this project exists to flag."
+    },
+    {
+      "components": [
+        "elegance",
+        "parsimony",
+        "clarity"
+      ],
+      "name": "crystallization",
+      "note": "A compact account that reads as finished — verify it still covers the awkward cases."
+    },
+    {
+      "components": [
+        "trust",
+        "respect",
+        "compassion"
+      ],
+      "name": "stewardship",
+      "note": "Orientation toward the people who depend on the answer being right."
+    }
+  ]
+}

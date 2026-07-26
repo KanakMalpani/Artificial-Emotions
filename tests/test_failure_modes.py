@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from artificial_curiosity.diversity import diversify, is_near_duplicate
-from artificial_curiosity.models import (
+from artificial_emotions.diversity import diversify, is_near_duplicate
+from artificial_emotions.models import (
     CuriosityConfig,
     GapEvidence,
     GapStatus,
@@ -12,15 +12,15 @@ from artificial_curiosity.models import (
     UnansweredQuestion,
     ValueProfile,
 )
-from artificial_curiosity.pipeline import CuriosityEngine
-from artificial_curiosity.provoke import provoke
-from artificial_curiosity.scoring import (
+from artificial_emotions.pipeline import CuriosityEngine
+from artificial_emotions.provoke import provoke
+from artificial_emotions.scoring import (
     aggregate_curiosity,
     heuristic_score,
     passes_gates,
     score_uncertainty_band,
 )
-from artificial_curiosity.verify import classify_gap
+from artificial_emotions.verify import classify_gap
 
 
 def _axes(**kwargs: float) -> ScoreAxes:
@@ -225,8 +225,8 @@ def test_f13_paraphrase_set_suppressed_in_diversify():
 
 def test_f7_phrase_gaming_open_gap_damps_overlap():
     """Open-gap abstract language must not inflate 'answered' overlap (F7)."""
-    from artificial_curiosity.models import LiteratureHit
-    from artificial_curiosity.verify import _abstract_claim_signal, _effective_overlap
+    from artificial_emotions.models import LiteratureHit
+    from artificial_emotions.verify import _abstract_claim_signal, _effective_overlap
 
     gaming = LiteratureHit(
         title="Survey",
@@ -251,8 +251,8 @@ def test_f7_phrase_gaming_open_gap_damps_overlap():
 
 def test_f7_further_research_needed_not_claim():
     """'Further research is needed' abstracts must damp claim signal (F7)."""
-    from artificial_curiosity.models import LiteratureHit
-    from artificial_curiosity.verify import _abstract_claim_signal
+    from artificial_emotions.models import LiteratureHit
+    from artificial_emotions.verify import _abstract_claim_signal
 
     hit = LiteratureHit(
         title="Open survey",
@@ -266,8 +266,8 @@ def test_f7_further_research_needed_not_claim():
 
 def test_f7_null_replication_phrases_dampen_answered():
     """Null/replication open-gap lexicon should damp effective overlap (failure knowledge)."""
-    from artificial_curiosity.models import LiteratureHit
-    from artificial_curiosity.verify import _abstract_claim_signal, _effective_overlap
+    from artificial_emotions.models import LiteratureHit
+    from artificial_emotions.verify import _abstract_claim_signal, _effective_overlap
 
     nullish = LiteratureHit(
         title="Replication note",

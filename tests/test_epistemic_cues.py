@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from artificial_curiosity.epistemic_cues import (
+from artificial_emotions.epistemic_cues import (
     EPISTEMIC_CUE_DISCLAIMER,
     TAG_CONFUSION_RISK,
     TAG_CURIOSITY_TARGET,
@@ -12,15 +12,15 @@ from artificial_curiosity.epistemic_cues import (
     derive_epistemic_cues,
     incongruity_investigate_block,
 )
-from artificial_curiosity.models import (
+from artificial_emotions.models import (
     GapEvidence,
     GapStatus,
     RankedQuestion,
     ScoreAxes,
     UnansweredQuestion,
 )
-from artificial_curiosity.packs import load_pack_file, questions_from_pack
-from artificial_curiosity.provoke import build_inject_prompt, compact_unknown, provoke
+from artificial_emotions.packs import load_pack_file, questions_from_pack
+from artificial_emotions.provoke import build_inject_prompt, compact_unknown, provoke
 
 
 def _ranked(
@@ -99,7 +99,7 @@ def test_inject_includes_framing_and_anti_anthropomorphism():
 
 
 def test_public_demo_strict_risk_preset():
-    from artificial_curiosity.models import get_profile
+    from artificial_emotions.models import get_profile
 
     p = get_profile("public_demo_strict_risk")
     assert p.max_risk <= 0.55
@@ -119,7 +119,7 @@ def test_affective_science_pack_loads():
     path = (
         Path(__file__).resolve().parents[1]
         / "src"
-        / "artificial_curiosity"
+        / "artificial_emotions"
         / "packs"
         / "affective_science.json"
     )

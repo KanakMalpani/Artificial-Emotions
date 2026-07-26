@@ -1,7 +1,7 @@
 # Evolving Idea Graphs (EIG) — ideation adjacency (research)
 
 **Status:** Competitor note for multi-agent ideation with persistent graph state.  
-**Honesty:** EIG optimizes **idea proposals** (novelty/feasibility/clarity). Artificial Curiosity ranks **unknowns under ValueProfile**. Steal graph-state discipline; don’t replace verify+rank.
+**Honesty:** EIG optimizes **idea proposals** (novelty/feasibility/clarity). Artificial Emotions ranks **unknowns under ValueProfile**. Steal graph-state discipline; don’t replace verify+rank.
 
 *Generated: 2026-07-25 | Paper: Dong et al. arXiv [2605.04922](https://arxiv.org/abs/2605.04922)*
 

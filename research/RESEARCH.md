@@ -1,4 +1,4 @@
-# Research Report: Artificial Curiosity Layer
+# Research Report: Artificial Emotions Layer
 *Generated: 2026-07-23 | Sources: 20+ | Confidence: High on gap diagnosis; Medium on long-term eval*
 
 ## Executive Summary

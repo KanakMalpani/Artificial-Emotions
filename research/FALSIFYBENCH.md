@@ -18,7 +18,7 @@ FALSIFYBENCH adapts Wason 2-4-6–style rule discovery: agents propose examples,
 
 ---
 
-## 2. Transfer to Artificial Curiosity
+## 2. Transfer to Artificial Emotions
 
 | FALSIFYBENCH | Our stack |
 |--------------|-----------|

@@ -14,7 +14,7 @@ from typing import Any
 
 import pytest
 
-from artificial_curiosity.llm import (
+from artificial_emotions.llm import (
     LLMClient,
     LLMSettings,
     _extract_json,
@@ -174,7 +174,7 @@ def _completion(content: str) -> dict[str, Any]:
 
 
 def _install_urlopen(monkeypatch, handler):
-    import artificial_curiosity.llm as llm_mod
+    import artificial_emotions.llm as llm_mod
 
     monkeypatch.setattr(llm_mod.urllib.request, "urlopen", handler)
 

@@ -1,10 +1,10 @@
 # Emotions in AI — how they are produced, modeled, and misread
 
-**Status:** Expanded research monograph (durable notes for Artificial Curiosity).  
-**Honesty bar:** This document distinguishes *having* emotions from *modeling*, *detecting*, *displaying*, and *eliciting* affect. Nothing here claims that Artificial Curiosity (or current LLMs) *feel*. Curiosity in this repo is a **decision / information-seeking layer**, not an anthropomorphic mind.
+**Status:** Expanded research monograph (durable notes for Artificial Emotions).  
+**Honesty bar:** This document distinguishes *having* emotions from *modeling*, *detecting*, *displaying*, and *eliciting* affect. Nothing here claims that Artificial Emotions (or current LLMs) *feel*. Curiosity in this repo is a **decision / information-seeking layer**, not an anthropomorphic mind.
 
 **Primary workspace path:** `research/AI_EMOTIONS.md`  
-**Related in-repo:** [`FIRST_PRINCIPLES.md`](FIRST_PRINCIPLES.md) (decision-theoretic curiosity), [`SOURCES.md`](SOURCES.md) (curiosity / VOI bibliography), [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) (consumer APIs / libraries / public contract), `src/artificial_curiosity/provoke.py` (epistemic *provoke*), `src/artificial_curiosity/epistemic_cues.py` (optional UX annotations), [`docs/ROADMAP.md`](../docs/ROADMAP.md) §7.6 / near-wedge pointer.
+**Related in-repo:** [`FIRST_PRINCIPLES.md`](FIRST_PRINCIPLES.md) (decision-theoretic curiosity), [`SOURCES.md`](SOURCES.md) (curiosity / VOI bibliography), [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) (consumer APIs / libraries / public contract), `src/artificial_emotions/provoke.py` (epistemic *provoke*), `src/artificial_emotions/epistemic_cues.py` (optional UX annotations), [`docs/ROADMAP.md`](../docs/ROADMAP.md) §7.6 / near-wedge pointer.
 
 **Revision note:** Second-pass expansion beyond the initial spike — classical theories, CME architecture survey, ML recognition/generation stacks, RL functional analogs, LLM appraisal evidence, neuromodulation (cautious), HRI, epistemic-emotion elicitation design, ethics, and concrete product wedges.
 
@@ -25,7 +25,7 @@
 
 **Production mechanisms** range from hand-crafted appraisal trees (OCC) and dimensional continuous spaces (VAD / PAD), through multimodal ML pipelines, to RL intrinsic motivation and LLM prompting. Neuromorphic and embodied robots add sensors and actuators but do not dissolve the philosophical gap between simulation and experience.
 
-**Link to this project:** Epistemic emotions in psychology (curiosity, interest, confusion, surprise, awe) are *about knowledge*—they track cognitive incongruity and often drive exploration (Pekrun & Stephens; Vogl et al.; EES scales). Artificial Curiosity’s **surprise / neglectedness / tractability** axes and **`provoke` inject packs** are best read as **structured elicitors of epistemic investigation in *agents and humans***, analogous in *function* (promote exploration of unknowns) but **not** as claims that the software has feelings.
+**Link to this project:** Epistemic emotions in psychology (curiosity, interest, confusion, surprise, awe) are *about knowledge*—they track cognitive incongruity and often drive exploration (Pekrun & Stephens; Vogl et al.; EES scales). Artificial Emotions’s **surprise / neglectedness / tractability** axes and **`provoke` inject packs** are best read as **structured elicitors of epistemic investigation in *agents and humans***, analogous in *function* (promote exploration of unknowns) but **not** as claims that the software has feelings.
 
 **Safety spine:** Anthropomorphism raises trust, attachment, and manipulation risk; affective persuasion is dual-use. Keep product copy and LIMITS honest: scores are decision aids; provoke is not “the AI is curious.”
 
@@ -281,7 +281,7 @@ Boredom                         Low learning progress             Diversity + ne
 Fear / anxiety (social)         Risk penalties / constraints      safety.py / risk axis
 ```
 
-**Repo mapping:** Artificial Curiosity’s `surprise` axis is closer to **expected information / belief-shift utility** than to ICM pixel prediction error. Do not equate RL curiosity bonuses with scientific VOI.
+**Repo mapping:** Artificial Emotions’s `surprise` axis is closer to **expected information / belief-shift utility** than to ICM pixel prediction error. Do not equate RL curiosity bonuses with scientific VOI.
 
 Broekens & colleagues’ survey of emotion in RL agents (Machine Learning, 2018) frames emotions as *functional* modulators of motivation and action selection—useful for ML and HRI, not as experience claims.
 
@@ -319,7 +319,7 @@ Grounded in goals/plans            Inferred from text alone
 
 ### 8.3 Anthropomorphism studies (product-relevant)
 
-Companion/chat literature (e.g. arXiv:2412.19976, 2506.20748 and related) shows affect-laden agents can shift persuasion, empathy attributions, and donation/trust behaviors. Design implication: **fluency + warmth is a capability and a hazard**. Artificial Curiosity should default to anti-anthropomorphic copy (“ranked unknowns,” “decision aids,” never “I feel curious”).
+Companion/chat literature (e.g. arXiv:2412.19976, 2506.20748 and related) shows affect-laden agents can shift persuasion, empathy attributions, and donation/trust behaviors. Design implication: **fluency + warmth is a capability and a hazard**. Artificial Emotions should default to anti-anthropomorphic copy (“ranked unknowns,” “decision aids,” never “I feel curious”).
 
 **Default honest summary for product docs:** LLMs are strong at *affective language games* and sometimes at *appraisal-consistent reasoning*; they are not known to *have* emotions.
 
@@ -415,9 +415,9 @@ High-confidence error / conflicting texts
 | **Physio** | Arousal only (underspecified) | Low priority; privacy cost |
 | **LLM-as-judge of “curiosity”** | Cheap but circular | Use only with human calibration |
 
-### 11.4 Functional analogy ↔ Artificial Curiosity
+### 11.4 Functional analogy ↔ Artificial Emotions
 
-| Epistemic emotion (human) | Rough functional role | Artificial Curiosity artifact |
+| Epistemic emotion (human) | Rough functional role | Artificial Emotions artifact |
 |---------------------------|----------------------|-------------------------------|
 | Curiosity / interest | Seek missing / valuable information | Ranked unknowns; `provoke` “what to investigate next” |
 | Surprise | Register schema violation / unexpectedness | `ScoreAxes.surprise` (belief-shift / epistemic value proxy) |
@@ -471,7 +471,7 @@ Picard’s later emphasis on clinical / wellbeing sensing with consent contrasts
 
 ---
 
-## 13. Product wedges for Artificial Curiosity
+## 13. Product wedges for Artificial Emotions
 
 ### 13.1 Near wedges (implementable without claiming feelings)
 
@@ -601,13 +601,13 @@ Picard’s later emphasis on clinical / wellbeing sensing with consent contrasts
 | Decision-theoretic curiosity | `research/FIRST_PRINCIPLES.md` |
 | Curiosity literature map | `research/SOURCES.md` |
 | Consumer access patterns / public contract | `research/EMOTION_ACCESS.md` |
-| Provoke inject (epistemic elicitation) | `src/artificial_curiosity/provoke.py` |
-| Epistemic cue tags (UX annotations) | `src/artificial_curiosity/epistemic_cues.py` |
-| Public emotions surface | `src/artificial_curiosity/emotions.py`; `/v1/emotions/*` |
+| Provoke inject (epistemic elicitation) | `src/artificial_emotions/provoke.py` |
+| Epistemic cue tags (UX annotations) | `src/artificial_emotions/epistemic_cues.py` |
+| Public emotions surface | `src/artificial_emotions/emotions.py`; `/v1/emotions/*` |
 | Example emotion schemas | `examples/emotions_*.json` |
 | Surprise / axes | `scoring.py`, `models.ScoreAxes` |
 | Dual-use / risk | `safety.py`, F10 in FAILURE_MODES |
-| Affect-domain seeds | `src/artificial_curiosity/packs/affective_science.json` |
+| Affect-domain seeds | `src/artificial_emotions/packs/affective_science.json` |
 | ROADMAP moonshot / near wedge | `docs/ROADMAP.md` §7.6 + epistemic elicitation pointer |
 
 ---
@@ -630,4 +630,4 @@ Ethics when “anyone can use” affect tooling (consent, covert sensing, manipu
 
 ## 17. One-paragraph bottom line
 
-Emotions in AI are **engineered constructs**—appraisal rules, dimensional states, classifiers, RL bonuses, embodied displays, or LLM text patterns—optimized for recognition, control, or social effect. Classical theories (James–Lange through constructionism) supply metaphors and partial blueprints; CME stacks (EMA, FAtiMA, WASABI, ALMA, Kismet, …) show what *production* looks like in practice: event → appraisal/dynamics → state → expression/action. Epistemic emotions in humans motivate information seeking under incongruity; Artificial Curiosity operationalizes a related *function* (rank and provoke investigation of unknowns) with explicit values, gap evidence, and optional UX cues—never an OCC “feeling” engine. Treat affective science as a **source of hypotheses, elicitation designs, and eval metrics**, not as a license to claim the system feels.
+Emotions in AI are **engineered constructs**—appraisal rules, dimensional states, classifiers, RL bonuses, embodied displays, or LLM text patterns—optimized for recognition, control, or social effect. Classical theories (James–Lange through constructionism) supply metaphors and partial blueprints; CME stacks (EMA, FAtiMA, WASABI, ALMA, Kismet, …) show what *production* looks like in practice: event → appraisal/dynamics → state → expression/action. Epistemic emotions in humans motivate information seeking under incongruity; Artificial Emotions operationalizes a related *function* (rank and provoke investigation of unknowns) with explicit values, gap evidence, and optional UX cues—never an OCC “feeling” engine. Treat affective science as a **source of hypotheses, elicitation designs, and eval metrics**, not as a license to claim the system feels.

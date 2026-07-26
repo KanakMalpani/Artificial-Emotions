@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from artificial_curiosity import errors
-from artificial_curiosity.errors import (
+from artificial_emotions import errors
+from artificial_emotions.errors import (
     ERR_EMPTY_MIX,
     ERR_MIX_TOO_LARGE,
     ERR_NEGATIVE_WEIGHT,
@@ -19,8 +19,8 @@ from artificial_curiosity.errors import (
     classify_value_error,
     error_payload,
 )
-from artificial_curiosity.generate import generate_candidates
-from artificial_curiosity.models import CuriosityConfig
+from artificial_emotions.generate import generate_candidates
+from artificial_emotions.models import CuriosityConfig
 
 
 @pytest.mark.parametrize(
@@ -79,7 +79,7 @@ def test_error_codes_are_unique():
 
 
 def test_dunder_main_prints_surface_help(capsys):
-    from artificial_curiosity.__main__ import main
+    from artificial_emotions.__main__ import main
 
     assert main() == 0
     err = capsys.readouterr().err
@@ -119,7 +119,7 @@ def test_generate_candidates_soft_fails_to_seeds_without_llm_credentials(monkeyp
 
 def test_generate_candidates_soft_fails_when_llm_raises(monkeypatch):
     """A throwing LLM must degrade to seeds — generation is never a hard dependency."""
-    import artificial_curiosity.generate as gen
+    import artificial_emotions.generate as gen
 
     class Exploding:
         def chat_json(self, system: str, user: str):
@@ -133,7 +133,7 @@ def test_generate_candidates_soft_fails_when_llm_raises(monkeypatch):
 
 
 def test_generate_candidates_skips_malformed_llm_items(monkeypatch):
-    import artificial_curiosity.generate as gen
+    import artificial_emotions.generate as gen
 
     class Partial:
         def chat_json(self, system: str, user: str):

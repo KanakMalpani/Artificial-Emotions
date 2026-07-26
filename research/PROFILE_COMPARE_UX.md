@@ -3,7 +3,7 @@
 **Status:** Companion to shipped `compare_profiles` ([`CONSTITUTIONAL_CURIOSITY.md`](CONSTITUTIONAL_CURIOSITY.md)).  
 **Honesty:** Offline heuristic re-rank is a **decision aid** — not proof either profile is “correct.”
 
-*Generated: 2026-07-25 | Aligns with `src/artificial_curiosity/compare.py`*
+*Generated: 2026-07-25 | Aligns with `src/artificial_emotions/compare.py`*
 
 ---
 

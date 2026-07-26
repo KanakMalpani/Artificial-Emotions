@@ -9,7 +9,7 @@
 
 ## 1. ITN in one table
 
-| Axis | EA-ish meaning | Artificial Curiosity cousin |
+| Axis | EA-ish meaning | Artificial Emotions cousin |
 |------|----------------|------------------------------|
 | **Importance** | Scale of problem / stakes if solved | `impact` / stakes language in profiles |
 | **Tractability** | Marginal progress per resource | `tractability` / `answerability` + cost proxy |

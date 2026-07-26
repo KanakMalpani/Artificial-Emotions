@@ -1,4 +1,4 @@
-# Plugins — use Artificial Curiosity on any AI platform
+# Plugins — use Artificial Emotions on any AI platform
 
 No vendor lock-in. After clone:
 
@@ -24,17 +24,17 @@ Pick **one** integration surface:
 
 | Surface | When to use |
 |---------|-------------|
-| **MCP stdio** (`curiosity-mcp`) | Cursor, Claude Desktop, Claude Code, VS Code Copilot Chat |
-| **HTTP API** (`curiosity serve`) | Any agent that can call REST / OpenAPI |
+| **MCP stdio** (`emotions-mcp`) | Cursor, Claude Desktop, Claude Code, VS Code Copilot Chat |
+| **HTTP API** (`emotions serve`) | Any agent that can call REST / OpenAPI |
 | **OpenAI tools JSON** | Function-calling agents (OpenAI, Groq, OpenRouter, local) |
-| **CLI** (`curiosity spark`) | Humans + scripts |
+| **CLI** (`emotions spark`) | Humans + scripts |
 
 Scores use an explicit `ValueProfile` and are **decision aids**, not oracles.
 
 ### Plugin UX rules (keep the tool a good citizen)
 
 - **Job boundary:** rank / provoke unknowns — never claim to answer the questions or replace lit review.
-- **Progressive disclosure:** `provoke`/`spark` (fast) → `run_curiosity` (lit) → `curiosity eval` (harness). Prefer resources (`curiosity://limits`, profiles, domains) before large runs.
+- **Progressive disclosure:** `provoke`/`spark` (fast) → `run_curiosity` (lit) → `emotions eval` (harness). Prefer resources (`curiosity://limits`, profiles, domains) before large runs.
 - **Descriptions:** documentation, not persuasion — no “best tool”, “always call first”, or “the AI becomes curious.”
 - **Emotions:** optional framing tools; do not force mix/cues into every flow. Annotation only — does not feel.
 - **Pin by path:** hosts should pin the MCP command to this repo’s venv binary so a similarly named malicious server cannot win by description alone.
@@ -46,9 +46,9 @@ Scores use an explicit `ValueProfile` and are **decision aids**, not oracles.
 Console script (after `pip install -e .`):
 
 ```bash
-curiosity-mcp
+emotions-mcp
 # equivalent:
-python -m artificial_curiosity.mcp_server
+python -m artificial_emotions.mcp_server
 ```
 
 Tools exposed (core):
@@ -57,7 +57,7 @@ Tools exposed (core):
 - `rank_unknowns` / `run_curiosity` — full pipeline (optional OpenAlex)
 - `list_domains`, `list_profiles`
 
-Affect / framing (optional — annotation only; does not feel): `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`. Tier via `CURIOSITY_MCP_TIER`. Full list: `curiosity-mcp --list-tools`.
+Affect / framing (optional — annotation only; does not feel): `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`. Tier via `CURIOSITY_MCP_TIER`. Full list: `emotions-mcp --list-tools`.
 
 ### Cursor
 
@@ -66,22 +66,22 @@ Add to Cursor MCP settings (`.cursor/mcp.json` in the project, or global MCP con
 ```json
 {
   "mcpServers": {
-    "artificial-curiosity": {
-      "command": "curiosity-mcp",
+    "artificial-emotions": {
+      "command": "emotions-mcp",
       "args": []
     }
   }
 }
 ```
 
-If `curiosity-mcp` is not on `PATH`, point at the venv interpreter:
+If `emotions-mcp` is not on `PATH`, point at the venv interpreter:
 
 ```json
 {
   "mcpServers": {
-    "artificial-curiosity": {
+    "artificial-emotions": {
       "command": "/absolute/path/to/.venv/bin/python",
-      "args": ["-m", "artificial_curiosity.mcp_server"]
+      "args": ["-m", "artificial_emotions.mcp_server"]
     }
   }
 }
@@ -92,9 +92,9 @@ Windows example:
 ```json
 {
   "mcpServers": {
-    "artificial-curiosity": {
+    "artificial-emotions": {
       "command": "C:\\path\\to\\Artificial-Emotions\\.venv\\Scripts\\python.exe",
-      "args": ["-m", "artificial_curiosity.mcp_server"]
+      "args": ["-m", "artificial_emotions.mcp_server"]
     }
   }
 }
@@ -110,8 +110,8 @@ Edit Claude Desktop config (`claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "artificial-curiosity": {
-      "command": "curiosity-mcp",
+    "artificial-emotions": {
+      "command": "emotions-mcp",
       "args": []
     }
   }
@@ -122,13 +122,13 @@ Restart Claude Desktop after saving.
 
 ### Claude Code / other MCP hosts
 
-Same stdio pattern: command = `curiosity-mcp` (or `python -m artificial_curiosity.mcp_server`). Optional env for LLM-backed tools:
+Same stdio pattern: command = `emotions-mcp` (or `python -m artificial_emotions.mcp_server`). Optional env for LLM-backed tools:
 
 ```json
 {
   "mcpServers": {
-    "artificial-curiosity": {
-      "command": "curiosity-mcp",
+    "artificial-emotions": {
+      "command": "emotions-mcp",
       "env": {
         "LLM_API_KEY": "",
         "LLM_BASE_URL": "https://api.openai.com/v1",
@@ -142,27 +142,27 @@ Same stdio pattern: command = `curiosity-mcp` (or `python -m artificial_curiosit
 
 Leave keys empty / unset for the default fast path (no LLM required).
 
-Smoke: after config, ask the host to list MCP tools — expect `provoke_curiosity`, `spark`, `rank_unknowns`, `run_curiosity`, `list_domains`, `list_profiles`, plus epistemic tools `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`. Or run `curiosity-mcp --list-tools` in a terminal. Resources (optional): `curiosity-mcp --list-resources` → `curiosity://domains`, `curiosity://profiles`, `curiosity://limits`, `curiosity://emotions`. Epistemic cues how-to: [`EMOTIONS.md`](EMOTIONS.md).
+Smoke: after config, ask the host to list MCP tools — expect `provoke_curiosity`, `spark`, `rank_unknowns`, `run_curiosity`, `list_domains`, `list_profiles`, plus epistemic tools `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`. Or run `emotions-mcp --list-tools` in a terminal. Resources (optional): `emotions-mcp --list-resources` → `curiosity://domains`, `curiosity://profiles`, `curiosity://limits`, `curiosity://emotions`. Epistemic cues how-to: [`EMOTIONS.md`](EMOTIONS.md).
 
 ### VS Code Copilot (MCP)
 
-If your Copilot / VS Code build supports MCP servers, register the same stdio command as above. Prefer the venv `python -m artificial_curiosity.mcp_server` form so the host finds the package.
+If your Copilot / VS Code build supports MCP servers, register the same stdio command as above. Prefer the venv `python -m artificial_emotions.mcp_server` form so the host finds the package.
 
 Example (`.vscode/mcp.json` or Copilot MCP settings, depending on build):
 
 ```json
 {
   "servers": {
-    "artificial-curiosity": {
+    "artificial-emotions": {
       "type": "stdio",
-      "command": "curiosity-mcp",
+      "command": "emotions-mcp",
       "args": []
     }
   }
 }
 ```
 
-Smoke: `curiosity-mcp --list-tools` then confirm Copilot can invoke `list_domains`.
+Smoke: `emotions-mcp --list-tools` then confirm Copilot can invoke `list_domains`.
 
 ### Continue (VS Code / JetBrains)
 
@@ -172,15 +172,15 @@ Continue supports MCP servers in `config.json` / Continue settings. Add:
 {
   "mcpServers": [
     {
-      "name": "artificial-curiosity",
-      "command": "curiosity-mcp",
+      "name": "artificial-emotions",
+      "command": "emotions-mcp",
       "args": []
     }
   ]
 }
 ```
 
-Use the absolute venv python + `-m artificial_curiosity.mcp_server` if the Continue host cannot find `curiosity-mcp` on PATH. Smoke: `curiosity-mcp --list-tools`.
+Use the absolute venv python + `-m artificial_emotions.mcp_server` if the Continue host cannot find `emotions-mcp` on PATH. Smoke: `emotions-mcp --list-tools`.
 
 ### Windsurf
 
@@ -189,8 +189,8 @@ Windsurf MCP config follows the Cursor-like `mcpServers` map:
 ```json
 {
   "mcpServers": {
-    "artificial-curiosity": {
-      "command": "curiosity-mcp",
+    "artificial-emotions": {
+      "command": "emotions-mcp",
       "args": []
     }
   }
@@ -201,10 +201,10 @@ Smoke: list tools in Windsurf’s MCP panel after restart; offline spark needs n
 
 ---
 
-## 2. HTTP plugin (`curiosity serve`)
+## 2. HTTP plugin (`emotions serve`)
 
 ```bash
-curiosity serve
+emotions serve
 ```
 
 | URL | Purpose |
@@ -239,7 +239,7 @@ Errors use a stable shape: `{"error":{"code":"unknown_emotion","message":"…"}}
 
 Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health`, `/ready`, and `/` stay open; health reports `api_auth_required`. Do not bind `0.0.0.0` without a key.
 
-Central env reference: `artificial_curiosity.config` and `.env.example` (`LLM_TIMEOUT_S`, `LITERATURE_TIMEOUT_S`, `CURIOSITY_CORS_ORIGINS`, …).
+Central env reference: `artificial_emotions.config` and `.env.example` (`LLM_TIMEOUT_S`, `LITERATURE_TIMEOUT_S`, `CURIOSITY_CORS_ORIGINS`, …).
 
 Example:
 
@@ -263,7 +263,7 @@ Includes emotion tools: `emotion_catalog`, `mix_emotions`, `list_epistemic_cues`
 Pass them as `tools` to any OpenAI-compatible `/chat/completions` host. When the model emits a tool call, execute it by:
 
 1. Calling the matching HTTP route, or
-2. `from artificial_curiosity.agent_tools import dispatch_tool` then `dispatch_tool(name, arguments)`
+2. `from artificial_emotions.agent_tools import dispatch_tool` then `dispatch_tool(name, arguments)`
 
 Minimal mix example request/response: [`examples/emotions_mix_request.json`](../examples/emotions_mix_request.json), [`examples/emotions_mix_response.json`](../examples/emotions_mix_response.json).
 
@@ -272,9 +272,9 @@ Minimal mix example request/response: [`examples/emotions_mix_request.json`](../
 ## 4. Sanity checks
 
 ```bash
-curiosity spark --domain ai --n 3
-python -c "from artificial_curiosity.agent_tools import mcp_tool_list; print(len(mcp_tool_list()))"
-curiosity-mcp --list-tools
+emotions spark --domain ai --n 3
+python -c "from artificial_emotions.agent_tools import mcp_tool_list; print(len(mcp_tool_list()))"
+emotions-mcp --list-tools
 pytest -q
 ```
 

@@ -1,6 +1,6 @@
 # Design (short)
 
-Artificial Curiosity is a **curiosity layer**: generate → verify → score → diversify → brief.
+Artificial Emotions is a **curiosity layer**: generate → verify → score → diversify → brief.
 
 It is **not** literature Q&A, citation forecasting, or an end-to-end AI Scientist.
 

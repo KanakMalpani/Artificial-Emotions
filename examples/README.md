@@ -1,6 +1,6 @@
 # Examples
 
-Sample payloads, protocols, and harnesses for Artificial Curiosity. Prefer the short product proof guide:
+Sample payloads, protocols, and harnesses for Artificial Emotions. Prefer the short product proof guide:
 
 → **[`docs/PROOFS.md`](../docs/PROOFS.md)** · Plugins: **[`docs/PLUGINS.md`](../docs/PLUGINS.md)** · Emotions: **[`docs/EMOTIONS.md`](../docs/EMOTIONS.md)**
 

@@ -1,4 +1,4 @@
-# Agent Handoff — Artificial Curiosity
+# Agent Handoff — Artificial Emotions
 
 **Repo root:** this clone  
 **Remote:** https://github.com/KanakMalpani/Artificial-Emotions.git  

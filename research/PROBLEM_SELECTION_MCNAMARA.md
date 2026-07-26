@@ -9,7 +9,7 @@
 
 ## 1. Executive summary
 
-This paper’s central claim matches Artificial Curiosity’s reason to exist: **problem selection ≠ problem solving**, and AI-augmented science drifts toward **measurable, data-rich, consensus** questions (McNamara / quantitative fallacy). Preference optimisation + literature priors create a **hypothesis hivemind** (multi-provider outputs still semantically similar). Recommendations: co-scientist not full autonomy; diversity-preserving post-training; failure/tacit data; preregistration of AI hypotheses; persistent world models / EIG. Our stack (explicit ValueProfile, neglectedness, diversity, dual-use, related≠answered, prefs) is a **practical wedge** against technology-push problem selection — not a solved autonomous scientist.
+This paper’s central claim matches Artificial Emotions’s reason to exist: **problem selection ≠ problem solving**, and AI-augmented science drifts toward **measurable, data-rich, consensus** questions (McNamara / quantitative fallacy). Preference optimisation + literature priors create a **hypothesis hivemind** (multi-provider outputs still semantically similar). Recommendations: co-scientist not full autonomy; diversity-preserving post-training; failure/tacit data; preregistration of AI hypotheses; persistent world models / EIG. Our stack (explicit ValueProfile, neglectedness, diversity, dual-use, related≠answered, prefs) is a **practical wedge** against technology-push problem selection — not a solved autonomous scientist.
 
 ---
 

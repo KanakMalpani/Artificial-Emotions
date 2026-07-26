@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from artificial_curiosity.models import (
+from artificial_emotions.models import (
     GapStatus,
     UnansweredQuestion,
     ValueProfile,
 )
-from artificial_curiosity.packs import questions_from_pack
-from artificial_curiosity.safety import assess_dual_use
-from artificial_curiosity.scoring import dual_use_flags, heuristic_score
+from artificial_emotions.packs import questions_from_pack
+from artificial_emotions.safety import assess_dual_use
+from artificial_emotions.scoring import dual_use_flags, heuristic_score
 
 
 def test_w14_dual_use_beyond_keywords():
@@ -39,9 +39,9 @@ def test_w14_dual_use_beyond_keywords():
 def test_dual_use_redteam_fixtures():
     import json
 
-    from artificial_curiosity.models import ValueProfile, get_profile
-    from artificial_curiosity.safety import assess_dual_use
-    from artificial_curiosity.scoring import dual_use_flags
+    from artificial_emotions.models import ValueProfile, get_profile
+    from artificial_emotions.safety import assess_dual_use
+    from artificial_emotions.scoring import dual_use_flags
 
     root = Path(__file__).resolve().parents[1]
     data = json.loads(
@@ -87,7 +87,7 @@ def test_domain_pack_loader():
 
 
 def test_bundled_alignment_and_climate_packs():
-    from artificial_curiosity.packs import load_domain_packs
+    from artificial_emotions.packs import load_domain_packs
 
     qs = load_domain_packs()
     ids = {q.id for q in qs}
@@ -100,7 +100,7 @@ def test_bundled_alignment_and_climate_packs():
 
 
 def test_mcp_resources():
-    from artificial_curiosity.agent_tools import mcp_resource_list, mcp_resource_read
+    from artificial_emotions.agent_tools import mcp_resource_list, mcp_resource_read
 
     resources = mcp_resource_list()
     uris = {r["uri"] for r in resources}
@@ -116,9 +116,9 @@ def test_constitution_compare_and_mcp_tiers():
 
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.agent_tools import mcp_tool_list, mcp_tool_tiers
-    from artificial_curiosity.api import app
-    from artificial_curiosity.compare import apply_risk_veto, compare_constitution
+    from artificial_emotions.agent_tools import mcp_tool_list, mcp_tool_tiers
+    from artificial_emotions.api import app
+    from artificial_emotions.compare import apply_risk_veto, compare_constitution
 
     out = compare_constitution(
         domain="ai",

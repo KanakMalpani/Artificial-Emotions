@@ -9,7 +9,7 @@
 
 ## 1. Executive summary
 
-EU AI Act and public ethics debate focus on **emotion recognition from biometrics** (workplace/education bans; high-risk elsewhere) and **manipulative AI** that distorts behavior. Artificial Curiosity’s `/v1/emotions/*` and cue tags are **annotation / authoring**, not ERS — but **provoke injects** intentionally shape agent/human investigation stance. “Anyone can use” implies: clear disclaimers, no covert affect inference, no dark-pattern mix APIs, dual-use already weighted, and MCP tool metadata that does not preference-manipulate hosts. Design restraint > anthropomorphic marketing.
+EU AI Act and public ethics debate focus on **emotion recognition from biometrics** (workplace/education bans; high-risk elsewhere) and **manipulative AI** that distorts behavior. Artificial Emotions’s `/v1/emotions/*` and cue tags are **annotation / authoring**, not ERS — but **provoke injects** intentionally shape agent/human investigation stance. “Anyone can use” implies: clear disclaimers, no covert affect inference, no dark-pattern mix APIs, dual-use already weighted, and MCP tool metadata that does not preference-manipulate hosts. Design restraint > anthropomorphic marketing.
 
 ---
 

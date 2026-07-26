@@ -1,8 +1,8 @@
 # Publishing to PyPI
 
-Package name: **`artificial-curiosity`** · Version: see `pyproject.toml` (currently **`0.4.0`**).
+Package name: **`artificial-emotions`** · Version: see `pyproject.toml` (currently **`0.4.0`**).
 
-**Status:** not on PyPI yet — do not document `pip install artificial-curiosity` as a public path until `https://pypi.org/project/artificial-curiosity/` resolves.
+**Status:** not on PyPI yet — do not document `pip install artificial-emotions` as a public path until `https://pypi.org/project/artificial-emotions/` resolves.
 
 Never store PyPI tokens in the repo or commit `.env` / credentials. For HTTP demos, unset `CURIOSITY_API_KEY` is fine on localhost only — set a key before any non-local bind.
 
@@ -41,17 +41,17 @@ The publish workflow uploads with `secrets.PYPI_API_TOKEN` via [pypa/gh-action-p
 ```bash
 pip install build
 python -m build
-pip install dist/artificial_curiosity-*.whl
-python -c "import artificial_curiosity; print(artificial_curiosity.__version__)"
+pip install dist/artificial_emotions-*.whl
+python -c "import artificial_emotions; print(artificial_emotions.__version__)"
 ```
 
 ## First-time project creation
 
-If `https://pypi.org/project/artificial-curiosity/` does not exist yet, the first successful upload (with a user or project token that can create projects) registers it. After that, prefer a project-scoped token or Trusted Publishing.
+If `https://pypi.org/project/artificial-emotions/` does not exist yet, the first successful upload (with a user or project token that can create projects) registers it. After that, prefer a project-scoped token or Trusted Publishing.
 
 ## Checklist before tagging
 
-- [ ] `version` in `pyproject.toml` and `__version__` in `src/artificial_curiosity/__init__.py` match
+- [ ] `version` in `pyproject.toml` and `__version__` in `src/artificial_emotions/__init__.py` match
 - [ ] Tag is `v` + that version (e.g. `v0.4.0`)
 - [ ] `pytest -q` green
 - [ ] `docs/LIMITS.md` / ROADMAP updated only after a successful publish
@@ -72,4 +72,4 @@ gh run rerun <run-id> --failed
 gh workflow run publish.yml -f dry_run=false
 ```
 
-Until Actions can start runners, PyPI upload via this workflow cannot complete. Local `python -m build` still works for smoke; do not claim PyPI publish until `https://pypi.org/project/artificial-curiosity/` resolves.
+Until Actions can start runners, PyPI upload via this workflow cannot complete. Local `python -m build` still works for smoke; do not claim PyPI publish until `https://pypi.org/project/artificial-emotions/` resolves.

@@ -21,7 +21,7 @@ Reported: ~81% verdict accuracy with frontier models on a 64-hypothesis MRI bank
 
 ---
 
-## 2. Mapping to Artificial Curiosity gap status
+## 2. Mapping to Artificial Emotions gap status
 
 | VERITAS label | Our gap-status cousin | Product use |
 |---------------|----------------------|-------------|

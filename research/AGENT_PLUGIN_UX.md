@@ -1,6 +1,6 @@
 # Agent plugin ecosystems — UX for a curiosity layer
 
-**Status:** Research notes on MCP / tool-calling UX so Artificial Curiosity stays a **good citizen** plugin (not a noisy or adversarial tool).  
+**Status:** Research notes on MCP / tool-calling UX so Artificial Emotions stays a **good citizen** plugin (not a noisy or adversarial tool).  
 **Related:** `docs/PLUGINS.md`, `mcp_server.py`, `agent_tools.py`, [`AFFECTIVE_SAFETY.md`](AFFECTIVE_SAFETY.md).
 
 *Generated: 2026-07-25 | Sources: arXiv MCP security + ScaleMCP UX | Confidence: High on attack literature; Medium on ideal UX patterns (fast-moving).*

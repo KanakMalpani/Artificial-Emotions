@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from artificial_curiosity.api import app
-from artificial_curiosity.llm import _extract_json, resolve_llm_settings
-from artificial_curiosity.provoke import provoke
+from artificial_emotions.api import app
+from artificial_emotions.llm import _extract_json, resolve_llm_settings
+from artificial_emotions.provoke import provoke
 
 
 def test_extract_json_from_fenced_block():
@@ -95,7 +95,7 @@ def test_resolve_judge_model_env(monkeypatch):
 
 
 def test_optional_api_key_auth(monkeypatch):
-    from artificial_curiosity.config import clear_config_cache
+    from artificial_emotions.config import clear_config_cache
 
     client = TestClient(app)
     # Disabled by default — health and provoke open.
@@ -134,7 +134,7 @@ def test_optional_api_key_auth(monkeypatch):
 
 
 def test_health_redacts_llm_base_url(monkeypatch):
-    from artificial_curiosity.config import clear_config_cache
+    from artificial_emotions.config import clear_config_cache
 
     monkeypatch.setenv("LLM_API_KEY", "dummy")
     monkeypatch.setenv("LLM_BASE_URL", "https://secret-host.example/v1")

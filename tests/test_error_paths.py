@@ -5,10 +5,10 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from artificial_curiosity import CuriosityError, mix_emotions
-from artificial_curiosity.api import ProvokeRequest, RunRequest, app
-from artificial_curiosity.config import clear_config_cache
-from artificial_curiosity.errors import (
+from artificial_emotions import CuriosityError, mix_emotions
+from artificial_emotions.api import ProvokeRequest, RunRequest, app
+from artificial_emotions.config import clear_config_cache
+from artificial_emotions.errors import (
     ERR_AUTH_REQUIRED,
     ERR_EMPTY_MIX,
     ERR_UNKNOWN_EMOTION,
@@ -84,7 +84,7 @@ def test_health_and_ready_detail():
 
 def test_ready_returns_503_when_checks_fail(monkeypatch):
     # Patch where /ready resolves the symbol, i.e. the router module it lives in.
-    from artificial_curiosity.api_pkg.routers import meta as meta_router
+    from artificial_emotions.api_pkg.routers import meta as meta_router
 
     monkeypatch.setattr(
         meta_router,

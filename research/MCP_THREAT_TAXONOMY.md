@@ -19,7 +19,7 @@
 
 ---
 
-## 2. Mapping to Artificial Curiosity tools
+## 2. Mapping to Artificial Emotions tools
 
 | Threat class (informal) | Our exposure | Mitigation (shipped / proposed) |
 |-------------------------|--------------|----------------------------------|

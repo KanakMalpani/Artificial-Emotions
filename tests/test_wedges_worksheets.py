@@ -4,18 +4,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from artificial_curiosity.models import (
+from artificial_emotions.models import (
     GapStatus,
     UnansweredQuestion,
     ValueProfile,
 )
-from artificial_curiosity.preferences import (
+from artificial_emotions.preferences import (
     PreferenceEvent,
 )
 
 
 def test_mix_coercion_warning():
-    from artificial_curiosity.emotions import mix_emotions
+    from artificial_emotions.emotions import mix_emotions
 
     mild = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30})
     assert mild.get("warnings") == [] or mild.get("coercion_weight", 0) < 0.35
@@ -28,7 +28,7 @@ def test_mix_coercion_warning():
 
 def test_elicit_ab_eval_path():
 
-    from artificial_curiosity.elicit_eval import run_elicit_ab, score_investigation_response
+    from artificial_emotions.elicit_eval import run_elicit_ab, score_investigation_response
 
     root = Path(__file__).resolve().parents[1]
     responses = root / "examples" / "elicit_ab_sample_responses.json"
@@ -48,15 +48,15 @@ def test_elicit_ab_eval_path():
 
 
 def test_cue_thresholds_and_outcome_hivemind():
-    from artificial_curiosity.epistemic_cues import derive_epistemic_cues
-    from artificial_curiosity.hivemind import top_n_pairwise_similarity
-    from artificial_curiosity.models import (
+    from artificial_emotions.epistemic_cues import derive_epistemic_cues
+    from artificial_emotions.hivemind import top_n_pairwise_similarity
+    from artificial_emotions.models import (
         GapEvidence,
         RankedQuestion,
         ScoreAxes,
     )
-    from artificial_curiosity.preferences import summarize_preferences
-    from artificial_curiosity.provoke import compact_unknown
+    from artificial_emotions.preferences import summarize_preferences
+    from artificial_emotions.provoke import compact_unknown
 
     q = UnansweredQuestion(
         id="c1",
@@ -134,8 +134,8 @@ def test_cue_thresholds_and_outcome_hivemind():
 def test_critique_brief_form_only():
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
-    from artificial_curiosity.critique import critique_brief
+    from artificial_emotions.api import app
+    from artificial_emotions.critique import critique_brief
 
     bad = critique_brief(
         question="What is A? What is B?",
@@ -169,9 +169,9 @@ def test_voi_worksheet_and_eval_report():
 
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
-    from artificial_curiosity.eval_report import build_eval_report
-    from artificial_curiosity.voi import fill_voi_worksheet
+    from artificial_emotions.api import app
+    from artificial_emotions.eval_report import build_eval_report
+    from artificial_emotions.voi import fill_voi_worksheet
 
     sheet = fill_voi_worksheet(
         question_id="q1",
@@ -215,8 +215,8 @@ def test_voi_worksheet_and_eval_report():
 def test_surprise_worksheet_offline():
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
-    from artificial_curiosity.bayesian import fill_surprise_worksheet
+    from artificial_emotions.api import app
+    from artificial_emotions.bayesian import fill_surprise_worksheet
 
     sheet = fill_surprise_worksheet(
         question_id="q-surprise",
@@ -252,9 +252,9 @@ def test_surprise_worksheet_offline():
 def test_mix_intensity_cap_and_idea_graph():
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
-    from artificial_curiosity.emotions import mix_emotions
-    from artificial_curiosity.idea_graph import export_idea_graph
+    from artificial_emotions.api import app
+    from artificial_emotions.emotions import mix_emotions
+    from artificial_emotions.idea_graph import export_idea_graph
 
     capped = mix_emotions(
         {"curiosity": 20, "fear": 40, "anger": 40},

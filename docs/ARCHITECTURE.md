@@ -28,6 +28,7 @@
 | judge | `judge.py` | Optional LLM scoring / gap reader |
 | diversity | `diversity.py` | Near-dup suppression |
 | brief | `brief.py` | Investigation briefs |
+| decompose | `decompose.py` | Curiosity depth: sub-questions, first step, falsifiers, stop rules |
 | pipeline | `pipeline.py` | Orchestration (`CuriosityEngine`) |
 | provoke | `provoke.py` | Instant spark + inject pack |
 | emotions | `emotions.py` | Catalog / mix / cues (`annotation_only` + `computational_affect`) |
@@ -36,15 +37,15 @@
 | agent_tools | `agent_tools.py` → `agent_tools_pkg/` | Shared MCP / OpenAI / HTTP tool schemas |
 | mcp_server | `mcp_server.py` | Stdio MCP (stdlib JSON-RPC) |
 | api | `api.py` → `api_pkg/` | FastAPI (see below) |
-| cli | `cli.py` → `cli_pkg/` | `curiosity run \| spark \| serve \| …` |
+| cli | `cli.py` → `cli_pkg/` | `emotions run \| spark \| serve \| …` |
 | llm | `llm.py` | Provider-agnostic OpenAI-compatible client |
 | config | `config.py` | Central env knobs |
 | evals | `evals.py`, `eval_report.py` | Offline expert-eval / composite report |
 
 ## HTTP layer
 
-`artificial_curiosity.api:app` is the stable entry point (uvicorn target,
-`curiosity serve`, `TestClient`). It is a thin re-export; the implementation is
+`artificial_emotions.api:app` is the stable entry point (uvicorn target,
+`emotions serve`, `TestClient`). It is a thin re-export; the implementation is
 split by concern:
 
 | Module | Holds |
@@ -56,6 +57,7 @@ split by concern:
 | `api_pkg/routers/meta.py` | `/`, `/health`, `/ready`, `/v1/agent`, `/v1/domains` |
 | `api_pkg/routers/profiles.py` | `/v1/profiles`, compare, constitution-compare |
 | `api_pkg/routers/curiosity.py` | `/v1/curiosity/run`, `/v1/curiosity/provoke` |
+| `api_pkg/routers/evaluation.py` | also `/v1/curiosity/decompose` |
 | `api_pkg/routers/preferences.py` | `/v1/preferences/*` |
 | `api_pkg/routers/evaluation.py` | `/v1/evals/*`, worksheets, brief critique |
 | `api_pkg/routers/emotions.py` | `/v1/emotions/*` and the `/v1/epistemic/*` alias |
@@ -66,7 +68,8 @@ middleware order, and that every router module is actually included.
 
 ## CLI layer
 
-`artificial_curiosity.cli:main` is the `curiosity` console script.
+`artificial_emotions.cli:main` backs the `emotions` console script (and the
+`curiosity` alias kept for pre-rename configs).
 
 | Module | Holds |
 |--------|-------|
@@ -74,17 +77,17 @@ middleware order, and that every router module is actually included.
 | `cli_pkg/parser.py` | Every argparse definition, in one readable place |
 | `cli_pkg/commands/ranking.py` | `run`, `spark`, `serve` |
 | `cli_pkg/commands/profiles.py` | `profiles`, `compare-profiles` |
-| `cli_pkg/commands/worksheets.py` | `critique-brief`, `voi-worksheet`, `surprise-worksheet` |
+| `cli_pkg/commands/worksheets.py` | `critique-brief`, `voi-worksheet`, `surprise-worksheet`, `decompose` |
 | `cli_pkg/commands/preferences.py` | `preferences hints \| summarize \| suggest-pair` |
 | `cli_pkg/commands/evaluation.py` | `eval spotcheck \| elicit \| gap-status \| report \| cooccur` |
 | `cli_pkg/commands/emotions.py` | `emotions` / `epistemic` subcommands |
 
-The bare-flag fallback (`curiosity --domain ai` → `run`) reads subcommand names
+The bare-flag fallback (`emotions --domain ai` → `run`) reads subcommand names
 off the parser rather than a hardcoded list, so the two cannot drift apart.
 
 ## Agent tool layer
 
-`artificial_curiosity.agent_tools` is the stable import path. Dependencies run
+`artificial_emotions.agent_tools` is the stable import path. Dependencies run
 strictly one way — nothing imports backwards:
 
 ```
@@ -106,8 +109,8 @@ list, and dispatch all derive from it.
 | Surface | Entry |
 |---------|--------|
 | CLI | `curiosity` |
-| MCP | `curiosity-mcp` |
-| HTTP | `curiosity serve` → `:8000` |
+| MCP | `emotions-mcp` |
+| HTTP | `emotions serve` → `:8000` |
 | OpenAI tools | `GET /v1/agent/tools` or `examples/openai_tools.json` |
 | Python | `CuriosityEngine`, `provoke`, emotion helpers |
 | Web (optional) | `web/` → `:5173` (proxies API) |
@@ -124,7 +127,7 @@ list, and dispatch all derive from it.
 
 ## Extension points
 
-1. Add a domain pack JSON under `artificial_curiosity/packs/` (see CONTRIBUTING).
+1. Add a domain pack JSON under `artificial_emotions/packs/` (see CONTRIBUTING).
 2. Swap / merge literature backends (`literature_backend=openalex|semantic_scholar|both`).
 3. Optional embedding diversity: `pip install '.[embeddings]'`.
 4. Preference JSONL → thin re-rank / weight hints (not calibrated learning yet).

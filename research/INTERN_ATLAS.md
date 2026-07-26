@@ -23,7 +23,7 @@ Positioned as research infrastructure for AI scientists (document-centric cites 
 
 ## 2. Transfer
 
-| Intern-Atlas | Artificial Curiosity |
+| Intern-Atlas | Artificial Emotions |
 |--------------|----------------------|
 | Method nodes | Optional future “method tags” on unknowns |
 | Lineage edges | Cousin to idea-graph similarity (weaker) |

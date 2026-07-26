@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from artificial_curiosity.diversity import diversify, jaccard
-from artificial_curiosity.models import (
+from artificial_emotions.diversity import diversify, jaccard
+from artificial_emotions.models import (
     CuriosityConfig,
     GapStatus,
     LiteratureHit,
@@ -12,14 +12,14 @@ from artificial_curiosity.models import (
     UnansweredQuestion,
     ValueProfile,
 )
-from artificial_curiosity.pipeline import CuriosityEngine
-from artificial_curiosity.scoring import (
+from artificial_emotions.pipeline import CuriosityEngine
+from artificial_emotions.scoring import (
     aggregate_curiosity,
     heuristic_score,
     passes_gates,
     score_uncertainty_band,
 )
-from artificial_curiosity.verify import (
+from artificial_emotions.verify import (
     _abstract_claim_signal,
     _effective_overlap,
     classify_gap,
@@ -114,7 +114,7 @@ def test_diversify_removes_near_duplicates():
             ),
             curiosity_score=score,
             confidence=0.5,
-            gap=__import__("artificial_curiosity.models", fromlist=["GapEvidence"]).GapEvidence(
+            gap=__import__("artificial_emotions.models", fromlist=["GapEvidence"]).GapEvidence(
                 status=GapStatus.UNANSWERED,
                 confidence=0.5,
             ),
@@ -203,8 +203,8 @@ def test_offline_results_include_score_band():
 
 
 def test_all_primary_domains_have_seeds():
-    from artificial_curiosity.models import Domain
-    from artificial_curiosity.seeds import SEED_QUESTIONS
+    from artificial_emotions.models import Domain
+    from artificial_emotions.seeds import SEED_QUESTIONS
 
     primary = [
         Domain.AI,
@@ -225,7 +225,7 @@ def test_all_primary_domains_have_seeds():
 
 
 def test_spark_works_across_domains():
-    from artificial_curiosity.provoke import provoke
+    from artificial_emotions.provoke import provoke
 
     for domain in ("biology", "materials", "social", "energy"):
         pack = provoke(domain=domain, n=2, fast=True)
@@ -234,7 +234,7 @@ def test_spark_works_across_domains():
 
 
 def test_value_profile_presets_exist():
-    from artificial_curiosity.models import get_profile, list_profile_names
+    from artificial_emotions.models import get_profile, list_profile_names
 
     names = list_profile_names()
     assert "humanity_default" in names
@@ -248,7 +248,7 @@ def test_value_profile_presets_exist():
 
 def test_embedding_backend_falls_back_without_extra():
     """Optional embedding path must not break offline Jaccard default (W1)."""
-    from artificial_curiosity.diversity import diversify, embedding_available, similarity
+    from artificial_emotions.diversity import diversify, embedding_available, similarity
 
     a = "What signals predict goal misgeneralization before deployment harm?"
     b = "What signals predict goal-misgeneralization before deployment-scale harm?"
@@ -282,7 +282,7 @@ def test_embedding_backend_falls_back_without_extra():
             ),
             curiosity_score=score,
             confidence=0.5,
-            gap=__import__("artificial_curiosity.models", fromlist=["GapEvidence"]).GapEvidence(
+            gap=__import__("artificial_emotions.models", fromlist=["GapEvidence"]).GapEvidence(
                 status=GapStatus.UNANSWERED,
                 confidence=0.5,
             ),
@@ -317,7 +317,7 @@ def test_literature_workers_parallel_verify():
     import threading
     import time
 
-    from artificial_curiosity.models import LiteratureHit
+    from artificial_emotions.models import LiteratureHit
 
     lock = threading.Lock()
     in_flight = 0

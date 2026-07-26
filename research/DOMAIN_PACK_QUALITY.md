@@ -11,7 +11,7 @@
 
 From CONTRIBUTING: operationalization + why_it_matters; not textbook-solved; dual-use awareness; checklist before PR.
 
-Packs now live under `src/artificial_curiosity/packs/` (aging_biology, materials_catalysis, affective_science, …).
+Packs now live under `src/artificial_emotions/packs/` (aging_biology, materials_catalysis, affective_science, …).
 
 ---
 
@@ -56,4 +56,4 @@ Packs now live under `src/artificial_curiosity/packs/` (aging_biology, materials
 
 - CONTRIBUTING.md seed section  
 - [`FAILURE_MODES.md`](FAILURE_MODES.md) F4/F6/F9/F10  
-- Packs: `src/artificial_curiosity/packs/`  
+- Packs: `src/artificial_emotions/packs/`  

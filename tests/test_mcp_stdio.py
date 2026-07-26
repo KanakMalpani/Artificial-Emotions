@@ -12,8 +12,8 @@ import json
 
 import pytest
 
-from artificial_curiosity import __version__
-from artificial_curiosity.mcp_server import (
+from artificial_emotions import __version__
+from artificial_emotions.mcp_server import (
     INTERNAL_ERROR,
     INVALID_PARAMS,
     INVALID_REQUEST,
@@ -166,7 +166,7 @@ def test_process_line_ignores_whitespace_only_input():
 
 
 def test_process_line_converts_an_unexpected_crash_into_an_rpc_error(monkeypatch):
-    import artificial_curiosity.mcp_server as srv
+    import artificial_emotions.mcp_server as srv
 
     def boom(_msg):
         raise RuntimeError("kaboom")
@@ -215,7 +215,7 @@ def test_cli_list_resources_emits_parseable_json(capsys):
 
 def test_cli_with_no_args_runs_the_stdio_loop(monkeypatch):
     called: list[bool] = []
-    import artificial_curiosity.mcp_server as srv
+    import artificial_emotions.mcp_server as srv
 
     monkeypatch.setattr(srv, "run_stdio", lambda: called.append(True))
     assert srv.main([]) == 0

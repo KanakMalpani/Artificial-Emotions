@@ -2,7 +2,7 @@
 
 **Status:** Deep research spike for ROADMAP §7.6 near-wedge *Epistemic emotion elicitation*.  
 **Honesty bar:** Cues and inject framing are **investigation annotations**, not OCC/PAD engines and not claims that users or models “feel” EES emotions.  
-**Related:** [`AI_EMOTIONS.md`](AI_EMOTIONS.md) §11–13, [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) §3.5, `src/artificial_curiosity/epistemic_cues.py`, `provoke.py`.
+**Related:** [`AI_EMOTIONS.md`](AI_EMOTIONS.md) §11–13, [`EMOTION_ACCESS.md`](EMOTION_ACCESS.md) §3.5, `src/artificial_emotions/epistemic_cues.py`, `provoke.py`.
 
 *Generated: 2026-07-25 | Sources: Academia (S2 + arXiv) + Exa | Confidence: High on psych mechanisms; Medium on agent transfer; Low on calibrated EES→product conversion.*
 
@@ -10,7 +10,7 @@
 
 ## 1. Executive summary
 
-Psychology measures epistemic emotions with **discrete scales (EES)** and **incongruity / high-confidence-error paradigms**. Those paradigms map cleanly onto what Artificial Curiosity already ships: gap status + surprise/answerability axes + optional cue tags + provoke inject instructions. The productive product path is **not** embedding an EES API; it is **eval design**: A/B incongruity-framed injects → investigation quality (specificity, falsifiers), with optional short EES items only in human studies. Medium information gaps + sense of control beat “too wide / hopeless” gaps (Loewenstein; Pekrun control-value). Confusion is a **risk tag**, not a goal state. Profile `cue_*` knobs already exist — see [`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md) and `examples/cue_threshold_presets.json`.
+Psychology measures epistemic emotions with **discrete scales (EES)** and **incongruity / high-confidence-error paradigms**. Those paradigms map cleanly onto what Artificial Emotions already ships: gap status + surprise/answerability axes + optional cue tags + provoke inject instructions. The productive product path is **not** embedding an EES API; it is **eval design**: A/B incongruity-framed injects → investigation quality (specificity, falsifiers), with optional short EES items only in human studies. Medium information gaps + sense of control beat “too wide / hopeless” gaps (Loewenstein; Pekrun control-value). Confusion is a **risk tag**, not a goal state. Profile `cue_*` knobs already exist — see [`CUE_THRESHOLD_KNOBS.md`](CUE_THRESHOLD_KNOBS.md) and `examples/cue_threshold_presets.json`.
 
 ---
 

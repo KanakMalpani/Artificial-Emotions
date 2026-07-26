@@ -1,6 +1,6 @@
 # Annotated Sources
 
-All research for Artificial Curiosity lives in this repo under `research/`.
+All research for Artificial Emotions lives in this repo under `research/`.
 Primary synthesis: `RESEARCH.md`. Design basis: `FIRST_PRINCIPLES.md`. Product docs: `docs/`.
 
 ## Academic / preprint

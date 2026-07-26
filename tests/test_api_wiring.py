@@ -12,8 +12,8 @@ import pkgutil
 import pytest
 from fastapi.testclient import TestClient
 
-from artificial_curiosity.api import app, create_app
-from artificial_curiosity.api_pkg import routers as routers_pkg
+from artificial_emotions.api import app, create_app
+from artificial_emotions.api_pkg import routers as routers_pkg
 
 # Every path the API serves. Adding one here is deliberate; losing one is a bug.
 EXPECTED_PATHS = {
@@ -23,6 +23,7 @@ EXPECTED_PATHS = {
     "/v1/agent",
     "/v1/agent/tools",
     "/v1/briefs/critique",
+    "/v1/curiosity/decompose",
     "/v1/curiosity/provoke",
     "/v1/curiosity/run",
     "/v1/domains",
@@ -63,7 +64,7 @@ def test_every_router_module_is_included_in_the_app():
     assert discovered, "no router modules found"
 
     for name in discovered:
-        module = __import__(f"artificial_curiosity.api_pkg.routers.{name}", fromlist=["router"])
+        module = __import__(f"artificial_emotions.api_pkg.routers.{name}", fromlist=["router"])
         paths = {r.path for r in module.router.routes}
         assert paths, f"router {name} declares no routes"
         missing = paths - served
@@ -103,8 +104,8 @@ def test_create_app_builds_an_equivalent_independent_app():
     ],
 )
 def test_public_names_stay_importable_from_the_api_module(name: str):
-    """`artificial_curiosity.api` is the documented import path — keep it stable."""
-    import artificial_curiosity.api as api_mod
+    """`artificial_emotions.api` is the documented import path — keep it stable."""
+    import artificial_emotions.api as api_mod
 
     assert hasattr(api_mod, name)
 

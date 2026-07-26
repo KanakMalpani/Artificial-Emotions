@@ -16,13 +16,13 @@ import sys
 
 import pytest
 
-from artificial_curiosity.models import CuriosityConfig
-from artificial_curiosity.pipeline import CuriosityEngine
-from artificial_curiosity.scoring import dedupe_flags
+from artificial_emotions.models import CuriosityConfig
+from artificial_emotions.pipeline import CuriosityEngine
+from artificial_emotions.scoring import dedupe_flags
 
 _SPARK = """
 import contextlib, io, json
-from artificial_curiosity.cli import main
+from artificial_emotions.cli import main
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
     main(["spark", "--domain", "ai", "--n", "3", "--json"])

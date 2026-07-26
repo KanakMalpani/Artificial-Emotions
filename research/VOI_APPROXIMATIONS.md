@@ -9,7 +9,7 @@
 
 ## 1. Executive summary
 
-ISPOR VOI Task Force and ConVOI make clear: **EVPI / EVPPI / EVSI / ENBS** prioritize research when you already have a health-economic decision model and PSA draws. Modern approximations (moment matching, Gaussian approximation, nonparametric regression, TGA for nonlinear models) make EVSI tractable in minutes–hours instead of weeks — **inside that paradigm**. Artificial Curiosity ranks open scientific unknowns **without** a shared net-benefit function. The honest bridge is: (a) keep multi-axis proxies + ValueProfile; (b) optionally offer a **structured VOI template** for domains that *do* have decision models (clinical/policy packs); (c) never claim general EVSI for arbitrary AI/climate questions.
+ISPOR VOI Task Force and ConVOI make clear: **EVPI / EVPPI / EVSI / ENBS** prioritize research when you already have a health-economic decision model and PSA draws. Modern approximations (moment matching, Gaussian approximation, nonparametric regression, TGA for nonlinear models) make EVSI tractable in minutes–hours instead of weeks — **inside that paradigm**. Artificial Emotions ranks open scientific unknowns **without** a shared net-benefit function. The honest bridge is: (a) keep multi-axis proxies + ValueProfile; (b) optionally offer a **structured VOI template** for domains that *do* have decision models (clinical/policy packs); (c) never claim general EVSI for arbitrary AI/climate questions.
 
 ---
 

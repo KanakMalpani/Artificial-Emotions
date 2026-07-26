@@ -37,7 +37,7 @@ still **not** a single product accuracy claim.
 ```bash
 curiosity eval
 # or
-python -c "from artificial_curiosity.evals import run_spotcheck; print(run_spotcheck().to_dict())"
+python -c "from artificial_emotions.evals import run_spotcheck; print(run_spotcheck().to_dict())"
 pytest tests/test_mid_horizon.py::test_w10_spotcheck_harness_offline -q
 ```
 

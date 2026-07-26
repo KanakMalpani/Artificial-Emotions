@@ -1,4 +1,4 @@
-# Artificial Curiosity — Roadmap Summary
+# Artificial Emotions — Roadmap Summary
 
 **Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `0.4.0`
 

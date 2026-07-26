@@ -1,6 +1,6 @@
 # Design rationale — optional
 
-Long-form research that **informed** the product. You do not need these files to install or run Artificial Curiosity.
+Long-form research that **informed** the product. You do not need these files to install or run Artificial Emotions.
 
 **Product entry:** [`../README.md`](../README.md)  
 **Product docs:** [`../docs/`](../docs/) (plugins, limits, architecture, proofs)

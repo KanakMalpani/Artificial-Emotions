@@ -64,7 +64,7 @@ def browser_page():
 
 def test_web_brand_and_framing_honesty(browser_page) -> None:
     page = browser_page
-    assert page.get_by_text("Artificial Curiosity").count() >= 1
+    assert page.get_by_text("Artificial Emotions").count() >= 1
     footer = page.locator(".footer-note")
     assert footer.count() >= 1
     text = footer.inner_text().lower()

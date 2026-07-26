@@ -13,12 +13,12 @@ from pathlib import Path
 
 import pytest
 
-from artificial_curiosity import resources
-from artificial_curiosity.bayesian import default_surprise_worksheet_path
-from artificial_curiosity.compare import default_constitution_path
-from artificial_curiosity.elicit_eval import default_protocol_path
-from artificial_curiosity.evals import default_fixtures_dir
-from artificial_curiosity.voi import default_voi_template_path
+from artificial_emotions import resources
+from artificial_emotions.bayesian import default_surprise_worksheet_path
+from artificial_emotions.compare import default_constitution_path
+from artificial_emotions.elicit_eval import default_protocol_path
+from artificial_emotions.evals import default_fixtures_dir
+from artificial_emotions.voi import default_voi_template_path
 
 _PYPROJECT = Path(__file__).resolve().parents[1] / "pyproject.toml"
 
@@ -59,9 +59,9 @@ def test_required_data_file_is_shipped_in_wheel(relative: str):
 
 
 def test_force_include_targets_land_inside_the_package():
-    """Targets must sit under artificial_curiosity/data/ so the resolver finds them."""
+    """Targets must sit under artificial_emotions/data/ so the resolver finds them."""
     for source, target in _force_include().items():
-        assert target.startswith("artificial_curiosity/data/"), (
+        assert target.startswith("artificial_emotions/data/"), (
             f"force-include {source} → {target} lands outside the package data dir"
         )
         assert Path(_PYPROJECT.parent / source).exists(), f"force-include source missing: {source}"

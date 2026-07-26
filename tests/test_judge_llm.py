@@ -11,8 +11,8 @@ from typing import Any
 
 import pytest
 
-import artificial_curiosity.judge as judge_mod
-from artificial_curiosity.judge import (
+import artificial_emotions.judge as judge_mod
+from artificial_emotions.judge import (
     ScoreAxes,
     _ensemble_models,
     _parse_axes,
@@ -22,7 +22,7 @@ from artificial_curiosity.judge import (
     llm_score_ensemble,
     mean_axes,
 )
-from artificial_curiosity.models import (
+from artificial_emotions.models import (
     CuriosityConfig,
     GapEvidence,
     GapStatus,

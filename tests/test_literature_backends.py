@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 
-from artificial_curiosity.literature import (
+from artificial_emotions.literature import (
     CachedLiteratureClient,
     MergedLiteratureClient,
     SemanticScholarClient,
@@ -55,7 +55,7 @@ class _FakeResponse:
 
 
 def _install_urlopen(monkeypatch, handler):
-    import artificial_curiosity.literature as lit
+    import artificial_emotions.literature as lit
 
     monkeypatch.setattr(lit.urllib.request, "urlopen", handler)
 
@@ -185,8 +185,8 @@ def test_factory_wraps_in_a_cache_when_a_directory_is_given(tmp_path):
 
 
 def test_factory_tags_openalex_hits_with_their_source(monkeypatch):
-    import artificial_curiosity.literature as lit
-    from artificial_curiosity.models import LiteratureHit
+    import artificial_emotions.literature as lit
+    from artificial_emotions.models import LiteratureHit
 
     class FakeOpenAlex:
         def __init__(self, *a, **k):

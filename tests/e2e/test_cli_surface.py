@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from artificial_curiosity.cli import build_parser, main
+from artificial_emotions.cli import build_parser, main
 
 pytestmark = pytest.mark.e2e
 
@@ -152,6 +152,23 @@ def test_eval_defaults_to_spotcheck(capsys):
 def test_emotions_and_epistemic_are_the_same_surface(capsys, alias: str):
     cues = _json_out(capsys, [alias, "cues", "--json"])
     assert cues
+
+
+@pytest.mark.parametrize("shortcut", ["cues", "catalog", "elicit", "pack"])
+def test_affect_subcommands_work_at_the_top_level(capsys, shortcut: str):
+    """`emotions emotions mix` reads badly — the shortcut forms must work."""
+    assert _json_out(capsys, [shortcut, "--json"])
+
+
+def test_top_level_mix_matches_the_grouped_form(capsys):
+    short = _json_out(capsys, ["mix", "curiosity=60", "awe=40", "--json"])
+    grouped = _json_out(capsys, ["emotions", "mix", "curiosity=60", "awe=40", "--json"])
+    assert short["percents"] == grouped["percents"]
+    assert short["primary"] == grouped["primary"]
+
+
+def test_top_level_annotate_reaches_the_same_handler(capsys):
+    assert _json_out(capsys, ["annotate", "Which mechanism explains X?", "--json"])
 
 
 def test_emotions_catalog_family_filter(capsys):

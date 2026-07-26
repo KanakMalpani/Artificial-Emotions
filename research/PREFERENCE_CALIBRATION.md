@@ -9,7 +9,7 @@
 
 ## 1. Executive summary
 
-The product already logs `PreferenceEvent` JSONL and can suggest **tiny weight deltas** from prefer/reject events with score axes (`preferences.py`). Literature says: (1) expert rankings diverge from text-similarity (Lingeman & Yu); (2) Bradley–Terry / Plackett–Luce are the right *objects* for pairwise ranks, with modern fixes for multi-judge reliability (BT-σ) and nonparametric ranking (DMLRank); (3) online preference learning can **collapse feature diversity** unless preferences are preserved (PFP). For Artificial Curiosity, ship **profile-scoped** learning only; collect pairwise `preferred_over_ids`; delay full BT fitting until n is non-trivial; never overwrite ValueProfile without showing deltas.
+The product already logs `PreferenceEvent` JSONL and can suggest **tiny weight deltas** from prefer/reject events with score axes (`preferences.py`). Literature says: (1) expert rankings diverge from text-similarity (Lingeman & Yu); (2) Bradley–Terry / Plackett–Luce are the right *objects* for pairwise ranks, with modern fixes for multi-judge reliability (BT-σ) and nonparametric ranking (DMLRank); (3) online preference learning can **collapse feature diversity** unless preferences are preserved (PFP). For Artificial Emotions, ship **profile-scoped** learning only; collect pairwise `preferred_over_ids`; delay full BT fitting until n is non-trivial; never overwrite ValueProfile without showing deltas.
 
 ---
 

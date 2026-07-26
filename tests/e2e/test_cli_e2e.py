@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from artificial_curiosity.cli import main
+from artificial_emotions.cli import main
 
 pytestmark = pytest.mark.e2e
 

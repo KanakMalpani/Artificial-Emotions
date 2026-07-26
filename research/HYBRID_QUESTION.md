@@ -21,7 +21,7 @@ Validation framing: identify Top-10 breakthroughs of 2025 and Top-10 questions f
 
 ---
 
-## 2. Implications for Artificial Curiosity
+## 2. Implications for Artificial Emotions
 
 | HybridQuestion idea | Our analog | Gap / borrow |
 |---------------------|------------|--------------|

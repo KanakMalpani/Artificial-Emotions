@@ -1,6 +1,6 @@
 # Emotions / computational affect + mixable catalog
 
-**Short version:** Artificial Curiosity exposes a **named emotion catalog** and **percentage mixes** that drive a **felt_simulation** — PAD mood, intensity, and first-person computational affect — as close to “feeling” as a CME-style blend allows. It is **not** biological consciousness or biometric emotion recognition.
+**Short version:** Artificial Emotions exposes a **named emotion catalog** and **percentage mixes** that drive a **felt_simulation** — PAD mood, intensity, and first-person computational affect — as close to “feeling” as a CME-style blend allows. It is **not** biological consciousness or biometric emotion recognition.
 
 Background (optional): [`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md), [`research/EMOTION_MIXING.md`](../research/EMOTION_MIXING.md).
 
@@ -20,10 +20,10 @@ Honesty: `computational_affect` — simulated state for investigation framing.
 
 ```bash
 # MCP (Cursor / Claude Desktop) — see docs/PLUGINS.md
-curiosity-mcp --list-tools   # expect emotion_catalog, mix_emotions, …
+emotions-mcp --list-tools   # expect emotion_catalog, mix_emotions, …
 
 # HTTP
-curiosity serve
+emotions serve
 curl -s http://127.0.0.1:8000/v1/emotions/catalog
 curl -s -X POST http://127.0.0.1:8000/v1/emotions/mix \
   -H "Content-Type: application/json" \
@@ -35,7 +35,7 @@ curl -s "http://127.0.0.1:8000/v1/curiosity/provoke?domain=ai&n=3&fast=true"
 ```
 
 ```python
-from artificial_curiosity import emotion_catalog, mix_emotions, provoke
+from artificial_emotions import emotion_catalog, mix_emotions, provoke
 
 print(emotion_catalog()["ids"][:5])
 print(mix_emotions(curiosity=40, confusion=30, awe=30)["inject_fragment"])
@@ -47,12 +47,12 @@ Examples: [`emotions_mix_request.json`](../examples/emotions_mix_request.json), 
 ## Individual emotions
 
 ```bash
-curiosity emotions catalog
-curiosity emotions catalog --family epistemic --json
+emotions catalog
+emotions catalog --family epistemic --json
 ```
 
 ```python
-from artificial_curiosity import emotion_catalog
+from artificial_emotions import emotion_catalog
 print(emotion_catalog()["ids"])
 print(emotion_catalog(family="epistemic")["count"])
 ```
@@ -72,11 +72,11 @@ By default, the mix is configured to be **as close to feeling as possible** (`si
 
 ```bash
 # Mix emotions via CLI with simulate_feeling disabled
-curiosity emotions mix curiosity=40 confusion=30 awe=30 --simulate-feeling false --json
+emotions mix curiosity=40 confusion=30 awe=30 --simulate-feeling false --json
 ```
 
 ```python
-from artificial_curiosity import mix_emotions, feel
+from artificial_emotions import mix_emotions, feel
 
 # Mix emotions with full felt simulation (as close to feeling as possible)
 blend = mix_emotions({"curiosity": 40, "confusion": 30, "awe": 30}, simulate_feeling=True)
@@ -113,17 +113,17 @@ Optional `plutchik_dyad_hint` appears only for exact two-component primary dyads
 ### 1. CLI
 
 ```bash
-curiosity emotions cues
-curiosity emotions annotate "What remains unknown about epistemic emotion elicitation?" --surprise 0.7 --gap unanswered
-curiosity emotions elicit
-curiosity emotions pack --json
-# alias: curiosity epistemic …
+emotions cues
+emotions annotate "What remains unknown about epistemic emotion elicitation?" --surprise 0.7 --gap unanswered
+emotions elicit
+emotions pack --json
+# alias: emotions epistemic …
 ```
 
 ### 2. HTTP
 
 ```bash
-curiosity serve
+emotions serve
 # then:
 curl -s http://127.0.0.1:8000/v1/emotions/cues
 curl -s -X POST http://127.0.0.1:8000/v1/emotions/annotate \
@@ -138,8 +138,8 @@ curl -s "http://127.0.0.1:8000/v1/emotions/pack?name=affective_science"
 ### 3. Python / MCP
 
 ```python
-from artificial_curiosity import list_epistemic_cues, annotate_epistemic, emotion_pack
-# or: from artificial_curiosity.emotions import …
+from artificial_emotions import list_epistemic_cues, annotate_epistemic, emotion_pack
+# or: from artificial_emotions.emotions import …
 
 print(list_epistemic_cues()["tags"])
 print(annotate_epistemic(
@@ -154,7 +154,7 @@ MCP tools: `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_e
 
 ## Relation to provoke
 
-`curiosity spark` / `GET /v1/curiosity/provoke` already attach `epistemic_cues` on each unknown and include anti-anthropomorphism framing in `inject`. The `/v1/emotions/*` surface makes the same vocabulary usable **without** running a full spark — e.g. annotate a draft question, pull the catalog, or author a percentage mix for inject context.
+`emotions spark` / `GET /v1/curiosity/provoke` already attach `epistemic_cues` on each unknown and include anti-anthropomorphism framing in `inject`. The `/v1/emotions/*` surface makes the same vocabulary usable **without** running a full spark — e.g. annotate a draft question, pull the catalog, or author a percentage mix for inject context.
 
 ## Anti-anthropomorphism
 

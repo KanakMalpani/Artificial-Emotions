@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from artificial_curiosity.models import (
+from artificial_emotions.models import (
     CuriosityConfig,
     GapStatus,
     UnansweredQuestion,
     resolve_value_profile,
 )
-from artificial_curiosity.pipeline import CuriosityEngine
-from artificial_curiosity.preferences import (
+from artificial_emotions.pipeline import CuriosityEngine
+from artificial_emotions.preferences import (
     PreferenceEvent,
     append_preference_event,
     load_preference_events,
@@ -55,8 +55,8 @@ def test_w13_preference_jsonl_roundtrip(tmp_path: Path):
 
 
 def test_preference_rerank_hook(tmp_path: Path):
-    from artificial_curiosity.models import GapEvidence, RankedQuestion, ScoreAxes
-    from artificial_curiosity.preferences import apply_preference_rerank
+    from artificial_emotions.models import GapEvidence, RankedQuestion, ScoreAxes
+    from artificial_emotions.preferences import apply_preference_rerank
 
     path = tmp_path / "labeled.jsonl"
     append_preference_event(
@@ -136,7 +136,7 @@ def test_preference_rerank_hook(tmp_path: Path):
 
 
 def test_preference_weight_hints(tmp_path: Path):
-    from artificial_curiosity.preferences import (
+    from artificial_emotions.preferences import (
         apply_weight_hints_to_profile,
         learn_profile_weight_hints,
     )
@@ -198,7 +198,7 @@ def test_preference_weight_hints(tmp_path: Path):
 def test_preference_hints_api_inline():
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
+    from artificial_emotions.api import app
 
     client = TestClient(app)
     res = client.post(
@@ -241,9 +241,9 @@ def test_preference_hints_api_inline():
 def test_preference_summarize_and_compare_profiles(tmp_path: Path):
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
-    from artificial_curiosity.compare import compare_profiles
-    from artificial_curiosity.preferences import summarize_preferences
+    from artificial_emotions.api import app
+    from artificial_emotions.compare import compare_profiles
+    from artificial_emotions.preferences import summarize_preferences
 
     path = tmp_path / "prefs.jsonl"
     append_preference_event(
@@ -334,7 +334,7 @@ def test_preference_summarize_and_compare_profiles(tmp_path: Path):
 
 
 def test_preference_outcome_summarize_counts():
-    from artificial_curiosity.preferences import summarize_preferences
+    from artificial_emotions.preferences import summarize_preferences
 
     summary = summarize_preferences(
         [
@@ -371,8 +371,8 @@ def test_preference_outcome_summarize_counts():
 def test_suggest_next_pair_and_bt_gate():
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
-    from artificial_curiosity.preferences import (
+    from artificial_emotions.api import app
+    from artificial_emotions.preferences import (
         PreferenceEvent,
         fit_bt_offline,
         suggest_next_pair,
@@ -427,8 +427,8 @@ def test_suggest_next_pair_and_bt_gate():
 def test_cross_model_vote_offline():
     from fastapi.testclient import TestClient
 
-    from artificial_curiosity.api import app
-    from artificial_curiosity.hybrid_vote import cross_model_vote
+    from artificial_emotions.api import app
+    from artificial_emotions.hybrid_vote import cross_model_vote
 
     out = cross_model_vote(
         [

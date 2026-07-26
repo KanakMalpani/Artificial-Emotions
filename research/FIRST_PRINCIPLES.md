@@ -1,4 +1,4 @@
-# First Principles: Artificial Curiosity
+# First Principles: Artificial Emotions
 
 ## The Claim
 

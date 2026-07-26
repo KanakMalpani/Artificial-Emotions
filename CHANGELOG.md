@@ -1,5 +1,55 @@
 # Changelog
 
+## Unreleased — Artificial Emotions
+
+### Renamed
+- Project, distribution, and import path are now **Artificial Emotions** /
+  `artificial-emotions` / `artificial_emotions`. MCP server id, agent manifest,
+  docs, CI, and the FastAPI title follow. Console scripts are `emotions` and
+  `emotions-mcp`; the pre-rename `curiosity` / `curiosity-mcp` names remain as
+  aliases so existing MCP host configs keep working.
+- Deliberately **not** renamed: HTTP route namespaces (`/v1/curiosity/*`),
+  `CuriosityEngine`, `CuriosityConfig`, and `curiosity_score`. Those name the
+  mechanism, not the product, and renaming them would break the pinned API
+  contract for no gain.
+
+### Added — computational affect, expanded
+- Emotion catalog **25 → 54** entries across **six** families: `epistemic` (22),
+  `basic` (7), `social` (8), `achievement` (8), and two new ones — `aesthetic`
+  (elegance, sublimity, dissonance, parsimony) and `volitional` (determination,
+  impatience, reluctance, urgency, persistence).
+- `humility` and `hubris` are both catalogued on purpose: the discipline this
+  project is built around and the failure mode it exists to flag each need
+  vocabulary.
+- **Mixing past 2-component dyads.** `blend_triad_hint` names 3-component
+  blends (`disciplined_inquiry`, `premature_eureka`, `overclaim_risk_state`, …),
+  matching exactly at three components and on the top three by weight above
+  that. The existing `plutchik_dyad_hint` contract is unchanged.
+- **`ambivalence`** detects opposing entries held at once, scored as mass ×
+  balance across 13 opposition axes. A mix carrying `conviction` beside live
+  `doubt` now reads as a different stance, and `felt_simulation` says so —
+  "I am pulled two ways … name the observation that would settle it" — instead
+  of averaging the tension away. Sustained ambivalence is reported as an honest
+  state, not an error.
+- Four new cue tags registered in the stable vocabulary: `overclaim_risk`,
+  `insight_candidate`, `scope_creep_risk`, `dead_end_risk`.
+
+### Added — curiosity depth
+- **`artificial_emotions.decompose`** takes one ranked unknown a step further
+  toward a solution without becoming an answer engine. It expands a question
+  into measurement / baseline / mechanism / confound / boundary sub-questions
+  (recursively, to depth 3), names the single observation worth making first,
+  derives falsifiers from the stated operationalization (`AUROC >= 0.7` →
+  *refuted if AUROC < 0.7*), and emits stop rules — including a review gate when
+  the risk axis is elevated.
+- The invariant is enforced rather than intended: `assert_free` scans the whole
+  payload for assertion language and the result ships as `assertion_free`. Every
+  decomposition ends by stating that the original gap is **not** thereby closed.
+- Exposed on all four surfaces: `emotions decompose`, `POST
+  /v1/curiosity/decompose`, MCP/OpenAI tool `decompose_question` (tier
+  `investigate`), and the Python API. Fully offline and deterministic.
+- 60 new tests; coverage 87% → 88% across 415 tests.
+
 ## Unreleased
 
 ### Fixed
@@ -8,7 +58,7 @@
   `voi-worksheet` / `surprise-worksheet` commands resolved data via
   `Path(__file__).parents[2]`, a path that only exists in a source checkout —
   every `pip install` hit `FileNotFoundError`. Data files are now force-included
-  into the wheel and resolved by `artificial_curiosity.resources`, which prefers
+  into the wheel and resolved by `artificial_emotions.resources`, which prefers
   the packaged copy and falls back to the checkout.
 - `classify_value_error` returned `unknown_emotion` for "unknown emotion pack"
   messages, because the general check ran before the specific one. Pack errors
@@ -40,7 +90,7 @@
   exercise its data files and console scripts before upload.
 
 ### Added
-- `artificial_curiosity.resources` — package-first data file resolution.
+- `artificial_emotions.resources` — package-first data file resolution.
 - Test coverage for surfaces that had none: the MCP stdio read loop and
   `curiosity-mcp` argv handling, the full CLI subcommand surface, the
   OpenAI-compatible client (credential precedence, tolerant JSON extraction,
@@ -52,8 +102,8 @@
 ### Internal
 - `api.py` (1141 lines) split into `api_pkg/`: app assembly, `security.py`,
   `error_handlers.py`, `schemas.py`, and six routers grouped by URL prefix.
-  `artificial_curiosity.api:app` and every previously importable name still
-  resolve from `artificial_curiosity.api` — the generated OpenAPI (32 paths,
+  `artificial_emotions.api:app` and every previously importable name still
+  resolve from `artificial_emotions.api` — the generated OpenAPI (32 paths,
   18 component schemas) and the middleware order are byte-identical to before.
   Added `tests/test_api_wiring.py` to pin the served path set, the
   auth-wraps-CORS ordering, and that no router module can be left un-included.
@@ -83,7 +133,7 @@ Production-ready hardening of the public surface (emotions + API + plugins).
 - Honesty: not on PyPI; emotions annotation_only; scores ≠ oracles
 
 ### Added
-- Central `artificial_curiosity.config` (env knobs: LLM_*, CURIOSITY_API_KEY, timeouts, CORS)
+- Central `artificial_emotions.config` (env knobs: LLM_*, CURIOSITY_API_KEY, timeouts, CORS)
 - Structured errors (`CuriosityError` + stable codes) and HTTP exception handlers
 - `GET /ready` readiness checks; richer `/health` (version, timeouts, auth/cors summary)
 - CI workflow (`.github/workflows/ci.yml`): ruff + pytest on PR/push (separate from publish)

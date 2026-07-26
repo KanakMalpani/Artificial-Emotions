@@ -16,7 +16,7 @@
   },
   "external_compute": {
     "recommended": "ConVOI / ISPOR VOI tooling on PSA draws",
-    "do_not": "Treat Artificial Curiosity score axes as EVSI or ENBS"
+    "do_not": "Treat Artificial Emotions score axes as EVSI or ENBS"
   },
   "link_to_ranked_question": {
     "question_id": null,

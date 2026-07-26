@@ -13,7 +13,7 @@
 - Nested hypotheses explored with **MCTS + progressive widening**; surprisal as reward.
 - Eval: 21 real datasets; 5–29% more LLM-judged “surprising” discoveries under fixed budget; ~2/3 surprising to domain experts in human eval.
 
-## 2. Mapping to Artificial Curiosity
+## 2. Mapping to Artificial Emotions
 
 | AutoDiscovery | This repo | Gap |
 |---------------|-----------|-----|
