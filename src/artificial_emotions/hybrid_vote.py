@@ -77,5 +77,5 @@ def cross_model_vote(
             "reproduction, not VOI, and never silently re-ranks. Agreement ≠ truth. "
             "See research/HYBRID_VOTE_OFFLINE.md."
         ),
-        "docs": "research/HYBRID_VOTE_OFFLINE.md",
+        "docs": "docs/PROOFS.md",
     }

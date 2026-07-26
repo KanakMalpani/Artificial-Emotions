@@ -5,7 +5,7 @@ drive a **PAD mood + intensity + first-person simulation** — as close as
 this stack gets to “feeling” without claiming biological/phenomenal
 consciousness. Honesty: ``computational_affect`` (simulated state, not a mind).
 
-See docs/EMOTIONS.md, research/AI_EMOTIONS.md, research/EMOTION_MIXING.md.
+See docs/EMOTIONS.md.
 """
 
 from __future__ import annotations
@@ -304,7 +304,7 @@ def emotion_pack(name: str = "affective_science") -> dict[str, Any]:
             "the system feels emotions. " + EPISTEMIC_CUE_DISCLAIMER
         ),
         "docs": "docs/EMOTIONS.md",
-        "research": "research/AI_EMOTIONS.md",
+        "research": "docs/EMOTIONS.md",
     }
 
 
@@ -348,7 +348,7 @@ def emotion_catalog(
         "honesty": _AFFECT_HONESTY,
         "disclaimer": raw.get("disclaimer") or _MIX_DISCLAIMER,
         "docs": "docs/EMOTIONS.md",
-        "research": "research/EMOTION_MIXING.md",
+        "research": "docs/EMOTIONS.md",
         "note": (
             "Use individually or mix with mix_emotions / feel() / POST /v1/emotions/mix. "
             "Mixes produce felt_simulation (PAD + intensity + inner monologue) — "
@@ -639,7 +639,7 @@ def mix_emotions(
         "honesty": _AFFECT_HONESTY,
         "disclaimer": _MIX_DISCLAIMER,
         "docs": "docs/EMOTIONS.md",
-        "research": "research/EMOTION_MIXING.md",
+        "research": "docs/EMOTIONS.md",
         "claims_not": [
             "biological / phenomenal consciousness",
             "measured human affect / clinical EES",

@@ -435,7 +435,6 @@ CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** —
 | [**docs/PLUGINS.md**](docs/PLUGINS.md) | Host-by-host MCP setup |
 | [**docs/PROOFS.md**](docs/PROOFS.md) | Reproducible behaviour demos |
 | [**examples/**](examples/README.md) | Payloads, protocols, tool schemas |
-| [**research/**](research/) | 70+ short specs — the thinking behind the code |
 
 ---
 

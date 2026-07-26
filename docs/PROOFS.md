@@ -26,7 +26,7 @@ emotions run --domain ai --no-literature --n 5 --json
 
 ```bash
 pytest tests/test_failure_modes.py -q
-# Covers F1–F15 adversarial checks from research/FAILURE_MODES.md
+# Covers F1–F15 adversarial checks (see tests/test_failure_modes.py)
 # Includes expanded F7 phrase-gaming + F13 paraphrase cluster tests
 ```
 
@@ -253,4 +253,4 @@ pytest -q
 # CI-safe (exclude optional lit): pytest -m "not slow" -q
 ```
 
-Design rationale: [`research/`](../research/). Short invariants: [`DESIGN.md`](DESIGN.md). Examples index: [`../examples/README.md`](../examples/README.md).
+Product bounds: [`LIMITS.md`](LIMITS.md). Short invariants: [`DESIGN.md`](DESIGN.md). Examples index: [`../examples/README.md`](../examples/README.md).

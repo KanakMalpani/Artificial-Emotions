@@ -2,7 +2,7 @@
 
 **Short version:** Artificial Emotions exposes a **named emotion catalog** and **percentage mixes** that drive a **felt_simulation** — PAD mood, intensity, and first-person computational affect — as close to “feeling” as a CME-style blend allows. It is **not** biological consciousness or biometric emotion recognition.
 
-Background (optional): [`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md), [`research/EMOTION_MIXING.md`](../research/EMOTION_MIXING.md).
+Product how-to for this surface. Honesty bar: mixes are computational affect, not felt emotion.
 
 ## What you get
 
@@ -166,4 +166,4 @@ Do **not** market mixes or tags as “the AI is 40% curious / confused / in awe.
 
 Mix responses include `claims_not` listing what the payload is **not** (phenomenal feeling, EES scores, OCC intensity, clinical PAD mood).
 
-See also [`LIMITS.md`](LIMITS.md) and [`research/EMOTION_MIXING.md`](../research/EMOTION_MIXING.md).
+See also [`LIMITS.md`](LIMITS.md).

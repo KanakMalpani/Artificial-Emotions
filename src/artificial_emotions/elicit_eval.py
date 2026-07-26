@@ -252,5 +252,5 @@ def run_elicit_ab(
             "raises breakthrough rates."
         ),
         "docs": "examples/elicit_ab_protocol.json",
-        "research": "research/EPISTEMIC_ELICITATION.md",
+        "research": "docs/EMOTIONS.md",
     }

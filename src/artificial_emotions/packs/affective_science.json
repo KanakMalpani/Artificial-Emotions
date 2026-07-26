@@ -3,7 +3,7 @@
   "name": "affective_science_pack",
   "version": "0.2.0",
   "domain": "ai",
-  "description": "Affective science / AI affect unknowns (operationalization bar). Not an emotion engine — ranking seeds only. See research/AI_EMOTIONS.md.",
+  "description": "Affective science / AI affect unknowns (operationalization bar). Not an emotion engine — ranking seeds only. See docs/EMOTIONS.md.",
   "questions": [
     {
       "id": "affect-pack-01",

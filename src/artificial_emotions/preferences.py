@@ -512,7 +512,7 @@ def summarize_preferences(
             "not a performance certificate when outcome n is small, "
             "and not a universal science priority. " + _HINT_HONESTY
         ),
-        "docs": "research/PREFERENCE_CALIBRATION.md",
+        "docs": "docs/LIMITS.md",
     }
 
 
@@ -598,7 +598,7 @@ def suggest_next_pair(
             "not BT MLE, and never auto-overwrites ValueProfile weights. "
             "See research/PREFERENCE_BT_STAGE2.md."
         ),
-        "docs": "research/PREFERENCE_BT_STAGE2.md",
+        "docs": "docs/LIMITS.md",
     }
 
 
@@ -636,5 +636,5 @@ def fit_bt_offline(
             "BT fit is eval-only and gated on pair volume. This call does not "
             "auto-overwrite ValueProfile weights. Prefer axis weight hints until ready."
         ),
-        "docs": "research/PREFERENCE_BT_STAGE2.md",
+        "docs": "docs/LIMITS.md",
     }

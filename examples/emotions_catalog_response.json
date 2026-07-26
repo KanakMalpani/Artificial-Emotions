@@ -19,6 +19,6 @@
   "honesty": "annotation_only",
   "disclaimer": "Named emotions and mixes are UX / investigation-framing annotations. This software does not feel emotions; PAD anchors are illustrative, not measured affect.",
   "docs": "docs/EMOTIONS.md",
-  "research": "research/EMOTION_MIXING.md",
+  "research": "docs/EMOTIONS.md",
   "note": "Use individually or mix with mix_emotions / POST /v1/emotions/mix. Percentages are framing weights — this software does not feel."
 }

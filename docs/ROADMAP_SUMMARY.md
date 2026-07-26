@@ -30,7 +30,7 @@ P2 W10–W15 and core WO-0.4 hardening are ✅. Full queue: roadmap **§2**.
 | Session definition of done | ROADMAP **§5** |
 | F1–F15 → code actions | ROADMAP **§8** |
 | Plugins / MCP install | [`PLUGINS.md`](PLUGINS.md) |
-| Why (optional) | [`research/`](../research/) |
+| Design invariants | [`DESIGN.md`](DESIGN.md) |
 
 ## Phases
 

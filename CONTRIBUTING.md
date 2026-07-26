@@ -37,7 +37,7 @@ CI runs ruff + pytest on every PR/push (`.github/workflows/ci.yml`).
 - Prefer small, focused PRs.
 - Keep rankings value-explicit (`ValueProfile`); do not claim value-free scores.
 - Never commit `.env`, API keys, PyPI tokens, or local venvs.
-- Product docs live in `docs/`; long research notes belong in `research/` (optional reading).
+- Product docs live in `docs/`. Do not commit private design dumps under `research/` (gitignored).
 - Add or update tests when changing gates, gap logic, MCP/tools, emotions, or CLI.
 - Update [`docs/LIMITS.md`](docs/LIMITS.md) **before** marketing any new claim.
 - Emotions / mixes are **annotation_only** — never claim the system feels.
@@ -52,7 +52,6 @@ CI runs ruff + pytest on every PR/push (`.github/workflows/ci.yml`).
 | Domain packs (JSON) | `src/artificial_emotions/packs/*.json` + `packs.py` |
 | Product docs | `docs/` — start at [`docs/INDEX.md`](docs/INDEX.md) |
 | Examples / protocols | [`examples/README.md`](examples/README.md) |
-| Research (optional) | [`research/INDEX.md`](research/INDEX.md) |
 | Stuck playbooks | [`docs/ROADMAP.md`](docs/ROADMAP.md) §0→§3→§2 |
 
 ## Adding a domain seed
@@ -99,7 +98,7 @@ Minimum shape:
 }
 ```
 
-Same quality bar as seeds. Template sketch: [`examples/pack_meta_template.json`](examples/pack_meta_template.json). Deeper notes: [`research/DOMAIN_PACK_QUALITY.md`](research/DOMAIN_PACK_QUALITY.md).
+Same quality bar as seeds. Template sketch: [`examples/pack_meta_template.json`](examples/pack_meta_template.json).
 
 ### Checklist before opening a seed/pack PR
 

@@ -4,7 +4,7 @@ Artificial Emotions is a **curiosity layer**: generate → verify → score → 
 
 It is **not** literature Q&A, citation forecasting, or an end-to-end AI Scientist.
 
-## Invariants (from research)
+## Invariants
 
 1. Explicit `ValueProfile` — no value-free ranking  
 2. Related literature ≠ answered  
@@ -23,4 +23,3 @@ It is **not** literature Q&A, citation forecasting, or an end-to-end AI Scientis
 | Demo commands | [PROOFS.md](PROOFS.md) |
 | Modules | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Roadmap skim | [ROADMAP_SUMMARY.md](ROADMAP_SUMMARY.md) |
-| Full design rationale (optional) | [`research/INDEX.md`](../research/INDEX.md) |

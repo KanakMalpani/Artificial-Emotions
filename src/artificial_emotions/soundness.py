@@ -94,5 +94,5 @@ def soundness_pass(
             "never silent re-rank. Profile-scoped values remain separate. "
             "See research/INNOEVAL_JUDGES.md."
         ),
-        "docs": "research/INNOEVAL_JUDGES.md",
+        "docs": "docs/PROOFS.md",
     }

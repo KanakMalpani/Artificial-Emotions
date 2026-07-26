@@ -1,5 +1,6 @@
-# HANDOFF (moved)
+# Handoff
 
-This file moved to [`../research/HANDOFF.md`](../research/HANDOFF.md).
+Session handoff notes are not published in this repository.
 
-**Research** lives under `research/`. **Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.
+Use [`ROADMAP.md`](ROADMAP.md) §2 for the current priority queue, and leave a short
+“done / not finished” note in the PR or commit message when handing off work.

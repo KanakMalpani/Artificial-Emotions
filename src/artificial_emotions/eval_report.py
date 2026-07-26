@@ -196,5 +196,5 @@ def build_eval_report(
             "Composite eval report — diagnostics before quality means (ErrEval-style). "
             "Do not quote a single vanity accuracy %. LLM novelty judges are secondary."
         ),
-        "docs": "research/CURIOSITY_EVAL_METRICS.md",
+        "docs": "docs/PROOFS.md",
     }

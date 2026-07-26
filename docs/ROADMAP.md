@@ -5,7 +5,8 @@
 **Repo root:** this clone (relative paths below)  
 **Public repo:** https://github.com/KanakMalpani/Artificial-Emotions  
 **Companion:** [`ROADMAP_SUMMARY.md`](ROADMAP_SUMMARY.md) (1-page)  
-**Honesty anchors:** [`LIMITS.md`](LIMITS.md) · [`PROOFS.md`](PROOFS.md) · [`research/FAILURE_MODES.md`](../research/FAILURE_MODES.md)
+**Honesty anchors:** [`LIMITS.md`](LIMITS.md) · [`PROOFS.md`](PROOFS.md) · [`DESIGN.md`](DESIGN.md)  
+**Note:** Long-form `research/` notes are **not** in the public tree (local-only / gitignored).
 
 > **Primary audience:** Cursor / AI coding agents that are stuck, context-lost, or idle.  
 > **Secondary:** Humans planning product work. Ambition is welcome; overclaiming is not. Scores remain **decision aids** with explicit `ValueProfile` weights — never value-free oracles.
@@ -40,28 +41,23 @@
 | **Don't know what to do next** | **This file §2** (priority queue) | Pick highest unfinished wedge; run its success test |
 | **Broken behavior / red tests** | **§3 Stuck playbooks** | Fix → `pytest -q` → update LIMITS if claims change |
 | **Unsure what already ships** | **§1 Current truth** + [`LIMITS.md`](LIMITS.md) | Do **not** reimplement pipeline / MCP / provoke |
-| **Unsure why design is this way** | [`research/`](../research/) (optional) | Prefer product docs for “what works now” |
+| **Unsure why design is this way** | [`DESIGN.md`](DESIGN.md) · [`LIMITS.md`](LIMITS.md) | Prefer product docs for “what works now” |
 | **About to market a claim** | [`LIMITS.md`](LIMITS.md) + **§10** | Update LIMITS **before** README/marketing text |
 | **Need a demo that works** | [`PROOFS.md`](PROOFS.md) | `emotions spark`, `pytest -q`, MCP `--list-tools` |
 | **Integrating into an IDE/agent** | [`PLUGINS.md`](PLUGINS.md) | `mcp_server.py`, `agent_tools.py` |
 | **Module layout / trust boundary** | [`ARCHITECTURE.md`](ARCHITECTURE.md) | `pipeline.py` as spine |
-| **Prior session state** | [`research/HANDOFF.md`](../research/HANDOFF.md) | Sync “Done / Not finished” if you finish a wedge |
+| **Prior session state** | Commit messages + this roadmap §2 | Leave clear notes in the PR/session summary |
 
 ### Prefer which doc when?
 
 | Doc | Prefer when… |
 |-----|----------------|
 | **`docs/ROADMAP.md` (this)** | Choosing next work; stuck playbooks; session DoD |
-| **`docs/LIMITS.md`** | Honest “verified vs not”; confidence caps |
+| **`docs/LIMITS.md`** | Honest “verified vs not”; confidence caps; F1–F15 product implications |
 | **`docs/PROOFS.md`** | Reproducing verified demos / smoke commands |
 | **`docs/PLUGINS.md`** | MCP / HTTP / OpenAI tools install recipes |
 | **`docs/ARCHITECTURE.md`** | Where code lives; data flow |
-| **`docs/DESIGN.md`** | Short invariants without research depth |
-| **`research/FAILURE_MODES.md`** | F1–F15 definitions & acceptance gates |
-| **`research/FIRST_PRINCIPLES.md`** | Why VOI / anti-McNamara geometry exists |
-| **`research/CAPABILITY.md`** | Capability contract wording |
-| **`research/HANDOFF.md`** | Continue-from notes for the next agent |
-| **`research/RESEARCH.md` / `SOURCES.md`** | Competitive landscape / citations — not day-to-day coding |
+| **`docs/DESIGN.md`** | Short invariants |
 
 ### Read order when cold-starting a coding session
 
@@ -84,7 +80,7 @@
 
 ## 1. Current v0.1 truth — do not rebuild
 
-Aligned with [`LIMITS.md`](LIMITS.md) and [`research/HANDOFF.md`](../research/HANDOFF.md). **If it is listed here, improve it or extend it — do not recreate from scratch.**
+Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is listed here, improve it or extend it — do not recreate from scratch.**
 
 ### Verified working (as of 2026-07-23)
 
@@ -99,7 +95,7 @@ Aligned with [`LIMITS.md`](LIMITS.md) and [`research/HANDOFF.md`](../research/HA
 | **Agent glue** | `/v1/agent`, `/v1/agent/tools`, provoke/spark inject packs | `agent_tools.py`, `provoke.py`, `examples/openai_tools.json` |
 | **Tests** | Core, failure-mode, provoke/API, MCP, e2e (API+CLI) | `tests/` — run `pytest -q`; e2e: `pytest tests/e2e -q` |
 | **Artifacts** | Offline vs literature compares | `examples/run_ai_*_final.json`, `examples/_run_compare.py` |
-| **Docs** | Product under `docs/`; design rationale under `research/` | See appendix C |
+| **Docs** | Product under `docs/` | See appendix C |
 
 ### Product spine
 
@@ -133,7 +129,7 @@ ValueProfile + Domain/Topic
 | No PyPI yet | Packaging wedge; owner-gated publish — Actions still blocked by billing/spending until payment clears |
 | Public GitHub may lag local | Never force-push; never commit secrets |
 
-**Why this design?** See `research/` — agents coding day-to-day should prefer LIMITS + this playbook.
+**Why this design?** Prefer LIMITS + DESIGN + this playbook.
 
 ---
 
@@ -275,7 +271,7 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 | Step | Action |
 |------|--------|
 | 1 | Confirm cwd is `Artificial Emotions` only — do not edit sibling repos |
-| 2 | Re-read §1 + [`research/HANDOFF.md`](../research/HANDOFF.md) |
+| 2 | Re-read §1 + [LIMITS.md](LIMITS.md) |
 | 3 | Pick one wedge from §2; ignore moonshots |
 | 4 | Do not commit unless user asks; do not push unless user asks |
 
@@ -325,7 +321,7 @@ Weights from `ValueProfile`. Weak T/A or high R collapses or rejects.
 
 ### Acceptance gates before “top question” (v0.1 baseline)
 
-From [`research/FAILURE_MODES.md`](../research/FAILURE_MODES.md):
+From [LIMITS.md](LIMITS.md):
 
 1. Schema-valid  
 2. `answerability >=` profile minimum  
@@ -344,7 +340,7 @@ Before ending a coding session, agents should:
 1. **State what changed** (files + behavior) in the reply to the user.  
 2. **Run tests:** `pytest -q` (or the smallest suite that covers the change, then full if touching core).  
 3. **Honesty:** If user-visible claims changed → update [`LIMITS.md`](LIMITS.md); if new verified demo → [`PROOFS.md`](PROOFS.md).  
-4. **Handoff:** If continuing multi-session work, update [`research/HANDOFF.md`](../research/HANDOFF.md) “Done / Not finished” (or leave clear notes for the next agent).  
+4. **Handoff:** If continuing multi-session work, update [LIMITS.md](LIMITS.md) “Done / Not finished” (or leave clear notes for the next agent).  
 5. **Do not commit** unless the user asked. **Do not push** unless asked.  
 6. **Do not** leave secrets, `.env`, or API keys staged.  
 7. Prefer one finished wedge over five half-starts.
@@ -357,11 +353,11 @@ Before ending a coding session, agents should:
 
 **Become the default curiosity layer for AI systems and research organizations:** given a domain, topic, and explicit stakeholder values, produce a ranked set of *investigable unknowns* with literature gap evidence, multi-axis scores, uncertainty bands, and briefs — so a human or agent can decide *what to investigate next*.
 
-Capability contract ([`research/CAPABILITY.md`](../research/CAPABILITY.md)):
+Capability contract ([LIMITS.md](LIMITS.md)):
 
 > For a chosen domain/topic and explicit value profile, the system produces a ranked list of unanswered (or partially answered) scientific questions with multi-axis scores, literature gap evidence, confidence, and investigation briefs.
 
-Formal skeleton ([`research/FIRST_PRINCIPLES.md`](../research/FIRST_PRINCIPLES.md)):
+Formal skeleton ([LIMITS.md](LIMITS.md)):
 
 ```
 score(q) ≈ E[value of knowing answer(q)] − E[cost of investigating(q)]
@@ -501,18 +497,18 @@ Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding de
 | Lab closed-loop | Curiosity → experiment → re-rank (still not “we write Nature”) |
 | Constitutional curiosity | Multi-stakeholder ValueProfile negotiation |
 | Adversarial red-team league | Continuous F1–F15 corpus |
-| Affect / epistemic-emotion track | Research-only CME notes → optional incongruity UX cues / provoke elicitation eval; never claim the engine “feels” ([`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md)) |
+| Affect / epistemic-emotion track | Research-only CME notes → optional incongruity UX cues / provoke elicitation eval; never claim the engine “feels” ([LIMITS.md](LIMITS.md)) |
 | Epistemic emotion elicitation | Near moonshot / research wedge: measure whether incongruity-framed injects raise investigation quality (human or agent A/B + optional EES); ship only annotation-level cues (`epistemic_cues.py`), not OCC/PAD engines |
 
 Only pick these if the user explicitly asks or P1–P2 are clear.
 
-**Near pointer (not a default P1 ID):** If P1 is clear and the user asks for affect-adjacent product work, prefer **Epistemic emotion elicitation** over companion/empathy personas — keep honesty bar in [`LIMITS.md`](LIMITS.md) and [`research/AI_EMOTIONS.md`](../research/AI_EMOTIONS.md).
+**Near pointer (not a default P1 ID):** If P1 is clear and the user asks for affect-adjacent product work, prefer **Epistemic emotion elicitation** over companion/empathy personas — keep honesty bar in [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md).
 
 ---
 
 ## 8. F1–F15 → agent actions
 
-Source definitions: [`research/FAILURE_MODES.md`](../research/FAILURE_MODES.md).
+Source definitions: [LIMITS.md](LIMITS.md).
 
 | ID | Failure | v0.1 mitigation (code) | Agent action when hit / when improving |
 |----|---------|------------------------|----------------------------------------|
@@ -559,7 +555,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | W10 Community | Process | GitHub Issues, CONTRIBUTING | Good-first-issues ↔ F-modes |
 | W11 Enterprise | API ops | `api.py` | Optional auth; don't break local demos |
 | W12 Flywheel | Outcomes | future store/schema | Multi-outcome; anti-McNamara |
-| W13 Research loop | Docs | `research/` ↔ `docs/LIMITS.md` | Tag open Qs to milestones |
+| W13 Docs loop | Docs | `docs/LIMITS.md` ↔ README claims | Tag open Qs to milestones |
 
 ---
 
@@ -640,7 +636,7 @@ Tag answers into LIMITS + SOURCES when resolved.
 
 ```mermaid
 flowchart TB
-  R[research/: principles, failures, sources]
+  R[docs/: LIMITS, DESIGN, PROOFS]
   P[Product code + docs/LIMITS]
   E[Evals / spot-checks / flywheel]
   R -->|invariants & backlog| P
@@ -707,12 +703,12 @@ Stay in the wedge. Absorb ideas as modules, not mission creep.
 | Plugins | `docs/PLUGINS.md` |
 | Design short | `docs/DESIGN.md` |
 | Docs index | `docs/INDEX.md` |
-| First principles | `research/FIRST_PRINCIPLES.md` |
-| Research report | `research/RESEARCH.md` |
-| Failures F1–F15 | `research/FAILURE_MODES.md` |
-| Capability contract | `research/CAPABILITY.md` |
-| Agent handoff | `research/HANDOFF.md` |
-| Sources | `research/SOURCES.md` |
+| First principles | `docs/DESIGN.md` |
+| Research report | (private / not in public tree) |
+| Failures F1–F15 | `docs/LIMITS.md` / `tests/test_failure_modes.py` |
+| Capability contract | `docs/LIMITS.md` |
+| Agent handoff | `docs/HANDOFF.md` / PR notes |
+| Sources | (private / not in public tree) |
 | Engine | `src/artificial_emotions/` |
 | Tests | `tests/` |
 | Web | `web/` |

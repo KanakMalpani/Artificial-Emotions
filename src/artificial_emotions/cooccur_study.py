@@ -98,7 +98,7 @@ def run_cooccur_correlation(
             "not proof co-occurrence equals ITN neglectedness. See "
             "research/LITGAP_CORRELATION_STUDY.md."
         ),
-        "docs": "research/LITGAP_CORRELATION_STUDY.md",
+        "docs": "docs/PROOFS.md",
     }
 
 

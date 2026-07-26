@@ -57,3 +57,7 @@ lit_cache/
 # OS junk
 Thumbs.db
 Desktop.ini
+
+# Local design notes — not published with the public repo
+research/
+

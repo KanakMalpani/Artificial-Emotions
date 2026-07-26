@@ -83,5 +83,5 @@ def export_idea_graph(
             "conflict edges are coarse tag heuristics. Does not replace verify+rank "
             "or ValueProfile. See research/EIG_IDEATION_GRAPHS.md."
         ),
-        "docs": "research/EIG_IDEATION_GRAPHS.md",
+        "docs": "docs/PROOFS.md",
     }
