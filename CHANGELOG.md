@@ -46,8 +46,17 @@
 - Affect may make a safety gate **stricter, never looser**: `anxiety` lowers
   `max_risk` and nothing raises it. Scoring weights remain untouched by default.
 
+- **Ratcheted the guard to lock in the gains.** Its floors previously allowed a
+  slide back to 30 rules while still passing. They now sit just under the
+  achieved numbers (35 rules, 62% of catalog, 20 acting, 8 firing offline, 3
+  distinct drivers per loop) so ordinary churn passes but a real regression
+  fails. Added two reachability checks against *real* runs rather than
+  constructed contexts, and a direct regression guard for the normalisation bug:
+  a secondary signal must still act when a louder emotion fires beside it.
+  Verified by reverting the fix — the guard fails.
+
 ### Internal
-- 599 tests, 88.7% coverage.
+- 603 tests, 88.7% coverage.
 
 ## Unreleased — discovery, and evidence that it works
 

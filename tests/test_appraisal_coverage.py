@@ -181,15 +181,79 @@ def test_observation_only_emotions_really_do_not_act():
     assert not overlap, f"{sorted(overlap)} are declared observation-only but do modulate"
 
 
+# Ratchet floors. These sit just under what the code currently achieves, so
+# ordinary churn does not trip them but a real regression toward the old
+# "13 derivable, 4 firing" state does. Raise them as coverage grows; never lower.
+MIN_RULES = 35
+MIN_CATALOG_SHARE = 0.62
+MIN_ACTING = 20
+MIN_FIRING_OFFLINE = 8
+MIN_DISTINCT_DRIVERS_PER_RUN = 3
+
+
 def test_a_meaningful_share_of_the_catalog_is_reachable():
     """The original failure was 13/54 derivable. Hold well clear of that."""
-    assert len(RULES) >= 30
-    assert len(RULES) / len(CATALOG_IDS) >= 0.5
+    assert len(RULES) >= MIN_RULES, f"only {len(RULES)} rules"
+    share = len(RULES) / len(CATALOG_IDS)
+    assert share >= MIN_CATALOG_SHARE, f"only {share:.0%} of the catalog is derivable"
+
+
+def test_enough_emotions_actually_change_behaviour():
+    """Derivable-but-inert is still decoration. Count the ones that act."""
+    acting = _modulating_emotions()
+    assert len(acting) >= MIN_ACTING, f"only {len(acting)} emotions modulate: {sorted(acting)}"
 
 
 def test_appraisal_never_invents_vocabulary_outside_the_catalog():
     unknown = set(RULES) - CATALOG_IDS
     assert not unknown, f"appraisal can emit {sorted(unknown)}, which the mixer cannot mix"
+
+
+# --- reachability on *real* runs, not just constructed contexts ------------------------
+
+
+def test_plain_offline_runs_fire_a_variety_of_emotions():
+    """Firable-in-principle is not enough; ordinary runs must feel more than one thing."""
+    from artificial_emotions.appraisal import appraise_run
+
+    fired: set[str] = set()
+    for domain in ("ai", "biology", "physics", "climate", "medicine"):
+        items = CuriosityEngine(
+            CuriosityConfig(domain=domain, use_llm=False, use_literature=False, n_return=5)
+        ).run()
+        fired |= {s.emotion for s in appraise_run(items)}
+    assert len(fired) >= MIN_FIRING_OFFLINE, f"only {len(fired)} fire offline: {sorted(fired)}"
+
+
+def test_more_than_one_emotion_drives_change_across_a_real_loop():
+    """Locks in the fix for the bug that made only the loudest emotion able to act."""
+    from artificial_emotions.explore import explore
+
+    out = explore(domain="ai", steps=4, n_return=4)
+    drivers = {c["driver"] for s in out["trajectory"]["steps"] for c in s["modulation"]}
+    assert len(drivers) >= MIN_DISTINCT_DRIVERS_PER_RUN, f"only {sorted(drivers)} ever drove change"
+
+
+def test_a_secondary_signal_still_acts_beside_a_dominant_one():
+    """The regression guard for normalisation.
+
+    Modulation used to key off mix *percentages*, which shrink as more emotions
+    fire — so a genuinely strong secondary signal fell under the action floor
+    purely because something louder fired alongside it. Appraised strength must
+    be what decides.
+    """
+    config = CuriosityConfig(domain="ai", use_literature=False)
+
+    alone = modulate_config(config, {"anxiety": 0.4})[1]
+    assert alone.require_review is True
+
+    # Same anxiety, now beside a much louder curiosity. It must still act.
+    beside = modulate_config(config, {"curiosity": 0.95, "anxiety": 0.4})[1]
+    assert beside.require_review is True, (
+        "anxiety stopped acting once a louder emotion fired — modulation is "
+        "keying off relative share instead of appraised strength"
+    )
+    assert {c.driver for c in beside.changes} >= {"curiosity", "anxiety"}
 
 
 # --- the consequences are real ---------------------------------------------------------
