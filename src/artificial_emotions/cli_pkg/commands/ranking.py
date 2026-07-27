@@ -147,3 +147,48 @@ def _explore(args: argparse.Namespace) -> int:
         print(f"  {step['observation']}")
     print(f"\n{payload['claims_not'][0].capitalize()} is not claimed here.")
     return 0
+
+
+def _discover(args: argparse.Namespace) -> int:
+    """Literature-based discovery: propose links nobody has studied."""
+    from artificial_emotions.discover import discover
+
+    payload = discover(
+        args.seed,
+        max_bridges=args.bridges,
+        max_links=args.n,
+        cooccurrence_ceiling=args.ceiling,
+        cache_dir=args.cache_dir,
+        corpus=args.corpus,
+    )
+    if args.json:
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    if not payload["ok"]:
+        print(f"\nDiscovery failed: {payload.get('error')}")
+        print(payload["note"])
+        return 1
+
+    print(
+        f"\nLiterature-based discovery from '{payload['seed']}'"
+        f"  (Swanson ABC · source: {payload.get('source', 'unknown')})\n"
+    )
+    if not payload["links"]:
+        print("  No disconnected links found. Try a narrower seed concept,")
+        print("  or raise --ceiling if the field is very large.")
+        return 0
+
+    for link in payload["links"]:
+        print(f"  {link['a']}  --[{link['b']}]-->  {link['c']}")
+        print(f"      co-occurrence: {link['ac_cooccurrence']} works   gap: {link['gap_score']}")
+        print(f"      Q: {link['question']}")
+        for title in link["evidence_ab"][:1]:
+            print(f"      evidence A-B: {title[:80]}")
+        for title in link["evidence_bc"][:1]:
+            print(f"      evidence B-C: {title[:80]}")
+        print()
+
+    print(payload["how_to_read"])
+    print(f"\nNot claimed: {payload['claims_not'][0]}.")
+    return 0

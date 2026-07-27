@@ -82,6 +82,7 @@ packages = ["src/artificial_emotions"]
 "examples/elicit_ab_protocol.json" = "artificial_emotions/data/examples/elicit_ab_protocol.json"
 "examples/elicit_ab_sample_responses.json" = "artificial_emotions/data/examples/elicit_ab_sample_responses.json"
 "examples/voi_worksheet_template.json" = "artificial_emotions/data/examples/voi_worksheet_template.json"
+"examples/discovery_corpus_demo.json" = "artificial_emotions/data/examples/discovery_corpus_demo.json"
 "evals/fixtures" = "artificial_emotions/data/evals/fixtures"
 
 [tool.hatch.build.targets.sdist]

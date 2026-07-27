@@ -193,6 +193,32 @@ def build_parser() -> argparse.ArgumentParser:
     critique_p.add_argument("--why", default="", dest="why_it_matters")
     critique_p.add_argument("--json", action="store_true")
 
+    discover_p = sub.add_parser(
+        "discover",
+        help="Find links nobody has studied, from real literature (needs network)",
+    )
+    discover_p.add_argument("seed", help="Concept to start from, e.g. 'gut microbiome'")
+    discover_p.add_argument("--n", type=int, default=8, help="Max links to return")
+    discover_p.add_argument("--bridges", type=int, default=4, help="Bridging concepts to expand")
+    discover_p.add_argument(
+        "--ceiling",
+        type=int,
+        default=400,
+        help="Above this many A-and-C works the link is already studied",
+    )
+    discover_p.add_argument(
+        "--cache-dir",
+        default=None,
+        dest="cache_dir",
+        help="Cache OpenAlex responses here (recommended; the API rate-limits)",
+    )
+    discover_p.add_argument(
+        "--corpus",
+        default=None,
+        help="Run offline against your own corpus (JSON/JSONL of {title, concepts})",
+    )
+    discover_p.add_argument("--json", action="store_true")
+
     explore_p = sub.add_parser(
         "explore",
         help="Run the curiosity loop: appraise, feel, modulate, remember, repeat",

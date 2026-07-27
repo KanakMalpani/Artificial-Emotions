@@ -12,6 +12,7 @@ from artificial_emotions.cli_pkg.commands.evaluation import _eval
 from artificial_emotions.cli_pkg.commands.preferences import _preferences
 from artificial_emotions.cli_pkg.commands.profiles import _compare_profiles, _profiles
 from artificial_emotions.cli_pkg.commands.ranking import (
+    _discover,
     _explore,
     _run_engine,
     _serve,
@@ -28,6 +29,7 @@ __all__ = [
     "_compare_profiles",
     "_critique_brief",
     "_decompose",
+    "_discover",
     "_emotions",
     "_explore",
     "_eval",

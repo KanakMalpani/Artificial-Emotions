@@ -1,0 +1,18 @@
+[
+  {"title": "Dietary fish oil reduces blood viscosity in healthy volunteers",
+   "concepts": ["Fish oil", "Blood viscosity", "Eicosapentaenoic acid"]},
+  {"title": "Eicosapentaenoic acid and erythrocyte deformability",
+   "concepts": ["Fish oil", "Eicosapentaenoic acid", "Erythrocyte deformability"]},
+  {"title": "Omega-3 supplementation and platelet aggregation",
+   "concepts": ["Fish oil", "Platelet aggregation", "Eicosapentaenoic acid"]},
+  {"title": "Blood viscosity abnormalities in Raynaud's syndrome",
+   "concepts": ["Blood viscosity", "Raynaud disease", "Vasospasm"]},
+  {"title": "Erythrocyte deformability in patients with Raynaud's phenomenon",
+   "concepts": ["Erythrocyte deformability", "Raynaud disease"]},
+  {"title": "Vasospasm and microcirculatory flow in cold-induced disorders",
+   "concepts": ["Vasospasm", "Raynaud disease", "Blood viscosity"]},
+  {"title": "Platelet aggregation in peripheral vascular disease",
+   "concepts": ["Platelet aggregation", "Vasospasm"]},
+  {"title": "Rheology of blood in small vessels",
+   "concepts": ["Blood viscosity", "Erythrocyte deformability"]}
+]
