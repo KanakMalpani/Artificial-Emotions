@@ -153,9 +153,15 @@ def explore(
         mix = mix_emotions(signals_to_weights(signals))
         last_mix = mix
 
+        # Modulate on the *appraised* strengths, not the normalised mix. A mix
+        # percentage says "how much of the blend is this", which shrinks as more
+        # emotions fire — so a strong secondary signal would drop under the
+        # action floor purely because other things also fired. Appraised weight
+        # says "how strongly did the situation present this", which is what
+        # should decide whether to act on it.
         new_config, plan = modulate_config(
             config,
-            {c["id"]: c["weight"] for c in mix["components"]},
+            {s.emotion: s.weight for s in signals},
             allow_weight_deltas=allow_weight_deltas,
             exhausted=trail.is_exhausted(),
         )

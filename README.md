@@ -7,7 +7,7 @@
 *A curiosity engine that ranks what we don't yet know — then decomposes it into something you can actually go and test.*
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-510%20passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-599%20passing-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -161,9 +161,12 @@ emotions explore --domain ai --steps 4
 
 ```
 step 1  [ai]  4 new
-    feels: curiosity 0.69, humility 0.35, insight 0.26
-    · n_candidates: 16 → 20
+    acted:    curiosity 0.69, hope 0.30, determination 0.25
+    observed: humility 0.35, clarity 0.30, uncertainty 0.29, insight 0.26
+    · n_candidates: 16 → 22
       because curiosity — Open, neglected gaps are worth casting wider for.
+    · stay_the_course: False → True
+      because hope — A live, reachable thread is running.
     · force_decompose: False → True
       because determination — A workable high-value target is live.
     → Determination called for the ladder rather than more breadth.
@@ -196,13 +199,41 @@ flowchart LR
     style F fill:#dc2626,stroke:#b91c1c,color:#fff
 ```
 
+**37 of the 54 catalogued emotions are derivable**, and 22 of those change what
+the engine does. The rest are declared observation-only — surfaced for the reader,
+deliberately not acted on.
+
 | Feeling | Fires when | Changes |
 |---|---|---|
 | **curiosity** | Open gaps, neglected, high stakes | Widens the candidate pool |
 | **confusion** | Judges disagree, or answerability is low | Narrows, forces decomposition |
 | **boredom** | This ground is already mined | Suppresses duplicates, changes domain |
 | **hubris** | Confidence outran the evidence | **Makes the system go get literature** |
+| **anxiety** | Dual-use material in the set | **Tightens the risk ceiling, demands review** |
+| **skepticism** | An LLM cited work that wasn't retrieved | Forces the soundness pass |
+| **absorption / hope** | A live, reachable thread is running | Vetoes the stop, holds the ground |
+| **disappointment** | Gaps closed before we got there | Records the nulls and moves |
+| **triumph** | A result that holds up | Turns it into a concrete plan |
 | **frustration** | Repeated effort ruled nothing out | Stops the loop and records the dead end |
+| **elegance, respect, envy** | Aesthetic pull, prior work, competition | **Nothing** — real drivers *and* known biases, so they are shown, not obeyed |
+
+Runs print `acted:` and `observed:` separately, so you can see which feelings
+actually moved something:
+
+```
+step 1  [ai]  4 new
+    acted:    curiosity 0.69, hope 0.30, determination 0.25
+    observed: humility 0.35, clarity 0.30, uncertainty 0.29, insight 0.26
+    · stay_the_course: False → True
+      because hope — A live, reachable thread is running.
+```
+
+> [!NOTE]
+> **Affect is allowed to make a safety gate stricter, never looser.** `anxiety`
+> lowers `max_risk`; nothing raises it. And `tests/test_appraisal_coverage.py`
+> asserts every rule is firable and that each one either changes behaviour or is
+> explicitly declared observation-only — the catalog cannot quietly rot back into
+> decoration.
 
 > [!IMPORTANT]
 > **Affect moves search behaviour — never your scoring weights.**
@@ -554,7 +585,7 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 510 tests · 88% · floor enforced
+pytest -q --cov --cov-report=term-missing     # 599 tests · 88% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 

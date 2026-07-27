@@ -317,7 +317,10 @@ def test_cli_explore_json_and_text(capsys):
 
     assert main(["explore", "--domain", "ai", "--steps", "2", "--n", "3"]) == 0
     text = capsys.readouterr().out
-    assert "feels:" in text
+    # Emotions that changed something are separated from those merely surfaced,
+    # so a reader can tell which of them mattered.
+    assert "acted:" in text
+    assert "observed:" in text
     assert "Best found" in text
 
 

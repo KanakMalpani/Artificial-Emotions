@@ -120,9 +120,20 @@ def _explore(args: argparse.Namespace) -> int:
 
     print(f"\nExploring {payload['domain_started']} — {payload['steps_taken']} steps\n")
     for step in payload["trajectory"]["steps"]:
-        feels = ", ".join(f"{a['emotion']} {a['weight']:.2f}" for a in step["appraisal"][:3])
+        drivers = {c["driver"] for c in step["modulation"]}
+        acted = [a for a in step["appraisal"] if a["emotion"] in drivers]
+        observed = [a for a in step["appraisal"] if a["emotion"] not in drivers]
+
         print(f"  step {step['step']}  [{step['domain']}]  {len(step['new_question_ids'])} new")
-        print(f"      feels: {feels}")
+        if acted:
+            print(
+                "      acted:    " + ", ".join(f"{a['emotion']} {a['weight']:.2f}" for a in acted)
+            )
+        if observed:
+            print(
+                "      observed: "
+                + ", ".join(f"{a['emotion']} {a['weight']:.2f}" for a in observed[:6])
+            )
         for change in step["modulation"]:
             print(f"      · {change['knob']}: {change['before']} → {change['after']}")
             print(f"        because {change['driver']} — {change['rationale']}")

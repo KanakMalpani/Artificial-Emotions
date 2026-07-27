@@ -73,6 +73,9 @@ class ModulationPlan:
     weights_touched: bool = False
     force_decompose: bool = False
     suggest_domain_jump: bool = False
+    stay_the_course: bool = False
+    require_review: bool = False
+    force_soundness: bool = False
     stop: bool = False
     stop_reason: str = ""
 
@@ -83,6 +86,9 @@ class ModulationPlan:
             "weights_touched": self.weights_touched,
             "force_decompose": self.force_decompose,
             "suggest_domain_jump": self.suggest_domain_jump,
+            "stay_the_course": self.stay_the_course,
+            "require_review": self.require_review,
+            "force_soundness": self.force_soundness,
             "stop": self.stop,
             "stop_reason": self.stop_reason,
             "honesty": (
@@ -117,6 +123,7 @@ def modulate_config(
     """
     plan = ModulationPlan()
     updates: dict[str, Any] = {}
+    profile = config.value_profile
 
     curiosity = _strength(mix_weights, "curiosity")
     confusion = _strength(mix_weights, "confusion") + _strength(mix_weights, "perplexity")
@@ -125,6 +132,24 @@ def modulate_config(
     frustration = _strength(mix_weights, "frustration")
     resignation = _strength(mix_weights, "resignation")
     determination = _strength(mix_weights, "determination")
+
+    # Momentum is resolved up front because the stop rule below has to be able to
+    # consult it — a live thread should survive one bad step.
+    absorption = _strength(mix_weights, "absorption")
+    persistence = _strength(mix_weights, "persistence")
+    stay = absorption + _strength(mix_weights, "hope") + _strength(mix_weights, "anticipation")
+    if stay >= _STRENGTH_FLOOR:
+        plan.stay_the_course = True
+        plan.changes.append(
+            ModulationChange(
+                "stay_the_course",
+                False,
+                True,
+                "absorption" if absorption >= _STRENGTH_FLOOR else "hope",
+                stay,
+                "A live, reachable thread is running — do not change ground yet.",
+            )
+        )
 
     # --- curiosity widens the net ---------------------------------------------
     if curiosity >= _STRENGTH_FLOOR:
@@ -232,7 +257,9 @@ def modulate_config(
         )
 
     # --- frustration / resignation stop the loop ------------------------------
-    if frustration >= 0.35 or resignation >= 0.3 or exhausted:
+    if (frustration >= 0.35 or resignation >= 0.3 or exhausted) and not (
+        plan.stay_the_course or persistence >= _STRENGTH_FLOOR
+    ):
         plan.stop = True
         driver = (
             "frustration"
@@ -256,8 +283,137 @@ def modulate_config(
             )
         )
 
+    # --- safety: affect tightens the risk ceiling on itself -------------------
+    anxiety = _strength(mix_weights, "anxiety")
+    reluctance = _strength(mix_weights, "reluctance")
+    if max(anxiety, reluctance) >= _STRENGTH_FLOOR:
+        driver = "anxiety" if anxiety >= reluctance else "reluctance"
+        strength = max(anxiety, reluctance)
+        before = float(profile.max_risk)
+        after = round(max(0.05, before - 0.1 * strength), 4)
+        if after < before:
+            profile = profile.model_copy(update={"max_risk": after})
+            updates["value_profile"] = profile
+            plan.changes.append(
+                ModulationChange(
+                    "value_profile.max_risk",
+                    before,
+                    after,
+                    driver,
+                    strength,
+                    "Dual-use or high-risk material present — lower the ceiling. "
+                    "Affect is allowed to make the gate stricter, never looser.",
+                    bounded_by="max_risk >= 0.05",
+                )
+            )
+        plan.require_review = True
+        plan.changes.append(
+            ModulationChange(
+                "require_review",
+                False,
+                True,
+                driver,
+                strength,
+                "Route through human review before acting on this set.",
+            )
+        )
+
+    # --- doubt about the evidence itself --------------------------------------
+    skepticism = _strength(mix_weights, "skepticism") + _strength(mix_weights, "suspicion")
+    if skepticism >= _STRENGTH_FLOOR:
+        plan.force_soundness = True
+        plan.changes.append(
+            ModulationChange(
+                "force_soundness",
+                False,
+                True,
+                "skepticism",
+                skepticism,
+                "Grounding looked shaky — run the soundness pass before trusting ranks.",
+            )
+        )
+        if not config.use_literature:
+            updates["use_literature"] = True
+            plan.changes.append(
+                ModulationChange(
+                    "use_literature",
+                    False,
+                    True,
+                    "skepticism",
+                    skepticism,
+                    "Go and check the neighbourhood rather than assuming it.",
+                )
+            )
+
+    # --- lost the frame: shrink and re-derive rather than widen ----------------
+    disorientation = _strength(mix_weights, "disorientation")
+    if disorientation >= _STRENGTH_FLOOR:
+        before = config.n_return
+        after = max(2, before // 2)
+        if after != before:
+            updates["n_return"] = after
+            plan.changes.append(
+                ModulationChange(
+                    "n_return",
+                    before,
+                    after,
+                    "disorientation",
+                    disorientation,
+                    "The frame is unclear — shrink the field and re-derive the question.",
+                    bounded_by="n_return >= 2",
+                )
+            )
+        plan.force_decompose = True
+
+    # --- urgency / impatience: cheaper, narrower, sooner -----------------------
+    urgency = _strength(mix_weights, "urgency")
+    impatience = _strength(mix_weights, "impatience")
+    if max(urgency, impatience) >= _STRENGTH_FLOOR:
+        pressure = max(urgency, impatience)
+        before = config.n_return
+        after = max(3, int(round(before * (1.0 - 0.25 * pressure))))
+        if after != before:
+            updates["n_return"] = after
+            plan.changes.append(
+                ModulationChange(
+                    "n_return",
+                    before,
+                    after,
+                    "urgency" if urgency >= impatience else "impatience",
+                    pressure,
+                    "Take the cheap discriminating step rather than more breadth.",
+                    bounded_by="n_return >= 3",
+                )
+            )
+
+    # --- outcomes worth writing down ------------------------------------------
+    for name, note in (
+        ("triumph", "A result that holds up — turn it into a concrete plan."),
+        ("satisfaction", "Proportionate to the question asked — write the plan."),
+    ):
+        strength = _strength(mix_weights, name)
+        if strength >= _STRENGTH_FLOOR:
+            plan.force_decompose = True
+            plan.changes.append(
+                ModulationChange("force_decompose", False, True, name, strength, note)
+            )
+
+    # --- ground that closed before we got to it -------------------------------
+    disappointment = _strength(mix_weights, "disappointment")
+    if disappointment >= _STRENGTH_FLOOR:
+        plan.suggest_domain_jump = True
+        plan.changes.append(
+            ModulationChange(
+                "domain",
+                str(config.domain),
+                "<caller picks a new one>",
+                "disappointment",
+                disappointment,
+                "These gaps already closed — record the nulls and move.",
+            )
+        )
+
     # --- opt-in, bounded weight nudges ----------------------------------------
-    profile = config.value_profile
     if allow_weight_deltas:
         deltas: dict[str, float] = {}
         if curiosity >= _STRENGTH_FLOOR:

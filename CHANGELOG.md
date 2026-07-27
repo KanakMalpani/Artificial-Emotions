@@ -1,5 +1,54 @@
 # Changelog
 
+## Unreleased — the whole catalog earns its keep
+
+54 emotions existed; **four** ever fired. The rest were furniture.
+
+### Fixed
+- **Appraisal could derive only 13 of 54 catalogued emotions, and just four
+  (`curiosity`, `humility`, `insight`, `determination`) fired across all nine
+  domains.** Rules are now explicit condition/weight functions over one context
+  object: **37 emotions derivable (68% of the catalog)**, 9-10 firing per step.
+  New rules read signals the engine already computed but ignored — dual-use
+  flags, score-band width, near-duplicate rate, answered-gap ratio, ungrounded
+  LLM citations, literature density and citation counts, operationalization
+  shape, score spread, cost.
+- **Normalisation was crushing every secondary emotion below the action floor.**
+  Modulation keyed off mix *percentages*, which shrink as more emotions fire — a
+  strong signal at 0.25 became ~8% of the blend and never acted. It now keys off
+  appraised strength, which measures how strongly the situation presented rather
+  than how crowded the blend was. Distinct emotions changing behaviour per run
+  went from 2 to 4+.
+- `perplexity` was declared observation-only while actually modulating (it is
+  summed into confusion). Caught by the new guard.
+- `absorption` could not veto the stop because momentum was resolved *after* the
+  stop rule ran. Momentum is now resolved first, so a live thread survives a bad
+  step.
+
+### Added
+- **Consequences for 14 more emotions.** `anxiety`/`reluctance` tighten
+  `max_risk` and demand review; `skepticism`/`suspicion` force the soundness
+  pass and fetch literature; `disorientation` shrinks and reframes;
+  `absorption`/`hope`/`anticipation` hold the ground; `urgency`/`impatience`
+  narrow to the cheap step; `triumph`/`satisfaction` turn a result into a plan;
+  `disappointment` records nulls and moves.
+- **`OBSERVATION_ONLY`** — 15 emotions appraised and surfaced but deliberately
+  never acted on. Aesthetic pull (`elegance`, `parsimony`) and social comparison
+  (`envy`, `respect`) are real drivers of research choices *and* known biases, so
+  they are shown to the reader rather than obeyed.
+- **`tests/test_appraisal_coverage.py`** — the anti-decoration guard. Every rule
+  must be firable from a constructible context, must not fire on a neutral one,
+  and must either modulate behaviour or be declared observation-only. It found
+  all three bugs above.
+- Runs print `acted:` and `observed:` separately.
+
+### Honesty
+- Affect may make a safety gate **stricter, never looser**: `anxiety` lowers
+  `max_risk` and nothing raises it. Scoring weights remain untouched by default.
+
+### Internal
+- 599 tests, 88.7% coverage.
+
 ## Unreleased — discovery, and evidence that it works
 
 ### Added
