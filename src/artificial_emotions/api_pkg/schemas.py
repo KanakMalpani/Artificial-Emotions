@@ -28,6 +28,7 @@ __all__ = [
     "ConstitutionCompareRequest",
     "CritiqueBriefRequest",
     "DecomposeRequest",
+    "ExploreRequest",
     "CrossModelVoteRequest",
     "IdeaGraphRequest",
     "MixEmotionsRequest",
@@ -328,3 +329,23 @@ class SurpriseWorksheetRequest(BaseModel):
     pilot_result: str = ""
     belief_shift_1_to_5: int | None = Field(None, ge=1, le=5)
     crude_update_note: str = ""
+
+
+class ExploreRequest(BaseModel):
+    """Run the curiosity loop: appraise, feel, modulate, remember, repeat."""
+
+    domain: str = Domain.AI.value
+    topic: str = ""
+    steps: int = Field(5, ge=1, le=12, description="Passes to take")
+    n_return: int = Field(5, ge=1, le=16, description="Unknowns per step")
+    profile_name: str | None = None
+    use_literature: bool = False
+    allow_weight_deltas: bool = Field(
+        False,
+        description=(
+            "Let affect nudge ValueProfile weights. Bounded and logged; off by "
+            "default so ranking stays a pure function of the stated profile."
+        ),
+    )
+    allow_domain_jump: bool = Field(True, description="Let boredom change ground")
+    decompose_depth: int = Field(1, ge=1, le=3)

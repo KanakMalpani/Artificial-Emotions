@@ -193,6 +193,27 @@ def build_parser() -> argparse.ArgumentParser:
     critique_p.add_argument("--why", default="", dest="why_it_matters")
     critique_p.add_argument("--json", action="store_true")
 
+    explore_p = sub.add_parser(
+        "explore",
+        help="Run the curiosity loop: appraise, feel, modulate, remember, repeat",
+    )
+    explore_p.add_argument("--domain", default="ai", choices=[d.value for d in Domain])
+    explore_p.add_argument("--topic", default="")
+    explore_p.add_argument("--steps", type=int, default=5, help="Passes to take (max 12)")
+    explore_p.add_argument("--n", type=int, default=5, help="Unknowns per step")
+    explore_p.add_argument("--profile", default="humanity_default")
+    explore_p.add_argument("--literature", action="store_true", help="Ground gaps in literature")
+    explore_p.add_argument(
+        "--affect-weights",
+        action="store_true",
+        dest="affect_weights",
+        help="Let affect nudge ValueProfile weights (bounded, logged; off by default)",
+    )
+    explore_p.add_argument(
+        "--no-jump", action="store_true", help="Stay in one domain even when bored"
+    )
+    explore_p.add_argument("--json", action="store_true")
+
     decompose_p = sub.add_parser(
         "decompose",
         help="Open one unknown into sub-questions, a first step, and falsifiers (never an answer)",

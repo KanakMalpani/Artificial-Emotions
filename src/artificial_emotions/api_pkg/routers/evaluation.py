@@ -15,6 +15,7 @@ from artificial_emotions.api_pkg.schemas import (
     CritiqueBriefRequest,
     CrossModelVoteRequest,
     DecomposeRequest,
+    ExploreRequest,
     IdeaGraphRequest,
     SoundnessPassRequest,
     SurpriseWorksheetRequest,
@@ -116,4 +117,27 @@ def curiosity_decompose(req: DecomposeRequest) -> dict[str, Any]:
         answerability=req.answerability,
         tractability=req.tractability,
         risk=req.risk,
+    )
+
+
+@router.post("/v1/curiosity/explore")
+def curiosity_explore(req: ExploreRequest) -> dict[str, Any]:
+    """Run the curiosity loop and return the full trajectory.
+
+    Each step appraises what it found, feels something because of it, lets that
+    change how it searches next, and remembers where it has been. Everything it
+    felt and everything that feeling changed is in the response.
+    """
+    from artificial_emotions.explore import explore
+
+    return explore(
+        domain=req.domain,
+        topic=req.topic,
+        steps=req.steps,
+        n_return=req.n_return,
+        profile_name=req.profile_name,
+        use_literature=req.use_literature,
+        allow_weight_deltas=req.allow_weight_deltas,
+        allow_domain_jump=req.allow_domain_jump,
+        decompose_depth=req.decompose_depth,
     )

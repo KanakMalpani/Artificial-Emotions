@@ -17,6 +17,7 @@ from artificial_emotions.cli_pkg.commands import (
     _decompose,
     _emotions,
     _eval,
+    _explore,
     _preferences,
     _profiles,
     _run_engine,
@@ -43,6 +44,7 @@ _DISPATCH: dict[str, Handler] = {
     "voi-worksheet": _voi_worksheet,
     "surprise-worksheet": _surprise_worksheet,
     "eval": _eval,
+    "explore": _explore,
     "emotions": _emotions,
     "epistemic": _emotions,
 }

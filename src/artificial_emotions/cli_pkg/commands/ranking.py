@@ -98,3 +98,52 @@ def _spark(args: argparse.Namespace) -> int:
         return 0
     print(pack["inject"])
     return 0
+
+
+def _explore(args: argparse.Namespace) -> int:
+    """Run the curiosity loop and print the trajectory."""
+    from artificial_emotions.explore import explore
+
+    payload = explore(
+        domain=args.domain,
+        topic=args.topic,
+        steps=args.steps,
+        n_return=args.n,
+        profile_name=args.profile,
+        use_literature=args.literature,
+        allow_weight_deltas=args.affect_weights,
+        allow_domain_jump=not args.no_jump,
+    )
+    if args.json:
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    print(f"\nExploring {payload['domain_started']} — {payload['steps_taken']} steps\n")
+    for step in payload["trajectory"]["steps"]:
+        feels = ", ".join(f"{a['emotion']} {a['weight']:.2f}" for a in step["appraisal"][:3])
+        print(f"  step {step['step']}  [{step['domain']}]  {len(step['new_question_ids'])} new")
+        print(f"      feels: {feels}")
+        for change in step["modulation"]:
+            print(f"      · {change['knob']}: {change['before']} → {change['after']}")
+            print(f"        because {change['driver']} — {change['rationale']}")
+        print(f"      → {step['note']}\n")
+
+    print(f"Stopped: {payload['stopped_because']}")
+    print(f"Ground covered: {', '.join(payload['trajectory']['domains_visited'])}")
+
+    best = payload.get("best_found")
+    if best:
+        print(f"\nBest found  [score {best['curiosity_score']:.3f}]")
+        print(f"  {best['question']}")
+
+    feeling = payload.get("final_feeling")
+    if feeling:
+        print(f"\n{feeling['inner_monologue']}")
+
+    plan = payload.get("investigation_plan")
+    if plan:
+        step = plan["discriminating_step"]
+        print(f"\nDo this first ({step['kind']}, cost {step['expected_cost_band']}):")
+        print(f"  {step['observation']}")
+    print(f"\n{payload['claims_not'][0].capitalize()} is not claimed here.")
+    return 0

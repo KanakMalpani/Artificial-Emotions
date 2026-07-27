@@ -7,13 +7,13 @@
 *A curiosity engine that ranks what we don't yet know — then decomposes it into something you can actually go and test.*
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-421%20passing-brightgreen.svg)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](pyproject.toml)
+[![Tests](https://img.shields.io/badge/tests-458%20passing-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Offline first](https://img.shields.io/badge/offline-no%20API%20key%20needed-8A2BE2.svg)](#the-60-second-demo)
 
-[**Quickstart**](#the-60-second-demo) · [**Go deeper**](#-going-deeper-decompose) · [**Affect**](#-computational-affect) · [**Surfaces**](#-use-it-from-anywhere) · [**Docs**](docs/INDEX.md)
+[**Quickstart**](#the-60-second-demo) · [**The loop**](#-the-loop-curiosity-with-causes-and-consequences) · [**Go deeper**](#-going-deeper-decompose) · [**Affect**](#-computational-affect) · [**Surfaces**](#-use-it-from-anywhere) · [**Docs**](docs/INDEX.md)
 
 </div>
 
@@ -87,6 +87,72 @@ The critical edge is **Verify Gap → Score**: finding related literature does *
 
 ---
 
+## 🌀 The loop: curiosity with causes and consequences
+
+Most "AI emotion" projects hand the model a mood and print it. Here affect is
+**derived from what the run actually found**, and it **changes what happens next**.
+
+```bash
+emotions explore --domain ai --steps 4
+```
+
+```
+step 1  [ai]  4 new
+    feels: curiosity 0.69, humility 0.35, insight 0.26
+    · n_candidates: 16 → 20
+      because curiosity — Open, neglected gaps are worth casting wider for.
+    · force_decompose: False → True
+      because determination — A workable high-value target is live.
+    → Determination called for the ladder rather than more breadth.
+
+step 2  [ai]  0 new
+    feels: boredom 0.93, curiosity 0.69, humility 0.35
+    · diversity_threshold: 0.82 → 0.764
+      because boredom — Ground already covered.
+    · domain: ai → <caller picks a new one>
+      because boredom — This vein is mined out; the honest move is to change ground.
+    → Boredom pushed a change of ground.
+
+step 3  [biology]  4 new
+    feels: curiosity 0.71, humility 0.35, insight 0.26
+```
+
+Nothing told it to be bored. It looked at the same ground twice, found nothing
+new, and **boredom is what that situation produces** — so it moved. Nothing told
+it to be humble either: thin evidence met by correspondingly low confidence *is*
+humility, and the system appraises itself for that before you have to.
+
+```mermaid
+flowchart LR
+    R["Rank"] -->|"what did we find?"| A["Appraise"]
+    A -->|"so this is what<br/>it feels like"| F["Affective state"]
+    F -->|"so search<br/>differently"| M["Modulate"]
+    M --> T["Remember"]
+    T --> R
+    style A fill:#7c3aed,stroke:#5b21b6,color:#fff
+    style F fill:#dc2626,stroke:#b91c1c,color:#fff
+```
+
+| Feeling | Fires when | Changes |
+|---|---|---|
+| **curiosity** | Open gaps, neglected, high stakes | Widens the candidate pool |
+| **confusion** | Judges disagree, or answerability is low | Narrows, forces decomposition |
+| **boredom** | This ground is already mined | Suppresses duplicates, changes domain |
+| **hubris** | Confidence outran the evidence | **Makes the system go get literature** |
+| **frustration** | Repeated effort ruled nothing out | Stops the loop and records the dead end |
+
+> [!IMPORTANT]
+> **Affect moves search behaviour — never your scoring weights.**
+> Ranking stays a pure function of the `ValueProfile` you stated. Weight
+> modulation exists but is opt-in (`--affect-weights`), capped at ±0.08, and
+> every delta is listed in the output. Otherwise this tool would be smuggling
+> hidden values into the one thing built to refuse them.
+>
+> Every signal ships with its evidence. Affect you cannot audit is affect you
+> cannot trust.
+
+---
+
 ## Three things it does
 
 <table>
@@ -113,9 +179,9 @@ Then names the single observation worth making first.
 
 ### 🜂 Feel
 
-54 named emotions across 6 families, mixed into a **PAD mood + felt simulation**.
+Affect **derived from** what a run found, that **changes** what it does next, with a memory of where it has been.
 
-Detects when a mix pulls two ways — and says so instead of averaging it out.
+54 emotions, 6 families, auditable evidence on every signal.
 
 </td>
 </tr>
@@ -253,8 +319,8 @@ Sustained ambivalence is reported as an **honest state**, not an error to resolv
 flowchart LR
     CLI["⌨️ CLI<br/>emotions"] --> E(("Engine"))
     PY["🐍 Python<br/>CuriosityEngine"] --> E
-    MCP["🔗 MCP stdio<br/>21 tools · 4 tiers"] --> E
-    HTTP["🌐 HTTP<br/>33 routes"] --> E
+    MCP["🔗 MCP stdio<br/>22 tools · 4 tiers"] --> E
+    HTTP["🌐 HTTP<br/>34 routes"] --> E
     OAI["🤖 OpenAI tools<br/>function calling"] --> E
 
     style E fill:#059669,stroke:#047857,color:#fff
@@ -266,6 +332,7 @@ flowchart LR
 <br/>
 
 ```bash
+emotions explore --domain ai --steps 5                           # the curiosity loop
 emotions spark --domain biology --profile alignment_lab --json   # fast offline pack
 emotions run --domain ai --n 5 --no-literature --json            # full pipeline
 emotions decompose "Which mechanism explains X?" --depth 2       # go deeper
@@ -289,6 +356,7 @@ Domains: `ai` · `biology` · `physics` · `climate` · `medicine` · `materials
 from artificial_emotions import CuriosityConfig, CuriosityEngine, provoke
 from artificial_emotions.decompose import decompose_ranked
 from artificial_emotions.emotions import mix_emotions
+from artificial_emotions.explore import explore
 
 pack = provoke(domain="ai", n=5, fast=True, profile_name="alignment_lab")
 print(pack["inject"])                      # paste into any model's context
@@ -302,6 +370,10 @@ assert plan["assertion_free"] is True      # it never answered anything
 
 mood = mix_emotions({"curiosity": 60, "doubt": 40})
 print(mood["felt_simulation"]["inner_monologue"])
+
+trail = explore(domain="ai", steps=5)      # curiosity with a history
+for step in trail["trajectory"]["steps"]:
+    print(step["step"], step["primary_feeling"], "→", step["note"])
 ```
 
 </details>
@@ -326,7 +398,7 @@ emotions-mcp        # or: python -m artificial_emotions.mcp_server
 }
 ```
 
-**21 tools across 4 tiers.** Set `CURIOSITY_MCP_TIER=core|investigate|affect|research` to shrink the exposed surface for smaller context windows. Host-by-host setup in [docs/PLUGINS.md](docs/PLUGINS.md).
+**22 tools across 4 tiers.** Set `CURIOSITY_MCP_TIER=core|investigate|affect|research` to shrink the exposed surface for smaller context windows. Host-by-host setup in [docs/PLUGINS.md](docs/PLUGINS.md).
 
 </details>
 
@@ -344,6 +416,7 @@ emotions serve      # 127.0.0.1:8000 — interactive docs at /docs
 | `GET\|POST /v1/curiosity/provoke` | Fast investigation pack |
 | `POST /v1/curiosity/run` | Full ranking pipeline |
 | `POST /v1/curiosity/decompose` | Sub-questions, first step, falsifiers |
+| `POST /v1/curiosity/explore` | The full loop: appraise → feel → modulate → remember |
 | `POST /v1/emotions/mix` | Affect blend + felt simulation |
 | `GET /v1/agent` | Machine-readable capability **and honesty** guide |
 | `GET /v1/agent/tools` | OpenAI-compatible function schemas |
@@ -416,7 +489,7 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 421 tests · 88% · floor enforced
+pytest -q --cov --cov-report=term-missing     # 458 tests · 89% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 

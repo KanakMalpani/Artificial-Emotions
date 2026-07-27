@@ -24,6 +24,7 @@ EXPECTED_PATHS = {
     "/v1/agent/tools",
     "/v1/briefs/critique",
     "/v1/curiosity/decompose",
+    "/v1/curiosity/explore",
     "/v1/curiosity/provoke",
     "/v1/curiosity/run",
     "/v1/domains",

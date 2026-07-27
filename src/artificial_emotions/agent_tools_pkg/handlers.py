@@ -239,6 +239,35 @@ def handle_decompose_question(
     )
 
 
+def handle_explore_curiosity(
+    *,
+    domain: str = "ai",
+    topic: str = "",
+    steps: int = 5,
+    n_return: int = 5,
+    profile_name: str | None = None,
+    use_literature: bool = False,
+    allow_weight_deltas: bool = False,
+    allow_domain_jump: bool = True,
+    decompose_depth: int = 1,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Run the curiosity loop and return the trajectory."""
+    from artificial_emotions.explore import explore
+
+    return explore(
+        domain=domain,
+        topic=topic,
+        steps=int(steps or 5),
+        n_return=int(n_return or 5),
+        profile_name=profile_name,
+        use_literature=bool(use_literature),
+        allow_weight_deltas=bool(allow_weight_deltas),
+        allow_domain_jump=bool(allow_domain_jump),
+        decompose_depth=int(decompose_depth or 1),
+    )
+
+
 def handle_cross_model_vote(
     *,
     candidates: list[dict[str, Any]] | None = None,

@@ -19,6 +19,7 @@ from artificial_emotions.agent_tools_pkg.handlers import (
     handle_elicit_helpers,
     handle_emotion_catalog,
     handle_emotion_pack,
+    handle_explore_curiosity,
     handle_idea_graph,
     handle_list_domains,
     handle_list_epistemic_cues,
@@ -40,6 +41,7 @@ from artificial_emotions.agent_tools_pkg.schemas import (
     ELICIT_HELPERS_SCHEMA,
     EMOTION_CATALOG_SCHEMA,
     EMOTION_PACK_SCHEMA,
+    EXPLORE_SCHEMA,
     IDEA_GRAPH_SCHEMA,
     LIST_DOMAINS_SCHEMA,
     LIST_EPISTEMIC_CUES_SCHEMA,
@@ -151,6 +153,21 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": DECOMPOSE_SCHEMA,
         "handler": handle_decompose_question,
+    },
+    {
+        "name": "explore_curiosity",
+        "description": (
+            "Run the curiosity loop rather than a single ranking: each step ranks, "
+            "appraises what it found, feels something as a result, lets that change "
+            "how it searches next, and remembers where it has been. Returns the full "
+            "trajectory — every feeling, its evidence, and what it changed — ending "
+            "in a decomposed plan for the best unknown found. Affect moves search "
+            "behaviour only; ValueProfile weights stay untouched unless explicitly "
+            "allowed, and any delta is bounded and listed. Decision aid, not a "
+            "closed-loop scientist; related literature != answered still applies."
+        ),
+        "input_schema": EXPLORE_SCHEMA,
+        "handler": handle_explore_curiosity,
     },
     {
         "name": "cross_model_vote",
@@ -282,6 +299,7 @@ _TOOL_TIER: dict[str, str] = {
     "constitution_compare": "investigate",
     "critique_brief": "investigate",
     "decompose_question": "investigate",
+    "explore_curiosity": "research",
     "soundness_pass": "investigate",
     "cross_model_vote": "research",
     "export_idea_graph": "research",

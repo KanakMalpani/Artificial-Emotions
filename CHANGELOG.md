@@ -1,5 +1,50 @@
 # Changelog
 
+## Unreleased — the affect loop
+
+Affect stops being a label and starts being a cause.
+
+### Added
+- **`appraisal.py` — emotion as the output of evaluation.** Given what a run
+  actually encountered (open gaps, judge disagreement, thin evidence under high
+  confidence, ground already covered), it derives what the system should be
+  feeling and why. Every signal carries `because` and `evidence`: affect you
+  cannot audit is affect you cannot trust. Notably the system appraises *itself*
+  for `hubris` — high confidence on heuristic, literature-free evidence — and for
+  `humility` when thin evidence is met with correspondingly low confidence.
+- **`trajectory.py` — session memory.** Questions seen, vocabulary mined, dead
+  ends, surprises. Boredom is impossible without a past; this is the past.
+- **`modulate.py` — affect with consequences.** Curiosity widens the candidate
+  pool, confusion narrows and forces decomposition, boredom suppresses
+  duplicates and changes ground, hubris makes the system go and fetch
+  literature, frustration stops the loop and records the dead end.
+- **`explore.py` — the loop.** `rank → appraise → feel → modulate → remember`,
+  returning a research trajectory: every step, what it felt, the evidence, what
+  that changed, and a decomposed plan for the best unknown found. Offline and
+  deterministic. Surfaced as `emotions explore`, `POST /v1/curiosity/explore`,
+  and MCP tool `explore_curiosity`.
+
+### Honesty
+- **Affect modulates search behaviour, never the stated scoring weights.**
+  Ranking remains a pure function of the supplied `ValueProfile`. Weight
+  modulation is opt-in (`allow_weight_deltas`), capped at `MAX_WEIGHT_DELTA`
+  (±0.08, the same ceiling the preference-hint path uses), and every delta is
+  reported. Both directions are pinned by tests — the default leaves the profile
+  untouched, and the opt-in path stays bounded and logged.
+- `explore` disclaims what it is not: no answers, no optimal search, no
+  closed-loop scientist, no biological emotion.
+
+### Fixed
+- Term saturation was measured *after* folding the current run into memory, so
+  every step scored as already-seen against its own vocabulary and boredom
+  pinned high from step one. Memory is now snapshotted before the fold.
+- Step notes named the loudest feeling rather than the one that actually moved
+  the knob (`determination` forced decomposition while the note credited
+  `curiosity`). Notes now report the real driver.
+
+### Internal
+- 458 tests, 89% coverage. `modulate.py` at 100%.
+
 ## Unreleased — Artificial Emotions
 
 ### Renamed

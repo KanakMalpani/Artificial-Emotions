@@ -246,6 +246,27 @@ DECOMPOSE_SCHEMA: dict[str, Any] = {
 }
 
 
+EXPLORE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "domain": {"type": "string", "enum": _DOMAIN_ENUM, "default": "ai"},
+        "topic": {"type": "string", "default": ""},
+        "steps": {"type": "integer", "minimum": 1, "maximum": 12, "default": 5},
+        "n_return": {"type": "integer", "minimum": 1, "maximum": 16, "default": 5},
+        "profile_name": {"type": "string", "enum": _PROFILE_ENUM},
+        "use_literature": {"type": "boolean", "default": False},
+        "allow_weight_deltas": {
+            "type": "boolean",
+            "default": False,
+            "description": "Let affect nudge ValueProfile weights (bounded, logged).",
+        },
+        "allow_domain_jump": {"type": "boolean", "default": True},
+        "decompose_depth": {"type": "integer", "minimum": 1, "maximum": 3, "default": 1},
+    },
+    "additionalProperties": False,
+}
+
+
 CROSS_MODEL_VOTE_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {

@@ -29,6 +29,11 @@
 | diversity | `diversity.py` | Near-dup suppression |
 | brief | `brief.py` | Investigation briefs |
 | decompose | `decompose.py` | Curiosity depth: sub-questions, first step, falsifiers, stop rules |
+| appraisal | `appraisal.py` | Derives affect *from* a run — emotion as output, with evidence |
+| trajectory | `trajectory.py` | Session memory: seen ids, mined terms, dead ends, surprises |
+| modulate | `modulate.py` | Bounded, logged config changes driven by affect |
+| explore | `explore.py` | The loop: appraise → feel → modulate → remember |
+| affect | `affect.py` | PAD mood, felt simulation, blends and tension |
 | pipeline | `pipeline.py` | Orchestration (`CuriosityEngine`) |
 | provoke | `provoke.py` | Instant spark + inject pack |
 | emotions | `emotions.py` | Catalog / mix / cues (`annotation_only` + `computational_affect`) |
@@ -57,9 +62,8 @@ split by concern:
 | `api_pkg/routers/meta.py` | `/`, `/health`, `/ready`, `/v1/agent`, `/v1/domains` |
 | `api_pkg/routers/profiles.py` | `/v1/profiles`, compare, constitution-compare |
 | `api_pkg/routers/curiosity.py` | `/v1/curiosity/run`, `/v1/curiosity/provoke` |
-| `api_pkg/routers/evaluation.py` | also `/v1/curiosity/decompose` |
 | `api_pkg/routers/preferences.py` | `/v1/preferences/*` |
-| `api_pkg/routers/evaluation.py` | `/v1/evals/*`, worksheets, brief critique |
+| `api_pkg/routers/evaluation.py` | `/v1/evals/*`, worksheets, brief critique, `/v1/curiosity/decompose`, `/v1/curiosity/explore` |
 | `api_pkg/routers/emotions.py` | `/v1/emotions/*` and the `/v1/epistemic/*` alias |
 
 Routers spell out full paths (no `prefix=`) so any route can be found by
@@ -104,11 +108,31 @@ schemas.py → handlers.py → registry.py → mcp_resources.py
 `TOOL_SPECS` is the single source of truth: the MCP tool list, the OpenAI tool
 list, and dispatch all derive from it.
 
+## The affect loop
+
+Elsewhere the affect layer renders weights you supply. The loop inverts that:
+
+```
+rank → appraise → feel → modulate → remember → rank
+```
+
+| Stage | Module | Contract |
+|-------|--------|----------|
+| Appraise | `appraisal.py` | Every signal carries `because` + `evidence`. Deterministic. |
+| Feel | `emotions.py` / `affect.py` | Signals become a mix with PAD, triads, ambivalence. |
+| Modulate | `modulate.py` | Changes **search behaviour**. ValueProfile weights untouched unless `allow_weight_deltas`, then capped at `MAX_WEIGHT_DELTA` and listed. |
+| Remember | `trajectory.py` | Boredom needs a past; this is that past. |
+
+**Trust boundary.** Ranking must stay a function of the stated `ValueProfile`.
+Affect therefore moves breadth, literature use, decomposition and choice of
+ground — not the scoring weights. `tests/test_explore_loop.py` pins that
+invariant both ways.
+
 ## Product surfaces
 
 | Surface | Entry |
 |---------|--------|
-| CLI | `curiosity` |
+| CLI | `emotions` |
 | MCP | `emotions-mcp` |
 | HTTP | `emotions serve` → `:8000` |
 | OpenAI tools | `GET /v1/agent/tools` or `examples/openai_tools.json` |
