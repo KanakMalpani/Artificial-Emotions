@@ -25,6 +25,7 @@ from artificial_emotions.cli_pkg.commands import (
     _serve,
     _spark,
     _surprise_worksheet,
+    _validate,
     _voi_worksheet,
 )
 from artificial_emotions.cli_pkg.parser import build_parser
@@ -47,6 +48,7 @@ _DISPATCH: dict[str, Handler] = {
     "surprise-worksheet": _surprise_worksheet,
     "eval": _eval,
     "explore": _explore,
+    "validate": _validate,
     "emotions": _emotions,
     "epistemic": _emotions,
 }

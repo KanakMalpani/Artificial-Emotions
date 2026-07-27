@@ -1,5 +1,37 @@
 # Changelog
 
+## Unreleased — discovery, and evidence that it works
+
+### Added
+- **`validate.py` — retrospective validation.** The repo's one falsifiable claim
+  about its own usefulness. Hide everything from a cutoff year onward, run ABC
+  discovery on the past alone, then check which proposed A–C links actually
+  appear in the held-out future. On the bundled time-split corpus, discovery from
+  pre-1986 literature proposes fish oil → Raynaud's and finds it confirmed
+  post-1986 — the case Swanson actually got right, reproduced as a test.
+- **A random-pairing baseline, and lift.** A bare hit rate is precisely the
+  vanity metric `evals/METHODOLOGY.md` forbids: on a dense corpus you could
+  "confirm" most random pairs and look brilliant. Every run therefore pairs A
+  against randomly drawn concepts from the same pool and measures how often those
+  land. `test_lift_falls_to_chance_when_the_future_confirms_everything` asserts
+  lift collapses to 1.0 when a dense future confirms everything, so the metric
+  cannot quietly become flattery.
+- The control pool is *not* filtered to exclude concepts the method also
+  proposed, so it can score its own hits. That makes lift a floor rather than a
+  ceiling — the conservative direction to err in, and it is stated in the report.
+- `emotions validate --corpus … --cutoff … --seeds …`, plus a bundled time-split
+  demo corpus shipped in the wheel.
+
+### Honesty
+- The report disclaims being a benchmark, claiming significance at this sample
+  size, attributing confirmed links to anything the method knew, or generalising
+  beyond the supplied corpus.
+- The bundled corpora are small illustrative fixtures that demonstrate the
+  mechanism. They are not scraped datasets and are not evidence about any field.
+
+### Internal
+- 510 tests, 88% coverage.
+
 ## Unreleased — the affect loop
 
 Affect stops being a label and starts being a cause.

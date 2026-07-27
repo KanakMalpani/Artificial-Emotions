@@ -30,6 +30,7 @@ _REQUIRED_FILES = [
     "examples/elicit_ab_sample_responses.json",
     "examples/voi_worksheet_template.json",
     "examples/discovery_corpus_demo.json",
+    "examples/discovery_corpus_timesplit_demo.json",
     "evals/fixtures/cooccur_neglectedness_smoke_v1.json",
 ]
 

@@ -193,6 +193,17 @@ def build_parser() -> argparse.ArgumentParser:
     critique_p.add_argument("--why", default="", dest="why_it_matters")
     critique_p.add_argument("--json", action="store_true")
 
+    validate_p = sub.add_parser(
+        "validate",
+        help="Retrospective validation: does past-only discovery predict the future?",
+    )
+    validate_p.add_argument("--corpus", required=True, help="Corpus with year + concepts")
+    validate_p.add_argument("--cutoff", type=int, required=True, help="Hold out this year onward")
+    validate_p.add_argument("--seeds", required=True, help="Comma-separated seed concepts")
+    validate_p.add_argument("--n", type=int, default=5, help="Max proposals per seed")
+    validate_p.add_argument("--baseline", type=int, default=5, help="Random control pairs per seed")
+    validate_p.add_argument("--json", action="store_true")
+
     discover_p = sub.add_parser(
         "discover",
         help="Find links nobody has studied, from real literature (needs network)",

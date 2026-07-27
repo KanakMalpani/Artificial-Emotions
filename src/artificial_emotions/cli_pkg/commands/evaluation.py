@@ -135,3 +135,41 @@ def _eval(args: argparse.Namespace) -> int:
             mark = "OK" if r.match else "MISS"
             print(f"  [{mark}] {r.case_id}: gold={r.gold_status} pred={r.predicted_status}")
     return 0
+
+
+def _validate(args: argparse.Namespace) -> int:
+    """Retrospective validation: did past-only discovery predict the future?"""
+    from artificial_emotions.validate import validate_retrospective
+
+    report = validate_retrospective(
+        args.corpus,
+        seeds=[s.strip() for s in args.seeds.split(",") if s.strip()],
+        cutoff_year=args.cutoff,
+        max_links_per_seed=args.n,
+        baseline_samples_per_seed=args.baseline,
+    )
+    payload = report.to_dict()
+    if args.json:
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    print(f"\nRetrospective validation — {report.summary()}\n")
+    if not report.proposals:
+        print("  No proposals from the pre-cutoff slice. Try an earlier cutoff,")
+        print("  a different seed, or a corpus with more pre-cutoff coverage.")
+        return 0
+
+    print("  Proposed from pre-cutoff literature, checked against held-out future:")
+    for p in payload["proposals"]:
+        mark = "CONFIRMED" if p["confirmed"] else "    —    "
+        print(f"    [{mark}] {p['a']} --[{p['b']}]--> {p['c']}")
+        print(f"                future co-occurrence: {p['future_cooccurrence']}")
+
+    base = payload["baseline_hit_rate"]
+    lift = payload["lift_over_baseline"]
+    print(f"\n  hit rate {payload['hit_rate']}  vs  random-pairing baseline {base}")
+    if lift is not None:
+        print(f"  lift: {lift}x over chance")
+    print(f"\n  {payload['baseline_note']}")
+    print(f"\n  Not claimed: {payload['claims_not'][0]}.")
+    return 0

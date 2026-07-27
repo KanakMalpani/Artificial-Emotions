@@ -7,13 +7,13 @@
 *A curiosity engine that ranks what we don't yet know — then decomposes it into something you can actually go and test.*
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-458%20passing-brightgreen.svg)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](pyproject.toml)
+[![Tests](https://img.shields.io/badge/tests-510%20passing-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Offline first](https://img.shields.io/badge/offline-no%20API%20key%20needed-8A2BE2.svg)](#the-60-second-demo)
 
-[**Quickstart**](#the-60-second-demo) · [**The loop**](#-the-loop-curiosity-with-causes-and-consequences) · [**Go deeper**](#-going-deeper-decompose) · [**Affect**](#-computational-affect) · [**Surfaces**](#-use-it-from-anywhere) · [**Docs**](docs/INDEX.md)
+[**Quickstart**](#the-60-second-demo) · [**Discover**](#-it-generates-questions-nobody-wrote--and-can-show-the-method-works) · [**The loop**](#-the-loop-curiosity-with-causes-and-consequences) · [**Go deeper**](#-going-deeper-decompose) · [**Affect**](#-computational-affect) · [**Surfaces**](#-use-it-from-anywhere) · [**Docs**](docs/INDEX.md)
 
 </div>
 
@@ -63,6 +63,69 @@ emotions spark --domain ai --n 5 --json
 ```
 
 Look at what it volunteered about itself: **confidence 0.242**, flagged `heuristic_scoring`, flagged `no_literature`, gap status hedged to `unknown_with_caveat`. It tells you how much to trust it before you think to ask.
+
+---
+
+## 🔭 It generates questions nobody wrote — and can show the method works
+
+Ranking a list someone typed cannot surprise you. So the engine also **generates**
+candidates from literature itself, using **Swanson ABC linking**: if one body of
+work ties A to B, and another ties B to C, but A and C are essentially never
+studied together, then *"does A affect C via B?"* is an open question with the
+bridge and the papers as evidence.
+
+Swanson used exactly this to propose fish oil for Raynaud's (1986) and magnesium
+for migraine (1988) — both from disconnected literatures, both later supported.
+
+```bash
+emotions discover "Fish oil" --corpus examples/discovery_corpus_demo.json
+```
+
+```
+Fish oil  --[Blood viscosity]-->  Raynaud disease
+    co-occurrence: 0 works   gap: 0.141421
+    Q: Does Fish oil influence Raynaud disease, and is Blood viscosity the mechanism?
+    evidence A-B: Dietary fish oil reduces blood viscosity in healthy volunteers
+    evidence B-C: Blood viscosity abnormalities in Raynaud's syndrome
+```
+
+**No provider lock-in, no network required.** `DiscoveryClient` is a Protocol —
+run it against a corpus you supply (reading list, BibTeX export, proceedings
+dump) with zero API calls. OpenAlex is one optional backend, with caching.
+
+### Then prove it, don't assert it
+
+Hide everything after a cutoff year, discover from the past alone, and check
+which proposals show up in the held-out future:
+
+```bash
+emotions validate --corpus examples/discovery_corpus_timesplit_demo.json \
+                  --cutoff 1986 --seeds "Fish oil"
+```
+
+```
+cutoff 1986: 14 past docs → 3 proposals, 2 confirmed in 6 held-out docs
+             hit_rate=0.67 | baseline=0.20 | lift=3.33x
+
+  [CONFIRMED] Fish oil --[Blood viscosity]--> Raynaud disease
+  [    —    ] Fish oil --[Plasma lipids]--> Dietary fibre
+  [CONFIRMED] Fish oil --[Blood viscosity]--> Vasospasm
+```
+
+> [!IMPORTANT]
+> **A hit rate alone would be the vanity metric this repo forbids.** With a dense
+> corpus you could "confirm" most random pairs and look brilliant. So every run
+> also pairs A against randomly drawn concepts and measures how often *those*
+> land. **Lift is the honest number**; lift near 1.0 means the method is doing
+> nothing that shuffling would not — and there is a test asserting exactly that
+> collapse happens when the future confirms everything.
+>
+> The random pool isn't filtered to exclude concepts the method also proposed, so
+> the control can score its own hits. That makes lift a **floor, not a ceiling**.
+
+This is one corpus at one cutoff, at small N — evidence, not a benchmark, and the
+report says so. But it is a *falsifiable* claim about the method working, which
+is more than this field usually offers.
 
 ---
 
@@ -332,6 +395,8 @@ flowchart LR
 <br/>
 
 ```bash
+emotions discover "Fish oil" --corpus corpus.json                 # generate new questions
+emotions validate --corpus corpus.json --cutoff 1986 --seeds "Fish oil"   # prove the method
 emotions explore --domain ai --steps 5                           # the curiosity loop
 emotions spark --domain biology --profile alignment_lab --json   # fast offline pack
 emotions run --domain ai --n 5 --no-literature --json            # full pipeline
@@ -489,7 +554,7 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 458 tests · 89% · floor enforced
+pytest -q --cov --cov-report=term-missing     # 510 tests · 88% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 

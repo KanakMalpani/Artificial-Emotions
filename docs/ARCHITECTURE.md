@@ -33,6 +33,8 @@
 | trajectory | `trajectory.py` | Session memory: seen ids, mined terms, dead ends, surprises |
 | modulate | `modulate.py` | Bounded, logged config changes driven by affect |
 | explore | `explore.py` | The loop: appraise → feel → modulate → remember |
+| discover | `discover.py` | Swanson ABC linking — generates questions from a corpus |
+| validate | `validate.py` | Time-split retrospective validation with a random baseline |
 | affect | `affect.py` | PAD mood, felt simulation, blends and tension |
 | pipeline | `pipeline.py` | Orchestration (`CuriosityEngine`) |
 | provoke | `provoke.py` | Instant spark + inject pack |
