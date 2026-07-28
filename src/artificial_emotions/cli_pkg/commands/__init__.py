@@ -17,6 +17,7 @@ from artificial_emotions.cli_pkg.commands.ranking import (
     _run_engine,
     _serve,
     _spark,
+    _stance,
 )
 from artificial_emotions.cli_pkg.commands.worksheets import (
     _critique_brief,
@@ -38,6 +39,7 @@ __all__ = [
     "_run_engine",
     "_serve",
     "_spark",
+    "_stance",
     "_validate",
     "_surprise_worksheet",
     "_voi_worksheet",

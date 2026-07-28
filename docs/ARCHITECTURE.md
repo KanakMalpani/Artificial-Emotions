@@ -33,6 +33,7 @@
 | trajectory | `trajectory.py` | Session memory: seen ids, mined terms, dead ends, surprises |
 | modulate | `modulate.py` | Bounded, logged config changes driven by affect |
 | explore | `explore.py` | The loop: appraise → feel → modulate → remember |
+| stances | `stances.py` | Seven non-curiosity questions over one ranked set — views, never re-rankings |
 | discover | `discover.py` | Swanson ABC linking — generates questions from a corpus |
 | validate | `validate.py` | Time-split retrospective validation with a random baseline |
 | affect | `affect.py` | PAD mood, felt simulation, blends and tension |
@@ -129,6 +130,34 @@ rank → appraise → feel → modulate → remember → rank
 Affect therefore moves breadth, literature use, decomposition and choice of
 ground — not the scoring weights. `tests/test_explore_loop.py` pins that
 invariant both ways.
+
+### Stances: the second way an emotion can matter
+
+Modulation is emotion as a *modifier* on curiosity's search. That leaves every
+emotion that has nothing useful to say about breadth or literature with no job —
+which is how a 54-entry catalog becomes furniture.
+
+A **stance** is the other option: the emotion becomes the question itself. Same
+ranked set, a different thing asked of it.
+
+| Stance | Asks | Driven by |
+|--------|------|-----------|
+| `doubt` | Which of these am I most likely to be wrong about? | skepticism, suspicion, hubris, humility |
+| `safety` | Which could hurt someone, and who reviews it? | anxiety, reluctance, compassion |
+| `focus` | If I could only pursue one, what exactly would I do first? | absorption, determination, persistence |
+| `close` | What should we stop doing, and what do we write down? | disappointment, resignation, satisfaction |
+| `taste` | Which are badly posed, regardless of whether they matter? | elegance, parsimony, dissonance, clarity |
+| `wonder` | What is most surprising, regardless of whether it is valuable? | wonder, surprise, insight, interest, enjoyment, uncertainty |
+| `survey` | Who already owns this ground? | respect, envy, recognition |
+
+**Second trust boundary.** A stance is a *view*. It never rescores or reorders
+the ranked set it was handed — every payload carries
+`honesty: "stance_view_only"` and disclaims re-ranking, and
+`tests/test_stances.py` asserts the input ordering is byte-identical afterwards.
+
+`tests/test_appraisal_coverage.py` closes the loop: **every** appraisable emotion
+must either modulate search or drive a stance. Being named and disclaimed does
+not count as a use.
 
 ## Product surfaces
 

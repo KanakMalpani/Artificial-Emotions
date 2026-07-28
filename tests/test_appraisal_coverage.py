@@ -9,7 +9,9 @@ make that state unreachable:
 * every rule must **matter** — it either changes behaviour in ``modulate`` or is
   explicitly declared ``OBSERVATION_ONLY``;
 * every appraisable emotion must **exist in the catalog**, so appraisal cannot
-  invent vocabulary the mixer does not know.
+  invent vocabulary the mixer does not know;
+* every appraisable emotion must **have a use** — it steers the search, or it
+  drives a stance. Being named and disclaimed is not a use.
 """
 
 from __future__ import annotations
@@ -29,6 +31,7 @@ from artificial_emotions.emotions import emotion_catalog
 from artificial_emotions.models import CuriosityConfig
 from artificial_emotions.modulate import modulate_config
 from artificial_emotions.pipeline import CuriosityEngine
+from artificial_emotions.stances import STANCES
 
 CATALOG_IDS = {e["id"] for e in emotion_catalog()["emotions"]}
 
@@ -165,6 +168,11 @@ def _modulating_emotions() -> set[str]:
     return {e for e in RULES if f'"{e}"' in source}
 
 
+def _stance_driving_emotions() -> set[str]:
+    """Emotions that are the *point* of a stance rather than a modifier on search."""
+    return {e for stance in STANCES.values() for e in stance.driving_emotions}
+
+
 def test_every_appraisable_emotion_either_acts_or_is_declared_observation_only():
     """The anti-decoration rule: derive it, then either use it or say you won't."""
     acting = _modulating_emotions()
@@ -172,6 +180,47 @@ def test_every_appraisable_emotion_either_acts_or_is_declared_observation_only()
     assert not unaccounted, (
         f"{sorted(unaccounted)} are appraised but neither change behaviour nor are "
         "listed in OBSERVATION_ONLY — that is how a catalog becomes decoration."
+    )
+
+
+def test_every_emotion_has_a_use_not_merely_a_disclaimer():
+    """The stronger claim, and the one users actually care about.
+
+    ``OBSERVATION_ONLY`` is an honest label, but on its own it is still a catalog
+    of things the system names and never uses. Stances closed that gap: an
+    emotion that does not steer the search must at least be the question some
+    stance asks. Nothing is allowed to be merely observed.
+    """
+    useful = _modulating_emotions() | _stance_driving_emotions()
+    homeless = set(RULES) - useful
+    assert not homeless, (
+        f"{sorted(homeless)} are appraised but do nothing — they neither modulate "
+        "search nor drive a stance. Give them a use or drop the rule."
+    )
+
+
+def test_stances_only_claim_emotions_the_system_can_actually_appraise():
+    """A stance driven by a feeling that never fires is a marketing claim."""
+    invented = _stance_driving_emotions() - set(RULES)
+    assert not invented, f"stances claim {sorted(invented)}, which appraisal never derives"
+
+
+def test_stances_reach_past_curiosity():
+    """Curiosity already had a surface. The stances exist for everything else."""
+    drivers = _stance_driving_emotions()
+    assert "curiosity" not in drivers, (
+        "a stance is driven by curiosity — that is the ranking's job, not a stance's"
+    )
+    assert len(STANCES) >= MIN_STANCES, f"only {len(STANCES)} stances"
+    assert len(drivers) >= MIN_STANCE_DRIVERS, f"only {len(drivers)} emotions drive a stance"
+
+
+def test_observation_only_emotions_still_have_somewhere_to_go():
+    """Every emotion the loop refuses to act on must at least answer some question."""
+    stranded = OBSERVATION_ONLY - _stance_driving_emotions()
+    assert not stranded, (
+        f"{sorted(stranded)} are appraised, deliberately never acted on, and drive no "
+        "stance — appraising them is pure decoration."
     )
 
 
@@ -189,6 +238,8 @@ MIN_CATALOG_SHARE = 0.62
 MIN_ACTING = 20
 MIN_FIRING_OFFLINE = 8
 MIN_DISTINCT_DRIVERS_PER_RUN = 3
+MIN_STANCES = 7
+MIN_STANCE_DRIVERS = 24
 
 
 def test_a_meaningful_share_of_the_catalog_is_reachable():

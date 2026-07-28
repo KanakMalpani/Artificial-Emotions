@@ -1,5 +1,59 @@
 # Changelog
 
+## Unreleased — stances: curiosity is not the only useful feeling
+
+Widening appraisal made 37 emotions *derivable* and 22 of them able to change
+search behaviour. It did not change the fact that every entry point in the repo
+asked one question: **"what is most worth investigating?"** Emotions other than
+curiosity could only ever be modifiers on that — and the 15 declared
+`OBSERVATION_ONLY` could not even do that. They were named, disclaimed, and
+otherwise idle.
+
+### Added
+- **`stances.py` — seven non-curiosity questions over one ranked set.** A stance
+  does not rank; it reads an existing ranking looking for something else.
+  `doubt` (which of these am I most likely to be wrong about?), `safety` (which
+  could hurt someone, and who reviews it?), `focus` (if only one, what exactly
+  do I do first?), `close` (what do we stop doing, and what do we write down?),
+  `taste` (which are badly posed, regardless of whether they matter?), `wonder`
+  (what is most surprising, regardless of whether it is valuable?), `survey`
+  (who already owns this ground?).
+- **`wonder` deliberately ignores your ValueProfile.** It ranks on surprise and
+  neglectedness alone, then reports where that *disagrees* with your values — a
+  profile that never surprises you is filtering something out, and this is how
+  you find out. It is the only surface here that is allowed to not care what you
+  said you wanted.
+- **Every appraisable emotion now has a use.** 22 modulate search, 26 drive a
+  stance, and the union is 37 of 37. The six that had neither — `enjoyment`,
+  `insight`, `interest`, `surprise`, `uncertainty`, `wonder` — drive the `wonder`
+  stance.
+- Surfaces: `emotions stance <name>` and `emotions stance list` (CLI),
+  `list_stances` / `apply_stance` (MCP + OpenAI tools), `GET /v1/stances` and
+  `GET /v1/stances/{stance}` (HTTP).
+- **`tests/test_stances.py`** — guards the two ways this could rot: a stance that
+  agrees with the curiosity ranking on everything is decoration, and a stance
+  that quietly reorders the set would make the ValueProfile a lie. Also asserts
+  `taste` actually fails a malformed question rather than rubber-stamping.
+
+### Honesty
+- **A stance is a view, never a verdict.** It cannot rescore or reorder anything.
+  Every payload carries `honesty: "stance_view_only"` and explicitly disclaims
+  re-ranking; a test asserts the input ordering is unchanged afterwards.
+- No stance is driven by `curiosity` — that is the ranking's job, and a test
+  enforces it. Stances exist for the questions ranking cannot answer.
+
+### Changed
+- The anti-decoration guard now makes the **stronger** claim. It previously
+  accepted `OBSERVATION_ONLY` as sufficient justification for an emotion
+  existing; that is an honest label but still describes something the system
+  names and never uses. It now requires every appraisable emotion to modulate
+  search *or* drive a stance, and separately checks that no observation-only
+  emotion is left stranded without one. Floors: 7 stances, 24 stance drivers.
+- Fixed the CLI stance printer repeating a whole list per row instead of the row.
+
+### Internal
+- 616 tests.
+
 ## Unreleased — the whole catalog earns its keep
 
 54 emotions existed; **four** ever fired. The rest were furniture.

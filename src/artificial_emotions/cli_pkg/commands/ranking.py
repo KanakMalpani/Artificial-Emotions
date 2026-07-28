@@ -64,6 +64,7 @@ def _serve(args: argparse.Namespace) -> int:
         f"  Instant spark: GET /v1/curiosity/provoke?domain=ai&n=5\n"
         f"  Emotions:      GET /v1/emotions/catalog  POST /v1/emotions/mix\n"
         f"                 GET /v1/emotions/cues  POST /v1/emotions/annotate\n"
+        f"  Stances:       GET /v1/stances  GET /v1/stances/doubt?domain=ai\n"
         f"  Agent guide:   GET /v1/agent\n"
         f"  Agent tools:   GET /v1/agent/tools\n"
         f"  Profiles:      GET /v1/profiles\n"
@@ -201,5 +202,78 @@ def _discover(args: argparse.Namespace) -> int:
         print()
 
     print(payload["how_to_read"])
+    print(f"\nNot claimed: {payload['claims_not'][0]}.")
+    return 0
+
+
+def _stance(args: argparse.Namespace) -> int:
+    """Look at a ranked set through one emotional stance."""
+    from artificial_emotions.stances import apply_stance, list_stances
+
+    if args.stance_name in (None, "list"):
+        catalog = list_stances()
+        if args.json:
+            print(json.dumps(catalog, indent=2))
+            return 0
+        print("\nStances — different questions to ask of the same ranked set\n")
+        for s in catalog["stances"]:
+            print(f"  {s['stance']:8} {s['asks']}")
+            print(f"           use when: {s['use_when']}")
+            print(f"           driven by: {', '.join(s['driving_emotions'])}\n")
+        print(catalog["note"])
+        return 0
+
+    profile = resolve_value_profile(profile_name=args.profile)
+    items = CuriosityEngine(
+        CuriosityConfig(
+            domain=args.domain,
+            topic=args.topic,
+            n_return=args.n,
+            use_llm=False,
+            use_literature=args.literature,
+            value_profile=profile,
+        )
+    ).run()
+    payload = apply_stance(args.stance_name, items)
+
+    if args.json:
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    print(f"\n[{payload['stance']}]  {payload['asks']}")
+    print(f"driven by: {', '.join(payload['driving_emotions'])}\n")
+    view = payload["view"]
+    for key, value in view.items():
+        if key == "note":
+            continue
+        if isinstance(value, list):
+            for row in value:
+                if isinstance(row, dict):
+                    head = row.get("question") or row.get("term") or str(row)
+                    print(f"  · {str(head)[:88]}")
+                    for field_name in (
+                        "doubt_score",
+                        "risk_axis",
+                        "form_score",
+                        "crowding",
+                        "reason",
+                        "needs_human_review",
+                    ):
+                        if field_name in row:
+                            print(f"      {field_name}: {row[field_name]}")
+                    for list_field in ("reasons_to_distrust", "problems", "flags"):
+                        for entry in row.get(list_field) or []:
+                            print(f"      - {entry}")
+                    if row.get("advice"):
+                        print(f"      → {row['advice']}")
+                else:
+                    print(f"  · {row}")
+            print()
+        elif isinstance(value, dict) and key == "target":
+            print(f"  target: {value['question']}\n")
+        elif not isinstance(value, dict):
+            print(f"  {key}: {value}\n")
+    if view.get("note"):
+        print(view["note"])
     print(f"\nNot claimed: {payload['claims_not'][0]}.")
     return 0

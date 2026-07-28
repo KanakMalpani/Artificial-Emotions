@@ -5,7 +5,7 @@ Product documentation for **Artificial Emotions** (v0.4.0). Start at the root [R
 | Doc | Purpose |
 |-----|---------|
 | [PLUGINS.md](PLUGINS.md) | MCP / HTTP / OpenAI tools / CLI install |
-| [EMOTIONS.md](EMOTIONS.md) | Epistemic cues, catalog, % mixes — annotation only (does not feel) |
+| [EMOTIONS.md](EMOTIONS.md) | Epistemic cues, catalog, % mixes, and the seven stances — annotation only (does not feel) |
 | [LIMITS.md](LIMITS.md) | Honest bounds — what works, what doesn’t |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Pipeline modules and trust boundaries |
 | [PROOFS.md](PROOFS.md) | Demo commands for verified behaviors |

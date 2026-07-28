@@ -49,6 +49,8 @@ EXPECTED_PATHS = {
     "/v1/profiles",
     "/v1/profiles/compare",
     "/v1/profiles/constitution-compare",
+    "/v1/stances",
+    "/v1/stances/{stance}",
     "/v1/surprise/worksheet",
     "/v1/voi/worksheet",
 }

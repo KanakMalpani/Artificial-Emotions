@@ -156,6 +156,42 @@ MCP tools: `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_e
 
 `emotions spark` / `GET /v1/curiosity/provoke` already attach `epistemic_cues` on each unknown and include anti-anthropomorphism framing in `inject`. The `/v1/emotions/*` surface makes the same vocabulary usable **without** running a full spark — e.g. annotate a draft question, pull the catalog, or author a percentage mix for inject context.
 
+## Stances: when an emotion is the question
+
+Mixing tells you what a run *felt like*. Modulation lets a feeling change how the
+search proceeds. Neither gives a job to the emotions that have nothing useful to
+say about breadth or literature — aesthetic pull, social comparison, the pull of
+sheer novelty.
+
+A **stance** is the third option: the emotion becomes the question you ask of an
+existing ranked set.
+
+```bash
+emotions stance list                       # what each one asks
+emotions stance doubt --domain ai --n 5
+emotions stance safety --domain medicine
+```
+
+| Stance | Asks | Driven by |
+|--------|------|-----------|
+| `doubt` | Which of these am I most likely to be wrong about? | skepticism, suspicion, hubris, humility |
+| `safety` | Which could hurt someone, and who reviews it? | anxiety, reluctance, compassion |
+| `focus` | If I could only pursue one, what exactly would I do first? | absorption, determination, persistence |
+| `close` | What should we stop doing, and what do we write down? | disappointment, resignation, satisfaction |
+| `taste` | Which are badly posed, regardless of whether they matter? | elegance, parsimony, dissonance, clarity |
+| `wonder` | What is most surprising, regardless of whether it is valuable? | wonder, surprise, insight, interest, enjoyment, uncertainty |
+| `survey` | Who already owns this ground? | respect, envy, recognition |
+
+**Honesty.** A stance is a *view*, never a verdict. It cannot rescore or reorder
+anything — the ValueProfile ordering you were given survives untouched, every
+payload carries `honesty: "stance_view_only"`, and a test asserts it. None is
+driven by `curiosity`: that is the ranking's job.
+
+`wonder` is the deliberate exception to deference. It ignores your ValueProfile
+entirely, ranks on surprise and neglectedness, and reports where it disagrees
+with your stated values — because a profile that never surprises you is filtering
+something out.
+
 ## Anti-anthropomorphism
 
 Do **not** market mixes or tags as “the AI is 40% curious / confused / in awe.” Prefer:

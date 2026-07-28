@@ -200,6 +200,15 @@ def agent_manifest() -> dict[str, Any]:
             "path": "/v1/briefs/critique",
             "note": "Form-only critic — does not re-rank.",
         },
+        "stances": {
+            "method": "GET",
+            "path": "/v1/stances  ·  /v1/stances/{stance}",
+            "note": (
+                "Ask a ranked set a different question than 'what is most valuable': "
+                "doubt, safety, focus, close, taste, wonder, survey. A view over the "
+                "existing ranking — never a re-ranking, nothing is rescored."
+            ),
+        },
         "voi_worksheet": {
             "method": "POST",
             "path": "/v1/voi/worksheet",

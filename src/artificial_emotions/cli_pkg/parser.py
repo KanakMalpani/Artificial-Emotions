@@ -193,6 +193,23 @@ def build_parser() -> argparse.ArgumentParser:
     critique_p.add_argument("--why", default="", dest="why_it_matters")
     critique_p.add_argument("--json", action="store_true")
 
+    stance_p = sub.add_parser(
+        "stance",
+        help="Ask a different question of a ranked set (doubt, safety, focus, close, taste, survey)",
+    )
+    stance_p.add_argument(
+        "stance_name",
+        nargs="?",
+        default="list",
+        help="Stance name, or omit to list them",
+    )
+    stance_p.add_argument("--domain", default="ai", choices=[d.value for d in Domain])
+    stance_p.add_argument("--topic", default="")
+    stance_p.add_argument("--n", type=int, default=6)
+    stance_p.add_argument("--profile", default="humanity_default")
+    stance_p.add_argument("--literature", action="store_true")
+    stance_p.add_argument("--json", action="store_true")
+
     validate_p = sub.add_parser(
         "validate",
         help="Retrospective validation: does past-only discovery predict the future?",

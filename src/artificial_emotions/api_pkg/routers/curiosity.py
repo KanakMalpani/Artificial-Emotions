@@ -91,3 +91,36 @@ def provoke_get(
         judge_model=judge_model,
         diversity_backend=diversity_backend,
     )
+
+
+@router.get("/v1/stances")
+def list_stances_route() -> dict[str, Any]:
+    """The stances and what each one is for."""
+    from artificial_emotions.stances import list_stances
+
+    return list_stances()
+
+
+@router.get("/v1/stances/{stance}")
+def apply_stance_route(
+    stance: str,
+    domain: str = Query("ai"),
+    topic: str = Query(""),
+    n: int = Query(6, ge=1, le=16),
+    profile_name: str | None = Query(None),
+    use_literature: bool = Query(False),
+) -> dict[str, Any]:
+    """Rank once, then read the result through one stance instead of curiosity."""
+    from artificial_emotions.stances import apply_stance
+
+    items = CuriosityEngine(
+        CuriosityConfig(
+            domain=domain,
+            topic=topic,
+            n_return=n,
+            use_llm=False,
+            use_literature=use_literature,
+            value_profile=safe_profile(None, profile_name),
+        )
+    ).run()
+    return apply_stance(stance, items)

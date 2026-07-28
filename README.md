@@ -275,11 +275,63 @@ Then names the single observation worth making first.
 
 Affect **derived from** what a run found, that **changes** what it does next, with a memory of where it has been.
 
-54 emotions, 6 families, auditable evidence on every signal.
+54 emotions, 6 families, auditable evidence on every signal — and **seven stances** that turn the non-curious ones into questions you can actually ask.
 
 </td>
 </tr>
 </table>
+
+---
+
+## 🧭 Curiosity is not the only useful feeling
+
+Curiosity asks **"what is worth investigating?"** — and for a long time that was the only question this repo could ask. Every other emotion was a modifier on how curiosity searched.
+
+But researchers don't only feel curious. Before committing a quarter to something they feel **doubt**. Before touching a risky area, **anxiety**. Looking at a pile of half-finished threads, **resignation** — and the good ones act on it.
+
+**Stances** make those the point instead of the side-effect. Same ranked set, seven different questions:
+
+```mermaid
+flowchart LR
+    R["📊 One ranked set<br/><i>ordered by your ValueProfile</i>"]
+    R --> D["🔍 <b>doubt</b><br/>which am I most likely<br/>to be wrong about?"]
+    R --> S["🛡️ <b>safety</b><br/>which could hurt someone,<br/>and who reviews it?"]
+    R --> F["🎯 <b>focus</b><br/>if only one, what<br/>exactly would I do first?"]
+    R --> C["🚪 <b>close</b><br/>what do we stop doing,<br/>and what do we write down?"]
+    R --> T["✒️ <b>taste</b><br/>which are badly posed,<br/>whether or not they matter?"]
+    R --> W["✨ <b>wonder</b><br/>what's most surprising,<br/>whether or not it's valuable?"]
+    R --> V["🗺️ <b>survey</b><br/>who already owns<br/>this ground?"]
+```
+
+```bash
+emotions stance doubt --domain ai --n 5
+```
+
+```
+[doubt]  Which of these am I most likely to be wrong about?
+driven by: skepticism, suspicion, hubris, humility
+
+  · What measurable internal signals most reliably predict goal-misgeneralization…
+      doubt_score: 0.84
+      - scored heuristically — no judge looked at it
+      - no literature was consulted, so the gap is unverified
+      - confidence is low (0.24)
+      - score band is wide (0.57) — weakly pinned
+      - gap status is hedged, not established
+      - no related work was found to argue against
+
+Not claimed: a re-ranking — the ValueProfile ordering you were given is unchanged.
+```
+
+A stance is **a view, never a verdict**. It cannot rescore anything, and every payload says so. `wonder` is the sharpest example: it deliberately ignores your ValueProfile and ranks on surprise alone, then reports where it *disagrees* with your values — because a profile that never surprises you is a profile that is filtering something out.
+
+```bash
+emotions stance list          # what each one asks, and when to reach for it
+emotions stance safety --domain medicine
+curl "localhost:8000/v1/stances/close?domain=ai"
+```
+
+**This is what stops the catalog from being decoration.** A test in `tests/test_appraisal_coverage.py` asserts that *every* appraisable emotion either steers the search or drives a stance — 37 of 37, no exceptions, enforced in CI. Being named and disclaimed is not a use.
 
 ---
 

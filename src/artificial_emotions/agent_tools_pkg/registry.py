@@ -11,6 +11,7 @@ from typing import Any
 from artificial_emotions.agent_tools_pkg.handlers import (
     ToolHandler,
     handle_annotate_epistemic,
+    handle_apply_stance,
     handle_compare_profiles,
     handle_constitution_compare,
     handle_critique_brief,
@@ -24,6 +25,7 @@ from artificial_emotions.agent_tools_pkg.handlers import (
     handle_list_domains,
     handle_list_epistemic_cues,
     handle_list_profiles,
+    handle_list_stances,
     handle_mix_emotions,
     handle_provoke_curiosity,
     handle_rank_unknowns,
@@ -33,6 +35,7 @@ from artificial_emotions.agent_tools_pkg.handlers import (
 )
 from artificial_emotions.agent_tools_pkg.schemas import (
     ANNOTATE_EPISTEMIC_SCHEMA,
+    APPLY_STANCE_SCHEMA,
     COMPARE_PROFILES_SCHEMA,
     CONSTITUTION_COMPARE_SCHEMA,
     CRITIQUE_BRIEF_SCHEMA,
@@ -46,6 +49,7 @@ from artificial_emotions.agent_tools_pkg.schemas import (
     LIST_DOMAINS_SCHEMA,
     LIST_EPISTEMIC_CUES_SCHEMA,
     LIST_PROFILES_SCHEMA,
+    LIST_STANCES_SCHEMA,
     MIX_EMOTIONS_SCHEMA,
     PROVOKE_SCHEMA,
     RANK_SCHEMA,
@@ -168,6 +172,35 @@ TOOL_SPECS: list[dict[str, Any]] = [
         ),
         "input_schema": EXPLORE_SCHEMA,
         "handler": handle_explore_curiosity,
+    },
+    {
+        "name": "list_stances",
+        "description": (
+            "List the stances — different questions to ask of one ranked set, each "
+            "driven by a different emotion. Curiosity answers 'what is worth "
+            "investigating'; doubt asks 'why might this be wrong', safety asks 'what "
+            "could this hurt', focus asks 'what should I stay on', close asks 'what "
+            "should I abandon', taste asks 'which is well-formed', wonder asks 'what "
+            "is most surprising regardless of value', survey asks 'where is the crowd'. "
+            "A stance is a view, never a re-ranking: the ValueProfile ordering is "
+            "untouched. Decision aids only — not verdicts."
+        ),
+        "input_schema": LIST_STANCES_SCHEMA,
+        "handler": handle_list_stances,
+    },
+    {
+        "name": "apply_stance",
+        "description": (
+            "Rank unknowns once, then read the result through one stance instead of "
+            "the curiosity ordering. Use when 'what is most valuable' is the wrong "
+            "question — e.g. before committing resource (doubt), before touching a "
+            "risky area (safety), when deciding what to drop (close), or when you "
+            "want to be surprised rather than to optimise (wonder). Returns a view "
+            "over the existing ranking: the ValueProfile ordering is unchanged and no "
+            "item is rescored. Decision aid, not a verdict."
+        ),
+        "input_schema": APPLY_STANCE_SCHEMA,
+        "handler": handle_apply_stance,
     },
     {
         "name": "cross_model_vote",
@@ -300,6 +333,8 @@ _TOOL_TIER: dict[str, str] = {
     "critique_brief": "investigate",
     "decompose_question": "investigate",
     "explore_curiosity": "research",
+    "list_stances": "core",
+    "apply_stance": "investigate",
     "soundness_pass": "investigate",
     "cross_model_vote": "research",
     "export_idea_graph": "research",
