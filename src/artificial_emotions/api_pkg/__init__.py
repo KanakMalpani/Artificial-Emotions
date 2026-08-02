@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from artificial_emotions import __version__
 from artificial_emotions.api_pkg.error_handlers import register_error_handlers
 from artificial_emotions.api_pkg.routers import (
+    alive,
     curiosity,
     emotions,
     evaluation,
@@ -52,7 +53,7 @@ def create_app() -> FastAPI:
 
     register_error_handlers(application)
 
-    for module in (meta, profiles, curiosity, preferences, evaluation, emotions):
+    for module in (meta, profiles, curiosity, alive, preferences, evaluation, emotions):
         application.include_router(module.router)
 
     return application

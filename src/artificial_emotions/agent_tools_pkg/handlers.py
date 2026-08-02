@@ -250,11 +250,19 @@ def handle_explore_curiosity(
     allow_weight_deltas: bool = False,
     allow_domain_jump: bool = True,
     decompose_depth: int = 1,
+    persist_memory: Any = None,
+    memory_path: Any = None,
     **_extra: Any,
 ) -> dict[str, Any]:
-    """Run the curiosity loop and return the trajectory."""
+    """Run the curiosity loop and return the trajectory.
+
+    MCP never persists: ``persist_memory`` / ``memory_path`` are refused even if
+    a host passes them. CLI owns the opt-in write path.
+    """
     from artificial_emotions.explore import explore
 
+    # Hard refuse — kwargs must not enable disk writes from this surface.
+    _ = persist_memory, memory_path, _extra
     return explore(
         domain=domain,
         topic=topic,
@@ -265,6 +273,8 @@ def handle_explore_curiosity(
         allow_weight_deltas=bool(allow_weight_deltas),
         allow_domain_jump=bool(allow_domain_jump),
         decompose_depth=int(decompose_depth or 1),
+        persist_memory=False,
+        memory_path=None,
     )
 
 
@@ -468,8 +478,29 @@ def handle_apply_stance(
 def handle_list_imagination_kinds(**_extra: Any) -> dict[str, Any]:
     """List imagination kinds and which generators are wired."""
     from artificial_emotions.imagine import list_imagination_kinds
+    from artificial_emotions.transfer import TRANSFER_SHIP_STATUS
 
-    return list_imagination_kinds()
+    payload = list_imagination_kinds()
+    # Document transfer as corpus_gated — never apply_imagination.
+    transfer_entry = next(
+        (k for k in payload.get("kinds") or [] if k.get("kind") == "transfer"),
+        None,
+    )
+    if transfer_entry is not None:
+        transfer_entry["generator"] = "corpus_gated" if TRANSFER_SHIP_STATUS == "shipped" else "cut"
+        transfer_entry["entry"] = "imagine_transfer"
+        transfer_entry["not"] = "apply_imagination"
+    payload["transfer"] = {
+        "generator": "corpus_gated" if TRANSFER_SHIP_STATUS == "shipped" else "cut",
+        "ship_status": TRANSFER_SHIP_STATUS,
+        "tool": "imagine_transfer",
+        "note": (
+            "Transfer is corpus_gated: call imagine_transfer with seed + corpus. "
+            "Never routed through apply_imagination; never ranked injection. "
+            "Decision aid under quarantine — does not feel."
+        ),
+    }
+    return payload
 
 
 def handle_apply_imagination(
@@ -487,6 +518,25 @@ def handle_apply_imagination(
     from artificial_emotions.models import CuriosityConfig, resolve_value_profile
     from artificial_emotions.pipeline import CuriosityEngine
 
+    key = (kind or "").strip().lower()
+    if key == "transfer":
+        return {
+            "ok": False,
+            "kind": "transfer",
+            "refused": True,
+            "reason": (
+                "transfer is corpus_gated — use imagine_transfer with seed + corpus; "
+                "never apply_imagination"
+            ),
+            "honesty": "imagined_not_retrieved",
+            "confidence": None,
+            "imagined": [],
+            "note": (
+                "Decision aid under quarantine — does not feel; not ranked findings. "
+                "Related literature ≠ answered."
+            ),
+        }
+
     items = CuriosityEngine(
         CuriosityConfig(
             domain=domain,
@@ -498,3 +548,248 @@ def handle_apply_imagination(
         )
     ).run()
     return apply_imagination(kind, items)
+
+
+def handle_memory_show(
+    *,
+    path: str | None = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Read-only dump of local memory JSON if present — never creates the file."""
+    from artificial_emotions.memory import PersistentMemory, memory_disabled
+
+    if memory_disabled():
+        return {
+            "disabled": True,
+            "reason": "CURIOSITY_NO_MEMORY is set — no read or write",
+            "created_file": False,
+            "note": (
+                "MCP does not persist by default. Annotation continuity — "
+                "does not feel; decision aid only."
+            ),
+        }
+
+    mem = PersistentMemory.load(path or None)
+    exists = mem.path.is_file()
+    payload = (
+        mem.show()
+        if exists
+        else {
+            "present": False,
+            "path": str(mem.path),
+            "privacy_notice": mem.to_dict()["privacy_notice"],
+            "sessions": [],
+            "encounters": {},
+            "selections": {},
+            "scars": [],
+            "affinities": [],
+            "mood_carryover": mem.mood_carryover.to_dict(),
+        }
+    )
+    payload["present"] = exists
+    payload["created_file"] = False
+    payload["mcp_persists"] = False
+    payload["note"] = (
+        "Read-only MCP surface — never creates or writes memory.json. "
+        "CLI explore may persist; MCP/HTTP do not by default. "
+        "Annotation continuity — does not feel; decision aid only. "
+        "Related literature ≠ answered."
+    )
+    return payload
+
+
+def handle_memory_forget(
+    *,
+    what: str = "",
+    confirm: bool = False,
+    path: str | None = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Explicit forget — requires confirm=true; still no auto-write from explore."""
+    from artificial_emotions.memory import PersistentMemory, memory_disabled
+
+    if not confirm:
+        return {
+            "forgot": False,
+            "refused": True,
+            "reason": "confirm must be true — destructive ops are explicit only",
+            "note": ("MCP does not auto-persist from explore. Decision aid only — does not feel."),
+        }
+    if memory_disabled():
+        return {
+            "forgot": False,
+            "disabled": True,
+            "reason": "CURIOSITY_NO_MEMORY is set — no read or write",
+        }
+
+    mem = PersistentMemory.load(path or None)
+    result = mem.forget(what or "")
+    if result.get("forgot"):
+        mem.save()
+    result["mcp_persists_default"] = False
+    result["note"] = (
+        "Explicit forget only. Explore-style MCP tools never auto-write. "
+        "Annotation continuity — does not feel; decision aid only."
+    )
+    return result
+
+
+def handle_memory_reset(
+    *,
+    confirm: bool = False,
+    path: str | None = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Wipe remembered state + delete file — requires confirm=true."""
+    from artificial_emotions.memory import PersistentMemory, memory_disabled
+
+    if not confirm:
+        return {
+            "reset": False,
+            "refused": True,
+            "reason": "confirm must be true — destructive ops are explicit only",
+            "note": ("MCP does not auto-persist from explore. Decision aid only — does not feel."),
+        }
+    if memory_disabled():
+        return {
+            "reset": False,
+            "disabled": True,
+            "reason": "CURIOSITY_NO_MEMORY is set — no read or write",
+        }
+
+    mem = PersistentMemory.load(path or None)
+    mem.reset()
+    deleted = mem.delete_file()
+    return {
+        "reset": True,
+        "deleted_file": deleted,
+        "path": str(mem.path),
+        "mcp_persists_default": False,
+        "note": (
+            "Explicit reset only. Explore-style MCP tools never auto-write. "
+            "Annotation continuity — does not feel; decision aid only."
+        ),
+    }
+
+
+def handle_memory_avoiding(
+    *,
+    path: str | None = None,
+    min_encounters: int | None = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Surface avoidance patterns from local memory (pattern ≠ motive)."""
+    from artificial_emotions.avoidance import avoiding_payload
+    from artificial_emotions.memory import PersistentMemory, memory_disabled
+
+    if memory_disabled():
+        return {
+            "disabled": True,
+            "avoiding": [],
+            "count": 0,
+            "honesty": "pattern_not_motive",
+            "reason": "CURIOSITY_NO_MEMORY is set — no read or write",
+            "note": ("Pattern ≠ motive. Annotation only — does not feel; decision aid only."),
+        }
+
+    mem = PersistentMemory.load(path or None)
+    kwargs: dict[str, Any] = {
+        "encounters": mem.encounters,
+        "selections": mem.selections,
+    }
+    if min_encounters is not None:
+        kwargs["min_encounters"] = int(min_encounters)
+    payload = avoiding_payload(**kwargs)
+    payload["path"] = str(mem.path)
+    payload["created_file"] = False
+    payload["mcp_persists"] = False
+    return payload
+
+
+def handle_dream_reanalyze(
+    *,
+    path: str | None = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Thin wrap of dream.reanalyze_history — offline reanalysis, not a dream."""
+    from artificial_emotions.dream import HONESTY_REANALYSIS, reanalyze_history
+    from artificial_emotions.memory import memory_disabled
+
+    if memory_disabled():
+        return {
+            "disabled": True,
+            "reason": "CURIOSITY_NO_MEMORY is set — no history to reanalyze",
+            "framing": HONESTY_REANALYSIS,
+            "honesty": HONESTY_REANALYSIS,
+            "confidence": None,
+            "note": (
+                "Offline reanalysis of stored history — does not feel; "
+                "decision aid only. Related literature ≠ answered."
+            ),
+        }
+
+    return reanalyze_history(path=path or None)
+
+
+def handle_imagine_transfer(
+    *,
+    seed: str = "",
+    corpus: Any = None,
+    max_bridges: int = 4,
+    max_links: int = 8,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Corpus-gated structural transfer — refuse when ship status is not cleared."""
+    from artificial_emotions.transfer import (
+        TRANSFER_SHIP_STATUS,
+        imagine_transfer,
+    )
+
+    seed_text = (seed or "").strip()
+    if not seed_text:
+        return {
+            "ok": False,
+            "refused": True,
+            "reason": "seed is required",
+            "kind": "transfer",
+            "honesty": "imagined_not_retrieved",
+            "confidence": None,
+            "imagined": [],
+            "note": (
+                "Corpus-gated transfer decision aid — does not feel; "
+                "never ranked injection. Related literature ≠ answered."
+            ),
+        }
+    if corpus is None or corpus == "" or corpus == []:
+        return {
+            "ok": False,
+            "refused": True,
+            "reason": "corpus path or document list is required",
+            "kind": "transfer",
+            "honesty": "imagined_not_retrieved",
+            "confidence": None,
+            "imagined": [],
+            "ship_status": TRANSFER_SHIP_STATUS,
+            "note": (
+                "Corpus-gated transfer decision aid — does not feel; "
+                "never ranked injection. Related literature ≠ answered."
+            ),
+        }
+
+    # imagine_transfer itself refuses when TRANSFER_SHIP_STATUS != "shipped".
+    payload = imagine_transfer(
+        seed_text,
+        corpus=corpus,
+        max_bridges=int(max_bridges or 4),
+        max_links=int(max_links or 8),
+    )
+    payload.setdefault("generator", "corpus_gated")
+    payload.setdefault(
+        "note",
+        (
+            "Imagined structural analogies — not ranked, not confidence-scored. "
+            "Does not feel; computational generation under quarantine. "
+            "Related literature ≠ answered."
+        ),
+    )
+    return payload

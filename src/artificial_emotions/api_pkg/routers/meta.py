@@ -109,6 +109,14 @@ def root() -> dict[str, Any]:
             "(inline events; no filesystem paths)"
         ),
         "compare_profiles": "POST /v1/profiles/compare",
+        "imagination": (
+            "GET /v1/imagination · GET /v1/imagination/{kind} · POST /v1/imagination/transfer"
+        ),
+        "memory": (
+            "GET /v1/memory · POST /v1/memory/forget|reset|avoiding "
+            "(no auto-persist; CURIOSITY_NO_MEMORY=1 opts out)"
+        ),
+        "dream": "POST /v1/dream (explicit offline reanalysis only)",
         "mcp": "curiosity-mcp (stdio) or python -m artificial_emotions.mcp_server",
         "config": "artificial_emotions.config / .env.example",
         "safety": (
@@ -207,6 +215,37 @@ def agent_manifest() -> dict[str, Any]:
                 "Ask a ranked set a different question than 'what is most valuable': "
                 "doubt, safety, focus, close, taste, wonder, survey. A view over the "
                 "existing ranking — never a re-ranking, nothing is rescored."
+            ),
+        },
+        "imagination": {
+            "method": "GET",
+            "path": "/v1/imagination  ·  /v1/imagination/{kind}",
+            "transfer": "POST /v1/imagination/transfer",
+            "note": (
+                "Stance-twin generators over a ranked set under quarantine "
+                "(honesty=imagined_not_retrieved, confidence=null). Stubs and "
+                "transfer return 400 on GET /{kind}; transfer is corpus-gated via POST. "
+                "Never injects into ranked keys."
+            ),
+        },
+        "memory": {
+            "method": "GET",
+            "path": "/v1/memory",
+            "mutations": "POST /v1/memory/forget · /v1/memory/reset · /v1/memory/avoiding",
+            "note": (
+                "Read-only on GET — never creates or updates the file. "
+                "HTTP/library defaults: no auto-persist (unlike CLI explore). "
+                "Opt out of all read/write: CURIOSITY_NO_MEMORY=1. "
+                "forget/reset require confirm=true."
+            ),
+        },
+        "dream": {
+            "method": "POST",
+            "path": "/v1/dream",
+            "note": (
+                "Explicit offline reanalysis of stored PersistentMemory only — "
+                "never automatic, never background. Payload framing is "
+                "offline_reanalysis_of_stored_history, not evidence of dreaming."
             ),
         },
         "voi_worksheet": {
@@ -344,6 +383,14 @@ def agent_tools() -> dict[str, Any]:
             "annotate_epistemic": "POST /v1/emotions/annotate",
             "emotion_pack": "GET /v1/emotions/pack",
             "elicit_helpers": "GET /v1/emotions/elicit",
+            "list_imagination_kinds": "GET /v1/imagination",
+            "apply_imagination": "GET /v1/imagination/{kind}",
+            "imagine_transfer": "POST /v1/imagination/transfer",
+            "memory_show": "GET /v1/memory",
+            "memory_forget": "POST /v1/memory/forget",
+            "memory_reset": "POST /v1/memory/reset",
+            "memory_avoiding": "POST /v1/memory/avoiding",
+            "dream_reanalyze": "POST /v1/dream",
         },
     }
 

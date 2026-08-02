@@ -28,9 +28,13 @@ __all__ = [
     "ConstitutionCompareRequest",
     "CritiqueBriefRequest",
     "DecomposeRequest",
+    "DreamRequest",
     "ExploreRequest",
     "CrossModelVoteRequest",
     "IdeaGraphRequest",
+    "MemoryForgetRequest",
+    "MemoryIntentRequest",
+    "MemoryResetRequest",
     "MixEmotionsRequest",
     "PreferenceHintsRequest",
     "PreferenceSummarizeRequest",
@@ -39,6 +43,7 @@ __all__ = [
     "SoundnessPassRequest",
     "SuggestPairRequest",
     "SurpriseWorksheetRequest",
+    "TransferImaginationRequest",
     "VoiWorksheetRequest",
     "safe_profile",
 ]
@@ -349,3 +354,66 @@ class ExploreRequest(BaseModel):
     )
     allow_domain_jump: bool = Field(True, description="Let boredom change ground")
     decompose_depth: int = Field(1, ge=1, le=3)
+
+
+class TransferImaginationRequest(BaseModel):
+    """Corpus-gated analogical transfer (POST /v1/imagination/transfer)."""
+
+    seed: str = Field(..., min_length=1, examples=["Fish oil"])
+    corpus: list[dict[str, Any]] | None = Field(
+        None,
+        description="Inline corpus documents: [{title, concepts, year?}, ...]",
+    )
+    corpus_text: str | None = Field(
+        None,
+        description="JSON text of a document list (alternative to corpus)",
+    )
+    corpus_path: str | None = Field(
+        None,
+        description=(
+            "Local corpus JSON/JSONL path (trusted/local use). Prefer inline corpus for agents."
+        ),
+    )
+    max_bridges: int = Field(4, ge=1, le=16)
+    max_links: int = Field(8, ge=1, le=32)
+    cooccurrence_ceiling: int = Field(400, ge=1, le=10_000)
+
+
+class MemoryIntentRequest(BaseModel):
+    """POST body for read-only memory intents that still require explicit POST."""
+
+    path: str | None = Field(
+        None,
+        description="Optional local memory JSON path (tests / local)",
+    )
+
+
+class MemoryForgetRequest(BaseModel):
+    """Explicit forget — confirm=true required."""
+
+    what: str = Field(
+        ...,
+        min_length=1,
+        description=(
+            "Session id, question id, scar target, or keyword: "
+            "sessions|encounters|selections|mood|scars|affinities"
+        ),
+    )
+    confirm: bool = False
+    path: str | None = None
+
+
+class MemoryResetRequest(BaseModel):
+    """Wipe memory + delete file — confirm=true required."""
+
+    confirm: bool = False
+    path: str | None = None
+
+
+class DreamRequest(BaseModel):
+    """Explicit offline reanalysis of stored PersistentMemory history."""
+
+    path: str | None = Field(
+        None,
+        description="Optional local memory JSON path (tests / local)",
+    )

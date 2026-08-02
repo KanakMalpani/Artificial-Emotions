@@ -18,16 +18,22 @@ from artificial_emotions.agent_tools_pkg.handlers import (
     handle_critique_brief,
     handle_cross_model_vote,
     handle_decompose_question,
+    handle_dream_reanalyze,
     handle_elicit_helpers,
     handle_emotion_catalog,
     handle_emotion_pack,
     handle_explore_curiosity,
     handle_idea_graph,
+    handle_imagine_transfer,
     handle_list_domains,
     handle_list_epistemic_cues,
     handle_list_imagination_kinds,
     handle_list_profiles,
     handle_list_stances,
+    handle_memory_avoiding,
+    handle_memory_forget,
+    handle_memory_reset,
+    handle_memory_show,
     handle_mix_emotions,
     handle_provoke_curiosity,
     handle_rank_unknowns,
@@ -44,16 +50,22 @@ from artificial_emotions.agent_tools_pkg.schemas import (
     CRITIQUE_BRIEF_SCHEMA,
     CROSS_MODEL_VOTE_SCHEMA,
     DECOMPOSE_SCHEMA,
+    DREAM_REANALYZE_SCHEMA,
     ELICIT_HELPERS_SCHEMA,
     EMOTION_CATALOG_SCHEMA,
     EMOTION_PACK_SCHEMA,
     EXPLORE_SCHEMA,
     IDEA_GRAPH_SCHEMA,
+    IMAGINE_TRANSFER_SCHEMA,
     LIST_DOMAINS_SCHEMA,
     LIST_EPISTEMIC_CUES_SCHEMA,
     LIST_IMAGINATION_KINDS_SCHEMA,
     LIST_PROFILES_SCHEMA,
     LIST_STANCES_SCHEMA,
+    MEMORY_AVOIDING_SCHEMA,
+    MEMORY_FORGET_SCHEMA,
+    MEMORY_RESET_SCHEMA,
+    MEMORY_SHOW_SCHEMA,
     MIX_EMOTIONS_SCHEMA,
     PROVOKE_SCHEMA,
     RANK_SCHEMA,
@@ -172,7 +184,8 @@ TOOL_SPECS: list[dict[str, Any]] = [
             "in a decomposed plan for the best unknown found. Affect moves search "
             "behaviour only; ValueProfile weights stay untouched unless explicitly "
             "allowed, and any delta is bounded and listed. Decision aid, not a "
-            "closed-loop scientist; related literature != answered still applies."
+            "closed-loop scientist; related literature != answered still applies. "
+            "MCP never persists memory — persist_memory is refused on this surface."
         ),
         "input_schema": EXPLORE_SCHEMA,
         "handler": handle_explore_curiosity,
@@ -210,11 +223,12 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "name": "list_imagination_kinds",
         "description": (
             "List imagination kinds — generative twins of stances (premortem, "
-            "reformulation, counterfactual, …). Outputs are quarantined imagined "
-            "content with honesty imagined_not_retrieved; never ranked findings, "
-            "never a confidence score. Decision aids only — does not feel; "
-            "computational generation under quarantine. Related literature ≠ "
-            "answered still applies."
+            "reformulation, counterfactual, …). Transfer is corpus_gated "
+            "(imagine_transfer tool; not apply_imagination). Outputs are "
+            "quarantined imagined content with honesty imagined_not_retrieved; "
+            "never ranked findings, never a confidence score. Decision aids "
+            "only — does not feel; computational generation under quarantine. "
+            "Related literature ≠ answered still applies."
         ),
         "input_schema": LIST_IMAGINATION_KINDS_SCHEMA,
         "handler": handle_list_imagination_kinds,
@@ -227,12 +241,82 @@ TOOL_SPECS: list[dict[str, Any]] = [
             "a better-posed question; counterfactual = posit an answer and derive "
             "consequences). Offline generators; outputs travel only under the "
             "imagined payload key with honesty imagined_not_retrieved and "
-            "confidence=null. Never injects into ranked lists. Decision aid under "
+            "confidence=null. Never injects into ranked lists. Transfer is "
+            "corpus_gated — use imagine_transfer instead. Decision aid under "
             "an explicit ValueProfile — does not feel; not retrieved literature; "
             "related ≠ answered."
         ),
         "input_schema": APPLY_IMAGINATION_SCHEMA,
         "handler": handle_apply_imagination,
+    },
+    {
+        "name": "imagine_transfer",
+        "description": (
+            "Corpus-gated analogical transfer: seed concept + local corpus "
+            "(path or document list) → quarantined imagined structural analogies. "
+            "Refuses when ship status is not cleared. Never ranked injection; "
+            "never apply_imagination. Honesty imagined_not_retrieved; "
+            "confidence=null. Decision aid under quarantine — does not feel; "
+            "related literature ≠ answered."
+        ),
+        "input_schema": IMAGINE_TRANSFER_SCHEMA,
+        "handler": handle_imagine_transfer,
+    },
+    {
+        "name": "memory_show",
+        "description": (
+            "Read-only dump of local PersistentMemory JSON if present "
+            "(privacy_notice fields included). Never creates the file; MCP does "
+            "not persist by default. Annotation continuity — does not feel; "
+            "decision aid only. Related literature ≠ answered."
+        ),
+        "input_schema": MEMORY_SHOW_SCHEMA,
+        "handler": handle_memory_show,
+    },
+    {
+        "name": "memory_forget",
+        "description": (
+            "Explicit forget of a session id, question id, or keyword from local "
+            "memory. Requires confirm=true. Still no auto-write from "
+            "explore_curiosity. Annotation continuity — does not feel; "
+            "decision aid only. Related literature ≠ answered."
+        ),
+        "input_schema": MEMORY_FORGET_SCHEMA,
+        "handler": handle_memory_forget,
+    },
+    {
+        "name": "memory_reset",
+        "description": (
+            "Explicit wipe of local PersistentMemory and delete of the JSON file. "
+            "Requires confirm=true. Still no auto-write from explore_curiosity. "
+            "Annotation continuity — does not feel; decision aid only. "
+            "Related literature ≠ answered."
+        ),
+        "input_schema": MEMORY_RESET_SCHEMA,
+        "handler": handle_memory_reset,
+    },
+    {
+        "name": "memory_avoiding",
+        "description": (
+            "Surface avoidance patterns from local memory encounters vs selections "
+            "(pattern ≠ motive; cannot distinguish avoidance from judgment). "
+            "Read-only; never creates the file. Annotation only — does not feel; "
+            "decision aid only. Related literature ≠ answered."
+        ),
+        "input_schema": MEMORY_AVOIDING_SCHEMA,
+        "handler": handle_memory_avoiding,
+    },
+    {
+        "name": "dream_reanalyze",
+        "description": (
+            "Explicit offline reanalysis of stored PersistentMemory history "
+            "(CLI may say dream once; payload framing is "
+            "offline_reanalysis_of_stored_history — never labeled dream as "
+            "evidence). Read-only; invents no literature. Decision aid under "
+            "quarantine — does not feel; related literature ≠ answered."
+        ),
+        "input_schema": DREAM_REANALYZE_SCHEMA,
+        "handler": handle_dream_reanalyze,
     },
     {
         "name": "cross_model_vote",
@@ -369,6 +453,12 @@ _TOOL_TIER: dict[str, str] = {
     "apply_stance": "investigate",
     "list_imagination_kinds": "core",
     "apply_imagination": "investigate",
+    "imagine_transfer": "investigate",
+    "memory_show": "research",
+    "memory_forget": "research",
+    "memory_reset": "research",
+    "memory_avoiding": "research",
+    "dream_reanalyze": "research",
     "soundness_pass": "investigate",
     "cross_model_vote": "research",
     "export_idea_graph": "research",
