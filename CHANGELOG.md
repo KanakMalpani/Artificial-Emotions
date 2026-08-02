@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## [0.4.1] — memory integrity + API serve hardening
+
+Patch release for silent memory wipe risk and open HTTP serve defaults that
+landed after `0.4.0` but were not yet tagged.
+
+### Fixed
+- **Atomic memory save:** write `memory.json` via `.tmp` + replace so a truncated
+  write cannot leave an empty file that wipes history on next load.
+- **Corrupt reads:** preserve unreadable `memory.json` as `*.corrupt*` instead of
+  silently starting empty.
+- **Rate-limit probe exemptions:** `/health` and `/ready` skip the same open-path
+  exemptions as auth so probes stay reachable under load.
+
+### Changed
+- **HTTP rate limiting** on API routes (configurable; defaults disclosed in
+  `docs/LIMITS.md`).
+- **CORS default empty** (no `*` wildcard) — callers must opt in explicitly.
+
 ### Removed
 - **`web/`** demo surface: Vite SPA, mood-shell GIF / capture pipeline,
   Playwright web smoke (`tests/e2e/test_web_playwright.py`), and CI `web` job.
@@ -12,8 +30,7 @@
 Functional continuity and quarantined imagination. Affect can outlive a process,
 cost something, and generate what is not yet there — without phenomenal claims.
 
-**Install from git / editable checkout.** PyPI upload is deferred; the package
-version is `0.4.0` and tags land when surfacing work is verified.
+Package version `0.4.0`. Superseded for serve/memory hardening by `[0.4.1]`.
 
 ### Added — continuity
 - **`memory.py` — persistent CLI memory.** Local JSON at

@@ -1,7 +1,7 @@
 # Artificial Emotions — Agent Playbook & Roadmap
 
 **Status:** Living operational plan (not a commitment ledger)  
-**Product version today:** `0.4.0` (see `pyproject.toml`)  
+**Product version today:** `0.4.1` (see `pyproject.toml`)  
 **Repo root:** this clone (relative paths below)  
 **Public repo:** https://github.com/KanakMalpani/Artificial-Emotions  
 **Companion:** [`ROADMAP_SUMMARY.md`](ROADMAP_SUMMARY.md) (1-page)  

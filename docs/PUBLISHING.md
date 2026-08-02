@@ -1,8 +1,8 @@
 # Publishing to PyPI
 
-Package name: **`artificial-emotions`** · Version: see `pyproject.toml` (currently **`0.4.0`**).
+Package name: **`artificial-emotions`** · Version: see `pyproject.toml` (currently **`0.4.1`**).
 
-**Status:** not on PyPI yet — do not document `pip install artificial-emotions` as a public path until `https://pypi.org/project/artificial-emotions/` resolves.
+**Status:** published at [pypi.org/project/artificial-emotions](https://pypi.org/project/artificial-emotions/). Install with `pip install artificial-emotions`.
 
 Never store PyPI tokens in the repo or commit `.env` / credentials. For HTTP demos, unset `CURIOSITY_API_KEY` is fine on localhost only — set a key before any non-local bind.
 
@@ -16,7 +16,7 @@ Once configured, GitHub Actions can publish without a long-lived API token.
    - Workflow: `publish.yml`
    - Environment: leave blank (or match a GitHub Environment if you add one later)
 2. In `.github/workflows/publish.yml`, enable OIDC by setting job `permissions.id-token: write` and remove the `password:` input from `pypa/gh-action-pypi-publish` (or keep token as fallback only while migrating).
-3. Create a GitHub Release / tag `v*` matching `pyproject.toml` (e.g. `v0.4.0`).
+3. Create a GitHub Release / tag `v*` matching `pyproject.toml` (e.g. `v0.4.1`).
 
 ## Current path: API token (repository secret)
 
@@ -31,7 +31,7 @@ The publish workflow uploads with `secrets.PYPI_API_TOKEN` via [pypa/gh-action-p
 | Event | Behavior |
 |-------|----------|
 | GitHub Release published | Build + upload to PyPI |
-| Push tag `v*` (e.g. `v0.4.0`) | Build + upload to PyPI |
+| Push tag `v*` (e.g. `v0.4.1`) | Build + upload to PyPI |
 | `workflow_dispatch` with dry-run | Build only |
 | `workflow_dispatch` with dry-run off | Build + upload |
 | Pull request (packaging paths) | Build only (no upload) |
@@ -52,7 +52,7 @@ If `https://pypi.org/project/artificial-emotions/` does not exist yet, the first
 ## Checklist before tagging
 
 - [ ] `version` in `pyproject.toml` and `__version__` in `src/artificial_emotions/__init__.py` match
-- [ ] Tag is `v` + that version (e.g. `v0.4.0`)
+- [ ] Tag is `v` + that version (e.g. `v0.4.1`)
 - [ ] `pytest -q` green
 - [ ] `docs/LIMITS.md` / ROADMAP updated only after a successful publish
 
@@ -72,4 +72,4 @@ gh run rerun <run-id> --failed
 gh workflow run publish.yml -f dry_run=false
 ```
 
-Until Actions can start runners, PyPI upload via this workflow cannot complete. Local `python -m build` still works for smoke; do not claim PyPI publish until `https://pypi.org/project/artificial-emotions/` resolves.
+Until Actions can start runners, PyPI upload via this workflow cannot complete. Local `python -m build` still works for smoke if Actions cannot run.

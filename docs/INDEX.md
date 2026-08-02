@@ -1,6 +1,6 @@
 # Docs
 
-Product documentation for **Artificial Emotions** (v0.4.0 — Alive). Start at the root [README](../README.md).
+Product documentation for **Artificial Emotions** (v0.4.1 — Alive). Start at the root [README](../README.md).
 
 | Doc | Purpose |
 |-----|---------|

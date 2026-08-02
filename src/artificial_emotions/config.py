@@ -96,7 +96,7 @@ class AppConfig:
     literature_timeout_s: float = 12.0
     openalex_mailto: str = "curiosity@localhost"
     s2_configured: bool = False
-    version: str = "0.4.0"  # mirrored from package __version__ via get_config()
+    version: str = "0.4.1"  # mirrored from package __version__ via get_config()
 
     @property
     def api_auth_required(self) -> bool:

@@ -707,7 +707,7 @@ ruff check src tests && ruff format --check src tests
 
 CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** — then builds the wheel, installs it into a clean environment, and exercises the data files and console scripts from *outside* the checkout. A package that only works inside its own source tree is a broken package.
 
-**Not on PyPI yet** — install from a git clone (`pip install -e ".[dev]"`).
+Install: `pip install artificial-emotions` (or editable `pip install -e ".[dev]"` from a clone).
 
 ---
 
@@ -722,7 +722,7 @@ CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** —
 | [**docs/PLAN_ALIVE.md**](docs/PLAN_ALIVE.md) | Continuity + imagination (Track C / `web/` historical) |
 | [**docs/PLUGINS.md**](docs/PLUGINS.md) | Host-by-host MCP setup |
 | [**docs/PROOFS.md**](docs/PROOFS.md) | Reproducible behaviour demos |
-| [**CHANGELOG.md**](CHANGELOG.md) | `[0.4.0]` Alive notes (PyPI deferred) |
+| [**CHANGELOG.md**](CHANGELOG.md) | `[0.4.1]` release notes |
 | [**examples/**](examples/README.md) | Payloads, protocols, tool schemas |
 
 ---
