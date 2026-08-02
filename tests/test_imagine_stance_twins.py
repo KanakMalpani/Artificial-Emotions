@@ -58,6 +58,8 @@ def test_implemented_kinds_are_the_six_ranked_applicable():
 def test_catalog_lists_wired_generators():
     catalog = list_imagination_kinds()
     assert catalog["honesty"] == HONESTY_IMAGINED
+    assert catalog["count"] == len(IMPLEMENTED_IMAGINATION_KINDS) == 6
+    assert catalog["catalog_count"] == len(IMAGINATION_KINDS) == 7
     assert set(catalog["implemented"]) == set(IMPLEMENTED_IMAGINATION_KINDS)
     by_name = {k["kind"]: k for k in catalog["kinds"]}
     for name in _RANKED_WIRED:

@@ -85,7 +85,8 @@ def test_imagined_content_never_appears_unmarked():
     # Registry listings are also marked.
     listing = list_imagination_kinds()
     assert listing["honesty"] == HONESTY_IMAGINED
-    assert listing["count"] == len(IMAGINATION_KINDS) == 7
+    assert listing["count"] == 6  # ranked-applicable wired generators
+    assert listing["catalog_count"] == len(IMAGINATION_KINDS) == 7
     for kind in listing["kinds"]:
         assert kind["honesty"] == HONESTY_IMAGINED
         assert "phenomenal" in " ".join(kind["claims_not"]).lower()
