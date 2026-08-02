@@ -1,0 +1,36 @@
+/**
+ * Affect design tokens (C1).
+ * AffectProvider writes live PAD / embodiment_hint values into these.
+ * Components consume var(--ae-*) — never hardcode mood colours.
+ */
+
+:root {
+  /* PAD continuum (neutral defaults until AffectProvider mounts) */
+  --ae-valence: 0;
+  --ae-activation: 0.35;
+  --ae-dominance: 0;
+  --ae-agency: 0.5;
+  --ae-boredom: 0;
+  --ae-absorption: 0;
+
+  /* Derived presentation hooks */
+  --ae-color-temperature: 0deg;
+  --ae-saturation: 1;
+  --ae-motion-duration: 280ms;
+  --ae-motion-easing: ease-out;
+  --ae-contrast: 1;
+  --ae-density: 1;
+  --ae-focus-recede: 1;
+  --ae-warmth: 0.5;
+  --ae-coolness: 0.5;
+
+  /* Steady / reduced-motion pin — AffectProvider flips these */
+  --ae-affect-enabled: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ae-motion-duration: 0ms;
+    --ae-affect-enabled: 0;
+  }
+}

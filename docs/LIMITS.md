@@ -106,6 +106,19 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | Unauthenticated local HTTP when API key unset | Demo DX by design | Documented; set key + avoid `0.0.0.0` for non-local |
 | MCP / `use_llm` can incur provider cost | Tools may call paid LLM hosts | Operator controls keys + MCP tier; no silent billing claims |
 
+## Persistent memory (privacy)
+
+CLI `explore` may write a local JSON file at `~/.artificial_emotions/memory.json`
+(session summaries + question encounter counts). This is **usage history on your
+machine**, not a cloud sync and not a model of the field.
+
+- **Inspect / edit / delete** the file by hand, or use `emotions memory show`,
+  `emotions memory forget <what>`, `emotions memory reset`.
+- **Opt out:** `CURIOSITY_NO_MEMORY=1` (or `explore --no-memory`) — no read, no
+  write; offline explore stays byte-identical to a fresh install.
+- **Never on by default for MCP/HTTP** — only the CLI, where there is a single
+  obvious user. Library `explore(..., persist_memory=False)` is the default.
+
 ## Confidence interpretation
 
 - `~0.25–0.35`: no literature / unknown caveat

@@ -44,6 +44,25 @@ __all__ = [
     "signals_to_weights",
 ]
 
+# Lazy catalog PAD lookup for mood-congruent threshold floors (A2).
+_EMOTION_PAD_P: dict[str, float] | None = None
+
+
+def _emotion_pad_p(emotion: str) -> float | None:
+    global _EMOTION_PAD_P
+    if _EMOTION_PAD_P is None:
+        try:
+            from artificial_emotions.emotions import emotion_catalog
+
+            _EMOTION_PAD_P = {
+                str(e["id"]): float((e.get("pad") or {}).get("P") or 0.0)
+                for e in emotion_catalog().get("emotions") or []
+            }
+        except Exception:  # pragma: no cover — catalog always present in-tree
+            _EMOTION_PAD_P = {}
+    return _EMOTION_PAD_P.get(emotion)
+
+
 # Below this a signal is noise; it gets dropped rather than padding the mix.
 _MIN_SIGNAL = 0.04
 
@@ -522,10 +541,19 @@ def appraise_run(
     steps_without_progress: int = 0,
     rejected_count: int = 0,
     previous_top_id: str | None = None,
+    mood_bias: Any | None = None,
+    temperament: Any | None = None,
 ) -> list[AppraisalSignal]:
     """Derive affective signals from one completed run.
 
     Returns signals sorted by weight, each carrying the evidence that fired it.
+
+    ``mood_bias`` (A2 ``MoodThresholdBias``) may shift the per-emotion weight
+    floor for signals that already have run support. Rules that return
+    ``None`` stay ``None`` — carryover never fabricates evidence.
+
+    ``temperament`` (A5) may scale *supported* weights (reactivity / skepticism /
+    novelty). It never invents a signal that the rules did not fire.
     """
     if not items:
         return [
@@ -547,16 +575,31 @@ def appraise_run(
         previous_top_id=previous_top_id,
     )
 
+    bias_active = bool(mood_bias is not None and getattr(mood_bias, "is_active", False))
+
     signals: list[AppraisalSignal] = []
     for emotion, (why, rule) in RULES.items():
         outcome = rule(ctx)
         if outcome is None:
+            # No run support — mood must not invent a signal.
             continue
         weight, evidence = outcome
-        if weight >= _MIN_SIGNAL:
+        floor = _MIN_SIGNAL
+        if bias_active:
+            floor = float(mood_bias.floor_for(_emotion_pad_p(emotion)))
+        if weight >= floor:
+            if bias_active and abs(floor - _MIN_SIGNAL) > 1e-9:
+                evidence = {
+                    **evidence,
+                    "mood_threshold_floor": round(floor, 4),
+                }
             signals.append(AppraisalSignal(emotion, weight, why, evidence))
 
     signals.sort(key=lambda s: (-s.weight, s.emotion))
+    if temperament is not None:
+        from artificial_emotions.temperament import scale_appraisal_signals
+
+        signals = scale_appraisal_signals(signals, temperament)
     return signals
 
 

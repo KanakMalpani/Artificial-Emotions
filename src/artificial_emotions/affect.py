@@ -4,21 +4,207 @@ The internals behind ``mix_emotions``: how a weighted set of catalog entries
 becomes a mood reading, a first-person simulation, a named compound, and a
 measure of how much of the mix is in tension with itself.
 
+Also owns A2 mood carryover decay and appraisal-threshold bias: session mood
+survives the process, decays exponentially toward neutral, and may shift how
+easily *supported* appraisal signals clear the floor — never inventing evidence.
+
 Kept apart from ``emotions.py`` so the public affect API stays readable. Nothing
 here claims biological emotion — see ``claims_not`` on every mix payload.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any
 
 __all__ = [
+    "DEFAULT_MIN_SIGNAL",
+    "MAX_MIN_SIGNAL_DELTA",
+    "MOOD_HALF_LIFE_HOURS",
+    "MoodThresholdBias",
     "build_felt_simulation",
+    "decay_factor",
+    "decay_mood_pad",
     "detect_ambivalence",
     "match_blend_triad",
     "match_plutchik_dyad",
+    "pad_from_felt_or_mix",
     "pad_qualitative",
+    "threshold_bias_from_pad",
 ]
+
+#: Half-life for mood carryover decay — a few hours (PLAN_ALIVE A2).
+MOOD_HALF_LIFE_HOURS = 4.0
+
+#: Appraisal noise floor (mirrors ``appraisal._MIN_SIGNAL``).
+DEFAULT_MIN_SIGNAL = 0.04
+
+#: Carryover may nudge the floor by at most this much.
+MAX_MIN_SIGNAL_DELTA = 0.015
+
+
+def _parse_iso(ts: str | None) -> datetime | None:
+    if not ts:
+        return None
+    text = str(ts).strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
+
+
+def decay_factor(
+    updated_at: str | None,
+    *,
+    now: datetime | None = None,
+    half_life_hours: float = MOOD_HALF_LIFE_HOURS,
+) -> float:
+    """Exponential decay factor in ``[0, 1]`` from wall-clock elapsed time.
+
+    Missing / unparseable timestamps keep factor ``1.0`` (hand-edited mood
+    without a clock is treated as fresh). Negative elapsed clamps to ``1.0``.
+    """
+    half = max(1e-6, float(half_life_hours))
+    then = _parse_iso(updated_at)
+    if then is None:
+        return 1.0
+    when = now if now is not None else datetime.now(UTC)
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=UTC)
+    elapsed_h = (when.astimezone(UTC) - then).total_seconds() / 3600.0
+    if elapsed_h <= 0:
+        return 1.0
+    return float(0.5 ** (elapsed_h / half))
+
+
+def decay_mood_pad(
+    pleasure: float,
+    arousal: float,
+    dominance: float,
+    updated_at: str | None,
+    *,
+    now: datetime | None = None,
+    half_life_hours: float = MOOD_HALF_LIFE_HOURS,
+) -> tuple[float, float, float, float]:
+    """Decay PAD toward neutral. Returns ``(P, A, D, factor)``."""
+    factor = decay_factor(updated_at, now=now, half_life_hours=half_life_hours)
+    return (
+        float(pleasure) * factor,
+        float(arousal) * factor,
+        float(dominance) * factor,
+        factor,
+    )
+
+
+def pad_from_felt_or_mix(payload: dict[str, Any] | None) -> dict[str, float] | None:
+    """Pull ``P/A/D`` from a ``felt_simulation`` mood block or a mix ``pad`` dict."""
+    if not payload:
+        return None
+    mood = payload.get("mood") if isinstance(payload.get("mood"), dict) else None
+    pad = mood if mood else payload.get("pad")
+    if not isinstance(pad, dict):
+        # bare {P,A,D} or {pleasure,arousal,dominance}
+        pad = payload
+    p = pad.get("P", pad.get("pleasure"))
+    a = pad.get("A", pad.get("arousal"))
+    d = pad.get("D", pad.get("dominance"))
+    if p is None and a is None and d is None:
+        return None
+    return {
+        "P": float(p or 0.0),
+        "A": float(a or 0.0),
+        "D": float(d or 0.0),
+    }
+
+
+@dataclass(frozen=True)
+class MoodThresholdBias:
+    """How decayed carryover mood nudges appraisal signal floors.
+
+    Rules that return ``None`` (no run support) stay ``None``. Bias only moves
+    the weight floor for signals that already carry evidence.
+    """
+
+    pleasure: float
+    arousal: float
+    dominance: float
+    decay_factor: float
+    base_min_signal: float = DEFAULT_MIN_SIGNAL
+
+    @property
+    def is_active(self) -> bool:
+        return abs(self.pleasure) > 1e-6 or abs(self.arousal) > 1e-6 or abs(self.dominance) > 1e-6
+
+    def floor_for(self, emotion_pad_p: float | None = None) -> float:
+        """Effective ``min_signal`` for one emotion given its catalog pleasure.
+
+        Congruent valence (same sign as carryover pleasure) lowers the floor
+        slightly; incongruent raises it. Magnitude scales with residual |P|
+        and arousal. Caps keep behaviour close to today's default.
+        """
+        if not self.is_active:
+            return self.base_min_signal
+        magnitude = min(
+            MAX_MIN_SIGNAL_DELTA,
+            0.55 * abs(self.pleasure) + 0.35 * abs(self.arousal) * MAX_MIN_SIGNAL_DELTA / 0.5,
+        )
+        magnitude = min(MAX_MIN_SIGNAL_DELTA, max(0.0, magnitude))
+        if emotion_pad_p is None or abs(self.pleasure) < 1e-6:
+            # Global arousal residual: mild floor softening when activated.
+            delta = -0.4 * magnitude * (1.0 if self.arousal > 0 else 0.0)
+        else:
+            congruent = (self.pleasure * float(emotion_pad_p)) > 0
+            delta = -magnitude if congruent else magnitude
+        floor = self.base_min_signal + delta
+        return max(0.01, min(0.08, floor))
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "pleasure": round(float(self.pleasure), 4),
+            "arousal": round(float(self.arousal), 4),
+            "dominance": round(float(self.dominance), 4),
+            "decay_factor": round(float(self.decay_factor), 4),
+            "base_min_signal": float(self.base_min_signal),
+            "active": self.is_active,
+            "honesty": (
+                "biases appraisal thresholds only — does not invent evidence "
+                "or claim the system feels"
+            ),
+        }
+
+
+def threshold_bias_from_pad(
+    pleasure: float,
+    arousal: float,
+    dominance: float,
+    *,
+    updated_at: str | None = None,
+    now: datetime | None = None,
+    half_life_hours: float = MOOD_HALF_LIFE_HOURS,
+    base_min_signal: float = DEFAULT_MIN_SIGNAL,
+) -> MoodThresholdBias:
+    """Build a threshold bias from stored PAD, applying exponential decay."""
+    p, a, d, factor = decay_mood_pad(
+        pleasure,
+        arousal,
+        dominance,
+        updated_at,
+        now=now,
+        half_life_hours=half_life_hours,
+    )
+    return MoodThresholdBias(
+        pleasure=p,
+        arousal=a,
+        dominance=d,
+        decay_factor=factor,
+        base_min_signal=float(base_min_signal),
+    )
 
 
 def pad_qualitative(pad: dict[str, float]) -> dict[str, str]:

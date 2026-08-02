@@ -15,6 +15,9 @@ Env reference (see also ``.env.example``)::
     CURIOSITY_CORS_ORIGINS — comma list; default ``*`` (local demos)
     CURIOSITY_HOST / CURIOSITY_PORT — serve defaults
     CURIOSITY_MCP_TIER     — MCP tool tier (core|investigate|affect|research|full)
+    CURIOSITY_NO_MEMORY    — set to 1 to disable PersistentMemory read/write
+    CURIOSITY_MEMORY_PATH  — optional override for ~/.artificial_emotions/memory.json
+    CURIOSITY_TEMPERAMENT_PATH — optional override for ~/.artificial_emotions/temperament.toml
     OPENALEX_MAILTO
     S2_API_KEY / SEMANTIC_SCHOLAR_API_KEY
     LITERATURE_TIMEOUT_S   — literature HTTP timeout (default 12)

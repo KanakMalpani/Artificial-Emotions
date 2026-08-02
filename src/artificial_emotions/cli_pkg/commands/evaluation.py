@@ -138,22 +138,39 @@ def _eval(args: argparse.Namespace) -> int:
 
 
 def _validate(args: argparse.Namespace) -> int:
-    """Retrospective validation: did past-only discovery predict the future?"""
-    from artificial_emotions.validate import validate_retrospective
+    """Retrospective validation: did past-only discovery/transfer predict the future?"""
+    method = (getattr(args, "method", None) or "abc").strip().lower()
+    seeds = [s.strip() for s in args.seeds.split(",") if s.strip()]
+    if method == "transfer":
+        from artificial_emotions.transfer import validate_transfer_retrospective
 
-    report = validate_retrospective(
-        args.corpus,
-        seeds=[s.strip() for s in args.seeds.split(",") if s.strip()],
-        cutoff_year=args.cutoff,
-        max_links_per_seed=args.n,
-        baseline_samples_per_seed=args.baseline,
-    )
+        report = validate_transfer_retrospective(
+            args.corpus,
+            seeds=seeds,
+            cutoff_year=args.cutoff,
+            max_links_per_seed=args.n,
+            baseline_samples_per_seed=args.baseline,
+        )
+        label = "structural transfer"
+    else:
+        from artificial_emotions.validate import validate_retrospective
+
+        report = validate_retrospective(
+            args.corpus,
+            seeds=seeds,
+            cutoff_year=args.cutoff,
+            max_links_per_seed=args.n,
+            baseline_samples_per_seed=args.baseline,
+        )
+        label = "Swanson ABC"
+
     payload = report.to_dict()
+    payload["method"] = method
     if args.json:
         print(json.dumps(payload, indent=2))
         return 0
 
-    print(f"\nRetrospective validation — {report.summary()}\n")
+    print(f"\nRetrospective validation ({label}) — {report.summary()}\n")
     if not report.proposals:
         print("  No proposals from the pre-cutoff slice. Try an earlier cutoff,")
         print("  a different seed, or a corpus with more pre-cutoff coverage.")

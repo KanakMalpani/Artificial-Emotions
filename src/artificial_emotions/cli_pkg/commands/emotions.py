@@ -37,13 +37,23 @@ def _emotions(args: argparse.Namespace) -> int:
     cmd = getattr(args, "emotions_cmd", None)
     if not cmd:
         print(
-            "Usage: curiosity emotions {cues|catalog|mix|annotate|elicit|pack}\n"
+            "Usage: curiosity emotions {cues|catalog|mix|annotate|elicit|pack|memory|dream}\n"
             "  (alias: curiosity epistemic …)\n"
             "  mix example: curiosity emotions mix curiosity=40 confusion=30 awe=30\n"
             "Emotion tags/mixes are UX annotations — this system does not feel.",
             file=sys.stderr,
         )
         return 2
+
+    if cmd == "memory":
+        from artificial_emotions.cli_pkg.commands.memory import _memory
+
+        return _memory(args)
+
+    if cmd == "dream":
+        from artificial_emotions.cli_pkg.commands.dream import _dream
+
+        return _dream(args)
 
     if cmd == "cues":
         payload = list_epistemic_cues()

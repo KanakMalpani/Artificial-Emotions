@@ -312,10 +312,13 @@ def test_mcp_explore_tool():
 def test_cli_explore_json_and_text(capsys):
     from artificial_emotions.cli import main
 
-    assert main(["explore", "--domain", "ai", "--steps", "2", "--n", "3", "--json"]) == 0
+    assert (
+        main(["explore", "--domain", "ai", "--steps", "2", "--n", "3", "--json", "--no-memory"])
+        == 0
+    )
     assert json.loads(capsys.readouterr().out)["trajectory"]
 
-    assert main(["explore", "--domain", "ai", "--steps", "2", "--n", "3"]) == 0
+    assert main(["explore", "--domain", "ai", "--steps", "2", "--n", "3", "--no-memory"]) == 0
     text = capsys.readouterr().out
     # Emotions that changed something are separated from those merely surfaced,
     # so a reader can tell which of them mattered.

@@ -11,6 +11,7 @@ from typing import Any
 from artificial_emotions.agent_tools_pkg.handlers import (
     ToolHandler,
     handle_annotate_epistemic,
+    handle_apply_imagination,
     handle_apply_stance,
     handle_compare_profiles,
     handle_constitution_compare,
@@ -24,6 +25,7 @@ from artificial_emotions.agent_tools_pkg.handlers import (
     handle_idea_graph,
     handle_list_domains,
     handle_list_epistemic_cues,
+    handle_list_imagination_kinds,
     handle_list_profiles,
     handle_list_stances,
     handle_mix_emotions,
@@ -35,6 +37,7 @@ from artificial_emotions.agent_tools_pkg.handlers import (
 )
 from artificial_emotions.agent_tools_pkg.schemas import (
     ANNOTATE_EPISTEMIC_SCHEMA,
+    APPLY_IMAGINATION_SCHEMA,
     APPLY_STANCE_SCHEMA,
     COMPARE_PROFILES_SCHEMA,
     CONSTITUTION_COMPARE_SCHEMA,
@@ -48,6 +51,7 @@ from artificial_emotions.agent_tools_pkg.schemas import (
     IDEA_GRAPH_SCHEMA,
     LIST_DOMAINS_SCHEMA,
     LIST_EPISTEMIC_CUES_SCHEMA,
+    LIST_IMAGINATION_KINDS_SCHEMA,
     LIST_PROFILES_SCHEMA,
     LIST_STANCES_SCHEMA,
     MIX_EMOTIONS_SCHEMA,
@@ -203,6 +207,34 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "handler": handle_apply_stance,
     },
     {
+        "name": "list_imagination_kinds",
+        "description": (
+            "List imagination kinds — generative twins of stances (premortem, "
+            "reformulation, counterfactual, …). Outputs are quarantined imagined "
+            "content with honesty imagined_not_retrieved; never ranked findings, "
+            "never a confidence score. Decision aids only — does not feel; "
+            "computational generation under quarantine. Related literature ≠ "
+            "answered still applies."
+        ),
+        "input_schema": LIST_IMAGINATION_KINDS_SCHEMA,
+        "handler": handle_list_imagination_kinds,
+    },
+    {
+        "name": "apply_imagination",
+        "description": (
+            "Rank unknowns once, then generate quarantined imagined content via a "
+            "stance twin (premortem = imagine this failed; reformulation = imagine "
+            "a better-posed question; counterfactual = posit an answer and derive "
+            "consequences). Offline generators; outputs travel only under the "
+            "imagined payload key with honesty imagined_not_retrieved and "
+            "confidence=null. Never injects into ranked lists. Decision aid under "
+            "an explicit ValueProfile — does not feel; not retrieved literature; "
+            "related ≠ answered."
+        ),
+        "input_schema": APPLY_IMAGINATION_SCHEMA,
+        "handler": handle_apply_imagination,
+    },
+    {
         "name": "cross_model_vote",
         "description": (
             "Offline HybridQuestion-style keep/drop/rewrite annotations on "
@@ -335,6 +367,8 @@ _TOOL_TIER: dict[str, str] = {
     "explore_curiosity": "research",
     "list_stances": "core",
     "apply_stance": "investigate",
+    "list_imagination_kinds": "core",
+    "apply_imagination": "investigate",
     "soundness_pass": "investigate",
     "cross_model_vote": "research",
     "export_idea_graph": "research",

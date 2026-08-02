@@ -59,6 +59,7 @@ class TrajectoryStep:
     new_question_ids: list[str] = field(default_factory=list)
     appraisal: list[dict[str, Any]] = field(default_factory=list)
     modulation: list[dict[str, Any]] = field(default_factory=list)
+    costs: list[dict[str, Any]] = field(default_factory=list)
     primary_feeling: str = ""
     ambivalence: float = 0.0
     made_progress: bool = True
@@ -78,6 +79,7 @@ class TrajectoryStep:
             "ambivalence": round(float(self.ambivalence), 4),
             "appraisal": list(self.appraisal),
             "modulation": list(self.modulation),
+            "costs": list(self.costs),
             "made_progress": self.made_progress,
             "note": self.note,
         }
@@ -173,7 +175,8 @@ class Trajectory:
             "steps_without_progress": self.steps_without_progress(),
             "note": (
                 "Session memory only — nothing persists between processes unless "
-                "the caller saves it. Not a model of the field, and not evidence "
-                "that anything here was answered."
+                "PersistentMemory is enabled (CLI explore; opt-out "
+                "CURIOSITY_NO_MEMORY=1). Not a model of the field, and not "
+                "evidence that anything here was answered."
             ),
         }

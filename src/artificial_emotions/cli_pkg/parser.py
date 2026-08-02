@@ -210,13 +210,56 @@ def build_parser() -> argparse.ArgumentParser:
     stance_p.add_argument("--literature", action="store_true")
     stance_p.add_argument("--json", action="store_true")
 
+    imagine_p = sub.add_parser(
+        "imagine",
+        help=(
+            "Generate quarantined imagined content "
+            "(premortem, reformulation, counterfactual, transfer); "
+            "offline, never ranked"
+        ),
+    )
+    imagine_p.add_argument(
+        "imagine_kind",
+        nargs="?",
+        default="list",
+        help=(
+            "Imagination kind (premortem|reformulation|counterfactual|transfer), or omit to list"
+        ),
+    )
+    imagine_p.add_argument("--domain", default="ai", choices=[d.value for d in Domain])
+    imagine_p.add_argument("--topic", default="")
+    imagine_p.add_argument("--n", type=int, default=6)
+    imagine_p.add_argument("--profile", default="humanity_default")
+    imagine_p.add_argument(
+        "--literature",
+        action="store_true",
+        help="Optional literature for the ranking step only; generators stay offline",
+    )
+    imagine_p.add_argument(
+        "--corpus",
+        default="",
+        help="Local corpus (year+concepts JSON) — required for transfer",
+    )
+    imagine_p.add_argument(
+        "--seed",
+        default="",
+        help="Seed concept for transfer (e.g. 'Fish oil')",
+    )
+    imagine_p.add_argument("--json", action="store_true")
+
     validate_p = sub.add_parser(
         "validate",
-        help="Retrospective validation: does past-only discovery predict the future?",
+        help="Retrospective validation: does past-only discovery/transfer predict the future?",
     )
     validate_p.add_argument("--corpus", required=True, help="Corpus with year + concepts")
     validate_p.add_argument("--cutoff", type=int, required=True, help="Hold out this year onward")
     validate_p.add_argument("--seeds", required=True, help="Comma-separated seed concepts")
+    validate_p.add_argument(
+        "--method",
+        default="abc",
+        choices=["abc", "transfer"],
+        help="abc = Swanson discovery; transfer = structural analogy (B3)",
+    )
     validate_p.add_argument("--n", type=int, default=5, help="Max proposals per seed")
     validate_p.add_argument("--baseline", type=int, default=5, help="Random control pairs per seed")
     validate_p.add_argument("--json", action="store_true")
@@ -265,6 +308,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     explore_p.add_argument(
         "--no-jump", action="store_true", help="Stay in one domain even when bored"
+    )
+    explore_p.add_argument(
+        "--no-memory",
+        action="store_true",
+        help=("Do not read/write ~/.artificial_emotions/memory.json (also: CURIOSITY_NO_MEMORY=1)"),
     )
     explore_p.add_argument("--json", action="store_true")
 
@@ -419,4 +467,92 @@ def build_parser() -> argparse.ArgumentParser:
         )
         pack_p.add_argument("--json", action="store_true")
 
+        _add_memory_subparser(emo_sub)
+        _add_dream_subparser(emo_sub)
+
+    # Top-level: `emotions memory show` when the binary is `emotions`
+    mem_top = sub.add_parser(
+        "memory",
+        help=(
+            "Persistent CLI memory (local JSON; opt-out CURIOSITY_NO_MEMORY=1) "
+            "— annotation continuity, does not feel"
+        ),
+    )
+    mem_top_sub = mem_top.add_subparsers(dest="memory_cmd")
+    _fill_memory_subcommands(mem_top_sub)
+
+    # Top-level: `emotions dream` — explicit offline reanalysis only
+    dream_top = sub.add_parser(
+        "dream",
+        help=(
+            "Offline reanalysis of stored PersistentMemory history "
+            "(explicit only — never automatic; does not feel)"
+        ),
+    )
+    _fill_dream_arguments(dream_top)
+
     return p
+
+
+def _add_memory_subparser(parent: argparse._SubParsersAction) -> None:
+    mem_p = parent.add_parser(
+        "memory",
+        help=(
+            "Persistent CLI memory show|forget|reset|avoiding "
+            "(local JSON; never on by default for MCP/HTTP)"
+        ),
+    )
+    mem_sub = mem_p.add_subparsers(dest="memory_cmd")
+    _fill_memory_subcommands(mem_sub)
+
+
+def _add_dream_subparser(parent: argparse._SubParsersAction) -> None:
+    dream_p = parent.add_parser(
+        "dream",
+        help=(
+            "Offline reanalysis of stored history "
+            "(explicit only — never automatic / background; does not feel)"
+        ),
+    )
+    _fill_dream_arguments(dream_p)
+
+
+def _fill_dream_arguments(dream_p: argparse.ArgumentParser) -> None:
+    dream_p.add_argument("--json", action="store_true")
+    dream_p.add_argument(
+        "--path",
+        default=None,
+        help="Override memory JSON path (default ~/.artificial_emotions/memory.json)",
+    )
+
+
+def _fill_memory_subcommands(mem_sub: argparse._SubParsersAction) -> None:
+    show_p = mem_sub.add_parser("show", help="Show what is remembered (local JSON)")
+    show_p.add_argument("--json", action="store_true")
+    show_p.add_argument(
+        "--path",
+        default=None,
+        help="Override memory JSON path (default ~/.artificial_emotions/memory.json)",
+    )
+
+    avoid_p = mem_sub.add_parser(
+        "avoiding",
+        help=(
+            "List questions seen many times and picked zero "
+            "(pattern only — cannot distinguish avoidance from judgment)"
+        ),
+    )
+    avoid_p.add_argument("--json", action="store_true")
+    avoid_p.add_argument("--path", default=None)
+
+    forget_p = mem_sub.add_parser(
+        "forget",
+        help="Forget a session id, question id, or keyword (sessions|encounters|mood)",
+    )
+    forget_p.add_argument("what", help="session id, question id, or sessions|encounters|mood|…")
+    forget_p.add_argument("--json", action="store_true")
+    forget_p.add_argument("--path", default=None)
+
+    reset_p = mem_sub.add_parser("reset", help="Wipe all persistent memory and delete the file")
+    reset_p.add_argument("--json", action="store_true")
+    reset_p.add_argument("--path", default=None)

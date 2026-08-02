@@ -1,140 +1,43 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { AffectReadout } from "./affect";
+import { ExplorePanel, useProfilesQuery } from "./features/explore";
+import { ImaginationCanvas } from "./features/imagine";
+import { ConfessionPanel, TrajectoryMap } from "./features/memory";
+import { RankPanel } from "./features/rank";
+import {
+  ComparePanel,
+  StanceLensList,
+  StanceNav,
+  type StanceId,
+} from "./features/stances";
+import {
+  FALLBACK_PROFILES,
+  MIX_SLIDERS,
+  qidFor,
+  type CompareData,
+  type FeedbackEvent,
+  type MixBlend,
+  type OutcomeDraft,
+  type Ranked,
+} from "./types";
 
-type ScoreAxes = {
-  impact: number;
-  neglectedness: number;
-  tractability: number;
-  surprise: number;
-  answerability: number;
-  risk: number;
-  cost_proxy: number;
-};
-
-type LitHit = {
-  title: string;
-  year?: number | null;
-  cited_by_count?: number | null;
-  url?: string | null;
-};
-
-type Ranked = {
-  rank: number;
-  curiosity_score: number;
-  confidence: number;
-  score_low?: number | null;
-  score_high?: number | null;
-  flags: string[];
-  investigation_brief: string;
-  scores: ScoreAxes;
-  gap: {
-    status: string;
-    confidence: number;
-    notes: string;
-    top_overlap?: number;
-    related_works?: LitHit[];
-  };
-  question: {
-    id?: string;
-    question: string;
-    why_it_matters: string;
-    operationalization: string;
-    tags: string[];
-    domain: string;
-  };
-};
-
-type FeedbackEvent = {
-  event_type: string;
-  profile_name: string;
-  question_id: string;
-  question_text: string;
-  rank: number;
-  curiosity_score: number;
-  score_axes: Partial<ScoreAxes>;
-  preferred_over_ids?: string[];
-  labels?: {
-    position?: string;
-    result?: string;
-    months?: string;
-    relation?: string;
-  };
-  notes?: string;
-};
-
-const OUTCOME_LABELS = [
-  "partial_progress",
-  "null",
-  "contradicted",
-  "answered_elsewhere",
-  "abandoned",
-] as const;
-
-type ProfileMeta = {
-  name: string;
-  description: string;
-};
-
-type MixBlend = {
-  framing?: string;
-  inject_fragment?: string;
-  percents?: Record<string, number>;
-  honesty?: string;
-  disclaimer?: string;
-};
-
-const DOMAINS = [
-  "ai",
-  "biology",
-  "medicine",
-  "climate",
-  "energy",
-  "materials",
-  "physics",
-  "social",
-  "general",
-];
-
-const AXIS: { key: keyof ScoreAxes; label: string; tip?: string }[] = [
-  { key: "impact", label: "Impact" },
-  { key: "neglectedness", label: "Neglected" },
-  { key: "tractability", label: "Tractable", tip: "Resource/ops realism (not SFBench)" },
-  { key: "surprise", label: "Surprise" },
-  {
-    key: "answerability",
-    label: "Answerable",
-    tip: "As-posed specificity — distinct from tractability; not a feasibility score",
-  },
-];
-
-const FALLBACK_PROFILES: ProfileMeta[] = [
-  { name: "humanity_default", description: "Default multi-stakeholder weights" },
-  { name: "funder_10y", description: "Tractable unknowns within ~10 years" },
-  { name: "alignment_lab", description: "Neglected alignment / control unknowns" },
-  { name: "climate_adaptation", description: "Climate adaptation / resilience" },
-  { name: "basic_science", description: "Surprising fundamental unknowns" },
-  { name: "near_term_ops", description: "Low-cost near-term operational unknowns" },
-  {
-    name: "public_demo_strict_risk",
-    description: "Public / demo surface with a strict dual-use risk ceiling",
-  },
-];
-
-const MIX_SLIDERS: { id: string; label: string }[] = [
-  { id: "curiosity", label: "Curiosity" },
-  { id: "confusion", label: "Confusion" },
-  { id: "awe", label: "Awe" },
-  { id: "interest", label: "Interest" },
-];
-
+/**
+ * App shell: C1 affect + Wave 4 presentation (C2–C5).
+ * AffectProvider (main.tsx) writes --ae-* CSS vars from PAD state.
+ */
 export default function App() {
+
+  const profilesQuery = useProfilesQuery();
+  const profiles = profilesQuery.data ?? FALLBACK_PROFILES;
+
   const [domain, setDomain] = useState("ai");
   const [topic, setTopic] = useState("");
   const [profileName, setProfileName] = useState("humanity_default");
-  const [profiles, setProfiles] = useState<ProfileMeta[]>(FALLBACK_PROFILES);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<Ranked[]>([]);
   const [resultMode, setResultMode] = useState<"run" | "spark" | null>(null);
+  const [activeStance, setActiveStance] = useState<StanceId>("curiosity");
   const [activeProfile, setActiveProfile] = useState<string | null>(null);
   const [profileDescription, setProfileDescription] = useState<string | null>(
     null,
@@ -155,28 +58,14 @@ export default function App() {
   const [soundnessNote, setSoundnessNote] = useState<string | null>(null);
   const [preferredIds, setPreferredIds] = useState<Set<string>>(new Set());
   const [outcomeDraft, setOutcomeDraft] = useState<
-    Record<string, { result: string; months: string; note: string }>
+    Record<string, OutcomeDraft>
   >({});
   const [compareB, setCompareB] = useState("alignment_lab");
   const [vetoProfile, setVetoProfile] = useState("public_demo_strict_risk");
   const [compareOpen, setCompareOpen] = useState(false);
   const [compareBusy, setCompareBusy] = useState(false);
   const [compareErr, setCompareErr] = useState<string | null>(null);
-  const [compareData, setCompareData] = useState<{
-    ranks_a?: { rank: number; question: string; curiosity_score: number }[];
-    ranks_b?: { rank: number; question: string; curiosity_score: number }[];
-    agreement?: { kendall_tau?: number | null; top_k_jaccard?: number | null };
-    honesty?: string;
-    profile_a?: { name?: string };
-    profile_b?: { name?: string };
-    veto_applied?: {
-      n_kept?: number;
-      n_flagged?: number;
-      max_risk?: number;
-      flagged?: { rank: number; question: string; veto_risk?: number }[];
-    };
-    constitution?: { id?: string; primary_profile?: string; veto_profile?: string };
-  } | null>(null);
+  const [compareData, setCompareData] = useState<CompareData | null>(null);
 
   const subtitle = useMemo(
     () =>
@@ -188,22 +77,6 @@ export default function App() {
     () => profiles.find((p) => p.name === (activeProfile ?? profileName)),
     [profiles, activeProfile, profileName],
   );
-
-  useEffect(() => {
-    fetch("/v1/profiles")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.presets?.length) {
-          setProfiles(
-            data.presets.map((p: ProfileMeta) => ({
-              name: p.name,
-              description: p.description,
-            })),
-          );
-        }
-      })
-      .catch(() => undefined);
-  }, []);
 
   async function run() {
     setLoading(true);
@@ -223,12 +96,11 @@ export default function App() {
           literature_workers: 4,
         }),
       });
-      if (!res.ok) {
-        throw new Error(`API ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
       setResults(data.questions ?? []);
       setResultMode("run");
+      setActiveStance("curiosity");
       setActiveProfile(data.value_profile?.name ?? profileName);
       setProfileDescription(data.value_profile?.description ?? null);
     } catch (e) {
@@ -256,13 +128,12 @@ export default function App() {
       const res = await fetch(`/v1/curiosity/provoke?${qs.toString()}`);
       if (!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
-      const questions = (data.questions ?? []) as Ranked[];
-      setResults(questions);
+      setResults((data.questions ?? []) as Ranked[]);
       setResultMode("spark");
+      setActiveStance("curiosity");
       setActiveProfile(data.value_profile?.name ?? profileName);
       setProfileDescription(data.value_profile?.description ?? null);
       if (mixBlend?.inject_fragment && data.inject) {
-        // Framing is optional UX — never claimed as felt emotion.
         void navigator.clipboard?.writeText?.(
           `${mixBlend.inject_fragment}\n\n${data.inject}`,
         );
@@ -304,19 +175,10 @@ export default function App() {
       setMixWarnings(Array.isArray(data.warnings) ? data.warnings : []);
       setMixOpen(true);
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Emotion mix failed",
-      );
+      setError(e instanceof Error ? e.message : "Emotion mix failed");
     } finally {
       setMixBusy(false);
     }
-  }
-
-  function qidFor(r: Ranked): string {
-    return (
-      r.question.id ||
-      `rank-${r.rank}-${r.question.question.slice(0, 24).replace(/\s+/g, "_")}`
-    );
   }
 
   function recordFeedback(
@@ -503,7 +365,9 @@ export default function App() {
       setCompareData(await res.json());
       setCompareOpen(true);
     } catch (e) {
-      setCompareErr(e instanceof Error ? e.message : "Constitution compare failed");
+      setCompareErr(
+        e instanceof Error ? e.message : "Constitution compare failed",
+      );
       setCompareData(null);
     } finally {
       setCompareBusy(false);
@@ -517,9 +381,7 @@ export default function App() {
     }
     try {
       const candidates = results.map((r) => ({
-        question_id:
-          r.question.id ||
-          `rank-${r.rank}-${r.question.question.slice(0, 24).replace(/\s+/g, "_")}`,
+        question_id: qidFor(r),
         rank: r.rank,
         curiosity_score: r.curiosity_score,
         question: r.question.question,
@@ -540,13 +402,9 @@ export default function App() {
         setFeedbackNote(data.reason || "No pair suggested");
         return;
       }
-      const aq = pair.a?.question || pair.a?.question_id;
-      const bq = pair.b?.question || pair.b?.question_id;
       setFeedbackNote(
         `Next duel: #${pair.a?.rank} vs #${pair.b?.rank} — prior=${pair.prior_comparisons} (not BT overwrite)`,
       );
-      void aq;
-      void bq;
     } catch (e) {
       setFeedbackNote(e instanceof Error ? e.message : "Suggest-pair failed");
     }
@@ -592,479 +450,97 @@ export default function App() {
   }
 
   return (
-    <main className="shell">
+    <main className="shell" data-testid="mood-shell">
       <h1 className="brand">Artificial Emotions</h1>
       <p className="lede">{subtitle}</p>
 
-      <div className="controls">
-        <label>
-          Domain
-          <select value={domain} onChange={(e) => setDomain(e.target.value)}>
-            {DOMAINS.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          ValueProfile
-          <select
-            value={profileName}
-            onChange={(e) => setProfileName(e.target.value)}
-          >
-            {profiles.map((p) => (
-              <option key={p.name} value={p.name}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Topic focus
-          <input
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="optional — e.g. aging biomarkers"
-          />
-        </label>
-        <div className="btn-row">
-          <button type="button" onClick={run} disabled={loading}>
-            {loading ? "Mapping unknowns…" : "Ask what to investigate"}
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={spark}
-            disabled={loading}
-          >
-            Fast spark
-          </button>
-        </div>
-      </div>
+      <AffectReadout />
 
-      {(activeProfileMeta?.description || profileDescription) && (
-        <p className="profile-desc">
-          <strong>Active profile.</strong>{" "}
-          {profileDescription ?? activeProfileMeta?.description}
-        </p>
+      <StanceNav
+        results={results}
+        activeStance={activeStance}
+        onStance={setActiveStance}
+      />
+
+      <ExplorePanel
+        domain={domain}
+        topic={topic}
+        profileName={profileName}
+        profiles={profiles}
+        loading={loading}
+        profileDescription={profileDescription}
+        activeProfileDescription={activeProfileMeta?.description}
+        mixOpen={mixOpen}
+        mixBusy={mixBusy}
+        mixWeights={mixWeights}
+        mixBlend={mixBlend}
+        mixWarnings={mixWarnings}
+        onDomain={setDomain}
+        onTopic={setTopic}
+        onProfileName={setProfileName}
+        onRun={run}
+        onSpark={spark}
+        onMixOpenToggle={() => setMixOpen((o) => !o)}
+        onMixWeight={(id, value) =>
+          setMixWeights((w) => ({ ...w, [id]: value }))
+        }
+        onBuildMix={buildMix}
+      />
+
+      <ComparePanel
+        profileName={profileName}
+        profiles={profiles}
+        compareB={compareB}
+        vetoProfile={vetoProfile}
+        compareBusy={compareBusy}
+        compareErr={compareErr}
+        compareOpen={compareOpen}
+        compareData={compareData}
+        onCompareB={setCompareB}
+        onVetoProfile={setVetoProfile}
+        onCompare={runCompare}
+        onConstitutionCompare={runConstitutionCompare}
+      />
+
+      <StanceLensList results={results} stance={activeStance} />
+
+      {activeStance === "curiosity" && (
+        <RankPanel
+          domain={domain}
+          profileLabel={activeProfile ?? profileName}
+          resultMode={resultMode}
+          results={results}
+          preferredIds={preferredIds}
+          outcomeDraft={outcomeDraft}
+          feedbackCount={feedback.length}
+          feedbackNote={feedbackNote}
+          critiqueNote={critiqueNote}
+          soundnessNote={soundnessNote}
+          error={error}
+          onRecordFeedback={recordFeedback}
+          onRecordOutcome={recordOutcome}
+          onOutcomeDraft={(qid, draft) =>
+            setOutcomeDraft((d) => ({ ...d, [qid]: draft }))
+          }
+          onCritique={critiqueCard}
+          onSoundness={soundnessCard}
+          onSummarizeFeedback={summarizeFeedback}
+          onSuggestPair={suggestPair}
+        />
       )}
 
-      <section className="compare-panel" aria-label="Profile compare">
-        <div className="compare-controls">
-          <label>
-            Compare vs
-            <select
-              value={compareB}
-              onChange={(e) => setCompareB(e.target.value)}
-            >
-              {profiles
-                .filter((p) => p.name !== profileName)
-                .map((p) => (
-                  <option key={p.name} value={p.name}>
-                    {p.name}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <label>
-            Safety veto
-            <select
-              value={vetoProfile}
-              onChange={(e) => setVetoProfile(e.target.value)}
-            >
-              {profiles.map((p) => (
-                <option key={p.name} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={runCompare}
-            disabled={compareBusy || compareB === profileName}
-          >
-            {compareBusy ? "Comparing…" : "Side-by-side ranks"}
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={runConstitutionCompare}
-            disabled={compareBusy}
-          >
-            Compare + veto
-          </button>
-        </div>
-        {compareErr && <p className="error">{compareErr}</p>}
-        {compareOpen && compareData && (
-          <div className="compare-grid">
-            <div className="compare-col">
-              <h3>{compareData.profile_a?.name ?? profileName}</h3>
-              <ol>
-                {(compareData.ranks_a || []).map((r) => (
-                  <li key={`a-${r.rank}`}>
-                    <span className="compare-rank">#{r.rank}</span>
-                    <span className="compare-q">{r.question}</span>
-                    <span className="compare-score">
-                      {r.curiosity_score.toFixed(2)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="compare-col">
-              <h3>{compareData.profile_b?.name ?? compareB}</h3>
-              <ol>
-                {(compareData.ranks_b || []).map((r) => (
-                  <li key={`b-${r.rank}`}>
-                    <span className="compare-rank">#{r.rank}</span>
-                    <span className="compare-q">{r.question}</span>
-                    <span className="compare-score">
-                      {r.curiosity_score.toFixed(2)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <p className="compare-meta">
-              τ=
-              {compareData.agreement?.kendall_tau == null
-                ? "n/a"
-                : Number(compareData.agreement.kendall_tau).toFixed(3)}
-              {" · "}
-              top-k Jaccard=
-              {compareData.agreement?.top_k_jaccard == null
-                ? "n/a"
-                : Number(compareData.agreement.top_k_jaccard).toFixed(3)}
-              {" — "}
-              offline heuristic; no silent merge.
-              {compareData.veto_applied
-                ? ` Veto kept=${compareData.veto_applied.n_kept} flagged=${compareData.veto_applied.n_flagged} (max_risk=${compareData.veto_applied.max_risk}).`
-                : ""}
-            </p>
-            {(compareData.veto_applied?.flagged?.length ?? 0) > 0 && (
-              <p className="compare-meta">
-                Flagged over risk ceiling:{" "}
-                {compareData.veto_applied!.flagged!
-                  .slice(0, 3)
-                  .map((f) => `#${f.rank}`)
-                  .join(", ")}
-                {" — stakeholders can disagree; not a consensus score."}
-              </p>
-            )}
-          </div>
-        )}
-      </section>
-
-      <section className="mix-panel" aria-label="Investigation framing mix">
-        <button
-          type="button"
-          className="mix-toggle"
-          onClick={() => setMixOpen((o) => !o)}
-          aria-expanded={mixOpen}
-        >
-          {mixOpen ? "Hide" : "Show"} investigation framing mix
-          <span className="mix-hint">UX annotation only — does not feel</span>
-        </button>
-        {mixOpen && (
-          <div className="mix-body">
-            <p className="mix-honesty">
-              Percentages are framing weights for investigation tone — not EES
-              scores, not felt emotion, and not a clinical mood measure.
-            </p>
-            <div className="mix-sliders">
-              {MIX_SLIDERS.map((s) => (
-                <label key={s.id} className="mix-slider">
-                  <span>
-                    {s.label}{" "}
-                    <em>{Math.round(mixWeights[s.id] ?? 0)}</em>
-                  </span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={mixWeights[s.id] ?? 0}
-                    onChange={(e) =>
-                      setMixWeights((w) => ({
-                        ...w,
-                        [s.id]: Number(e.target.value),
-                      }))
-                    }
-                  />
-                </label>
-              ))}
-            </div>
-            <button type="button" onClick={buildMix} disabled={mixBusy}>
-              {mixBusy ? "Mixing…" : "Build framing mix"}
-            </button>
-            {mixBlend && (
-              <div className="mix-result">
-                {mixWarnings.length > 0 && (
-                  <ul className="mix-warnings">
-                    {mixWarnings.map((w) => (
-                      <li key={w.slice(0, 40)}>{w}</li>
-                    ))}
-                  </ul>
-                )}
-                {mixBlend.framing && (
-                  <p>
-                    <strong>Framing.</strong> {mixBlend.framing}
-                  </p>
-                )}
-                {mixBlend.inject_fragment && (
-                  <pre className="mix-inject">{mixBlend.inject_fragment}</pre>
-                )}
-                <p className="mix-disclaimer">
-                  {mixBlend.honesty ||
-                    mixBlend.disclaimer ||
-                    "Annotation only — this system does not feel."}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-
-      {feedbackNote && <p className="feedback-note">{feedbackNote}</p>}
-      {critiqueNote && <p className="feedback-note">{critiqueNote}</p>}
-      {soundnessNote && <p className="feedback-note">{soundnessNote}</p>}
-      {feedback.length > 0 && (
-        <div className="feedback-bar">
-          <span>{feedback.length} feedback event(s) this session</span>
-          <button type="button" className="btn-secondary" onClick={summarizeFeedback}>
-            Summarize feedback
-          </button>
-          <button type="button" className="btn-secondary" onClick={suggestPair}>
-            Suggest next duel
-          </button>
-        </div>
-      )}
-      {results.length >= 2 && feedback.length === 0 && (
-        <div className="feedback-bar">
-          <button type="button" className="btn-secondary" onClick={suggestPair}>
-            Suggest next duel
-          </button>
-        </div>
+      {error && activeStance !== "curiosity" && (
+        <div className="error">{error}</div>
       )}
 
-      {error && <div className="error">{error}</div>}
+      <TrajectoryMap domain={domain} topic={topic} results={results} />
 
-      {results.length > 0 && (
-        <>
-          <div className="meta-row">
-            <span>{results.length} ranked unknowns</span>
-            <span>domain={domain}</span>
-            <span>profile={activeProfile ?? profileName}</span>
-            <span>
-              {resultMode === "spark"
-                ? "fast spark (offline seeds)"
-                : "literature-grounded gap check"}
-            </span>
-          </div>
-          <p className="profile-note">
-            Rankings use explicit ValueProfile weights — decision aids, not oracles.
-            Curiosity scores and [low–high] bands are evidence-strength envelopes,
-            not calibrated probabilities. Investigation briefs are primary; axis
-            bars are secondary context.
-          </p>
-          <section className="list">
-            {results.map((r) => {
-              const works = r.gap?.related_works?.slice(0, 3) ?? [];
-              const band =
-                r.score_low != null && r.score_high != null
-                  ? `[${r.score_low.toFixed(2)}–${r.score_high.toFixed(2)}]`
-                  : null;
-              return (
-                <article className="card" key={`${r.rank}-${r.question.question}`}>
-                  <div className="rank">#{r.rank}</div>
-                  <div>
-                    <h2 className="q-title">{r.question.question}</h2>
-                    <div className="scores">
-                      <span className="chip">
-                        curiosity {r.curiosity_score.toFixed(3)}
-                        {band ? ` ${band}` : ""}
-                      </span>
-                      <span className="chip">conf {r.confidence.toFixed(2)}</span>
-                      <span className={`chip gap-${r.gap?.status ?? "unknown"}`}>
-                        gap:{r.gap?.status ?? "n/a"}
-                      </span>
-                      <span className="chip">
-                        cost {r.scores.cost_proxy.toFixed(2)}
-                      </span>
-                      {r.flags?.slice(0, 4).map((f) => (
-                        <span className="chip flag" key={f}>
-                          {f}
-                        </span>
-                      ))}
-                      {r.question.tags?.slice(0, 3).map((t) => (
-                        <span className="chip" key={t}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                    {r.investigation_brief && (
-                      <div className="brief">
-                        <strong>Investigation brief.</strong> {r.investigation_brief}
-                      </div>
-                    )}
-                    <div className="feedback-actions">
-                      <button
-                        type="button"
-                        className="btn-feedback"
-                        onClick={() => recordFeedback(r, "prefer")}
-                      >
-                        Prefer
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-feedback"
-                        onClick={() => recordFeedback(r, "tie")}
-                      >
-                        Tie
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-feedback"
-                        onClick={() => recordFeedback(r, "reject")}
-                      >
-                        Reject
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-feedback"
-                        onClick={() => recordFeedback(r, "already_answered")}
-                      >
-                        Already answered
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-feedback"
-                        onClick={() => critiqueCard(r)}
-                      >
-                        Critique form
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-feedback"
-                        onClick={() => soundnessCard(r)}
-                      >
-                        Soundness
-                      </button>
-                    </div>
-                    {preferredIds.has(qidFor(r)) && (
-                      <div className="outcome-picker">
-                        <label>
-                          Outcome
-                          <select
-                            value={
-                              outcomeDraft[qidFor(r)]?.result ||
-                              "partial_progress"
-                            }
-                            onChange={(e) => {
-                              const id = qidFor(r);
-                              setOutcomeDraft((d) => ({
-                                ...d,
-                                [id]: {
-                                  result: e.target.value,
-                                  months: d[id]?.months || "",
-                                  note: d[id]?.note || "",
-                                },
-                              }));
-                            }}
-                          >
-                            {OUTCOME_LABELS.map((o) => (
-                              <option key={o} value={o}>
-                                {o}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        <label>
-                          Months
-                          <input
-                            type="number"
-                            min={0}
-                            placeholder="opt"
-                            value={outcomeDraft[qidFor(r)]?.months || ""}
-                            onChange={(e) => {
-                              const id = qidFor(r);
-                              setOutcomeDraft((d) => ({
-                                ...d,
-                                [id]: {
-                                  result: d[id]?.result || "partial_progress",
-                                  months: e.target.value,
-                                  note: d[id]?.note || "",
-                                },
-                              }));
-                            }}
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          className="btn-feedback"
-                          onClick={() => recordOutcome(r)}
-                        >
-                          Log outcome
-                        </button>
-                        <span className="outcome-hint">
-                          Sparse flywheel — not auto-retrain
-                        </span>
-                      </div>
-                    )}
-                    <p className="why">
-                      <strong>Why it matters.</strong> {r.question.why_it_matters}
-                    </p>
-                    <p className="ops">
-                      <strong>Operationalization.</strong>{" "}
-                      {r.question.operationalization}
-                    </p>
-                    {works.length > 0 && (
-                      <div className="lit">
-                        <strong>Neighborhood literature</strong>
-                        <span className="lit-note">
-                          {" "}
-                          (related ≠ answered; overlap=
-                          {(r.gap.top_overlap ?? 0).toFixed(2)})
-                        </span>
-                        <ul>
-                          {works.map((w) => (
-                            <li key={w.title}>
-                              {w.url ? (
-                                <a href={w.url} target="_blank" rel="noreferrer">
-                                  {w.title}
-                                </a>
-                              ) : (
-                                w.title
-                              )}
-                              {w.year != null ? ` (${w.year})` : ""}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="bars">
-                      {AXIS.map((a) => (
-                        <div className="bar-row" key={a.key}>
-                          <span title={a.tip}>{a.label}</span>
-                          <div className="bar-track">
-                            <div
-                              className="bar-fill"
-                              style={{ width: `${r.scores[a.key] * 100}%` }}
-                            />
-                          </div>
-                          <span>{r.scores[a.key].toFixed(2)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
-        </>
-      )}
+      <ImaginationCanvas results={results} />
+
+      <ConfessionPanel
+        results={results}
+        profileLabel={activeProfile ?? profileName}
+      />
 
       <p className="footer-note">
         Scores estimate expected value of investigation (impact × neglectedness ×

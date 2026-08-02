@@ -463,3 +463,38 @@ def handle_apply_stance(
         )
     ).run()
     return apply_stance(stance, items)
+
+
+def handle_list_imagination_kinds(**_extra: Any) -> dict[str, Any]:
+    """List imagination kinds and which generators are wired."""
+    from artificial_emotions.imagine import list_imagination_kinds
+
+    return list_imagination_kinds()
+
+
+def handle_apply_imagination(
+    *,
+    kind: str,
+    domain: str = "ai",
+    topic: str = "",
+    n_return: int = 6,
+    profile_name: str | None = None,
+    use_literature: bool = False,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Rank once offline, then generate quarantined imagined content."""
+    from artificial_emotions.imagine import apply_imagination
+    from artificial_emotions.models import CuriosityConfig, resolve_value_profile
+    from artificial_emotions.pipeline import CuriosityEngine
+
+    items = CuriosityEngine(
+        CuriosityConfig(
+            domain=domain,
+            topic=topic,
+            n_return=int(n_return or 6),
+            use_llm=False,
+            use_literature=bool(use_literature),
+            value_profile=resolve_value_profile(profile_name=profile_name),
+        )
+    ).run()
+    return apply_imagination(kind, items)

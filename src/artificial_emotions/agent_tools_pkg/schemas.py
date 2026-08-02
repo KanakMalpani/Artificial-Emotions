@@ -484,3 +484,34 @@ APPLY_STANCE_SCHEMA: dict[str, Any] = {
     "required": ["stance"],
     "additionalProperties": False,
 }
+
+LIST_IMAGINATION_KINDS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": False,
+}
+
+APPLY_IMAGINATION_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "kind": {
+            "type": "string",
+            "enum": ["premortem", "reformulation", "counterfactual"],
+            "description": (
+                "Which generative twin to run. Outputs are quarantined imagined "
+                "content — not ranked findings."
+            ),
+        },
+        "domain": {"type": "string", "enum": _DOMAIN_ENUM, "default": "ai"},
+        "topic": {"type": "string", "default": ""},
+        "n_return": {"type": "integer", "minimum": 1, "maximum": 16, "default": 6},
+        "profile_name": {"type": "string", "enum": _PROFILE_ENUM},
+        "use_literature": {
+            "type": "boolean",
+            "default": False,
+            "description": "Literature for the ranking step only; generators stay offline.",
+        },
+    },
+    "required": ["kind"],
+    "additionalProperties": False,
+}

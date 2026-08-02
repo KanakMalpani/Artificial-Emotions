@@ -28,6 +28,7 @@ from artificial_emotions.appraisal import (
     build_context,
 )
 from artificial_emotions.emotions import emotion_catalog
+from artificial_emotions.imagine import IMAGINATION_KINDS, IMPLEMENTED_IMAGINATION_KINDS
 from artificial_emotions.models import CuriosityConfig
 from artificial_emotions.modulate import modulate_config
 from artificial_emotions.pipeline import CuriosityEngine
@@ -173,6 +174,16 @@ def _stance_driving_emotions() -> set[str]:
     return {e for stance in STANCES.values() for e in stance.driving_emotions}
 
 
+def _imagination_driving_emotions() -> set[str]:
+    """Emotions that drive a wired imaginative lens (B4+)."""
+    return {
+        e
+        for kind in IMAGINATION_KINDS.values()
+        if kind.generate is not None
+        for e in kind.driving_emotions
+    }
+
+
 def test_every_appraisable_emotion_either_acts_or_is_declared_observation_only():
     """The anti-decoration rule: derive it, then either use it or say you won't."""
     acting = _modulating_emotions()
@@ -189,13 +200,15 @@ def test_every_emotion_has_a_use_not_merely_a_disclaimer():
     ``OBSERVATION_ONLY`` is an honest label, but on its own it is still a catalog
     of things the system names and never uses. Stances closed that gap: an
     emotion that does not steer the search must at least be the question some
-    stance asks. Nothing is allowed to be merely observed.
+    stance asks — or drive a wired imaginative lens. Nothing is allowed to be
+    merely observed.
     """
-    useful = _modulating_emotions() | _stance_driving_emotions()
+    useful = _modulating_emotions() | _stance_driving_emotions() | _imagination_driving_emotions()
     homeless = set(RULES) - useful
     assert not homeless, (
         f"{sorted(homeless)} are appraised but do nothing — they neither modulate "
-        "search nor drive a stance. Give them a use or drop the rule."
+        "search, drive a stance, nor drive an imaginative lens. Give them a use "
+        "or drop the rule."
     )
 
 
@@ -203,6 +216,13 @@ def test_stances_only_claim_emotions_the_system_can_actually_appraise():
     """A stance driven by a feeling that never fires is a marketing claim."""
     invented = _stance_driving_emotions() - set(RULES)
     assert not invented, f"stances claim {sorted(invented)}, which appraisal never derives"
+
+
+def test_imagination_only_claims_emotions_the_system_can_actually_appraise():
+    invented = _imagination_driving_emotions() - set(RULES)
+    assert not invented, (
+        f"imagination kinds claim {sorted(invented)}, which appraisal never derives"
+    )
 
 
 def test_stances_reach_past_curiosity():
@@ -215,12 +235,20 @@ def test_stances_reach_past_curiosity():
     assert len(drivers) >= MIN_STANCE_DRIVERS, f"only {len(drivers)} emotions drive a stance"
 
 
+def test_imagination_twins_start_shipping():
+    """Ratchet: premortem, reformulation, and counterfactual stay wired."""
+    assert len(IMPLEMENTED_IMAGINATION_KINDS) >= MIN_IMAGINATION_GENERATORS
+    assert "premortem" in IMPLEMENTED_IMAGINATION_KINDS
+    assert "reformulation" in IMPLEMENTED_IMAGINATION_KINDS
+    assert "counterfactual" in IMPLEMENTED_IMAGINATION_KINDS
+
+
 def test_observation_only_emotions_still_have_somewhere_to_go():
     """Every emotion the loop refuses to act on must at least answer some question."""
-    stranded = OBSERVATION_ONLY - _stance_driving_emotions()
+    stranded = OBSERVATION_ONLY - _stance_driving_emotions() - _imagination_driving_emotions()
     assert not stranded, (
         f"{sorted(stranded)} are appraised, deliberately never acted on, and drive no "
-        "stance — appraising them is pure decoration."
+        "stance or imaginative lens — appraising them is pure decoration."
     )
 
 
@@ -240,6 +268,7 @@ MIN_FIRING_OFFLINE = 8
 MIN_DISTINCT_DRIVERS_PER_RUN = 3
 MIN_STANCES = 7
 MIN_STANCE_DRIVERS = 24
+MIN_IMAGINATION_GENERATORS = 3
 
 
 def test_a_meaningful_share_of_the_catalog_is_reachable():

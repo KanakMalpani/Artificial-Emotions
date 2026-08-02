@@ -16,9 +16,12 @@ from artificial_emotions.cli_pkg.commands import (
     _critique_brief,
     _decompose,
     _discover,
+    _dream,
     _emotions,
     _eval,
     _explore,
+    _imagine,
+    _memory,
     _preferences,
     _profiles,
     _run_engine,
@@ -50,9 +53,12 @@ _DISPATCH: dict[str, Handler] = {
     "eval": _eval,
     "explore": _explore,
     "stance": _stance,
+    "imagine": _imagine,
     "validate": _validate,
     "emotions": _emotions,
     "epistemic": _emotions,
+    "memory": _memory,
+    "dream": _dream,
 }
 
 
