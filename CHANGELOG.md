@@ -1,7 +1,5 @@
 # Changelog
 
-## Unreleased
-
 ## [0.4.1] — memory integrity + API serve hardening
 
 Patch release for silent memory wipe risk and open HTTP serve defaults that
@@ -31,6 +29,11 @@ Functional continuity and quarantined imagination. Affect can outlive a process,
 cost something, and generate what is not yet there — without phenomenal claims.
 
 Package version `0.4.0`. Superseded for serve/memory hardening by `[0.4.1]`.
+
+**Correction (2026-08-02):** early `0.4.0` notes said PyPI upload was deferred.
+That stopped being true when `0.4.0` published — install path is
+`pip install artificial-emotions` (see `docs/PUBLISHING.md`). Hardening that
+justifies upgrading from that release is recorded under `[0.4.1]`.
 
 ### Added — continuity
 - **`memory.py` — persistent CLI memory.** Local JSON at
@@ -403,7 +406,9 @@ Production-ready hardening of the public surface (emotions + API + plugins).
 ### Docs / packaging surface (same release line)
 - World-class README + docs INDEX / CONTRIBUTING / examples index aligned to v0.4.0
 - ROADMAP_SUMMARY + PUBLISHING version pins corrected (were stale at 0.3.1)
-- Honesty: not on PyPI; emotions annotation_only; scores ≠ oracles
+- Honesty: emotions annotation_only; scores ≠ oracles. *(Original line also said
+  “not on PyPI”; that claim was corrected when the package published — see
+  correction under `[0.4.0] — Alive` above.)*
 
 ### Added
 - Central `artificial_emotions.config` (env knobs: LLM_*, CURIOSITY_API_KEY, timeouts, CORS)

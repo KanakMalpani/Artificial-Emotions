@@ -7,8 +7,8 @@
 *A curiosity engine that ranks what we don't yet know — then decomposes it into something you can actually go and test.*
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-680%20passing-brightgreen.svg)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](pyproject.toml)
+[![Tests](https://img.shields.io/badge/tests-743%20passing-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Offline first](https://img.shields.io/badge/offline-no%20API%20key%20needed-8A2BE2.svg)](#the-60-second-demo)

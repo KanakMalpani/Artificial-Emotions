@@ -76,8 +76,8 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Failure-mode suite: `tests/test_failure_modes.py` encodes F1–F15 from `docs/LIMITS.md` / failure-mode tests
 - Explicit ValueProfile on provoke/inject (F11); recency-aware likely-answered gate (F12)
 - Download-and-run: `pip install -e .` then `emotions serve` **or** `emotions-mcp` — no vendor lock-in for LLM hosts
-- Packaging: hatchling sdist/wheel buildable locally; **not published to PyPI yet** — install from git / `pip install -e .` (see `docs/PUBLISHING.md`)
-- Alive continuity + imagination: CLI memory defaults, scars/costs/temperament/avoidance as biases, quarantined imagination, corpus-gated transfer (~5× lift), explicit dream reanalysis — see sections below and `CHANGELOG` `[0.4.0]`
+- Packaging: on PyPI as `artificial-emotions` (`pip install artificial-emotions`); editable install still fine for contributors (see `docs/PUBLISHING.md`)
+- Alive continuity + imagination: CLI memory defaults, scars/costs/temperament/avoidance as biases, quarantined imagination, corpus-gated transfer (~5× lift), explicit dream reanalysis — see sections below and `CHANGELOG` `[0.4.0]` (serve/memory integrity hardening in `[0.4.1]`)
 
 ## Known limits
 
@@ -100,7 +100,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 | Neglectedness/cost are lexicon/density proxies | No grant/spend APIs wired | Documented spike; optional funding adapters later |
 | LLM paths untested live in CI | `LLM_API_KEY` often unset | Local multi-provider smoke per PROOFS; no secrets in repo |
 | Multi-judge ensemble needs live LLM | Offline uses single heuristic | Documented; disagreement flag only when ≥2 judges return |
-| Not on PyPI yet | Owner publish + Actions billing gate | Fix Billing & plans; then re-run `publish.yml` (see PUBLISHING) |
+| PyPI publish depends on Actions billing | Failed payment / spending limit aborts runners in ~2s | Fix Billing & plans; re-run `publish.yml` (see PUBLISHING) |
 | Absolute local paths may remain in older git commits | Working-tree scrub does not rewrite history | Accept residual username-in-history risk, or squash/filter before first public clone wave |
 | Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — not claimed done |
 | Unauthenticated local HTTP when API key unset | Demo DX by design | Documented; set key + avoid `0.0.0.0` for non-local |
