@@ -240,8 +240,7 @@ class PersistentMemory:
                 )
             else:
                 print(
-                    f"warning: corrupt memory at {resolved} ({exc}); "
-                    f"preserved as {corrupt}",
+                    f"warning: corrupt memory at {resolved} ({exc}); preserved as {corrupt}",
                     file=sys.stderr,
                     flush=True,
                 )
