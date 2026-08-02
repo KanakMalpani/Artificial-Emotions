@@ -52,6 +52,8 @@ dev = [
   # Pinned to one minor: `ruff format --check` is version-sensitive, so a wider
   # range silently reformats the tree under CI and turns main red.
   "ruff>=0.15,<0.16",
+  # Runs the CI gates locally; see .pre-commit-config.yaml.
+  "pre-commit>=4,<5",
 ]
 embeddings = [
   "sentence-transformers>=3.0,<5",

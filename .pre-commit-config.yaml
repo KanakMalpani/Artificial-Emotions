@@ -1,0 +1,33 @@
+# Local mirror of the CI gates, so main cannot go red on something a hook
+# would have caught. Twice now a commit landed unformatted and `ruff format
+# --check` failed *before* pytest ran, which means the tests never executed
+# upstream at all.
+#
+# Setup (once per clone):
+#     pip install -e ".[dev]"
+#     pre-commit install && pre-commit install --hook-type pre-push
+#
+# Split by cost: lint on every commit (fast), the suite on push (~20s).
+#
+# The ruff rev MUST track the `ruff>=0.15,<0.16` pin in pyproject.toml.
+# `ruff format` output is version-sensitive, so a hook on a different minor
+# would reformat the tree and reintroduce exactly the failure this prevents.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.22
+    hooks:
+      - id: ruff-format
+        files: ^(src|tests)/
+      - id: ruff
+        args: [--fix]
+        files: ^(src|tests)/
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest (full suite, matches CI)
+        entry: python -m pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
