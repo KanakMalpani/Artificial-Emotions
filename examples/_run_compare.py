@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from artificial_emotions import CuriosityEngine, CuriosityConfig
+from artificial_emotions import CuriosityConfig, CuriosityEngine
 
 out = Path("examples")
 out.mkdir(exist_ok=True)
