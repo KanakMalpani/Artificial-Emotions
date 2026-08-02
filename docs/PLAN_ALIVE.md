@@ -1,10 +1,10 @@
 # Plan: frontend, imagination, and feeling alive
 
-**Status:** Alive core shipped on `main` (continuity + imagination + mood demo).
+**Status:** Alive core shipped on `main` (continuity + imagination).
 Written 2026-07-30; status updated with the 0.4.0 Alive line.
-**Product freeze:** `web/` is **local demo evidence only** — no deploy, auth,
-multi-user, or server persistence. Frontend product scope is closed; further
-`web/` work is capped at demo/GIF polish unless a bug blocks that evidence.
+**Frontend / Track C:** `web/` was **removed** from the tree (historical plan only —
+do not treat Track C below as active work). Continuity visual proof is
+`docs/media/avoidance.svg`, not a mood-shell SPA.
 **Scope (original):** three tracks — a frontend that behaves emotionally, an
 imagination layer, and continuity that makes the system feel like a someone
 rather than a function call.
@@ -345,6 +345,9 @@ Track B is done when analogical transfer clears the `validate.py` lift bar on he
 ---
 
 ## Track C — Frontend
+
+> **HISTORICAL / REMOVED (2026-08):** The `web/` SPA and mood-shell
+> demo surface were deleted. Leave this track as written history; do not resume it.
 
 **Goal:** an interface where emotion is *the interaction model*, not a readout. Budget ~25%, and none of it starts until C0 is done.
 

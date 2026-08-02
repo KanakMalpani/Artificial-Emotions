@@ -24,7 +24,7 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - MCP stdio server: `emotions-mcp` (tools + resources: `curiosity://domains|profiles|limits`)
 - Plugin install docs: `docs/PLUGINS.md` (Cursor, Claude Desktop, Claude Code, VS Code Copilot, Continue, Windsurf, HTTP, OpenAI tools)
 - Demo proofs: `docs/PROOFS.md` (includes multi-provider smoke matrix notes — no secrets)
-- CLI, Python API, FastAPI (`:8000`), Vite UI (`:5173`) — UI shows briefs, `[low–high]` bands, and profile name
+- CLI, Python API, FastAPI (`:8000`) — briefs, `[low–high]` bands, and profile name on agent surfaces
 - Expert-eval / spot-check harness: `emotions eval` + `evals/fixtures/` (v1+v2 adversarial) + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**; stratified `by_gold_status`)
 - Elicit A/B process eval: `emotions eval elicit` + `examples/elicit_ab_protocol.json` (lexical investigation-quality rubric — **not** EES)
 - Gap-status hand-label metric: `emotions eval gap-status` + `evals/fixtures/gap_status_handlabel_v1.json` (status_accuracy + related_but_unanswered_recall + false_answered_rate)
@@ -58,19 +58,16 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Offline soundness pass (`POST /v1/evals/soundness` / MCP `soundness_pass`) — form/gap annotations; not a global science judge
 - Bayesian surprise worksheet fill (`emotions surprise-worksheet` / `POST /v1/surprise/worksheet` / MCP `surprise_worksheet`) — belief-shift logging only; **not** EVSI; does **not** rename `ScoreAxes.surprise`
 - Composite eval report includes soundness + hivemind sections (`emotions eval report`)
-- Web outcome picker on preferred cards → `event_type=outcome` (session feedback; sparse flywheel — not auto-retrain)
 - Agent card `/v1/agent` includes affective-safety blurb (not biometric ERS; provoke is opt-in framing)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
 - Versioned domain packs (`artificial_emotions/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment, climate, affective science, aging biology, and materials catalysis packs
-- Vite UI (`:5173`): briefs + bands + profile primary; optional investigation framing mix (annotation only — does not feel); Fast spark via provoke — **local demo only** (no deploy/auth; product scope frozen)
 - Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness (**503** when not ready)
 - Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
 - Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (~680)
-- Optional Playwright web smoke: `CURIOSITY_PLAYWRIGHT=1` + `web/dist` + chromium (`tests/e2e/test_web_playwright.py`) — skipped by default
 - Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
@@ -136,11 +133,6 @@ the same file — never automatic, never “dream evidence.”
   not applied over a ranking. Ship gate: ≈5× lift vs random pairing on the
   bundled timesplit corpus; dense-corpus control collapses to chance.
 
-## Web UI (local demo only)
-
-`web/` is a mood-reactive Vite SPA for **local evidence** of affect tokens and
-Alive surfaces. No deploy, auth, multi-user, or server-side persistence.
-Product scope for `web/` is frozen at demo quality.
 
 ## Confidence interpretation
 

@@ -518,8 +518,6 @@ flowchart LR
     MCP["🔗 MCP stdio<br/>imagination + tiers"] --> E
     HTTP["🌐 HTTP<br/>/v1 discovery"] --> E
     OAI["🤖 OpenAI tools<br/>function calling"] --> E
-    WEB["🖥️ web/<br/>local demo only"] --> E
-
     style E fill:#059669,stroke:#047857,color:#fff
 ```
 
@@ -639,26 +637,6 @@ the open list requires a bearer token. Unset, it stays open for local demos.
 
 </details>
 
-<details>
-<summary><b>🖥️ web/</b> — mood-reactive local demo (not a product)</summary>
-
-<br/>
-
-```bash
-cd web && npm install && npm run dev   # http://localhost:5173
-```
-
-Affect-derived CSS tokens, stance lenses, and imagination/memory panels for
-**local evidence** of the mood shell. No deploy story, no auth, no multi-user,
-no server-side memory. Product scope for `web/` is frozen at demo quality —
-see [docs/PLAN_ALIVE.md](docs/PLAN_ALIVE.md).
-
-![Mood shell cycling bored → anxious → pleasant](docs/media/mood-shell.gif)
-
-*Computational affect only — CSS tokens from PAD-style numbers. Not a claim
-of phenomenal feeling.* Re-capture: `cd web && npm run capture:mood-shell`.
-
-</details>
 
 ---
 
@@ -741,7 +719,7 @@ CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** —
 | [**docs/ARCHITECTURE.md**](docs/ARCHITECTURE.md) | Module map, Alive continuity/imagination, trust boundaries |
 | [**docs/LIMITS.md**](docs/LIMITS.md) | Verified capabilities and honest bounds |
 | [**docs/EMOTIONS.md**](docs/EMOTIONS.md) | Catalog, mixing, affect safety |
-| [**docs/PLAN_ALIVE.md**](docs/PLAN_ALIVE.md) | Continuity + imagination; `web/` demo freeze |
+| [**docs/PLAN_ALIVE.md**](docs/PLAN_ALIVE.md) | Continuity + imagination (Track C / `web/` historical) |
 | [**docs/PLUGINS.md**](docs/PLUGINS.md) | Host-by-host MCP setup |
 | [**docs/PROOFS.md**](docs/PROOFS.md) | Reproducible behaviour demos |
 | [**CHANGELOG.md**](CHANGELOG.md) | `[0.4.0]` Alive notes (PyPI deferred) |

@@ -211,7 +211,6 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 | HTTP | `emotions serve` → `:8000` — stances today; Alive routes land via `/v1` discovery |
 | OpenAI tools | `GET /v1/agent/tools` or `examples/openai_tools.json` |
 | Python | `CuriosityEngine`, `provoke`, emotion helpers, `imagine` / `transfer` / `memory` |
-| Web | `web/` → `:5173` — **local mood-reactive demo only** (no deploy/auth/product growth) |
 
 ## Trust boundaries
 

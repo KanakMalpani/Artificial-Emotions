@@ -91,7 +91,7 @@ Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is lis
 | **Scoring** | Multi-axis geometric aggregate + bands; risk hard-reject | `scoring.py`, `models.py` (`ValueProfile`) |
 | **Seeds** | ai, biology, physics, climate, medicine, materials, social, energy (+ general) | `seeds.py` |
 | **LLM** | OpenAI-compatible client; optional judge + gap reader | `llm.py`, `judge.py` |
-| **Surfaces** | CLI, FastAPI `:8000`, MCP stdio, Python API, Vite UI `:5173` | `cli.py`, `api.py`, `mcp_server.py`, `web/` |
+| **Surfaces** | CLI, FastAPI `:8000`, MCP stdio, Python API | `cli.py`, `api.py`, `mcp_server.py` |
 | **Agent glue** | `/v1/agent`, `/v1/agent/tools`, provoke/spark inject packs | `agent_tools.py`, `provoke.py`, `examples/openai_tools.json` |
 | **Tests** | Core, failure-mode, provoke/API, MCP, e2e (API+CLI) | `tests/` — run `pytest -q`; e2e: `pytest tests/e2e -q` |
 | **Artifacts** | Offline vs literature compares | `examples/run_ai_*_final.json`, `examples/_run_compare.py` |
@@ -153,7 +153,7 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 | **W3** | Separate `judge_model` from generator model | `llm.py`, `judge.py`, `generate.py`, CLI/API flags | Config accepts distinct judge model; test with mocks | ✅ Documented in LIMITS + `.env.example` | F5 |
 | **W4** | Multi-provider LLM smoke notes (≥3: OpenAI / OpenRouter / Groq / Ollama) | `docs/PROOFS.md` or `examples/`, `llm.py` | Documented matrix run **once** with no secrets committed | ✅ PROOFS/notes updated; `.env` untouched | ops |
 | **W5** | Expand F7 phrase-gaming + F13 paraphrase adversarial tests | `tests/test_failure_modes.py`, maybe `verify.py` / `diversity.py` | New cases fail-then-pass intentionally | ✅ Suite still encodes F1–F15 | F7, F13 |
-| **W6** | Web: briefs primary; bands + profile name unavoidable | `web/src/App.tsx`, `web/src/styles.css` | UI shows brief, `[low–high]`, profile | ✅ No oracle aesthetics | F8, F11 |
+| **W6** | ~~Web: briefs primary~~ (`web/` **removed**) | — | Historical wedge; SPA deleted | ✅ Was shipped; surface retired | F8, F11 |
 | **W7** | MCP host recipes (Claude Code, VS Code Copilot, Continue, Windsurf) | `docs/PLUGINS.md` | Copy-paste recipe + `--list-tools` smoke note per host | ✅ PLUGINS lists host; no “works everywhere” without smoke | plugins |
 | **W8** | PyPI packaging prep (owner publishes) | `pyproject.toml`, CI if present | Build/sdist works locally | ✅ LIMITS notes “why not yet” (owner-gated; not published) | dist |
 | **W9** | Seed contribution guide + domain pack format | `CONTRIBUTING.md`, `seeds.py` | Contributor can add a seed without breaking schema | ✅ Quality bar: operationalization + one primary unknown | F2, F9 |
@@ -417,7 +417,7 @@ flowchart LR
 - [x] **WO-0.2.2** ValueProfile presets on API/CLI/MCP (`models.py`, surfaces)  
 - [x] **WO-0.2.3** `judge_model` ≠ generator (`llm.py`, `judge.py`, flags)  
 - [x] **WO-0.2.4** Multi-provider smoke notes in PROOFS/examples (no secrets)  
-- [x] **WO-0.2.5** Web briefs + bands + profile name (`web/src/`)  
+- [x] **WO-0.2.5** Web briefs + bands + profile name (`web/src/`) — **surface later removed**  
 - [x] **WO-0.2.6** More MCP host recipes (`PLUGINS.md`)  
 - [x] **WO-0.2.7** PyPI-ready packaging + owner-gated publish **or** LIMITS “why not yet”  
 - [x] **WO-0.2.8** Expand F7/F13 tests (`tests/test_failure_modes.py`)  
@@ -547,7 +547,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | W2 Literature | Gap verify | `openalex.py`, `verify.py` | Query quality; 2nd backend; grounded LLM reader |
 | W3 LLM | Providers | `llm.py`, `generate.py`, `judge.py` | Provider matrix; judge≠gen; offline forever |
 | W4 Plugins | MCP / tools | `mcp_server.py`, `agent_tools.py`, `docs/PLUGINS.md` | Host recipes; resources later |
-| W5 Web | Honesty UX | `web/src/App.tsx`, `styles.css` | Briefs, bands, profile |
+| W5 Web | Honesty UX | ~~`web/`~~ **removed** | Historical; SPA deleted |
 | W6 Eval | Calibration | `tests/`, `examples/`, future `evals/` | Fixtures; no vanity accuracy % |
 | W7 Safety | Dual-use | `scoring.py`, future `safety/` | Classifier + review |
 | W8 Domains | Seeds | `seeds.py`, `CONTRIBUTING.md` | Packs + quality bar |
@@ -711,7 +711,7 @@ Stay in the wedge. Absorb ideas as modules, not mission creep.
 | Sources | (private / not in public tree) |
 | Engine | `src/artificial_emotions/` |
 | Tests | `tests/` |
-| Web | `web/` |
+| Web | ~~`web/`~~ **removed** |
 | Examples | `examples/` |
 
 ---

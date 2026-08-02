@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+- **`web/`** demo surface: Vite SPA, mood-shell GIF / capture pipeline,
+  Playwright web smoke (`tests/e2e/test_web_playwright.py`), and CI `web` job.
+  Continuity visual proof remains `docs/media/avoidance.svg`.
+
 ## [0.4.0] — Alive (continuity + imagination)
 
 Functional continuity and quarantined imagination. Affect can outlive a process,
