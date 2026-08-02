@@ -12,7 +12,8 @@ Env reference (see also ``.env.example``)::
     LLM_JSON_MODE
     LLM_TIMEOUT_S          — chat completion timeout (default 90)
     CURIOSITY_API_KEY / ARTIFICIAL_CURIOSITY_API_KEY / CURIOSITY_API_KEYS
-    CURIOSITY_CORS_ORIGINS — comma list; default ``*`` (local demos)
+    CURIOSITY_CORS_ORIGINS — comma list; default empty (deny). Opt-in e.g. http://127.0.0.1:3000
+    CURIOSITY_API_RATE_LIMIT_PER_MINUTE — HTTP soft limit per client host (default 60; 0 disables)
     CURIOSITY_HOST / CURIOSITY_PORT — serve defaults
     CURIOSITY_MCP_TIER     — MCP tool tier (core|investigate|affect|research|full)
     CURIOSITY_NO_MEMORY    — set to 1 to disable PersistentMemory read/write
@@ -44,6 +45,16 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
+def _env_int(name: str, default: int) -> int:
+    raw = _env(name)
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
 def configured_api_keys() -> set[str]:
     """Opt-in HTTP API keys. Empty → auth disabled (local demos)."""
     keys: set[str] = set()
@@ -58,11 +69,18 @@ def configured_api_keys() -> set[str]:
 
 
 def cors_origins() -> list[str]:
-    """CORS allow list. Default ``*`` for local demos — tighten in production."""
-    raw = _env("CURIOSITY_CORS_ORIGINS", "*")
+    """CORS allow list. Default empty (deny). Opt-in via ``CURIOSITY_CORS_ORIGINS``."""
+    raw = _env("CURIOSITY_CORS_ORIGINS", "")
+    if not raw:
+        return []
     if raw == "*":
         return ["*"]
-    return [o.strip() for o in raw.split(",") if o.strip()] or ["*"]
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
+def api_rate_limit_per_minute() -> int:
+    """Per-client HTTP requests per 60s window. ``0`` disables. Default 60."""
+    return max(0, _env_int("CURIOSITY_API_RATE_LIMIT_PER_MINUTE", 60))
 
 
 @dataclass(frozen=True)
@@ -70,7 +88,8 @@ class AppConfig:
     """Resolved runtime settings (non-secret summary safe to expose in /health)."""
 
     api_keys_configured: bool = False
-    cors_origins: tuple[str, ...] = ("*",)
+    cors_origins: tuple[str, ...] = ()
+    api_rate_limit_per_minute: int = 60
     host: str = "127.0.0.1"
     port: int = 8000
     llm_timeout_s: float = 90.0
@@ -93,6 +112,7 @@ def get_config() -> AppConfig:
     return AppConfig(
         api_keys_configured=bool(keys),
         cors_origins=tuple(cors_origins()),
+        api_rate_limit_per_minute=api_rate_limit_per_minute(),
         host=_env("CURIOSITY_HOST", "127.0.0.1") or "127.0.0.1",
         port=int(_env_float("CURIOSITY_PORT", 8000)),
         llm_timeout_s=_env_float("LLM_TIMEOUT_S", 90.0),
@@ -118,6 +138,7 @@ def literature_timeout_s() -> float:
 
 __all__ = [
     "AppConfig",
+    "api_rate_limit_per_minute",
     "clear_config_cache",
     "configured_api_keys",
     "cors_origins",

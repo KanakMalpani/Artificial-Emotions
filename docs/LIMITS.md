@@ -62,9 +62,11 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
+- In-process HTTP rate limit (`CURIOSITY_API_RATE_LIMIT_PER_MINUTE`, default 60/min; `0` disables) — per-process soft guard, not a WAF
+- CORS default deny (empty allow list); opt-in via `CURIOSITY_CORS_ORIGINS` (was `*` for the removed web demo)
 - Versioned domain packs (`artificial_emotions/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment, climate, affective science, aging biology, and materials catalysis packs
 - Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness (**503** when not ready)
-- Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS
+- Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS, rate limit
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
 - Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (~680)
@@ -102,7 +104,18 @@ Honest bounds for **v0.4.0** — do not overclaim.
 | Absolute local paths may remain in older git commits | Working-tree scrub does not rewrite history | Accept residual username-in-history risk, or squash/filter before first public clone wave |
 | Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — not claimed done |
 | Unauthenticated local HTTP when API key unset | Demo DX by design | Documented; set key + avoid `0.0.0.0` for non-local |
+| HTTP rate limit is per-process only | In-memory sliding window by client host | Soft guard for local serve; use a reverse proxy/WAF for multi-instance |
+| CORS default deny; auth still opt-in | Local CLI ergonomics vs browser demos | Set `CURIOSITY_CORS_ORIGINS` and/or API keys explicitly; not production hardening |
 | MCP / `use_llm` can incur provider cost | Tools may call paid LLM hosts | Operator controls keys + MCP tier; no silent billing claims |
+
+## Security posture (HTTP serve)
+
+Default `emotions serve` is a **local soft guard**, not a hardened public API:
+
+- **Rate limiting:** in-process sliding window (default 60 req / 60s per client host). Not multi-instance safe; not a WAF.
+- **Auth:** required only when `CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS` (or alias) is set. Unset keys → open routes (local CLI DX). Binding `0.0.0.0` without keys is operator risk.
+- **CORS:** default empty allow list (deny). Opt-in via `CURIOSITY_CORS_ORIGINS`. Previously defaulted to `*` for the removed web demo.
+- **No production hardening claim** — put a reverse proxy, TLS, and shared rate limits in front if you expose the API.
 
 ## Persistent memory (privacy)
 

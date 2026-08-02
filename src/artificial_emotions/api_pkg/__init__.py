@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from artificial_emotions import __version__
 from artificial_emotions.api_pkg.error_handlers import register_error_handlers
+from artificial_emotions.api_pkg.rate_limit import RateLimitMiddleware
 from artificial_emotions.api_pkg.routers import (
     alive,
     curiosity,
@@ -40,16 +41,16 @@ def create_app() -> FastAPI:
     )
 
     origins = cors_origins()
-    # Order matters: Starlette treats the last-added middleware as outermost, so
-    # auth wraps CORS exactly as it did before this module was split up.
+    # Order: CORS (inner) → auth → rate-limit (outer). Starlette: last-added = outermost.
     application.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
-        allow_credentials=("*" not in origins),
+        allow_credentials=bool(origins) and ("*" not in origins),
         allow_methods=["*"],
         allow_headers=["*"],
     )
     application.add_middleware(OptionalApiKeyMiddleware)
+    application.add_middleware(RateLimitMiddleware)
 
     register_error_handlers(application)
 

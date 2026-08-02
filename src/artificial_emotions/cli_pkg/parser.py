@@ -96,7 +96,13 @@ def build_parser() -> argparse.ArgumentParser:
     run_p = sub.add_parser("run", help="Rank unanswered questions (default)")
     _add_run_args(run_p)
 
-    serve_p = sub.add_parser("serve", help="Start the HTTP API for any client/agent")
+    serve_p = sub.add_parser(
+        "serve",
+        help=(
+            "Start the HTTP API (CORS deny-by-default; auth opt-in via "
+            "CURIOSITY_API_KEY; rate limit via CURIOSITY_API_RATE_LIMIT_PER_MINUTE)"
+        ),
+    )
     serve_p.add_argument("--host", default="127.0.0.1")
     serve_p.add_argument("--port", type=int, default=8000)
     serve_p.add_argument("--reload", action="store_true")

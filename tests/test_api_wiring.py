@@ -90,10 +90,14 @@ def test_epistemic_is_a_complete_alias_of_emotions():
     assert {p.replace("/v1/emotions/", "/v1/epistemic/") for p in emotions} == epistemic
 
 
-def test_auth_middleware_wraps_cors():
+def test_middleware_order_rate_limit_auth_cors():
     """Order is load-bearing: Starlette runs the last-added middleware outermost."""
     names = [m.cls.__name__ for m in app.user_middleware]
-    assert names == ["OptionalApiKeyMiddleware", "CORSMiddleware"]
+    assert names == [
+        "RateLimitMiddleware",
+        "OptionalApiKeyMiddleware",
+        "CORSMiddleware",
+    ]
 
 
 def test_create_app_builds_an_equivalent_independent_app():
