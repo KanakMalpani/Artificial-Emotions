@@ -236,11 +236,59 @@ def test_stances_reach_past_curiosity():
 
 
 def test_imagination_twins_start_shipping():
-    """Ratchet: premortem, reformulation, and counterfactual stay wired."""
+    """Ratchet: six ranked-applicable generators stay wired (transfer stays corpus-gated)."""
     assert len(IMPLEMENTED_IMAGINATION_KINDS) >= MIN_IMAGINATION_GENERATORS
-    assert "premortem" in IMPLEMENTED_IMAGINATION_KINDS
-    assert "reformulation" in IMPLEMENTED_IMAGINATION_KINDS
-    assert "counterfactual" in IMPLEMENTED_IMAGINATION_KINDS
+    for kind in (
+        "premortem",
+        "harm_scenario",
+        "rehearsal",
+        "eulogy",
+        "reformulation",
+        "counterfactual",
+    ):
+        assert kind in IMPLEMENTED_IMAGINATION_KINDS
+    assert "transfer" not in IMPLEMENTED_IMAGINATION_KINDS
+
+
+def test_former_stub_emotions_drive_wired_imagination():
+    """Once lenses ship, their driving emotions must count toward the usefulness union."""
+    drivers = _imagination_driving_emotions()
+    for emotion in (
+        "anxiety",
+        "compassion",  # harm_scenario
+        "determination",
+        "absorption",  # rehearsal
+        "resignation",
+        "disappointment",  # eulogy
+    ):
+        assert emotion in drivers, f"{emotion} missing from wired imagination drivers"
+    useful = _modulating_emotions() | _stance_driving_emotions() | drivers
+    assert not (set(RULES) - useful)
+
+
+def test_stripping_an_imagination_generator_fails_the_ratchet(monkeypatch: pytest.MonkeyPatch):
+    """Mutation: treating a wired kind as generate=None must fail the ratchet.
+
+    Same spirit as quarantine mutation tests — silently dropping a generator
+    must make the coverage floor bite. Usefulness still holds via stances for
+    these emotions; the generator count is what the ratchet guards.
+    """
+    target = "harm_scenario"
+    original = IMAGINATION_KINDS[target]
+    assert original.generate is not None
+    monkeypatch.setitem(IMAGINATION_KINDS, target, replace(original, generate=None))
+
+    implemented = frozenset(
+        name for name, kind in IMAGINATION_KINDS.items() if kind.generate is not None
+    )
+    assert target not in implemented
+    assert len(implemented) < MIN_IMAGINATION_GENERATORS
+    for emotion in original.driving_emotions:
+        assert emotion not in _imagination_driving_emotions()
+
+    with pytest.raises(AssertionError):
+        assert len(implemented) >= MIN_IMAGINATION_GENERATORS
+        assert target in implemented
 
 
 def test_observation_only_emotions_still_have_somewhere_to_go():
@@ -268,7 +316,7 @@ MIN_FIRING_OFFLINE = 8
 MIN_DISTINCT_DRIVERS_PER_RUN = 3
 MIN_STANCES = 7
 MIN_STANCE_DRIVERS = 24
-MIN_IMAGINATION_GENERATORS = 3
+MIN_IMAGINATION_GENERATORS = 6
 
 
 def test_a_meaningful_share_of_the_catalog_is_reachable():

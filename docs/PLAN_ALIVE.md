@@ -1,7 +1,13 @@
 # Plan: frontend, imagination, and feeling alive
 
-**Status:** proposal, nothing built. Written 2026-07-30.
-**Scope:** three tracks — a frontend that behaves emotionally, an imagination layer, and continuity that makes the system feel like a someone rather than a function call.
+**Status:** Alive core shipped on `main` (continuity + imagination + mood demo).
+Written 2026-07-30; status updated with the 0.4.0 Alive line.
+**Product freeze:** `web/` is **local demo evidence only** — no deploy, auth,
+multi-user, or server persistence. Frontend product scope is closed; further
+`web/` work is capped at demo/GIF polish unless a bug blocks that evidence.
+**Scope (original):** three tracks — a frontend that behaves emotionally, an
+imagination layer, and continuity that makes the system feel like a someone
+rather than a function call.
 
 Read §0 first. It contains a decision only you can make, and every other section changes depending on how you make it.
 

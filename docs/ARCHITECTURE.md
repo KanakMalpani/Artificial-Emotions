@@ -34,8 +34,16 @@
 | modulate | `modulate.py` | Bounded, logged config changes driven by affect |
 | explore | `explore.py` | The loop: appraise → feel → modulate → remember |
 | stances | `stances.py` | Seven non-curiosity questions over one ranked set — views, never re-rankings |
+| memory | `memory.py` | Cross-process CLI persistence (`~/.artificial_emotions/memory.json`); MCP/HTTP/library off by default |
+| costs | `costs.py` | Disclosed downside twins of helpful modulation — affect that can make a run worse |
+| scars | `scars.py` | History scars / affinities — capped, disclosed **behavioral biases**, not motives |
+| temperament | `temperament.py` | Instance `.toml` personality biasing search / appraisal knobs |
+| avoidance | `avoidance.py` | Persistent non-selection patterns (`pattern_not_motive`) |
+| imagine | `imagine.py` | Imagination quarantine + stance-twin generators (wired: premortem, reformulation, counterfactual) |
+| transfer | `transfer.py` | Corpus-gated structural analogy; ship gate ≈5× lift; never via ranked `apply_imagination` |
+| dream | `dream.py` | Explicit offline reanalysis of stored history — never automatic |
 | discover | `discover.py` | Swanson ABC linking — generates questions from a corpus |
-| validate | `validate.py` | Time-split retrospective validation with a random baseline |
+| validate | `validate.py` | Time-split retrospective validation with a random baseline (also gates transfer) |
 | affect | `affect.py` | PAD mood, felt simulation, blends and tension |
 | pipeline | `pipeline.py` | Orchestration (`CuriosityEngine`) |
 | provoke | `provoke.py` | Instant spark + inject pack |
@@ -88,6 +96,9 @@ middleware order, and that every router module is actually included.
 | `cli_pkg/commands/preferences.py` | `preferences hints \| summarize \| suggest-pair` |
 | `cli_pkg/commands/evaluation.py` | `eval spotcheck \| elicit \| gap-status \| report \| cooccur` |
 | `cli_pkg/commands/emotions.py` | `emotions` / `epistemic` subcommands |
+| `cli_pkg/commands/memory.py` | `memory show\|forget\|reset\|avoiding` |
+| `cli_pkg/commands/dream.py` | `dream` — explicit offline reanalysis |
+| `cli_pkg/commands/ranking.py` | also dispatches `imagine` / transfer corpus path |
 
 The bare-flag fallback (`emotions --domain ai` → `run`) reads subcommand names
 off the parser rather than a hardcoded list, so the two cannot drift apart.
@@ -157,18 +168,50 @@ the ranked set it was handed — every payload carries
 
 `tests/test_appraisal_coverage.py` closes the loop: **every** appraisable emotion
 must either modulate search or drive a stance. Being named and disclaimed does
-not count as a use.
+not count as a use. Imagination kinds extend that usefulness story (stance twins);
+the coverage guard also counts wired imagination generators.
+
+## Continuity (Alive)
+
+Session `trajectory` memory dies with the process. **Persistent memory** lets CLI
+explore remember across runs:
+
+| Default | Persistence |
+|---------|-------------|
+| CLI `emotions explore` | On (unless `--no-memory` / `CURIOSITY_NO_MEMORY=1`) |
+| Library `explore(..., persist_memory=False)` | Off |
+| MCP / HTTP | Off by default (agent exposure must not silently write) |
+
+`scars`, `costs`, `temperament`, and `avoidance` consume that history as
+**behavioral biases** — disclosed, capped, and explicitly not motives. `dream`
+re-reads the same file on demand; it invents no literature and must not label
+reanalysis as “dream evidence.”
+
+## Imagination quarantine
+
+```
+ranked items ──▶ apply_imagination(kind) ──▶ { imagined: [...], honesty: imagined_not_retrieved }
+                      │
+                      └── never mutates / never shares keys with ranked output
+
+corpus + seed ──▶ transfer.imagine_transfer ──▶ same quarantine (corpus_gated)
+```
+
+Wired generators today: `premortem`, `reformulation`, `counterfactual`.
+`harm_scenario`, `rehearsal`, `eulogy` are registered stubs until generators land.
+`transfer` keeps `generate=None` on purpose — only the corpus path ships, after
+clearing the validate lift gate (~5× on the bundled timesplit corpus).
 
 ## Product surfaces
 
 | Surface | Entry |
 |---------|--------|
-| CLI | `emotions` |
-| MCP | `emotions-mcp` |
-| HTTP | `emotions serve` → `:8000` |
+| CLI | `emotions` (`imagine`, `memory`, `dream`, `validate --method transfer`, …) |
+| MCP | `emotions-mcp` — `TOOL_SPECS` in `agent_tools_pkg/registry.py` (includes imagination; memory/dream/transfer tools landing in parallel) |
+| HTTP | `emotions serve` → `:8000` — stances today; Alive routes land via `/v1` discovery |
 | OpenAI tools | `GET /v1/agent/tools` or `examples/openai_tools.json` |
-| Python | `CuriosityEngine`, `provoke`, emotion helpers |
-| Web (optional) | `web/` → `:5173` (proxies API) |
+| Python | `CuriosityEngine`, `provoke`, emotion helpers, `imagine` / `transfer` / `memory` |
+| Web | `web/` → `:5173` — **local mood-reactive demo only** (no deploy/auth/product growth) |
 
 ## Trust boundaries
 
@@ -179,6 +222,9 @@ not count as a use.
 - Rankings require an explicit `ValueProfile` (defaults provided, not hidden).
 - Emotion cues are `annotation_only`; mixes emit `computational_affect` /
   `felt_simulation` — not biological consciousness or user-affect measurement.
+- Persistent memory is local usage history on the operator’s machine — not a
+  model of the field and not a cloud sync.
+- Imagined content is quarantined; never treated as retrieved literature.
 
 ## Extension points
 

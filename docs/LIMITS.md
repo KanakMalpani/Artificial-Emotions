@@ -64,12 +64,12 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
 - Versioned domain packs (`artificial_emotions/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment, climate, affective science, aging biology, and materials catalysis packs
-- Vite UI (`:5173`): briefs + bands + profile primary; optional investigation framing mix (annotation only — does not feel); Fast spark via provoke
+- Vite UI (`:5173`): briefs + bands + profile primary; optional investigation framing mix (annotation only — does not feel); Fast spark via provoke — **local demo only** (no deploy/auth; product scope frozen)
 - Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness (**503** when not ready)
 - Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, e2e — run `pytest -q`
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (~680)
 - Optional Playwright web smoke: `CURIOSITY_PLAYWRIGHT=1` + `web/dist` + chromium (`tests/e2e/test_web_playwright.py`) — skipped by default
 - Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
@@ -77,7 +77,8 @@ Honest bounds for **v0.4.0** — do not overclaim.
 - Failure-mode suite: `tests/test_failure_modes.py` encodes F1–F15 from `docs/LIMITS.md` / failure-mode tests
 - Explicit ValueProfile on provoke/inject (F11); recency-aware likely-answered gate (F12)
 - Download-and-run: `pip install -e .` then `emotions serve` **or** `emotions-mcp` — no vendor lock-in for LLM hosts
-- Packaging: hatchling sdist/wheel buildable locally; **not published to PyPI yet** (GitHub Actions blocked by account billing/spending — see `docs/PUBLISHING.md`)
+- Packaging: hatchling sdist/wheel buildable locally; **not published to PyPI yet** — install from git / `pip install -e .` (see `docs/PUBLISHING.md`)
+- Alive continuity + imagination: CLI memory defaults, scars/costs/temperament/avoidance as biases, quarantined imagination, corpus-gated transfer (~5× lift), explicit dream reanalysis — see sections below and `CHANGELOG` `[0.4.0]`
 
 ## Known limits
 
@@ -118,6 +119,28 @@ machine**, not a cloud sync and not a model of the field.
   write; offline explore stays byte-identical to a fresh install.
 - **Never on by default for MCP/HTTP** — only the CLI, where there is a single
   obvious user. Library `explore(..., persist_memory=False)` is the default.
+
+**Scars, costs, temperament, avoidance** read that history as disclosed
+**behavioral biases** (capped magnitudes, pattern-not-motive for avoidance).
+They do not invent motives. `emotions dream` is explicit offline reanalysis of
+the same file — never automatic, never “dream evidence.”
+
+## Imagination quarantine
+
+- Outputs travel only under the `imagined` payload key with
+  `honesty: "imagined_not_retrieved"` and `confidence: null`.
+- Never merged into ranked unknowns; never claimed as retrieved literature.
+- Wired generators: `premortem`, `reformulation`, `counterfactual`.
+  Stubs until generators land: `harm_scenario`, `rehearsal`, `eulogy`.
+- **Transfer** is corpus-gated (`emotions imagine transfer --seed … --corpus …`),
+  not applied over a ranking. Ship gate: ≈5× lift vs random pairing on the
+  bundled timesplit corpus; dense-corpus control collapses to chance.
+
+## Web UI (local demo only)
+
+`web/` is a mood-reactive Vite SPA for **local evidence** of affect tokens and
+Alive surfaces. No deploy, auth, multi-user, or server-side persistence.
+Product scope for `web/` is frozen at demo quality.
 
 ## Confidence interpretation
 

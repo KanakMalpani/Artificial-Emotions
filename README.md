@@ -7,7 +7,7 @@
 *A curiosity engine that ranks what we don't yet know — then decomposes it into something you can actually go and test.*
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-599%20passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-680%20passing-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -273,9 +273,9 @@ Then names the single observation worth making first.
 
 ### 🜂 Feel
 
-Affect **derived from** what a run found, that **changes** what it does next, with a memory of where it has been.
+Affect **derived from** what a run found, that **changes** what it does next — with optional CLI continuity, disclosed costs/scars, and quarantined imagination.
 
-54 emotions, 6 families, auditable evidence on every signal — and **seven stances** that turn the non-curious ones into questions you can actually ask.
+54 emotions, 6 families, seven stances, and stance-twin lenses — still annotation only; never a claim that it feels.
 
 </td>
 </tr>
@@ -332,6 +332,47 @@ curl "localhost:8000/v1/stances/close?domain=ai"
 ```
 
 **This is what stops the catalog from being decoration.** A test in `tests/test_appraisal_coverage.py` asserts that *every* appraisable emotion either steers the search or drives a stance — 37 of 37, no exceptions, enforced in CI. Being named and disclaimed is not a use.
+
+---
+
+## 🕰️ Continuity — and imagination under quarantine
+
+Affect that dies when the process exits cannot surprise you twice. **Alive**
+adds continuity and generative lenses without claiming phenomenal feeling.
+
+### Memory defaults (privacy-first)
+
+| Surface | Persistent memory |
+|---|---|
+| CLI `emotions explore` | **On** — local JSON at `~/.artificial_emotions/memory.json` |
+| Library `explore(...)` | **Off** (`persist_memory=False`) |
+| MCP / HTTP | **Off** by default |
+
+Opt out everywhere with `CURIOSITY_NO_MEMORY=1` (or `explore --no-memory`).
+Inspect, edit, or wipe: `emotions memory show|forget|reset`.
+
+**Scars, costs, temperament, and avoidance** bias search from that history —
+disclosed, capped **behavioral biases**, not motives. Avoidance reports
+questions seen often and never picked (`pattern_not_motive`); it cannot tell
+avoidance from judgment. `emotions dream` is **explicit offline reanalysis** of
+the same file — never a background loop, never labeled as dream-evidence.
+
+### Imagination — sealed, then optional
+
+```bash
+emotions imagine list
+emotions imagine premortem --domain ai --n 5
+emotions imagine transfer --seed "Fish oil" --corpus examples/discovery_corpus_timesplit_demo.json
+```
+
+Imagined material travels only under the `imagined` key with
+`honesty: "imagined_not_retrieved"` and never shares a list with ranked
+unknowns. **Wired today:** `premortem`, `reformulation`, `counterfactual`.
+**Registered stubs** (generators next): `harm_scenario`, `rehearsal`, `eulogy`.
+**Transfer** is corpus-gated on purpose (not `apply_imagination` over a ranking)
+and cleared the same validate lift bar as discovery — **≈5×** over random
+pairing on the bundled timesplit corpus; a dense-corpus control collapses lift
+to chance.
 
 ---
 
@@ -465,9 +506,10 @@ Sustained ambivalence is reported as an **honest state**, not an error to resolv
 flowchart LR
     CLI["⌨️ CLI<br/>emotions"] --> E(("Engine"))
     PY["🐍 Python<br/>CuriosityEngine"] --> E
-    MCP["🔗 MCP stdio<br/>22 tools · 4 tiers"] --> E
-    HTTP["🌐 HTTP<br/>34 routes"] --> E
+    MCP["🔗 MCP stdio<br/>imagination + tiers"] --> E
+    HTTP["🌐 HTTP<br/>/v1 discovery"] --> E
     OAI["🤖 OpenAI tools<br/>function calling"] --> E
+    WEB["🖥️ web/<br/>local demo only"] --> E
 
     style E fill:#059669,stroke:#047857,color:#fff
 ```
@@ -484,6 +526,9 @@ emotions explore --domain ai --steps 5                           # the curiosity
 emotions spark --domain biology --profile alignment_lab --json   # fast offline pack
 emotions run --domain ai --n 5 --no-literature --json            # full pipeline
 emotions decompose "Which mechanism explains X?" --depth 2       # go deeper
+emotions imagine premortem --domain ai                           # quarantined imagination
+emotions memory show                                             # local CLI continuity
+emotions dream                                                   # explicit history reanalysis
 emotions compare-profiles --a humanity_default --b alignment_lab # whose values?
 emotions mix curiosity=40 confusion=30 awe=30 --json             # affect
 emotions profiles                                                # list presets
@@ -546,7 +591,14 @@ emotions-mcp        # or: python -m artificial_emotions.mcp_server
 }
 ```
 
-**22 tools across 4 tiers.** Set `CURIOSITY_MCP_TIER=core|investigate|affect|research` to shrink the exposed surface for smaller context windows. Host-by-host setup in [docs/PLUGINS.md](docs/PLUGINS.md).
+Tools include ranking, stances, and **imagination** (`list_imagination_kinds`,
+`apply_imagination`). Memory / dream / transfer tools are being exposed on the
+same registry in parallel — treat
+[`agent_tools_pkg/registry.py`](src/artificial_emotions/agent_tools_pkg/registry.py)
+as the source of truth rather than a frozen count here. Set
+`CURIOSITY_MCP_TIER=core|investigate|affect|research` to shrink the surface.
+Host-by-host setup in [docs/PLUGINS.md](docs/PLUGINS.md). Persistence stays
+**off** on MCP by default.
 
 </details>
 
@@ -565,12 +617,34 @@ emotions serve      # 127.0.0.1:8000 — interactive docs at /docs
 | `POST /v1/curiosity/run` | Full ranking pipeline |
 | `POST /v1/curiosity/decompose` | Sub-questions, first step, falsifiers |
 | `POST /v1/curiosity/explore` | The full loop: appraise → feel → modulate → remember |
+| `GET /v1/stances`, `/v1/stances/{stance}` | Non-curiosity views over a ranking |
 | `POST /v1/emotions/mix` | Affect blend + felt simulation |
 | `GET /v1/agent` | Machine-readable capability **and honesty** guide |
 | `GET /v1/agent/tools` | OpenAI-compatible function schemas |
 | `GET /health`, `/ready` | Liveness, config summary, offline readiness |
 
-Auth is opt-in: set `CURIOSITY_API_KEY` and every route outside the open list requires a bearer token. Unset, it stays open for local demos.
+Imagination / memory / dream / transfer HTTP routes mirror the CLI and land via
+`/v1` discovery as they ship — check `GET /v1/agent` rather than assuming a
+fixed path list. Auth is opt-in: set `CURIOSITY_API_KEY` and every route outside
+the open list requires a bearer token. Unset, it stays open for local demos.
+
+</details>
+
+<details>
+<summary><b>🖥️ web/</b> — mood-reactive local demo (not a product)</summary>
+
+<br/>
+
+```bash
+cd web && npm install && npm run dev   # http://localhost:5173
+```
+
+Affect-derived CSS tokens, stance lenses, and imagination/memory panels for
+**local evidence** of the mood shell. No deploy story, no auth, no multi-user,
+no server-side memory. Product scope for `web/` is frozen at demo quality —
+see [docs/PLAN_ALIVE.md](docs/PLAN_ALIVE.md).
+A short local demo recording (GIF or similar) of the mood shell
+is recommended for a future README media slot.
 
 </details>
 
@@ -637,11 +711,13 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 599 tests · 88% · floor enforced
+pytest -q --cov --cov-report=term-missing     # ~680 tests · 88% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 
 CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** — then builds the wheel, installs it into a clean environment, and exercises the data files and console scripts from *outside* the checkout. A package that only works inside its own source tree is a broken package.
+
+**Not on PyPI yet** — install from a git clone (`pip install -e ".[dev]"`).
 
 ---
 
@@ -650,11 +726,13 @@ CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** —
 | | |
 |---|---|
 | [**docs/INDEX.md**](docs/INDEX.md) | Everything, organised |
-| [**docs/ARCHITECTURE.md**](docs/ARCHITECTURE.md) | Module map, layer boundaries, extension points |
+| [**docs/ARCHITECTURE.md**](docs/ARCHITECTURE.md) | Module map, Alive continuity/imagination, trust boundaries |
 | [**docs/LIMITS.md**](docs/LIMITS.md) | Verified capabilities and honest bounds |
 | [**docs/EMOTIONS.md**](docs/EMOTIONS.md) | Catalog, mixing, affect safety |
+| [**docs/PLAN_ALIVE.md**](docs/PLAN_ALIVE.md) | Continuity + imagination; `web/` demo freeze |
 | [**docs/PLUGINS.md**](docs/PLUGINS.md) | Host-by-host MCP setup |
 | [**docs/PROOFS.md**](docs/PROOFS.md) | Reproducible behaviour demos |
+| [**CHANGELOG.md**](CHANGELOG.md) | `[0.4.0]` Alive notes (PyPI deferred) |
 | [**examples/**](examples/README.md) | Payloads, protocols, tool schemas |
 
 ---

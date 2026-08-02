@@ -1,8 +1,9 @@
-"""B4 stance-twin generators — premortem + reformulation (+ B2 counterfactual wired).
+"""Stance-twin generators — six ranked-applicable kinds + transfer refuse.
 
 Offline generators emit ImaginedContent under quarantine. They must never
 reach a ranked list without gap verification, never carry confidence, and
-must stay marked imagined_not_retrieved.
+must stay marked imagined_not_retrieved. Transfer stays corpus-gated
+(``generate is None``); ``apply_imagination("transfer", …)`` must refuse.
 """
 
 from __future__ import annotations
@@ -23,6 +24,18 @@ from artificial_emotions.imagine import (
 from artificial_emotions.models import CuriosityConfig
 from artificial_emotions.pipeline import CuriosityEngine
 
+#: Ranked-applicable kinds with wired generators (transfer excluded by design).
+_RANKED_WIRED = frozenset(
+    {
+        "premortem",
+        "harm_scenario",
+        "rehearsal",
+        "eulogy",
+        "reformulation",
+        "counterfactual",
+    }
+)
+
 
 @pytest.fixture(scope="module")
 def ranked():
@@ -31,8 +44,8 @@ def ranked():
     ).run()
 
 
-def test_implemented_kinds_include_b4_and_b2():
-    assert {"premortem", "reformulation", "counterfactual"} <= IMPLEMENTED_IMAGINATION_KINDS
+def test_implemented_kinds_are_the_six_ranked_applicable():
+    assert IMPLEMENTED_IMAGINATION_KINDS == _RANKED_WIRED
     # B3 transfer is corpus-gated (not apply_imagination); generate stays None.
     assert "transfer" not in IMPLEMENTED_IMAGINATION_KINDS
     for name, kind in IMAGINATION_KINDS.items():
@@ -47,9 +60,8 @@ def test_catalog_lists_wired_generators():
     assert catalog["honesty"] == HONESTY_IMAGINED
     assert set(catalog["implemented"]) == set(IMPLEMENTED_IMAGINATION_KINDS)
     by_name = {k["kind"]: k for k in catalog["kinds"]}
-    assert by_name["premortem"]["generator"] == "wired"
-    assert by_name["reformulation"]["generator"] == "wired"
-    assert by_name["counterfactual"]["generator"] == "wired"
+    for name in _RANKED_WIRED:
+        assert by_name[name]["generator"] == "wired"
     # B3: corpus-gated when shipped; never a ranked-items generator.
     assert by_name["transfer"]["generator"] == "corpus_gated"
 
@@ -95,6 +107,36 @@ def test_premortem_states_invented_failure_modes(ranked):
         assert entry["invented"], "premortem must state what was invented"
 
 
+def test_harm_scenario_states_invented_misuse_frames(ranked):
+    payload = apply_imagination("harm_scenario", ranked)
+    assert payload["stance_twin"] == "safety"
+    assert set(payload["driving_emotions"]) == {"anxiety", "compassion"}
+    for entry in payload[IMAGINED_PAYLOAD_KEY]:
+        assert "Harm scenario" in entry["content"] or "harm" in entry["content"].lower()
+        assert entry["invented"], "harm_scenario must state invented misuse frames"
+        assert set(entry["driven_by"]) == {"anxiety", "compassion"}
+
+
+def test_rehearsal_states_what_breaks_first(ranked):
+    payload = apply_imagination("rehearsal", ranked)
+    assert payload["stance_twin"] == "focus"
+    assert set(payload["driving_emotions"]) == {"determination", "absorption"}
+    for entry in payload[IMAGINED_PAYLOAD_KEY]:
+        assert "Rehearsal" in entry["content"] or "breaks" in entry["content"].lower()
+        assert entry["invented"], "rehearsal must state invented break modes"
+        assert set(entry["driven_by"]) == {"determination", "absorption"}
+
+
+def test_eulogy_states_invented_loss_frames(ranked):
+    payload = apply_imagination("eulogy", ranked)
+    assert payload["stance_twin"] == "close"
+    assert set(payload["driving_emotions"]) == {"resignation", "disappointment"}
+    for entry in payload[IMAGINED_PAYLOAD_KEY]:
+        assert "Eulogy" in entry["content"] or "abandon" in entry["content"].lower()
+        assert entry["invented"], "eulogy must state invented loss frames"
+        assert set(entry["driven_by"]) == {"resignation", "disappointment"}
+
+
 def test_reformulation_states_invented_rewrites(ranked):
     payload = apply_imagination("reformulation", ranked)
     assert payload["stance_twin"] == "taste"
@@ -104,10 +146,15 @@ def test_reformulation_states_invented_rewrites(ranked):
         assert entry["invented"]
 
 
-def test_unwired_kinds_are_rejected(ranked):
+def test_transfer_still_refuses_apply_imagination(ranked):
     with pytest.raises(CuriosityError, match="no generator yet") as exc_info:
         apply_imagination("transfer", ranked)
-    assert "counterfactual" in str(exc_info.value.details["implemented"])
+    implemented = set(exc_info.value.details["implemented"])
+    assert implemented == set(IMPLEMENTED_IMAGINATION_KINDS)
+    assert "transfer" not in implemented
+    assert "harm_scenario" in implemented
+    assert "rehearsal" in implemented
+    assert "eulogy" in implemented
 
 
 def test_unknown_kind_is_rejected(ranked):
@@ -145,9 +192,10 @@ def test_generators_never_inject_into_ranking(ranked):
 
 
 def test_empty_ranking_yields_empty_imagined_list():
-    payload = apply_imagination("premortem", [])
-    assert payload["n_items"] == 0
-    assert payload["n_imagined"] == 0
-    assert payload[IMAGINED_PAYLOAD_KEY] == []
-    assert payload["honesty"] == HONESTY_IMAGINED
-    assert payload["confidence"] is None
+    for kind in ("premortem", "harm_scenario", "rehearsal", "eulogy"):
+        payload = apply_imagination(kind, [])
+        assert payload["n_items"] == 0
+        assert payload["n_imagined"] == 0
+        assert payload[IMAGINED_PAYLOAD_KEY] == []
+        assert payload["honesty"] == HONESTY_IMAGINED
+        assert payload["confidence"] is None

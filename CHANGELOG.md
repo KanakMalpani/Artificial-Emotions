@@ -1,5 +1,65 @@
 # Changelog
 
+## [0.4.0] — Alive (continuity + imagination)
+
+Functional continuity and quarantined imagination. Affect can outlive a process,
+cost something, and generate what is not yet there — without phenomenal claims.
+
+**Install from git / editable checkout.** PyPI upload is deferred; the package
+version is `0.4.0` and tags land when surfacing work is verified.
+
+### Added — continuity
+- **`memory.py` — persistent CLI memory.** Local JSON at
+  `~/.artificial_emotions/memory.json` (sessions, encounters, mood carryover).
+  **Defaults:** CLI `explore` may persist; library / MCP / HTTP stay off
+  (`persist_memory=False`). Opt out entirely with `CURIOSITY_NO_MEMORY=1`.
+  Inspect / forget / reset via `emotions memory show|forget|reset`.
+- **`scars.py` / affinities** — history biases the bar for returning to dead
+  ground and the pull toward what paid off. Disclosed magnitudes, capped;
+  **behavioral bias, not motive.**
+- **`costs.py` — affect that can make a run worse.** Downside twins of helpful
+  modulation; never raises risk ceilings; always disclosed.
+- **`temperament.py` — instance `.toml` personality.** Biases appraisal swing
+  and search knobs so *this* install diverges from a fresh one.
+- **`avoidance.py` — persistent non-selection patterns.**
+  `emotions memory avoiding` reports questions seen often and never picked.
+  Honesty: `pattern_not_motive` — cannot distinguish avoidance from judgment.
+- **`dream.py` — explicit offline reanalysis** of stored history
+  (`emotions dream`). Never automatic / background. Payload honesty:
+  `offline_reanalysis_of_stored_history` (not labeled as evidence of dreaming).
+
+### Added — imagination
+- **`imagine.py` — quarantine + stance-twin generators.** Imagined material
+  travels only under the `imagined` payload key with
+  `honesty: "imagined_not_retrieved"` and `confidence: null`. Never merged into
+  ranked lists. Wired offline generators today: **premortem**, **reformulation**,
+  **counterfactual**. Stubs (generators landing next): `harm_scenario`,
+  `rehearsal`, `eulogy`.
+- **`transfer.py` — corpus-gated structural analogy.** Separate from
+  `apply_imagination` (no ranked-item path). Cleared the `validate.py` lift
+  ship gate on the bundled timesplit corpus (**≈5×** over random pairing;
+  dense-corpus control collapses to chance). CLI:
+  `emotions imagine transfer --seed … --corpus …`,
+  `emotions validate --method transfer …`.
+- Surfaces: `emotions imagine`, `list_imagination_kinds` / `apply_imagination`
+  (MCP). Memory / dream / transfer agent tools and HTTP routes are landing in
+  parallel — see `agent_tools_pkg/registry.py` and `/v1` discovery; do not treat
+  route tables in older docs as exhaustive.
+
+### Added — mood-reactive local demo
+- **`web/`** — Vite SPA with affect-derived tokens, stance lenses, imagination /
+  memory stubs, and Playwright mood-shell snapshots. **Local demo evidence
+  only** — no deploy, auth, multi-user, or server-side persistence. Product
+  scope for `web/` is frozen at demo quality.
+
+### Honesty
+- Continuity modules bias behaviour; they do not invent motives or feelings.
+- Imagination stays quarantined; transfer never injects into ranking.
+- Affect may still tighten safety gates, never loosen them.
+
+### Internal
+- ~680 tests after Alive. Coverage floor unchanged.
+
 ## Unreleased — stances: curiosity is not the only useful feeling
 
 Widening appraisal made 37 emotions *derivable* and 22 of them able to change
