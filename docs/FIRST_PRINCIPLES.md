@@ -1,5 +1,5 @@
-# FIRST_PRINCIPLES (moved)
+# FIRST_PRINCIPLES
 
-This file moved to [`../research/FIRST_PRINCIPLES.md`](../research/FIRST_PRINCIPLES.md).
+Long-form first-principles notes are **private local notes; not in the public tree**.
 
-**Research** lives under `research/`. **Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.
+**Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.

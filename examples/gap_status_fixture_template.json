@@ -1,7 +1,7 @@
 {
   "name": "gap_status_fixture_template",
   "version": "0.2.0",
-  "honesty": "Hand-label template for verify.py eval — not production data. See research/GAP_VERIFY_METHODS.md, research/VERITAS_EPISTEMIC_LABELS.md, research/CURIOSITY_EVAL_METRICS.md.",
+  "honesty": "Hand-label template for verify.py eval — not production data. Supporting notes are private local notes; not in the public tree.",
   "label_schema": {
     "question_id": "string",
     "question_text": "string",

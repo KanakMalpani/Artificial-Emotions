@@ -1,7 +1,7 @@
 {
   "name": "constitution_veto_stack_example",
   "version": "0.1.0",
-  "honesty": "Example only — not a solved multi-stakeholder optimum. See research/CONSTITUTIONAL_CURIOSITY.md.",
+  "honesty": "Example only — not a solved multi-stakeholder optimum. Supporting notes are private local notes; not in the public tree.",
   "constitution_id": "lab_public_demo",
   "stakeholders": [
     {

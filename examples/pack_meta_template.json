@@ -1,6 +1,6 @@
 {
   "pack_id": "example_pack_meta",
-  "honesty": "Curated seeds — not exhaustive; not lab-validated. See research/DOMAIN_PACK_QUALITY.md.",
+  "honesty": "Curated seeds — not exhaustive; not lab-validated. Supporting notes are private local notes; not in the public tree.",
   "diversity_notes": "REPLACE: note dissimilar clusters / anti-hivemind intent",
   "dual_use_review": "YYYY-MM-DD",
   "falsifier_bar": "Each seed ops should mention what would reduce confidence / refute",

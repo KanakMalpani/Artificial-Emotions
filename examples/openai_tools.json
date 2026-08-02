@@ -648,7 +648,7 @@
     "type": "function",
     "function": {
       "name": "cross_model_vote",
-      "description": "Offline HybridQuestion-style keep/drop/rewrite annotations on candidate unknowns (form/heuristic proxy). Does not re-rank; agreement is not VOI. Decision aids under an explicit ValueProfile remain separate. See research/HYBRID_VOTE_OFFLINE.md.",
+      "description": "Offline HybridQuestion-style keep/drop/rewrite annotations on candidate unknowns (form/heuristic proxy). Does not re-rank; agreement is not VOI. Decision aids under an explicit ValueProfile remain separate.",
       "parameters": {
         "type": "object",
         "properties": {

@@ -324,7 +324,7 @@ TOOL_SPECS: list[dict[str, Any]] = [
             "Offline HybridQuestion-style keep/drop/rewrite annotations on "
             "candidate unknowns (form/heuristic proxy). Does not re-rank; "
             "agreement is not VOI. Decision aids under an explicit ValueProfile "
-            "remain separate. See research/HYBRID_VOTE_OFFLINE.md."
+            "remain separate."
         ),
         "input_schema": CROSS_MODEL_VOTE_SCHEMA,
         "handler": handle_cross_model_vote,
@@ -435,7 +435,7 @@ TOOL_SPECS: list[dict[str, Any]] = [
 
 HANDLERS: dict[str, ToolHandler] = {t["name"]: t["handler"] for t in TOOL_SPECS}
 
-# Progressive disclosure (research/MCP_PROGRESSIVE_DISCLOSURE.md).
+# Progressive disclosure tiers (private local notes; not in the public tree).
 # Default CURIOSITY_MCP_TIER=full keeps current host behavior.
 _TOOL_TIER: dict[str, str] = {
     "provoke_curiosity": "core",

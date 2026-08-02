@@ -1,6 +1,6 @@
 {
   "name": "bayesian_surprise_closed_loop_worksheet",
-  "honesty": "Not EVSI and not AutoDiscovery Bayesian surprise. Manual belief-shift logging only — see research/BAYESIAN_SURPRISE.md.",
+  "honesty": "Not EVSI and not AutoDiscovery Bayesian surprise. Manual belief-shift logging only. Supporting notes are private local notes; not in the public tree.",
   "fields": {
     "question_id": null,
     "profile_name": null,

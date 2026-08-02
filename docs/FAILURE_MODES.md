@@ -1,5 +1,5 @@
-# FAILURE_MODES (moved)
+# FAILURE_MODES
 
-This file moved to [`../research/FAILURE_MODES.md`](../research/FAILURE_MODES.md).
+Long-form failure-mode notes are **private local notes; not in the public tree**.
 
-**Research** lives under `research/`. **Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.
+**Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.

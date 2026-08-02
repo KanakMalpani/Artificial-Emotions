@@ -1,5 +1,5 @@
-# SOURCES (moved)
+# SOURCES
 
-This file moved to [`../research/SOURCES.md`](../research/SOURCES.md).
+Long-form source notes are **private local notes; not in the public tree**.
 
-**Research** lives under `research/`. **Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.
+**Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.

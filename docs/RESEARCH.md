@@ -1,5 +1,5 @@
-# RESEARCH (moved)
+# RESEARCH
 
-This file moved to [`../research/RESEARCH.md`](../research/RESEARCH.md).
+Long-form research notes are **private local notes; not in the public tree**.
 
-**Research** lives under `research/`. **Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.
+**Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.

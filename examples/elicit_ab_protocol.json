@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "honesty": "Research/eval protocol only — not an EES API; cues remain annotation_only.",
   "see": [
-    "research/EPISTEMIC_ELICITATION.md",
+    "private local notes; not in the public tree",
     "src/artificial_emotions/epistemic_cues.py"
   ],
   "primary_outcome": "investigation_quality",
@@ -60,7 +60,7 @@
         "apply_when_cue": "confusion_risk"
       }
     ],
-    "see_also": "research/INVESTIGATION_DESIGN.md"
+    "see_also": "private local notes; not in the public tree"
   },
   "fixed_controls": [
     "domain",

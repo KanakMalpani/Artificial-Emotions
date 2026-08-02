@@ -1,5 +1,5 @@
-# CAPABILITY (moved)
+# CAPABILITY
 
-This file moved to [`../research/CAPABILITY.md`](../research/CAPABILITY.md).
+Long-form capability notes are **private local notes; not in the public tree**.
 
-**Research** lives under `research/`. **Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.
+**Product docs** (plugins, limits, architecture, proofs, roadmap) stay in `docs/`.
