@@ -99,3 +99,26 @@ jobs:
           /tmp/clean/bin/curiosity eval cooccur --json > /dev/null
           /tmp/clean/bin/curiosity voi-worksheet --json > /dev/null
           /tmp/clean/bin/curiosity surprise-worksheet --json > /dev/null
+
+  web:
+    name: Web build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
