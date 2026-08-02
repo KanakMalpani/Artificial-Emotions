@@ -59,12 +59,15 @@ def test_rate_limit_burst_returns_429(monkeypatch):
     assert api_rate_limit_per_minute() == 3
     client = TestClient(create_app())
     for _ in range(3):
-        assert client.get("/health").status_code == 200
-    denied = client.get("/health")
+        assert client.get("/v1/domains").status_code == 200
+    denied = client.get("/v1/domains")
     assert denied.status_code == 429
     assert denied.headers.get("Retry-After")
     body = denied.json()
     assert body["error"]["code"] == ERR_RATE_LIMITED
+    # Probe paths match auth open list — never rate-limited.
+    assert client.get("/health").status_code == 200
+    assert client.get("/ready").status_code == 200
     monkeypatch.delenv("CURIOSITY_API_RATE_LIMIT_PER_MINUTE", raising=False)
     clear_config_cache()
 
@@ -75,7 +78,7 @@ def test_rate_limit_zero_disables(monkeypatch):
     assert api_rate_limit_per_minute() == 0
     client = TestClient(create_app())
     for _ in range(25):
-        assert client.get("/health").status_code == 200
+        assert client.get("/v1/domains").status_code == 200
     assert client.get("/v1/agent").status_code == 200
     monkeypatch.delenv("CURIOSITY_API_RATE_LIMIT_PER_MINUTE", raising=False)
     clear_config_cache()

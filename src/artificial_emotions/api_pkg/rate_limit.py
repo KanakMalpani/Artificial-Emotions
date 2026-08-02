@@ -15,6 +15,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from artificial_emotions.api_pkg.security import is_auth_open_path
 from artificial_emotions.config import api_rate_limit_per_minute
 from artificial_emotions.errors import ERR_RATE_LIMITED, error_payload
 
@@ -41,6 +42,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         if self._limit <= 0:
+            return await call_next(request)
+        # Match auth open list: probes and docs must stay reachable under load.
+        if is_auth_open_path(request.url.path):
             return await call_next(request)
 
         host = request.client.host if request.client else "unknown"

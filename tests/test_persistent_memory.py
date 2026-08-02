@@ -185,3 +185,55 @@ def test_session_record_round_trip() -> None:
         question_ids=["q1"],
     ).to_dict()
     assert SessionRecord.from_dict(raw).session_id == "abc"
+
+
+def test_corrupt_memory_preserved_and_warns(
+    mem_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Truncated JSON must not be wiped silently — preserve + warn + empty mem."""
+    truncated = '{"schema_version": "persistent_memory.v1", "sessions": ['
+    mem_path.write_text(truncated, encoding="utf-8")
+    corrupt_path = mem_path.with_name(mem_path.stem + ".corrupt" + mem_path.suffix)
+
+    mem = PersistentMemory.load(mem_path)
+    assert mem.sessions == []
+    assert mem.encounters == {}
+    assert corrupt_path.is_file()
+    assert corrupt_path.read_text(encoding="utf-8") == truncated
+    # Original path moved aside — empty load must not leave a half-wiped file.
+    assert not mem_path.exists()
+
+    err = capsys.readouterr().err
+    assert "warning: corrupt memory" in err
+    assert str(corrupt_path) in err or "preserved as" in err
+
+    # Subsequent save writes valid JSON without clobbering the corrupt backup.
+    mem.record_session(domain="ai", question_ids=["q_after_corrupt"])
+    assert mem.save()
+    assert mem_path.is_file()
+    assert json.loads(mem_path.read_text(encoding="utf-8"))["sessions"]
+    assert corrupt_path.is_file()
+    assert corrupt_path.read_text(encoding="utf-8") == truncated
+
+
+def test_save_is_atomic_via_tmp_replace(mem_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Save writes via ``.tmp`` then ``os.replace`` so readers never see partial JSON."""
+    mem = PersistentMemory.load(mem_path)
+    mem.record_session(domain="ai", question_ids=["q_atomic"])
+
+    calls: list[tuple[str, str]] = []
+    real_replace = os.replace
+
+    def tracking_replace(src: str | os.PathLike[str], dst: str | os.PathLike[str]) -> None:
+        calls.append((str(src), str(dst)))
+        real_replace(src, dst)
+
+    monkeypatch.setattr(os, "replace", tracking_replace)
+    assert mem.save()
+
+    assert len(calls) == 1
+    src, dst = calls[0]
+    assert src.endswith(".tmp")
+    assert Path(dst) == mem_path
+    assert not Path(src).exists()
+    assert json.loads(mem_path.read_text(encoding="utf-8"))["sessions"]

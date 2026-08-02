@@ -226,7 +226,25 @@ class PersistentMemory:
             return mem
         try:
             raw = json.loads(resolved.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        except (OSError, json.JSONDecodeError) as exc:
+            corrupt = resolved.with_name(resolved.stem + ".corrupt" + resolved.suffix)
+            try:
+                os.replace(resolved, corrupt)
+            except OSError:
+                # Still return empty mem; warn even if we could not move the file.
+                print(
+                    f"warning: corrupt memory at {resolved} ({exc}); "
+                    f"could not preserve as {corrupt}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+            else:
+                print(
+                    f"warning: corrupt memory at {resolved} ({exc}); "
+                    f"preserved as {corrupt}",
+                    file=sys.stderr,
+                    flush=True,
+                )
             return mem
         if not isinstance(raw, dict):
             return mem
@@ -292,7 +310,9 @@ class PersistentMemory:
         # path is runtime metadata — keep the file self-describing without it
         payload.pop("path", None)
         text = json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=False) + "\n"
-        self.path.write_text(text, encoding="utf-8")
+        tmp = self.path.with_suffix(".tmp")
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, self.path)
         if first_write:
             print(
                 f"privacy: wrote local memory at {self.path}\n  {_PRIVACY_NOTICE}",
