@@ -357,6 +357,15 @@ questions seen often and never picked (`pattern_not_motive`); it cannot tell
 avoidance from judgment. `emotions dream` is **explicit offline reanalysis** of
 the same file — never a background loop, never labeled as dream-evidence.
 
+```bash
+emotions memory avoiding
+```
+
+![emotions memory avoiding — pattern, not motive](docs/media/avoidance.svg)
+
+*Six encounters of `ai-04`, zero selections — the pattern is checkable; the
+motive is not. Re-render: `python scripts/render_avoidance_svg.py`.*
+
 ### Imagination — sealed, then optional
 
 ```bash
@@ -643,8 +652,11 @@ Affect-derived CSS tokens, stance lenses, and imagination/memory panels for
 **local evidence** of the mood shell. No deploy story, no auth, no multi-user,
 no server-side memory. Product scope for `web/` is frozen at demo quality —
 see [docs/PLAN_ALIVE.md](docs/PLAN_ALIVE.md).
-A short local demo recording (GIF or similar) of the mood shell
-is recommended for a future README media slot.
+
+![Mood shell cycling bored → anxious → pleasant](docs/media/mood-shell.gif)
+
+*Computational affect only — CSS tokens from PAD-style numbers. Not a claim
+of phenomenal feeling.* Re-capture: `cd web && npm run capture:mood-shell`.
 
 </details>
 

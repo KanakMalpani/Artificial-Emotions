@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="270" viewBox="0 0 760 270" role="img" aria-label="emotions memory avoiding CLI output">
+<title>emotions memory avoiding — pattern, not motive</title>
+<rect width="760" height="270" rx="8" fill="#1a1b26"/>
+<circle cx="28" cy="18" r="5" fill="#ff5f56"/>
+<circle cx="48" cy="18" r="5" fill="#ffbd2e"/>
+<circle cx="68" cy="18" r="5" fill="#27c93f"/>
+<text x="20" y="44" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#7aa2f7">$ emotions memory avoiding</text>
+<text x="20" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5">avoiding: 1 pattern(s)</text>
+<text x="20" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5"></text>
+<text x="20" y="98" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5">  ai-04: seen 6, picked 0</text>
+<text x="20" y="116" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5"></text>
+<text x="20" y="134" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5">I&#x27;ve now seen ai-04 in 6 sessions and picked it up 0 times. Each time something scored</text>
+<text x="20" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5">marginally higher. That pattern is either good judgment or avoidance, and I can&#x27;t tell</text>
+<text x="20" y="170" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5">which from here.</text>
+<text x="20" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5"></text>
+<text x="20" y="206" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5">Persistent non-selection from local memory encounters vs selections. Annotation only —</text>
+<text x="20" y="224" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c0caf5">does not feel; cannot distinguish avoidance from judgment.</text>
+</svg>
