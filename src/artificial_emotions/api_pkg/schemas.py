@@ -352,6 +352,14 @@ class ExploreRequest(BaseModel):
             "default so ranking stays a pure function of the stated profile."
         ),
     )
+    somatic_modulate: bool = Field(
+        False,
+        description=(
+            "Let high-coercion affect (fear, anger, disgust, joy, sadness) change "
+            "search knobs. Off by default: those ids still appraise and surface. "
+            "Never raises the risk ceiling."
+        ),
+    )
     allow_domain_jump: bool = Field(True, description="Let boredom change ground")
     decompose_depth: int = Field(1, ge=1, le=3)
 

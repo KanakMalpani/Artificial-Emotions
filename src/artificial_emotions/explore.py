@@ -123,6 +123,7 @@ def explore(
     use_literature: bool = False,
     use_llm: bool = False,
     allow_weight_deltas: bool = False,
+    somatic_modulate: bool = False,
     allow_domain_jump: bool = True,
     decompose_depth: int = 1,
     seed: int = 42,
@@ -138,6 +139,10 @@ def explore(
         domain: where to start.
         steps: how many passes to take (clamped to ``MAX_STEPS``).
         allow_weight_deltas: let affect nudge ValueProfile weights (bounded, logged).
+        somatic_modulate: let high-coercion affect (fear, anger, disgust, joy,
+            sadness) change search knobs. Off by default: those ids still
+            appraise and surface. ``tighten_safety`` / ``drop_dual_use`` may
+            still apply. Never raises the risk ceiling.
         allow_domain_jump: let boredom change ground.
         decompose_depth: depth of the closing investigation plan.
         persist_memory: when True (CLI), append a session to PersistentMemory
@@ -179,6 +184,7 @@ def explore(
         use_literature=use_literature,
         value_profile=profile,
         seed=seed,
+        somatic_modulate=somatic_modulate,
     )
 
     trail = Trajectory()
@@ -277,7 +283,10 @@ def explore(
             temperament=active_temperament,
         )
         prev_max_risk, prev_hubris, _ = _step_previous_features(items, signals, previous_top_id)
-        mix = mix_emotions(signals_to_weights(signals))
+        mix = mix_emotions(
+            signals_to_weights(signals),
+            mix_intensity_cap=float(profile.mix_intensity_cap),
+        )
         last_mix = mix
 
         # Modulate on the *appraised* strengths, not the normalised mix. A mix
@@ -301,6 +310,7 @@ def explore(
             allow_weight_deltas=allow_weight_deltas,
             exhausted=trail.is_exhausted(),
             ambivalence=mix.get("ambivalence"),
+            somatic_modulate=bool(config.somatic_modulate),
         )
 
         # A3: costs — affect downside. Never loosens safety gates (enforced in costs).
@@ -411,6 +421,9 @@ def explore(
                 "percents": last_mix["percents"],
                 "ambivalence": last_mix["ambivalence"],
                 "blend_triad_hint": last_mix["blend_triad_hint"],
+                "mix_intensity_cap": last_mix.get("mix_intensity_cap"),
+                "intensity_capped": last_mix.get("intensity_capped"),
+                "warnings": last_mix.get("warnings") or [],
             }
             if last_mix
             else None
@@ -428,6 +441,7 @@ def explore(
         ),
         "investigation_plan": plan_out,
         "weights_modulated": allow_weight_deltas,
+        "somatic_modulate": bool(somatic_modulate),
         "honesty": "affect_driven_search",
         "claims_not": [
             "an answer to any question it surfaced",
@@ -435,6 +449,7 @@ def explore(
             "a closed-loop scientist — it runs no experiments",
             "biological emotion; the affect is a computational blend",
             "a loosened safety or risk gate from affect costs",
+            "a raised risk ceiling from high-coercion affect",
         ],
         "docs": "docs/EMOTIONS.md",
     }

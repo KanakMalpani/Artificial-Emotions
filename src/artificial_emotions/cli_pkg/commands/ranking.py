@@ -121,6 +121,7 @@ def _explore(args: argparse.Namespace) -> int:
         profile_name=args.profile,
         use_literature=args.literature,
         allow_weight_deltas=args.affect_weights,
+        somatic_modulate=bool(getattr(args, "somatic_modulate", False)),
         allow_domain_jump=not args.no_jump,
         persist_memory=persist,
         preference_log_path=getattr(args, "preference_log", None),

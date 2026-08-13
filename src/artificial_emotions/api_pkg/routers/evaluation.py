@@ -138,6 +138,7 @@ def curiosity_explore(req: ExploreRequest) -> dict[str, Any]:
         profile_name=req.profile_name,
         use_literature=req.use_literature,
         allow_weight_deltas=req.allow_weight_deltas,
+        somatic_modulate=req.somatic_modulate,
         allow_domain_jump=req.allow_domain_jump,
         decompose_depth=req.decompose_depth,
     )

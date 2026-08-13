@@ -260,6 +260,15 @@ EXPLORE_SCHEMA: dict[str, Any] = {
             "default": False,
             "description": "Let affect nudge ValueProfile weights (bounded, logged).",
         },
+        "somatic_modulate": {
+            "type": "boolean",
+            "default": False,
+            "description": (
+                "Let high-coercion affect (fear, anger, disgust, joy, sadness) "
+                "change search knobs. Off by default; those ids still appraise "
+                "and surface. Never raises the risk ceiling."
+            ),
+        },
         "allow_domain_jump": {"type": "boolean", "default": True},
         "decompose_depth": {"type": "integer", "minimum": 1, "maximum": 3, "default": 1},
     },
