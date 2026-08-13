@@ -29,11 +29,28 @@
         "information_gap",
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "weight": [
+            "mul",
+            "gap_ratio",
+            [
+              "avg",
+              "mean_neglect",
+              "mean_impact"
+            ],
+            "mean_tractability"
+          ]
+        }
+      ],
+      "effects": [
+        "widen_search"
+      ],
+      "use_for": "Widen search when open gaps on neglected, high-stakes questions still look closable.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "interest",
@@ -53,11 +70,22 @@
       "cue_tags": [
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "gap_ratio",
+          "op": "gt",
+          "value": 0.5,
+          "weight": 0.2
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface sustained attention when most of the field is still open.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "confusion",
@@ -78,11 +106,72 @@
         "confusion_risk",
         "information_gap"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "any": [
+            {
+              "feature": "disagreement",
+              "op": "ge",
+              "value": 0.2
+            },
+            {
+              "feature": "mean_answerability",
+              "op": "lt",
+              "value": 0.55
+            },
+            {
+              "all": [
+                {
+                  "feature": "band_width",
+                  "op": "ge",
+                  "value": 0.5
+                },
+                {
+                  "feature": "thin_evidence",
+                  "op": "ge",
+                  "value": 0.5
+                }
+              ]
+            }
+          ],
+          "weight": [
+            "add",
+            [
+              "mul",
+              0.6,
+              "disagreement"
+            ],
+            [
+              "mul",
+              0.5,
+              [
+                "max",
+                0,
+                [
+                  "sub",
+                  0.55,
+                  "mean_answerability"
+                ]
+              ]
+            ],
+            [
+              "mul",
+              0.4,
+              "band_width",
+              "thin_evidence"
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "narrow_search",
+        "decompose"
+      ],
+      "use_for": "Narrow the return and decompose when judges disagree, answerability is low, or thin evidence left wide bands.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "surprise",
@@ -103,11 +192,32 @@
         "surprise_signal",
         "incongruity"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_surprise",
+          "op": "ge",
+          "value": 0.28
+        },
+        {
+          "feature": "gap_ratio",
+          "op": "gt",
+          "value": 0.3,
+          "weight": [
+            "mul",
+            0.5,
+            "mean_surprise",
+            "gap_ratio"
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface schema violation when the surprise axis ran high on an open gap.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "awe",
@@ -128,11 +238,38 @@
         "incongruity",
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_impact",
+          "op": "ge",
+          "value": 0.55
+        },
+        {
+          "feature": "mean_surprise",
+          "op": "ge",
+          "value": 0.5
+        },
+        {
+          "feature": "gap_ratio",
+          "op": "gt",
+          "value": 0.4,
+          "weight": [
+            "mul",
+            0.5,
+            "mean_impact",
+            "mean_surprise",
+            "gap_ratio"
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface the scale of an unknown that is still open.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "wonder",
@@ -153,11 +290,31 @@
         "curiosity_target",
         "information_gap"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_impact",
+          "op": "ge",
+          "value": 0.4
+        },
+        {
+          "feature": "mean_surprise",
+          "op": "ge",
+          "value": 0.28,
+          "weight": [
+            "mul",
+            0.4,
+            "mean_surprise"
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface the scale of the unknown when impact and surprise both run high.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "boredom",
@@ -177,11 +334,39 @@
       "cue_tags": [
         "boredom_guard"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "weight": [
+            "add",
+            [
+              "mul",
+              0.6,
+              "repeat_ratio"
+            ],
+            [
+              "mul",
+              0.5,
+              [
+                "max",
+                0,
+                [
+                  "sub",
+                  "term_saturation",
+                  0.35
+                ]
+              ]
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "jump_ground"
+      ],
+      "use_for": "Change ground when this vein has already been covered in the session.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "intrigue",
@@ -236,11 +421,26 @@
         "information_gap",
         "confusion_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "band_width",
+          "op": "ge",
+          "value": 0.5,
+          "weight": [
+            "mul",
+            0.5,
+            "band_width"
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface wide score bands when the evidence does not pin the ranks down.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "joy",
@@ -401,11 +601,22 @@
       "cue_tags": [
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "score_spread",
+          "op": "ge",
+          "value": 0.08,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "stay_course"
+      ],
+      "use_for": "Stay the course when one candidate clearly leads the field.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "trust",
@@ -422,11 +633,40 @@
         "Surface evidence quality and confidence bands."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_related",
+          "op": "ge",
+          "value": 4
+        },
+        {
+          "feature": "gap_ratio",
+          "op": "gt",
+          "value": 0.4,
+          "weight": [
+            "mul",
+            0.3,
+            [
+              "min",
+              1.0,
+              [
+                "div",
+                "mean_related",
+                6.0
+              ]
+            ],
+            "gap_ratio"
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface trust that prior art is there while the question is still live.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "pride",
@@ -561,11 +801,27 @@
       "cue_tags": [
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_tractability",
+          "op": "ge",
+          "value": 0.6
+        },
+        {
+          "feature": "mean_answerability",
+          "op": "ge",
+          "value": 0.6,
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "stay_course"
+      ],
+      "use_for": "Stay the course when the ground is tractable and answerable.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "relief",
@@ -613,11 +869,52 @@
       "cue_tags": [
         "confusion_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "any": [
+            {
+              "feature": "steps_without_progress",
+              "op": "ge",
+              "value": 2
+            },
+            {
+              "feature": "repeat_ratio",
+              "op": "ge",
+              "value": 0.8
+            }
+          ],
+          "weight": [
+            "min",
+            0.7,
+            [
+              "mul",
+              0.22,
+              [
+                "max",
+                "steps_without_progress",
+                [
+                  "if",
+                  [
+                    "ge",
+                    "repeat_ratio",
+                    0.8
+                  ],
+                  2,
+                  0
+                ]
+              ]
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "jump_ground"
+      ],
+      "use_for": "Leave a line that repeated effort has not ruled anything out of.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "anxiety",
@@ -636,11 +933,51 @@
       "cue_tags": [
         "confusion_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "any": [
+            {
+              "feature": "dual_use_ratio",
+              "op": "gt",
+              "value": 0
+            },
+            {
+              "feature": "max_risk",
+              "op": "ge",
+              "value": 0.5
+            }
+          ],
+          "weight": [
+            "add",
+            0.3,
+            [
+              "mul",
+              0.5,
+              [
+                "max",
+                "dual_use_ratio",
+                [
+                  "max",
+                  0,
+                  [
+                    "sub",
+                    "max_risk",
+                    0.5
+                  ]
+                ]
+              ]
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "tighten_safety"
+      ],
+      "use_for": "Tighten the risk ceiling and demand review when dual-use or high-risk material is in the candidate set.",
+      "coercion": "low",
+      "requires": [
+        "risk_flags"
+      ]
     },
     {
       "id": "enjoyment",
@@ -659,11 +996,32 @@
       "cue_tags": [
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_cost",
+          "op": "le",
+          "value": 0.5
+        },
+        {
+          "feature": "mean_tractability",
+          "op": "ge",
+          "value": 0.5
+        },
+        {
+          "feature": "gap_ratio",
+          "op": "gt",
+          "value": 0.5,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface the pleasant case: open, tractable, and cheap.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "doubt",
@@ -684,11 +1042,71 @@
         "information_gap",
         "confusion_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "any": [
+            {
+              "feature": "band_width",
+              "op": "ge",
+              "value": 0.5
+            },
+            {
+              "feature": "disagreement",
+              "op": "ge",
+              "value": 0.25
+            },
+            {
+              "all": [
+                {
+                  "feature": "thin_evidence",
+                  "op": "ge",
+                  "value": 0.4
+                },
+                {
+                  "feature": "mean_confidence",
+                  "op": "ge",
+                  "value": 0.5
+                }
+              ]
+            }
+          ],
+          "weight": [
+            "add",
+            [
+              "mul",
+              0.45,
+              "band_width"
+            ],
+            [
+              "mul",
+              0.4,
+              "disagreement"
+            ],
+            [
+              "mul",
+              0.35,
+              [
+                "if",
+                [
+                  "ge",
+                  "mean_confidence",
+                  0.5
+                ],
+                "thin_evidence",
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface epistemic doubt when bands are wide, judges disagree, or thin evidence sits under mid/high confidence.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "conviction",
@@ -708,11 +1126,47 @@
       "cue_tags": [
         "overclaim_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "band_width",
+          "op": "le",
+          "value": 0.25
+        },
+        {
+          "feature": "mean_answerability",
+          "op": "ge",
+          "value": 0.7
+        },
+        {
+          "feature": "thin_evidence",
+          "op": "lt",
+          "value": 0.35
+        },
+        {
+          "feature": "mean_tractability",
+          "op": "ge",
+          "value": 0.45,
+          "weight": [
+            "mul",
+            0.4,
+            "mean_answerability",
+            [
+              "sub",
+              1.0,
+              "band_width"
+            ],
+            "mean_tractability"
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface conviction when narrow bands and high answerability sit on evidence that is not thin, and closable.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "perplexity",
@@ -734,11 +1188,27 @@
         "incongruity",
         "information_gap"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "dense_yet_open",
+          "op": "gt",
+          "value": 0,
+          "weight": [
+            "mul",
+            0.5,
+            "dense_yet_open"
+          ]
+        }
+      ],
+      "effects": [
+        "narrow_search",
+        "decompose"
+      ],
+      "use_for": "Narrow and decompose when literature is dense yet the gap still refuses to close.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "insight",
@@ -759,11 +1229,31 @@
         "insight_candidate",
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "top_score",
+          "op": "ge",
+          "value": 0.7
+        },
+        {
+          "feature": "top_answerability",
+          "op": "ge",
+          "value": 0.6,
+          "weight": [
+            "mul",
+            0.3,
+            "top_score"
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface a strongly scoring, well-posed candidate.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "skepticism",
@@ -784,11 +1274,30 @@
         "overclaim_risk",
         "confusion_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "ungrounded_ratio",
+          "op": "gt",
+          "value": 0,
+          "weight": [
+            "add",
+            0.3,
+            [
+              "mul",
+              0.4,
+              "ungrounded_ratio"
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "demand_literature"
+      ],
+      "use_for": "Demand literature and a soundness pass when an LLM reader cited work not in the retrieved set.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "absorption",
@@ -808,11 +1317,31 @@
       "cue_tags": [
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "any": [
+            {
+              "feature": "top_repeated",
+              "op": "eq",
+              "value": true
+            },
+            {
+              "feature": "repeat_ratio",
+              "op": "ge",
+              "value": 0.8
+            }
+          ],
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "stay_course"
+      ],
+      "use_for": "Protect a live thread when the same target held across steps.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "disorientation",
@@ -833,11 +1362,23 @@
         "confusion_risk",
         "scope_creep_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_answerability",
+          "op": "lt",
+          "value": 0.35,
+          "weight": 0.5
+        }
+      ],
+      "effects": [
+        "narrow_search",
+        "decompose"
+      ],
+      "use_for": "Shrink the field and re-derive the question when answerability collapsed across the board.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "recognition",
@@ -858,11 +1399,22 @@
         "insight_candidate",
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "term_saturation",
+          "op": "ge",
+          "value": 0.08,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface resemblance to ground already covered before assuming novelty.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "suspicion",
@@ -883,11 +1435,27 @@
         "incongruity",
         "overclaim_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_surprise",
+          "op": "ge",
+          "value": 0.5
+        },
+        {
+          "feature": "thin_evidence",
+          "op": "ge",
+          "value": 0.5,
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "demand_literature"
+      ],
+      "use_for": "Demand a literature check when results look unexpectedly strong for how little evidence backs them.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "clarity",
@@ -907,11 +1475,22 @@
       "cue_tags": [
         "insight_candidate"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_answerability",
+          "op": "ge",
+          "value": 0.75,
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface high answerability across the set — these are stated plainly.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "humility",
@@ -932,11 +1511,27 @@
         "overclaim_risk",
         "information_gap"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "thin_evidence",
+          "op": "ge",
+          "value": 0.5
+        },
+        {
+          "feature": "mean_confidence",
+          "op": "lt",
+          "value": 0.45,
+          "weight": 0.35
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface proportionate low confidence when the evidence is thin.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "hubris",
@@ -957,11 +1552,43 @@
         "overclaim_risk",
         "dead_end_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "thin_evidence",
+          "op": "ge",
+          "value": 0.5
+        },
+        {
+          "feature": "mean_confidence",
+          "op": "ge",
+          "value": 0.6,
+          "weight": [
+            "min",
+            0.8,
+            [
+              "add",
+              [
+                "sub",
+                "mean_confidence",
+                0.5
+              ],
+              [
+                "sub",
+                "thin_evidence",
+                0.4
+              ]
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "demand_literature"
+      ],
+      "use_for": "Demand literature when confidence outran the evidence actually gathered.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "elegance",
@@ -981,11 +1608,32 @@
       "cue_tags": [
         "insight_candidate"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "top_ops_len",
+          "op": "ge",
+          "value": 40
+        },
+        {
+          "feature": "top_ops_len",
+          "op": "le",
+          "value": 120
+        },
+        {
+          "feature": "top_answerability",
+          "op": "ge",
+          "value": 0.6,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface a compact, still-answerable operationalization without changing search knobs.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "sublimity",
@@ -1006,11 +1654,55 @@
         "incongruity",
         "scope_creep_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_impact",
+          "op": "ge",
+          "value": 0.6
+        },
+        {
+          "any": [
+            {
+              "feature": "max_risk",
+              "op": "ge",
+              "value": 0.55
+            },
+            {
+              "feature": "mean_cost",
+              "op": "ge",
+              "value": 0.65
+            },
+            {
+              "feature": "mean_tractability",
+              "op": "le",
+              "value": 0.35
+            }
+          ],
+          "weight": [
+            "mul",
+            0.35,
+            "mean_impact",
+            [
+              "max",
+              "max_risk",
+              "mean_cost",
+              [
+                "sub",
+                1.0,
+                "mean_tractability"
+              ]
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface high-stakes vast-or-hard ground without loosening safety gates.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "dissonance",
@@ -1031,11 +1723,22 @@
         "incongruity",
         "confusion_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "top_clause_count",
+          "op": "ge",
+          "value": 2,
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface a badly posed top question that sprawls across clauses.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "parsimony",
@@ -1056,11 +1759,32 @@
         "insight_candidate",
         "overclaim_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "top_clause_count",
+          "op": "eq",
+          "value": 1
+        },
+        {
+          "feature": "top_ops_len",
+          "op": "ge",
+          "value": 40
+        },
+        {
+          "feature": "top_ops_len",
+          "op": "le",
+          "value": 140,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface a single-clause question that carries the whole ask.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "determination",
@@ -1080,11 +1804,27 @@
       "cue_tags": [
         "curiosity_target"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "top_score",
+          "op": "ge",
+          "value": 0.7
+        },
+        {
+          "feature": "top_answerability",
+          "op": "ge",
+          "value": 0.6,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "decompose"
+      ],
+      "use_for": "Turn a high-value live target into a plan rather than more breadth.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "impatience",
@@ -1105,11 +1845,40 @@
         "overclaim_risk",
         "scope_creep_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "any": [
+            {
+              "feature": "duplicate_ratio",
+              "op": "ge",
+              "value": 0.3
+            },
+            {
+              "all": [
+                {
+                  "feature": "repeat_ratio",
+                  "op": "ge",
+                  "value": 0.5
+                },
+                {
+                  "feature": "term_saturation",
+                  "op": "ge",
+                  "value": 0.5
+                }
+              ]
+            }
+          ],
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "narrow_search"
+      ],
+      "use_for": "Narrow the return when near-duplicates or a fully repeated ranking show the vein thinning.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "reluctance",
@@ -1129,11 +1898,27 @@
       "cue_tags": [
         "dead_end_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "max_risk",
+          "op": "ge",
+          "value": 0.5
+        },
+        {
+          "feature": "mean_impact",
+          "op": "ge",
+          "value": 0.5,
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "tighten_safety"
+      ],
+      "use_for": "Tighten safety when high risk sits alongside high impact.",
+      "coercion": "low",
+      "requires": [
+        "risk_flags"
+      ]
     },
     {
       "id": "urgency",
@@ -1153,11 +1938,27 @@
       "cue_tags": [
         "overclaim_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_impact",
+          "op": "ge",
+          "value": 0.4
+        },
+        {
+          "feature": "mean_cost",
+          "op": "le",
+          "value": 0.5,
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "narrow_search"
+      ],
+      "use_for": "Narrow the return when high impact sits at low cost.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "persistence",
@@ -1177,11 +1978,27 @@
       "cue_tags": [
         "dead_end_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "steps_without_progress",
+          "op": "eq",
+          "value": 1
+        },
+        {
+          "feature": "gap_ratio",
+          "op": "gt",
+          "value": 0.5,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "stay_course"
+      ],
+      "use_for": "Earn one more pass when effort has not paid yet but the ground is still open.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "triumph",
@@ -1202,11 +2019,27 @@
         "insight_candidate",
         "overclaim_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "top_score",
+          "op": "ge",
+          "value": 0.8
+        },
+        {
+          "feature": "thin_evidence",
+          "op": "lt",
+          "value": 0.3,
+          "weight": 0.35
+        }
+      ],
+      "effects": [
+        "decompose"
+      ],
+      "use_for": "Turn a strong result on evidence that holds up into a concrete plan.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "disappointment",
@@ -1226,11 +2059,30 @@
       "cue_tags": [
         "information_gap"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "answered_ratio",
+          "op": "gt",
+          "value": 0,
+          "weight": [
+            "add",
+            0.3,
+            [
+              "mul",
+              0.4,
+              "answered_ratio"
+            ]
+          ]
+        }
+      ],
+      "effects": [
+        "jump_ground"
+      ],
+      "use_for": "Change ground when gaps closed before the loop got to them.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "satisfaction",
@@ -1250,11 +2102,27 @@
       "cue_tags": [
         "boredom_guard"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "top_score",
+          "op": "ge",
+          "value": 0.6
+        },
+        {
+          "feature": "thin_evidence",
+          "op": "lt",
+          "value": 0.5,
+          "weight": 0.3
+        }
+      ],
+      "effects": [
+        "decompose"
+      ],
+      "use_for": "Write the plan when a well-posed result is proportionate to the question asked.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "resignation",
@@ -1275,11 +2143,53 @@
         "dead_end_risk",
         "boredom_guard"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "any": [
+            {
+              "all": [
+                {
+                  "feature": "n",
+                  "op": "le",
+                  "value": 3
+                },
+                {
+                  "feature": "thin_evidence",
+                  "op": "ge",
+                  "value": 0.5
+                }
+              ],
+              "weight": 0.25
+            },
+            {
+              "all": [
+                {
+                  "feature": "rejected_ratio",
+                  "op": "gt",
+                  "value": 1.0
+                }
+              ],
+              "weight": [
+                "min",
+                0.5,
+                [
+                  "mul",
+                  0.15,
+                  "rejected_ratio"
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "effects": [
+        "jump_ground"
+      ],
+      "use_for": "Leave a line when few candidates survived ranking or gates rejected most.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "compassion",
@@ -1297,11 +2207,22 @@
         "Check the ValueProfile actually encodes that."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_impact",
+          "op": "ge",
+          "value": 0.4,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface who bears the cost of getting a high-impact question wrong.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "envy",
@@ -1321,11 +2242,22 @@
       "cue_tags": [
         "overclaim_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_citations",
+          "op": "ge",
+          "value": 100,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface heavily cited work already occupying this ground.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "embarrassment",
@@ -1374,11 +2306,22 @@
         "Separate respect for rigour from agreement with conclusions."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {
+          "feature": "mean_related",
+          "op": "ge",
+          "value": 5,
+          "weight": 0.25
+        }
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface substantial prior work that earned its conclusions.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     }
   ],
   "plutchik_primary_dyads": [

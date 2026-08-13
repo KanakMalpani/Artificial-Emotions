@@ -16,6 +16,7 @@ from artificial_emotions.appraisal import (
     EFFECT_IDS,
     NEVER_APPRAISE,
     REQUIRES_TOKENS,
+    RULES,
     UNBUILT_UNTIL_OUTCOME,
     WHEN_OPS,
     validate_catalog_entry,
@@ -151,3 +152,61 @@ def test_never_appraise_and_unbuilt_sets_remain():
     """Wave 0 must not delete the named holes; Wave 3 owns that deletion."""
     assert NEVER_APPRAISE
     assert UNBUILT_UNTIL_OUTCOME
+
+
+_TWELVE_LEFTOVERS = frozenset(
+    {
+        "anger",
+        "fear",
+        "joy",
+        "sadness",
+        "disgust",
+        "gratitude",
+        "pride",
+        "shame",
+        "embarrassment",
+        "relief",
+        "intrigue",
+        "admiration",
+    }
+)
+
+
+def test_ruled_emotions_have_catalog_when():
+    by_id = {e["id"]: e for e in emotion_catalog()["emotions"]}
+    missing = [eid for eid in RULES if not by_id[eid]["when"]]
+    assert not missing, f"RULES ids still have empty when: {missing}"
+
+
+def test_twelve_leftovers_are_filled():
+    """Interpreter left leftovers empty; Twelve filled them. Merge keeps both."""
+    for entry in emotion_catalog()["emotions"]:
+        if entry["id"] in _TWELVE_LEFTOVERS:
+            assert entry["when"], entry["id"]
+            assert entry["effects"], entry["id"]
+            assert str(entry["use_for"]).strip(), entry["id"]
+
+
+def test_any_all_and_weight_clauses_validate():
+    validate_catalog_entry(
+        _placeholder(
+            when=[
+                {
+                    "any": [
+                        {"feature": "dual_use_ratio", "op": "gt", "value": 0},
+                        {"all": [{"feature": "max_risk", "op": "ge", "value": 0.5}]},
+                    ],
+                    "weight": ["add", 0.3, ["mul", 0.5, "dual_use_ratio"]],
+                }
+            ],
+            effects=["tighten_safety"],
+            use_for="Tighten the risk ceiling when dual-use material is present.",
+            coercion="low",
+            requires=["risk_flags"],
+        )
+    )
+
+
+def test_unknown_weight_op_fails():
+    with pytest.raises(ValueError, match="unknown weight op"):
+        validate_catalog_entry(_placeholder(when=[{"weight": ["pow", "gap_ratio", 2]}]))
