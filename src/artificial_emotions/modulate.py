@@ -21,17 +21,22 @@ Deterministic and offline.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
 from artificial_emotions.models import CuriosityConfig
 
 __all__ = [
+    "ALWAYS_ON_HIGH_COERCION_EFFECTS",
     "AMBIVALENCE_ENACT_THRESHOLD",
+    "HIGH_COERCION_IDS",
     "MAX_WEIGHT_DELTA",
     "ModulationChange",
     "ModulationPlan",
+    "high_coercion_effect_allowed",
     "modulate_config",
+    "somatic_modulate_requested",
 ]
 
 #: Same ceiling the preference-hint path uses. Affect nudges; it never steers.
@@ -45,12 +50,77 @@ AMBIVALENCE_ENACT_THRESHOLD = 0.35
 #: Honesty tokens on an enacted payload — a pattern in the mix, not a motive.
 _AMBIVALENCE_CLAIMS = ("ambivalence_enacted", "pattern_not_motive")
 
+#: Somatic cluster — catalog ``coercion: ""`` is unset, not ``low``. These ids
+#: are high-coercion even while Wave 0 placeholders remain empty.
+HIGH_COERCION_IDS: frozenset[str] = frozenset({"fear", "anger", "disgust", "joy", "sadness"})
+
+#: Frozen-vocabulary effects that may run without ``--somatic-modulate``.
+ALWAYS_ON_HIGH_COERCION_EFFECTS: frozenset[str] = frozenset({"tighten_safety", "drop_dual_use"})
+
 #: Knobs that disagree when both sides of a named opposite pair fire.
 #: Applying both in one step treats disagreement as agreement.
 _EXCLUSIVE_KNOBS: dict[str, frozenset[str]] = {
     "curiosity": frozenset({"n_candidates", "value_profile.weight_surprise"}),
     "boredom": frozenset({"diversity_threshold", "domain", "value_profile.weight_neglectedness"}),
 }
+
+
+def somatic_modulate_requested(
+    *,
+    somatic_modulate: bool = False,
+    mix_weights: Mapping[str, float] | None = None,
+    from_appraisal: bool = False,
+) -> bool:
+    """Whether the user asked for high-coercion search knobs.
+
+    Asking is ``somatic_modulate=True`` (CLI / ``CuriosityConfig``). A
+    caller-authored mix that already names high-coercion ids also counts,
+    unless ``from_appraisal`` — appraisal dumps are not a request.
+    """
+    if somatic_modulate:
+        return True
+    if from_appraisal:
+        return False
+    if not mix_weights:
+        return False
+    return any(str(eid) in HIGH_COERCION_IDS and float(w) > 0.0 for eid, w in mix_weights.items())
+
+
+def high_coercion_effect_allowed(
+    effect_id: str,
+    *,
+    somatic_modulate: bool,
+    emotion_id: str | None = None,
+    coercion: str = "",
+) -> bool:
+    """High-coercion search effects need opt-in; safety effects may always run.
+
+    ``coercion: ""`` is unset, not ``low``. Known high-coercion ids still gate
+    while catalog rows are empty placeholders. Wave 2 ``apply_effects`` reads
+    this; it does not invent effect ids.
+    """
+    eid = str(effect_id)
+    if eid in ALWAYS_ON_HIGH_COERCION_EFFECTS or eid == "surface_only":
+        return True
+    is_high = coercion == "high" or (
+        emotion_id is not None and str(emotion_id) in HIGH_COERCION_IDS
+    )
+    if not is_high:
+        return True
+    return bool(somatic_modulate)
+
+
+def _resolve_somatic_modulate(
+    config: CuriosityConfig,
+    mix_weights: Mapping[str, float],
+    somatic_modulate: bool | None,
+) -> bool:
+    """Explicit flag wins; otherwise config, else caller mix containing high-coercion ids."""
+    if somatic_modulate is not None:
+        return bool(somatic_modulate)
+    if bool(getattr(config, "somatic_modulate", False)):
+        return True
+    return somatic_modulate_requested(mix_weights=mix_weights)
 
 
 @dataclass(frozen=True)
@@ -92,6 +162,7 @@ class ModulationPlan:
     force_soundness: bool = False
     stop: bool = False
     stop_reason: str = ""
+    somatic_modulate: bool = False
     ambivalence_enacted: bool = False
     skipped_exclusive: list[str] = field(default_factory=list)
     because: str = ""
@@ -119,6 +190,7 @@ class ModulationPlan:
             "force_soundness": self.force_soundness,
             "stop": self.stop,
             "stop_reason": self.stop_reason,
+            "somatic_modulate": self.somatic_modulate,
             "honesty": honesty,
         }
         if self.ambivalence_enacted:
@@ -211,6 +283,7 @@ def modulate_config(
     allow_weight_deltas: bool = False,
     exhausted: bool = False,
     ambivalence: dict[str, Any] | None = None,
+    somatic_modulate: bool | None = None,
 ) -> tuple[CuriosityConfig, ModulationPlan]:
     """Return a new config shaped by the current affect, plus the audit trail.
 
@@ -222,11 +295,16 @@ def modulate_config(
         ambivalence: ``detect_ambivalence`` payload from the mix. When its
             score is ≥ ``AMBIVALENCE_ENACT_THRESHOLD`` on a named pair with
             exclusive knobs, those knobs are not applied as if they agreed.
+        somatic_modulate: high-coercion search knobs. ``None`` infers from
+            ``config.somatic_modulate`` or a caller mix that names those ids.
+            ``False`` forces off (appraisal-driven explore). ``True`` opts in.
+            Wave 2 reads this; safety effects may still apply either way.
 
     Returns:
         ``(new_config, plan)``. The input config is never mutated.
     """
     plan = ModulationPlan()
+    plan.somatic_modulate = _resolve_somatic_modulate(config, mix_weights, somatic_modulate)
     updates: dict[str, Any] = {}
     profile = config.value_profile
     skip, enacted = _ambivalence_skips(mix_weights, ambivalence)

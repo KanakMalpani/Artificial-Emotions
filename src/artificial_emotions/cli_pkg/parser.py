@@ -318,6 +318,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Let affect nudge ValueProfile weights (bounded, logged; off by default)",
     )
     explore_p.add_argument(
+        "--somatic-modulate",
+        action="store_true",
+        dest="somatic_modulate",
+        help=(
+            "Let high-coercion affect (fear, anger, disgust, joy, sadness) change "
+            "search knobs. Off by default: those ids still appraise and surface. "
+            "Never raises the risk ceiling."
+        ),
+    )
+    explore_p.add_argument(
         "--no-jump", action="store_true", help="Stay in one domain even when bored"
     )
     explore_p.add_argument(

@@ -298,3 +298,7 @@ class CuriosityConfig(BaseModel):
     domain_pack_paths: list[str] = Field(default_factory=list)
     # Include packaged example packs under artificial_emotions/packs/.
     load_bundled_packs: bool = False
+    # High-coercion search knobs (fear, anger, disgust, joy, sadness). Off:
+    # those ids still appraise and surface. tighten_safety / drop_dual_use
+    # may still apply. Never raises the risk ceiling.
+    somatic_modulate: bool = False
