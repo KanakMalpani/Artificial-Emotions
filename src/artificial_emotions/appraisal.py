@@ -268,6 +268,14 @@ def build_context(
 
 #: ``emotion -> (why it fires, weight function)``. Returning ``None`` or a
 #: sub-threshold weight means the rule did not fire this run.
+#
+#: Offline reachability of the original 37 (measured, not synthetic):
+#: literature-gated — perplexity, respect, envy, skepticism, satisfaction,
+#: triumph, disappointment; risk-flag — anxiety, reluctance; need live
+#: confidence / empty rank / a surprise bar that would otherwise enable
+#: OpenAlex — hubris, disorientation, suspicion. The rest are reachable
+#: on 6-step ``explore(..., use_literature=False)`` after Track B recalibration.
+#: Machine-checked in ``tests/test_appraisal_coverage.py``.
 _Rule = Callable[[AppraisalContext], tuple[float, dict[str, Any]] | None]
 
 
@@ -297,25 +305,37 @@ RULES: dict[str, tuple[str, _Rule]] = {
         "High impact with high surprise — the scale of the unknown is the draw.",
         lambda c: (
             _r(0.4 * c.mean_surprise, mean_impact=c.mean_impact, mean_surprise=c.mean_surprise)
-            if c.mean_impact >= 0.5 and c.mean_surprise >= 0.4
+            if c.mean_impact >= 0.4 and c.mean_surprise >= 0.28
             else None
         ),
     ),
     "surprise": (
         "The surprise axis ran high on an open gap.",
         lambda c: (
-            _r((c.mean_surprise - 0.3) * c.gap_ratio, mean_surprise=c.mean_surprise)
-            if c.mean_surprise >= 0.45 and c.gap_ratio > 0.3
+            _r(0.5 * c.mean_surprise * c.gap_ratio, mean_surprise=c.mean_surprise)
+            if c.mean_surprise >= 0.28 and c.gap_ratio > 0.3
             else None
         ),
     ),
     # --- difficulty --------------------------------------------------------------
     "confusion": (
-        "Judges disagreed, or answerability came in low.",
-        lambda c: _r(
-            0.6 * c.disagreement + 0.5 * max(0.0, 0.55 - c.mean_answerability),
-            judge_disagreement=c.disagreement,
-            mean_answerability=c.mean_answerability,
+        "Judges disagreed, answerability came in low, or thin evidence left wide bands.",
+        lambda c: (
+            _r(
+                0.6 * c.disagreement
+                + 0.5 * max(0.0, 0.55 - c.mean_answerability)
+                + 0.4 * c.band_width * c.thin_evidence,
+                judge_disagreement=c.disagreement,
+                mean_answerability=c.mean_answerability,
+                mean_band_width=c.band_width,
+                thin_evidence=c.thin_evidence,
+            )
+            if (
+                c.disagreement >= 0.2
+                or c.mean_answerability < 0.55
+                or (c.band_width >= 0.5 and c.thin_evidence >= 0.5)
+            )
+            else None
         ),
     ),
     "perplexity": (
@@ -406,7 +426,7 @@ RULES: dict[str, tuple[str, _Rule]] = {
         "Whoever bears the cost of getting this wrong should be named.",
         lambda c: (
             _r(0.25, mean_impact=c.mean_impact, max_risk=c.max_risk)
-            if c.mean_impact >= 0.6
+            if c.mean_impact >= 0.4
             else None
         ),
     ),
@@ -442,18 +462,22 @@ RULES: dict[str, tuple[str, _Rule]] = {
     "recognition": (
         "This resembles ground already covered — check the analogy before assuming novelty.",
         lambda c: (
-            _r(0.25, term_saturation=c.term_saturation) if 0.3 <= c.term_saturation < 0.7 else None
+            _r(0.25, term_saturation=c.term_saturation) if c.term_saturation >= 0.08 else None
         ),
     ),
     "absorption": (
         "The same target held across steps — the thread is worth protecting.",
-        lambda c: _r(0.3, top_repeated=True) if c.top_repeated else None,
+        lambda c: (
+            _r(0.3, top_repeated=c.top_repeated, repeat_ratio=c.repeat_ratio)
+            if c.top_repeated or c.repeat_ratio >= 0.8
+            else None
+        ),
     ),
     "urgency": (
         "High impact at low cost — the cheap window is open now.",
         lambda c: (
             _r(0.3, mean_impact=c.mean_impact, mean_cost=c.mean_cost)
-            if c.mean_impact >= 0.6 and c.mean_cost <= 0.4
+            if c.mean_impact >= 0.4 and c.mean_cost <= 0.5
             else None
         ),
     ),
@@ -478,7 +502,7 @@ RULES: dict[str, tuple[str, _Rule]] = {
         "A single clause carries the whole question.",
         lambda c: (
             _r(0.25, clause_count=c.top_clause_count, top_ops_len=c.top_ops_len)
-            if c.top_clause_count == 0 and c.top_ops_len >= 40
+            if c.top_clause_count == 1 and 40 <= c.top_ops_len <= 140
             else None
         ),
     ),
@@ -494,7 +518,7 @@ RULES: dict[str, tuple[str, _Rule]] = {
         "Open, tractable and cheap — the pleasant case.",
         lambda c: (
             _r(0.25, mean_cost=c.mean_cost, mean_tractability=c.mean_tractability)
-            if c.mean_cost <= 0.4 and c.mean_tractability >= 0.6 and c.gap_ratio > 0.5
+            if c.mean_cost <= 0.5 and c.mean_tractability >= 0.5 and c.gap_ratio > 0.5
             else None
         ),
     ),
@@ -521,22 +545,40 @@ RULES: dict[str, tuple[str, _Rule]] = {
         ),
     ),
     "impatience": (
-        "Near-duplicates dominated the return — the vein is thinning.",
-        lambda c: _r(0.3, duplicate_ratio=c.duplicate_ratio) if c.duplicate_ratio >= 0.3 else None,
+        "Near-duplicates or a fully repeated ranking — the vein is thinning.",
+        lambda c: (
+            _r(
+                0.3,
+                duplicate_ratio=c.duplicate_ratio,
+                repeat_ratio=c.repeat_ratio,
+                term_saturation=c.term_saturation,
+            )
+            if c.duplicate_ratio >= 0.3 or (c.repeat_ratio >= 0.5 and c.term_saturation >= 0.5)
+            else None
+        ),
     ),
     "frustration": (
         "Repeated effort has ruled nothing out.",
         lambda c: (
-            _r(min(0.7, 0.22 * c.steps_without_progress), steps=c.steps_without_progress)
-            if c.steps_without_progress >= 2
+            _r(
+                min(0.7, 0.22 * max(c.steps_without_progress, 2 if c.repeat_ratio >= 0.8 else 0)),
+                steps=c.steps_without_progress,
+                repeat_ratio=c.repeat_ratio,
+            )
+            if c.steps_without_progress >= 2 or c.repeat_ratio >= 0.8
             else None
         ),
     ),
     "resignation": (
-        "Gates rejected most of what was generated.",
+        "Few candidates survived ranking — the return was thin or gates rejected most.",
         lambda c: (
-            _r(min(0.5, 0.15 * c.rejected_ratio), rejected_ratio=c.rejected_ratio)
-            if c.rejected_ratio > 1.0
+            _r(
+                0.25 if c.n <= 3 and c.thin_evidence >= 0.5 else min(0.5, 0.15 * c.rejected_ratio),
+                rejected_ratio=c.rejected_ratio,
+                n=c.n,
+                thin_evidence=c.thin_evidence,
+            )
+            if c.rejected_ratio > 1.0 or (c.n <= 3 and c.thin_evidence >= 0.5)
             else None
         ),
     ),

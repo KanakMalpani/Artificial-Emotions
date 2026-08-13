@@ -74,7 +74,7 @@ FIRING_CONTEXTS: dict[str, dict[str, object]] = {
     "urgency": {"mean_impact": 0.8, "mean_cost": 0.2},
     "persistence": {"steps_without_progress": 1, "gap_ratio": 0.8},
     "elegance": {"top_ops_len": 80, "top_answerability": 0.8},
-    "parsimony": {"top_clause_count": 0, "top_ops_len": 90},
+    "parsimony": {"top_clause_count": 1, "top_ops_len": 90},
     "clarity": {"mean_answerability": 0.9},
     "enjoyment": {"mean_cost": 0.2, "mean_tractability": 0.8, "gap_ratio": 0.8},
     "respect": {"mean_related": 8.0},
@@ -337,11 +337,60 @@ def test_observation_only_emotions_really_do_not_act():
 MIN_RULES = 40
 MIN_CATALOG_SHARE = 0.75
 MIN_ACTING = 20
-MIN_FIRING_OFFLINE = 8
+MIN_FIRING_OFFLINE = 18
 MIN_DISTINCT_DRIVERS_PER_RUN = 3
 MIN_STANCES = 7
 MIN_STANCE_DRIVERS = 24
 MIN_IMAGINATION_GENERATORS = 6
+
+# Track B — original 37, measured on 6-step explore × ai,biology,physics,climate,medicine
+# with use_literature=False (Engine.run loop). Do not fake literature or dual-use.
+#
+# Already fired before recalibration (13): anticipation, boredom, clarity, curiosity,
+# determination, dissonance, elegance, hope, humility, insight, interest, persistence,
+# uncertainty.
+#
+# Recalibrated so they fire from offline axes / bands / clause counts / repeats (12).
+# Handoff guessed ~15; hubris (heuristic confidence cap), disorientation (empty /
+# collapsed rank), and suspicion (would enable OpenAlex via modulate) stay gated.
+RECALIBRATED_OFFLINE_RULES: frozenset[str] = frozenset(
+    {
+        "absorption",
+        "compassion",
+        "confusion",
+        "enjoyment",
+        "frustration",
+        "impatience",
+        "parsimony",
+        "recognition",
+        "resignation",
+        "surprise",
+        "urgency",
+        "wonder",
+    }
+)
+#: Need related_works, citations, LLM-grounded cites, or non-thin evidence.
+LITERATURE_GATED_RULES: frozenset[str] = frozenset(
+    {
+        "disappointment",
+        "envy",
+        "perplexity",
+        "respect",
+        "satisfaction",
+        "skepticism",
+        "triumph",
+    }
+)
+#: Need dual-use / max_risk flags that default packs do not raise offline.
+RISK_FLAG_RULES: frozenset[str] = frozenset({"anxiety", "reluctance"})
+#: Hubris needs confidence above the heuristic cap; disorientation needs an
+#: empty or collapsed-answerability rank (empty runs still emit it in appraise_run).
+#: Suspicion's thin-evidence input exists offline, but lowering its surprise bar
+#: makes modulate set use_literature=True and pulls OpenAlex into spark.
+OFFLINE_UNREACHABLE_WITHOUT_LIVE_SIGNALS: frozenset[str] = frozenset(
+    {"hubris", "disorientation", "suspicion"}
+)
+_OFFLINE_EXPLORE_DOMAINS = ("ai", "biology", "physics", "climate", "medicine")
 
 _SOMATIC_NEVER = frozenset({"anger", "fear", "joy", "sadness", "disgust"})
 _OUTCOME_GATED = frozenset({"pride", "shame", "gratitude", "embarrassment", "relief"})
@@ -498,17 +547,64 @@ def test_sublimity_does_not_loosen_safety_gates():
 # --- reachability on *real* runs, not just constructed contexts ------------------------
 
 
+def test_offline_rule_buckets_partition_the_original_catalog_minus_track_a():
+    """Literature / risk / live-signal rules are named; the rest must be reachable offline."""
+    track_a = {"doubt", "conviction", "trust", "awe", "sublimity"}
+    original = set(RULES) - track_a
+    gated = LITERATURE_GATED_RULES | RISK_FLAG_RULES | OFFLINE_UNREACHABLE_WITHOUT_LIVE_SIGNALS
+    assert not (RECALIBRATED_OFFLINE_RULES & gated)
+    assert RECALIBRATED_OFFLINE_RULES <= original
+    assert gated <= original
+    leftover = original - RECALIBRATED_OFFLINE_RULES - gated
+    # The leftover are the 13 that already fired on the measured suite.
+    assert leftover, "expected a non-empty already-reachable offline set"
+    assert "curiosity" in leftover
+
+
+def _fired_on_six_step_offline_explores() -> set[str]:
+    from artificial_emotions.explore import explore
+
+    fired: set[str] = set()
+    for domain in _OFFLINE_EXPLORE_DOMAINS:
+        out = explore(
+            domain=domain,
+            steps=6,
+            n_return=5,
+            use_literature=False,
+            use_llm=False,
+            seed=42,
+            persist_memory=False,
+        )
+        for step in out["trajectory"]["steps"]:
+            fired.update(a["emotion"] for a in step["appraisal"])
+            assert not any(c.get("knob") == "use_literature" for c in step["modulation"]), (
+                "offline explore must not enable literature via appraisal"
+            )
+    return fired
+
+
 def test_plain_offline_runs_fire_a_variety_of_emotions():
     """Firable-in-principle is not enough; ordinary runs must feel more than one thing."""
     from artificial_emotions.appraisal import appraise_run
 
     fired: set[str] = set()
-    for domain in ("ai", "biology", "physics", "climate", "medicine"):
+    for domain in _OFFLINE_EXPLORE_DOMAINS:
         items = CuriosityEngine(
             CuriosityConfig(domain=domain, use_llm=False, use_literature=False, n_return=5)
         ).run()
         fired |= {s.emotion for s in appraise_run(items)}
     assert len(fired) >= MIN_FIRING_OFFLINE, f"only {len(fired)} fire offline: {sorted(fired)}"
+
+
+def test_six_step_explore_fires_recalibrated_offline_rules():
+    """Lab-green FIRING_CONTEXTS is not enough — these must fire on real offline explores."""
+    fired = _fired_on_six_step_offline_explores()
+    missing = sorted(RECALIBRATED_OFFLINE_RULES - fired)
+    assert not missing, f"recalibrated rules never fired offline: {missing}"
+    faked_lit = sorted(LITERATURE_GATED_RULES & fired)
+    faked_risk = sorted(RISK_FLAG_RULES & fired)
+    assert not faked_lit, f"literature-gated rules must not be faked offline: {faked_lit}"
+    assert not faked_risk, f"risk-flag rules must not be faked offline: {faked_risk}"
 
 
 def test_more_than_one_emotion_drives_change_across_a_real_loop():

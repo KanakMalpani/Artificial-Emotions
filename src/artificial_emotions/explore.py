@@ -220,11 +220,13 @@ def explore(
 
         new_ids = trail.observe(items)
 
+        previous_top_id = trail.steps[-1].top_question_id if trail.steps else None
         signals = appraise_run(
             items,
             seen_question_ids=seen_before,
             term_saturation=saturation_before,
             steps_without_progress=trail.steps_without_progress(),
+            previous_top_id=previous_top_id,
             mood_bias=mood_bias,
             temperament=active_temperament,
         )
