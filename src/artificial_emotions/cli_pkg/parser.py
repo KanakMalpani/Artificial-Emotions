@@ -118,6 +118,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     spark_p.add_argument("--llm", action="store_true")
     spark_p.add_argument("--json", action="store_true")
+    spark_p.add_argument(
+        "--compact",
+        action="store_true",
+        help="Print rank-1 compact_unknown as JSON (not the full inject pack)",
+    )
     spark_p.add_argument("--model", default=None)
     spark_p.add_argument("--judge-model", default=None)
     spark_p.add_argument("--base-url", default=None)

@@ -42,23 +42,28 @@ pip install -e ".[dev]"
 ```
 
 ```bash
-emotions spark --domain ai --n 5 --json
+emotions spark --domain ai --n 5 --compact --json
 ```
 
-**No API key. No network. No LLM.** Curated seeds and heuristic scoring, entirely on your machine. Here is a real result, unedited:
+**No API key. No network. No LLM.** Curated seeds and heuristic scoring, entirely on your machine. Live compact output of rank 1 (`compact_unknown`) — not the full inject pack. For a short inject to paste into any model, omit `--json`: `emotions spark --domain ai --n 5`.
 
 ```jsonc
 {
-  "question": "Which training interventions most increase honest uncertainty
-                reporting under incentive pressure to appear confident?",
+  "rank": 1,
+  "question": "Which training interventions most increase honest uncertainty reporting under incentive pressure to appear confident?",
   "curiosity_score": 0.8648,
   "score_band":      [0.578, 1.151],   // evidence envelope, NOT a confidence interval
   "confidence":      0.242,            // low — and it says so
   "gap_status":      "unknown_with_caveat",
   "axes": { "impact": 0.40, "neglectedness": 1.00, "tractability": 0.70,
-            "surprise": 0.30, "answerability": 0.78, "risk": 0.15 },
+            "surprise": 0.30, "answerability": 0.78, "risk": 0.15,
+            "cost_proxy": 0.45 },
   "flags": ["heuristic_scoring", "no_literature"],
-  "epistemic_cues": ["information_gap", "curiosity_target", "confusion_risk"]
+  "epistemic_cues": {
+    "tags": ["information_gap", "curiosity_target", "confusion_risk", "boredom_guard"],
+    "primary": "information_gap",
+    "honesty": "annotation_only"
+  }
 }
 ```
 

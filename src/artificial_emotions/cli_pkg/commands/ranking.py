@@ -94,6 +94,11 @@ def _spark(args: argparse.Namespace) -> int:
         llm_base_url=args.base_url,
         diversity_backend=args.diversity,
     )
+    if getattr(args, "compact", False):
+        unknowns = pack.get("unknowns") or []
+        compact = next((u for u in unknowns if u.get("rank") == 1), None)
+        print(json.dumps(compact if compact is not None else {}, indent=2))
+        return 0
     if args.json:
         print(json.dumps(pack, indent=2))
         return 0
