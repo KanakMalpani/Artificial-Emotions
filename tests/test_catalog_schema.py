@@ -14,10 +14,8 @@ from artificial_emotions.appraisal import (
     CATALOG_WHEN_FEATURES,
     COERCION_LEVELS,
     EFFECT_IDS,
-    NEVER_APPRAISE,
     REQUIRES_TOKENS,
     RULES,
-    UNBUILT_UNTIL_OUTCOME,
     WHEN_OPS,
     validate_catalog_entry,
     validate_emotion_catalog,
@@ -148,10 +146,14 @@ def test_valid_when_clause_passes():
     )
 
 
-def test_never_appraise_and_unbuilt_sets_remain():
-    """Wave 0 must not delete the named holes; Wave 3 owns that deletion."""
-    assert NEVER_APPRAISE
-    assert UNBUILT_UNTIL_OUTCOME
+def test_never_appraise_and_unbuilt_sets_are_gone():
+    """Wave 3 deleted the named holes; catalog ``when`` / ``use_for`` is the contract."""
+    import artificial_emotions.appraisal as appraisal_mod
+
+    assert not hasattr(appraisal_mod, "NEVER_APPRAISE")
+    assert not hasattr(appraisal_mod, "UNBUILT_UNTIL_OUTCOME")
+    assert "NEVER_APPRAISE" not in appraisal_mod.__all__
+    assert "UNBUILT_UNTIL_OUTCOME" not in appraisal_mod.__all__
 
 
 _TWELVE_LEFTOVERS = frozenset(
@@ -210,3 +212,15 @@ def test_any_all_and_weight_clauses_validate():
 def test_unknown_weight_op_fails():
     with pytest.raises(ValueError, match="unknown weight op"):
         validate_catalog_entry(_placeholder(when=[{"weight": ["pow", "gap_ratio", 2]}]))
+
+
+def test_emotions_catalog_text_lists_use_for(capsys: pytest.CaptureFixture[str]) -> None:
+    from artificial_emotions.cli import main
+
+    assert main(["emotions", "catalog"]) == 0
+    out = capsys.readouterr().out
+    assert "i feel" not in out.lower()
+    for entry in emotion_catalog()["emotions"]:
+        use_for = str(entry["use_for"]).strip()
+        assert use_for, entry["id"]
+        assert use_for in out, entry["id"]

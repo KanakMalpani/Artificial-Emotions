@@ -204,9 +204,7 @@ flowchart LR
     style F fill:#dc2626,stroke:#b91c1c,color:#fff
 ```
 
-**37 of the 54 catalogued emotions are derivable**, and 22 of those change what
-the engine does. The rest are declared observation-only — surfaced for the reader,
-deliberately not acted on.
+The catalog is the contract: every named emotion has a condition and a use, and somatic search knobs stay opt-in (`--somatic-modulate`).
 
 | Feeling | Fires when | Changes |
 |---|---|---|
@@ -336,7 +334,7 @@ emotions stance safety --domain medicine
 curl "localhost:8000/v1/stances/close?domain=ai"
 ```
 
-**This is what stops the catalog from being decoration.** A test in `tests/test_appraisal_coverage.py` asserts that *every* appraisable emotion either steers the search or drives a stance — 37 of 37, no exceptions, enforced in CI. Being named and disclaimed is not a use.
+**This is what stops the catalog from being decoration.** A test in `tests/test_appraisal_coverage.py` asserts that every catalog emotion either steers the search, drives a stance, or drives a wired imaginative lens — no exceptions, enforced in CI. Being named and disclaimed is not a use.
 
 ---
 

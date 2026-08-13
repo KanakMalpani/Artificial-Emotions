@@ -10,11 +10,14 @@ make that state unreachable:
   explicitly declared ``OBSERVATION_ONLY``;
 * every appraisable emotion must **exist in the catalog**, so appraisal cannot
   invent vocabulary the mixer does not know;
-* every catalog id is in ``RULES`` ∪ ``NEVER_APPRAISE`` ∪ ``UNBUILT_UNTIL_OUTCOME``
-  — no silent holes, and the somatic / outcome-gated cluster is named rather
-  than licensed by a low catalog-share floor;
-* every appraisable emotion must **have a use** — it steers the search, or it
-  drives a stance. Being named and disclaimed is not a use.
+* every catalog id has a **condition** — non-empty ``when``, or
+  ``requires: outcome_event`` plus a fixture that fires it — and a **use**
+  (an effect other than only ``surface_only``, a stance driver, or an
+  imagination driver). ``MIN_CATALOG_SHARE = 1.0``; unnamed holes are not
+  licensed by a low floor;
+* every catalog emotion must **have a use** — it steers the search, or it
+  drives a stance, or it drives a wired imaginative lens. Being named and
+  disclaimed is not a use.
 """
 
 from __future__ import annotations
@@ -24,10 +27,8 @@ from dataclasses import replace
 import pytest
 
 from artificial_emotions.appraisal import (
-    NEVER_APPRAISE,
     OBSERVATION_ONLY,
     RULES,
-    UNBUILT_UNTIL_OUTCOME,
     AppraisalContext,
     build_context,
 )
@@ -39,6 +40,50 @@ from artificial_emotions.pipeline import CuriosityEngine
 from artificial_emotions.stances import STANCES
 
 CATALOG_IDS = {e["id"] for e in emotion_catalog()["emotions"]}
+
+
+def _requires_tokens_of(entry: dict) -> list[str]:
+    raw = entry.get("requires")
+    if isinstance(raw, str):
+        return [raw] if raw else []
+    if isinstance(raw, list):
+        return [str(t) for t in raw if t]
+    return []
+
+
+def _outcome_fire_fixtures() -> dict[str, dict[str, object]]:
+    """Pride/shame fixtures live in Twelve; coverage only checks they exist."""
+    from tests.test_twelve_leftovers import FIRING
+
+    return {
+        eid: ctx
+        for eid, ctx in FIRING.items()
+        if ctx.get("outcome_result") and ctx.get("outcome_question_id")
+    }
+
+
+def _has_condition(
+    entry: dict,
+    *,
+    outcome_fixtures: dict[str, dict[str, object]] | None = None,
+) -> bool:
+    if entry.get("when"):
+        return True
+    if "outcome_event" not in _requires_tokens_of(entry):
+        return False
+    fixtures = outcome_fixtures if outcome_fixtures is not None else _outcome_fire_fixtures()
+    fixture = fixtures.get(str(entry["id"]))
+    return bool(fixture and fixture.get("outcome_result") and fixture.get("outcome_question_id"))
+
+
+def _conditioned_ids(
+    entries: list[dict] | None = None,
+    *,
+    outcome_fixtures: dict[str, dict[str, object]] | None = None,
+) -> set[str]:
+    rows = entries if entries is not None else list(emotion_catalog()["emotions"])
+    return {str(e["id"]) for e in rows if _has_condition(e, outcome_fixtures=outcome_fixtures)}
+
 
 #: A context per rule that should make it fire. Written by hand so each entry
 #: documents the situation the emotion is *about*.
@@ -186,21 +231,20 @@ def _modulating_emotions() -> set[str]:
 
     Wave 2: the if-ladder is gone; catalog ``effects`` are the contract.
     ``inspect.getsource(modulate_config)`` would miss catalog-driven ids.
+    ``drop_dual_use`` / ``forbid_similar_jump`` are plan flags — they count
+    as acting even though explore does not yet drop dual-use items.
     """
-    by_id = {e["id"]: e for e in emotion_catalog()["emotions"]}
     acting: set[str] = set()
-    for eid in RULES:
-        effects = [str(x) for x in (by_id.get(eid, {}).get("effects") or [])]
+    for entry in emotion_catalog()["emotions"]:
+        effects = [str(x) for x in (entry.get("effects") or [])]
         if any(x != "surface_only" for x in effects):
-            acting.add(eid)
+            acting.add(str(entry["id"]))
     return acting
 
 
 def _appraisable_ids() -> set[str]:
-    """Ids appraisal can actually emit: RULES plus catalog rows with ``when``."""
-    return set(RULES) | {
-        str(entry["id"]) for entry in emotion_catalog()["emotions"] if entry.get("when")
-    }
+    """Ids appraisal can actually emit: RULES plus catalog rows with a condition."""
+    return set(RULES) | _conditioned_ids()
 
 
 def _stance_driving_emotions() -> set[str]:
@@ -235,15 +279,19 @@ def test_every_emotion_has_a_use_not_merely_a_disclaimer():
     of things the system names and never uses. Stances closed that gap: an
     emotion that does not steer the search must at least be the question some
     stance asks — or drive a wired imaginative lens. Nothing is allowed to be
-    merely observed.
+    merely observed. Wave 3: the union is every catalog id, not only ``RULES``.
     """
     useful = _modulating_emotions() | _stance_driving_emotions() | _imagination_driving_emotions()
-    homeless = set(RULES) - useful
+    homeless = CATALOG_IDS - useful
     assert not homeless, (
-        f"{sorted(homeless)} are appraised but do nothing — they neither modulate "
+        f"{sorted(homeless)} are catalogued but do nothing — they neither modulate "
         "search, drive a stance, nor drive an imaginative lens. Give them a use "
-        "or drop the rule."
+        "or drop the row."
     )
+    for entry in emotion_catalog()["emotions"]:
+        assert str(entry.get("use_for") or "").strip(), f"{entry['id']} has empty use_for"
+        lowered = str(entry["use_for"]).lower()
+        assert "i feel" not in lowered, f"{entry['id']} use_for is first-person"
 
 
 def test_stances_only_claim_emotions_the_system_can_actually_appraise():
@@ -344,7 +392,7 @@ def test_observation_only_emotions_really_do_not_act():
 # ordinary churn does not trip them but a real regression toward the old
 # "13 derivable, 4 firing" state does. Raise them as coverage grows; never lower.
 MIN_RULES = 40
-MIN_CATALOG_SHARE = 0.75
+MIN_CATALOG_SHARE = 1.0
 MIN_ACTING = 20
 MIN_FIRING_OFFLINE = 18
 MIN_DISTINCT_DRIVERS_PER_RUN = 3
@@ -401,24 +449,45 @@ OFFLINE_UNREACHABLE_WITHOUT_LIVE_SIGNALS: frozenset[str] = frozenset(
 )
 _OFFLINE_EXPLORE_DOMAINS = ("ai", "biology", "physics", "climate", "medicine")
 
-_SOMATIC_NEVER = frozenset({"anger", "fear", "joy", "sadness", "disgust"})
-_OUTCOME_GATED = frozenset({"pride", "shame", "gratitude", "embarrassment", "relief"})
+#: Catalog leftovers named so share=1.0 does not claim they fire on spark.
+LITERATURE_GATED_CATALOG: frozenset[str] = frozenset({"admiration", "gratitude"})
+RISK_FLAG_CATALOG: frozenset[str] = frozenset({"fear", "disgust"})
+OUTCOME_EVENT_IDS: frozenset[str] = frozenset({"pride", "shame"})
+PREVIOUS_STEP_IDS: frozenset[str] = frozenset({"embarrassment", "relief", "anger"})
 _FIVE_EPISTEMIC = ("doubt", "conviction", "trust", "awe", "sublimity")
 
 
-def _catalog_accounted(never: frozenset[str] | set[str] | None = None) -> set[str]:
-    return (
-        set(RULES)
-        | set(never if never is not None else NEVER_APPRAISE)
-        | set(UNBUILT_UNTIL_OUTCOME)
-    )
-
-
 def test_a_meaningful_share_of_the_catalog_is_reachable():
-    """The original failure was 13/54 derivable. Hold well clear of that."""
+    """The original failure was 13/54 derivable. Every id now has a condition."""
     assert len(RULES) >= MIN_RULES, f"only {len(RULES)} rules"
-    share = len(RULES) / len(CATALOG_IDS)
-    assert share >= MIN_CATALOG_SHARE, f"only {share:.0%} of the catalog is derivable"
+    conditioned = _conditioned_ids()
+    share = len(conditioned) / len(CATALOG_IDS)
+    assert share >= MIN_CATALOG_SHARE, f"only {share:.0%} of the catalog has a condition"
+    assert conditioned == CATALOG_IDS
+
+
+def test_every_catalog_id_has_a_condition():
+    """Non-empty ``when``, or ``outcome_event`` plus a fixture that fires it."""
+    missing = CATALOG_IDS - _conditioned_ids()
+    assert not missing, f"catalog ids with no condition: {sorted(missing)}"
+    extra = _conditioned_ids() - CATALOG_IDS
+    assert not extra, f"conditioned ids unknown to the catalog: {sorted(extra)}"
+
+
+def test_emptying_curiosity_when_fails():
+    """Mutation: a shipped id with no ``when`` and no outcome fixture is a hole."""
+    entries = []
+    for raw in emotion_catalog()["emotions"]:
+        entry = dict(raw)
+        if entry["id"] == "curiosity":
+            entry["when"] = []
+        entries.append(entry)
+    conditioned = _conditioned_ids(entries)
+    assert "curiosity" not in conditioned
+    share = len(conditioned) / len(CATALOG_IDS)
+    with pytest.raises(AssertionError):
+        assert share >= MIN_CATALOG_SHARE
+        assert conditioned == CATALOG_IDS
 
 
 def test_enough_emotions_actually_change_behaviour():
@@ -432,44 +501,45 @@ def test_appraisal_never_invents_vocabulary_outside_the_catalog():
     assert not unknown, f"appraisal can emit {sorted(unknown)}, which the mixer cannot mix"
 
 
-def test_every_catalog_id_is_ruled_never_appraised_or_unbuilt():
-    """Anti-decoration: share floors must not license unnamed holes."""
-    extra = _catalog_accounted() - CATALOG_IDS
-    missing = CATALOG_IDS - _catalog_accounted()
-    assert not extra, f"accounting names unknown ids: {sorted(extra)}"
-    assert not missing, f"catalog ids with no rule, never-appraise, or unbuilt: {sorted(missing)}"
+def test_plan_flags_count_as_real_use_with_stance():
+    """``drop_dual_use`` / ``forbid_similar_jump`` are plan flags, not a new effect id.
 
-
-def test_never_appraise_is_disjoint_from_rules_and_covers_the_somatic_cluster():
-    assert NEVER_APPRAISE <= CATALOG_IDS
-    assert not (NEVER_APPRAISE & set(RULES)), (
-        f"{sorted(NEVER_APPRAISE & set(RULES))} cannot be both ruled and never-appraised"
-    )
-    assert _SOMATIC_NEVER <= NEVER_APPRAISE
-    assert {"gratitude", "pride", "shame"} <= NEVER_APPRAISE
-    assert not (_SOMATIC_NEVER & set(RULES))
+    Explore does not yet drop dual-use items; the flag plus a stance driver is
+    the honest use. Frustration/resignation stop is ``jump_ground``, not ``stop``.
+    """
+    by_id = {e["id"]: e for e in emotion_catalog()["emotions"]}
+    assert "drop_dual_use" in by_id["disgust"]["effects"]
+    assert "forbid_similar_jump" in by_id["anger"]["effects"]
+    assert "jump_ground" in by_id["frustration"]["effects"]
+    assert "jump_ground" in by_id["resignation"]["effects"]
+    assert "stop" not in by_id["frustration"]["effects"]
+    drivers = _stance_driving_emotions()
+    assert "disgust" in drivers and "anger" in drivers
 
 
 def test_outcome_gated_affect_is_not_derived_from_rank():
-    """Pride/shame/embarrassment/relief/gratitude wait on outcomes, not top_score."""
-    assert not (_OUTCOME_GATED & set(RULES)), (
-        f"{sorted(_OUTCOME_GATED & set(RULES))} derived from rank — that is triumph, not outcome"
+    """Pride/shame wait on logged outcomes, not top_score — that path is triumph."""
+    assert not (OUTCOME_EVENT_IDS & set(RULES)), (
+        f"{sorted(OUTCOME_EVENT_IDS & set(RULES))} derived from rank — that is triumph, not outcome"
     )
-    assert {"embarrassment", "relief"} <= UNBUILT_UNTIL_OUTCOME
-    assert not (UNBUILT_UNTIL_OUTCOME & set(RULES))
-    assert not (UNBUILT_UNTIL_OUTCOME & NEVER_APPRAISE)
+    fixtures = _outcome_fire_fixtures()
+    for eid in OUTCOME_EVENT_IDS:
+        assert eid in fixtures, f"{eid} requires outcome_event but has no Twelve firing fixture"
+        assert fixtures[eid].get("outcome_result")
+        assert fixtures[eid].get("outcome_question_id")
 
 
-def test_stripping_never_appraise_membership_without_a_rule_fails():
-    """Mutation: dropping a never-appraise id without adding a rule leaves a hole."""
-    victim = "anger"
-    assert victim in NEVER_APPRAISE
-    assert victim not in RULES
-    stripped = NEVER_APPRAISE - {victim}
-    missing = CATALOG_IDS - _catalog_accounted(stripped)
-    assert victim in missing
-    with pytest.raises(AssertionError):
-        assert not missing
+def test_gated_catalog_antecedents_are_named():
+    """Literature / risk / previous / outcome stay named; share=1.0 is not spark coverage."""
+    by_id = {e["id"]: e for e in emotion_catalog()["emotions"]}
+    for eid in OUTCOME_EVENT_IDS:
+        assert "outcome_event" in _requires_tokens_of(by_id[eid]), eid
+    for eid in PREVIOUS_STEP_IDS:
+        assert "previous_step" in _requires_tokens_of(by_id[eid]), eid
+    for eid in LITERATURE_GATED_CATALOG:
+        assert "literature" in _requires_tokens_of(by_id[eid]), eid
+    for eid in RISK_FLAG_CATALOG:
+        assert "risk_flags" in _requires_tokens_of(by_id[eid]), eid
 
 
 def test_five_epistemic_rules_are_in_rules_and_firing_contexts():
@@ -477,8 +547,6 @@ def test_five_epistemic_rules_are_in_rules_and_firing_contexts():
         assert emotion in RULES, f"{emotion} missing from RULES"
         assert emotion in FIRING_CONTEXTS, f"{emotion} missing from FIRING_CONTEXTS"
         assert emotion in CATALOG_IDS
-        assert emotion not in NEVER_APPRAISE
-        assert emotion not in UNBUILT_UNTIL_OUTCOME
 
 
 def test_hopeless_mega_gap_does_not_outrank_tractable_curiosity(
@@ -610,10 +678,12 @@ def test_six_step_explore_fires_recalibrated_offline_rules():
     fired = _fired_on_six_step_offline_explores()
     missing = sorted(RECALIBRATED_OFFLINE_RULES - fired)
     assert not missing, f"recalibrated rules never fired offline: {missing}"
-    faked_lit = sorted(LITERATURE_GATED_RULES & fired)
-    faked_risk = sorted(RISK_FLAG_RULES & fired)
+    faked_lit = sorted((LITERATURE_GATED_RULES | LITERATURE_GATED_CATALOG) & fired)
+    faked_risk = sorted((RISK_FLAG_RULES | RISK_FLAG_CATALOG) & fired)
+    faked_outcome = sorted(OUTCOME_EVENT_IDS & fired)
     assert not faked_lit, f"literature-gated rules must not be faked offline: {faked_lit}"
     assert not faked_risk, f"risk-flag rules must not be faked offline: {faked_risk}"
+    assert not faked_outcome, f"outcome-gated rules must not be faked offline: {faked_outcome}"
 
 
 def test_more_than_one_emotion_drives_change_across_a_real_loop():

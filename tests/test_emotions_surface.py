@@ -62,6 +62,8 @@ def test_emotion_catalog_python():
     assert "awe" in cat["ids"]
     assert cat["honesty"] == "computational_affect"
     assert "epistemic" in cat["families"]
+    for entry in cat["emotions"]:
+        assert str(entry.get("use_for") or "").strip(), entry["id"]
     epi = emotion_catalog(family="epistemic")
     assert epi["count"] >= 8
     assert all(e["family"] == "epistemic" for e in epi["emotions"])

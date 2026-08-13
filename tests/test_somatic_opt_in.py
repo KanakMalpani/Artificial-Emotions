@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import inspect
 
-from artificial_emotions.appraisal import NEVER_APPRAISE, AppraisalSignal
+from artificial_emotions.appraisal import AppraisalSignal
 from artificial_emotions.cli import build_parser
+from artificial_emotions.emotions import emotion_catalog
 from artificial_emotions.explore import explore
 from artificial_emotions.models import CuriosityConfig, ValueProfile
 from artificial_emotions.modulate import (
@@ -36,7 +37,12 @@ def _fear_heavy_signals(*_args, **_kwargs) -> list[AppraisalSignal]:
 
 def test_high_coercion_ids_are_the_somatic_cluster():
     assert HIGH_COERCION_IDS == frozenset({"fear", "anger", "disgust", "joy", "sadness"})
-    assert HIGH_COERCION_IDS <= NEVER_APPRAISE
+    high = {
+        str(e["id"])
+        for e in emotion_catalog()["emotions"]
+        if str(e.get("coercion") or "") == "high"
+    }
+    assert HIGH_COERCION_IDS == high
 
 
 def test_empty_coercion_is_unset_not_low():

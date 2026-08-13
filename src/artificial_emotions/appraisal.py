@@ -10,12 +10,12 @@ A wide-open gap on a high-stakes question produces curiosity because the
 situation warrants it. Circling a dead end for the third time produces
 frustration because it happened, not because a caller asked for it.
 
-**Every rule must be reachable and must matter.** An earlier version could derive
-13 of 54 catalogued emotions and only four ever fired in practice, which made the
-other fifty decoration. Rules now live in :data:`RULES` as explicit
-condition/weight functions over one context object, so
-``tests/test_appraisal_coverage.py`` can assert that each is firable and that
-each either modulates behaviour or is declared :data:`OBSERVATION_ONLY`.
+**Every catalog emotion must have a condition and a use.** An earlier version
+could derive 13 of 54 catalogued emotions and only four ever fired in practice,
+which made the other fifty decoration. The catalog is the contract: coverage
+asserts a non-empty ``when`` (or an ``outcome_event`` fixture) and a real use,
+and that each :data:`RULES` entry is firable and either modulates behaviour or
+is declared :data:`OBSERVATION_ONLY`.
 
 Every signal carries its evidence. Affect you cannot audit is affect you cannot
 trust, and this project does not ship unauditable numbers.
@@ -39,11 +39,9 @@ __all__ = [
     "CATALOG_WHEN_FEATURES",
     "COERCION_LEVELS",
     "EFFECT_IDS",
-    "NEVER_APPRAISE",
     "OBSERVATION_ONLY",
     "REQUIRES_TOKENS",
     "RULES",
-    "UNBUILT_UNTIL_OUTCOME",
     "WHEN_OPS",
     "AppraisalContext",
     "AppraisalSignal",
@@ -103,35 +101,6 @@ OBSERVATION_ONLY: frozenset[str] = frozenset(
         "trust",
         "awe",
         "sublimity",
-    }
-)
-
-#: Catalog ids appraisal will not derive. Somatic cluster would route around
-#: ``AFFECTIVE_SAFETY`` if given a rule (``explore`` mixes without a cap).
-#: ``gratitude`` is signal-identical to ``respect``. ``pride`` / ``shame`` need
-#: outcome feedback, not rank / ``top_score`` (that path is already ``triumph``).
-NEVER_APPRAISE: frozenset[str] = frozenset(
-    {
-        "anger",
-        "fear",
-        "joy",
-        "sadness",
-        "disgust",
-        "gratitude",
-        "pride",
-        "shame",
-    }
-)
-
-#: Catalog ids with no honest rule yet. ``embarrassment`` / ``relief`` need
-#: stored outcome feedback. ``intrigue`` / ``admiration`` have no distinct
-#: offline antecedent that would not collapse into curiosity or respect.
-UNBUILT_UNTIL_OUTCOME: frozenset[str] = frozenset(
-    {
-        "embarrassment",
-        "relief",
-        "intrigue",
-        "admiration",
     }
 )
 

@@ -81,6 +81,9 @@ def _emotions(args: argparse.Namespace) -> int:
             )
             for e in payload["emotions"]:
                 print(f"  {e['id']:14} [{e['family']}] {e['label']}")
+                use_for = str(e.get("use_for") or "").strip()
+                if use_for:
+                    print(f"    {use_for}")
             print(f"\n{payload['disclaimer']}")
         return 0
 
