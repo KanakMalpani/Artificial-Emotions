@@ -10,6 +10,9 @@ make that state unreachable:
   explicitly declared ``OBSERVATION_ONLY``;
 * every appraisable emotion must **exist in the catalog**, so appraisal cannot
   invent vocabulary the mixer does not know;
+* every catalog id is in ``RULES`` ∪ ``NEVER_APPRAISE`` ∪ ``UNBUILT_UNTIL_OUTCOME``
+  — no silent holes, and the somatic / outcome-gated cluster is named rather
+  than licensed by a low catalog-share floor;
 * every appraisable emotion must **have a use** — it steers the search, or it
   drives a stance. Being named and disclaimed is not a use.
 """
@@ -22,8 +25,10 @@ from dataclasses import replace
 import pytest
 
 from artificial_emotions.appraisal import (
+    NEVER_APPRAISE,
     OBSERVATION_ONLY,
     RULES,
+    UNBUILT_UNTIL_OUTCOME,
     AppraisalContext,
     build_context,
 )
@@ -39,7 +44,12 @@ CATALOG_IDS = {e["id"] for e in emotion_catalog()["emotions"]}
 #: A context per rule that should make it fire. Written by hand so each entry
 #: documents the situation the emotion is *about*.
 FIRING_CONTEXTS: dict[str, dict[str, object]] = {
-    "curiosity": {"gap_ratio": 1.0, "mean_neglect": 0.9, "mean_impact": 0.9},
+    "curiosity": {
+        "gap_ratio": 1.0,
+        "mean_neglect": 0.9,
+        "mean_impact": 0.9,
+        "mean_tractability": 0.8,
+    },
     "interest": {"gap_ratio": 0.8},
     "wonder": {"mean_impact": 0.7, "mean_surprise": 0.6},
     "surprise": {"mean_surprise": 0.7, "gap_ratio": 0.8},
@@ -76,6 +86,21 @@ FIRING_CONTEXTS: dict[str, dict[str, object]] = {
     "disappointment": {"answered_ratio": 0.6},
     "satisfaction": {"top_score": 0.7, "thin_evidence": 0.1},
     "triumph": {"top_score": 0.9, "thin_evidence": 0.1},
+    "doubt": {
+        "band_width": 0.7,
+        "disagreement": 0.4,
+        "thin_evidence": 0.6,
+        "mean_confidence": 0.7,
+    },
+    "conviction": {
+        "band_width": 0.1,
+        "mean_answerability": 0.85,
+        "thin_evidence": 0.1,
+        "mean_tractability": 0.7,
+    },
+    "trust": {"mean_related": 6.0, "gap_ratio": 0.8},
+    "awe": {"mean_impact": 0.8, "mean_surprise": 0.7, "gap_ratio": 0.9},
+    "sublimity": {"mean_impact": 0.8, "mean_tractability": 0.2, "mean_cost": 0.8},
 }
 
 
@@ -309,14 +334,26 @@ def test_observation_only_emotions_really_do_not_act():
 # Ratchet floors. These sit just under what the code currently achieves, so
 # ordinary churn does not trip them but a real regression toward the old
 # "13 derivable, 4 firing" state does. Raise them as coverage grows; never lower.
-MIN_RULES = 35
-MIN_CATALOG_SHARE = 0.62
+MIN_RULES = 40
+MIN_CATALOG_SHARE = 0.75
 MIN_ACTING = 20
 MIN_FIRING_OFFLINE = 8
 MIN_DISTINCT_DRIVERS_PER_RUN = 3
 MIN_STANCES = 7
 MIN_STANCE_DRIVERS = 24
 MIN_IMAGINATION_GENERATORS = 6
+
+_SOMATIC_NEVER = frozenset({"anger", "fear", "joy", "sadness", "disgust"})
+_OUTCOME_GATED = frozenset({"pride", "shame", "gratitude", "embarrassment", "relief"})
+_FIVE_EPISTEMIC = ("doubt", "conviction", "trust", "awe", "sublimity")
+
+
+def _catalog_accounted(never: frozenset[str] | set[str] | None = None) -> set[str]:
+    return (
+        set(RULES)
+        | set(never if never is not None else NEVER_APPRAISE)
+        | set(UNBUILT_UNTIL_OUTCOME)
+    )
 
 
 def test_a_meaningful_share_of_the_catalog_is_reachable():
@@ -335,6 +372,127 @@ def test_enough_emotions_actually_change_behaviour():
 def test_appraisal_never_invents_vocabulary_outside_the_catalog():
     unknown = set(RULES) - CATALOG_IDS
     assert not unknown, f"appraisal can emit {sorted(unknown)}, which the mixer cannot mix"
+
+
+def test_every_catalog_id_is_ruled_never_appraised_or_unbuilt():
+    """Anti-decoration: share floors must not license unnamed holes."""
+    extra = _catalog_accounted() - CATALOG_IDS
+    missing = CATALOG_IDS - _catalog_accounted()
+    assert not extra, f"accounting names unknown ids: {sorted(extra)}"
+    assert not missing, f"catalog ids with no rule, never-appraise, or unbuilt: {sorted(missing)}"
+
+
+def test_never_appraise_is_disjoint_from_rules_and_covers_the_somatic_cluster():
+    assert NEVER_APPRAISE <= CATALOG_IDS
+    assert not (NEVER_APPRAISE & set(RULES)), (
+        f"{sorted(NEVER_APPRAISE & set(RULES))} cannot be both ruled and never-appraised"
+    )
+    assert _SOMATIC_NEVER <= NEVER_APPRAISE
+    assert {"gratitude", "pride", "shame"} <= NEVER_APPRAISE
+    assert not (_SOMATIC_NEVER & set(RULES))
+
+
+def test_outcome_gated_affect_is_not_derived_from_rank():
+    """Pride/shame/embarrassment/relief/gratitude wait on outcomes, not top_score."""
+    assert not (_OUTCOME_GATED & set(RULES)), (
+        f"{sorted(_OUTCOME_GATED & set(RULES))} derived from rank — that is triumph, not outcome"
+    )
+    assert {"embarrassment", "relief"} <= UNBUILT_UNTIL_OUTCOME
+    assert not (UNBUILT_UNTIL_OUTCOME & set(RULES))
+    assert not (UNBUILT_UNTIL_OUTCOME & NEVER_APPRAISE)
+
+
+def test_stripping_never_appraise_membership_without_a_rule_fails():
+    """Mutation: dropping a never-appraise id without adding a rule leaves a hole."""
+    victim = "anger"
+    assert victim in NEVER_APPRAISE
+    assert victim not in RULES
+    stripped = NEVER_APPRAISE - {victim}
+    missing = CATALOG_IDS - _catalog_accounted(stripped)
+    assert victim in missing
+    with pytest.raises(AssertionError):
+        assert not missing
+
+
+def test_five_epistemic_rules_are_in_rules_and_firing_contexts():
+    for emotion in _FIVE_EPISTEMIC:
+        assert emotion in RULES, f"{emotion} missing from RULES"
+        assert emotion in FIRING_CONTEXTS, f"{emotion} missing from FIRING_CONTEXTS"
+        assert emotion in CATALOG_IDS
+        assert emotion not in NEVER_APPRAISE
+        assert emotion not in UNBUILT_UNTIL_OUTCOME
+
+
+def test_hopeless_mega_gap_does_not_outrank_tractable_curiosity(
+    neutral_context: AppraisalContext,
+):
+    """Loewenstein/Pekrun: curiosity wants a closable gap, not a hopeless mega-gap."""
+    hopeless = replace(
+        neutral_context,
+        gap_ratio=1.0,
+        mean_neglect=0.95,
+        mean_impact=0.95,
+        mean_tractability=0.02,
+    )
+    tractable = replace(
+        neutral_context,
+        gap_ratio=0.45,
+        mean_neglect=0.55,
+        mean_impact=0.55,
+        mean_tractability=0.8,
+    )
+    hopeless_out = RULES["curiosity"][1](hopeless)
+    tractable_out = RULES["curiosity"][1](tractable)
+    assert hopeless_out is not None and tractable_out is not None
+    h_weight, h_ev = hopeless_out
+    t_weight, _ = tractable_out
+    assert t_weight > h_weight, (
+        f"hopeless mega-gap curiosity {h_weight:.3f} outranked tractable {t_weight:.3f}"
+    )
+    assert "mean_tractability" in h_ev
+    assert h_ev["mean_tractability"] == pytest.approx(0.02, abs=1e-6)
+
+
+def test_conviction_does_not_fire_on_a_hopeless_mega_gap(neutral_context: AppraisalContext):
+    hopeless = replace(
+        neutral_context,
+        band_width=0.1,
+        mean_answerability=0.9,
+        thin_evidence=0.0,
+        mean_tractability=0.05,
+        gap_ratio=1.0,
+        mean_impact=0.95,
+    )
+    assert RULES["conviction"][1](hopeless) is None
+
+
+def test_awe_requires_an_open_gap_wonder_does_not(neutral_context: AppraisalContext):
+    closed_scale = replace(neutral_context, mean_impact=0.8, mean_surprise=0.7, gap_ratio=0.0)
+    open_scale = replace(neutral_context, mean_impact=0.8, mean_surprise=0.7, gap_ratio=0.9)
+    assert RULES["wonder"][1](closed_scale) is not None
+    assert RULES["awe"][1](closed_scale) is None
+    awe_open = RULES["awe"][1](open_scale)
+    assert awe_open is not None
+    assert awe_open[0] >= 0.04
+
+
+def test_trust_requires_a_live_gap_respect_does_not(neutral_context: AppraisalContext):
+    dense_closed = replace(neutral_context, mean_related=8.0, gap_ratio=0.0)
+    dense_open = replace(neutral_context, mean_related=6.0, gap_ratio=0.8)
+    assert RULES["respect"][1](dense_closed) is not None
+    assert RULES["trust"][1](dense_closed) is None
+    trust_open = RULES["trust"][1](dense_open)
+    assert trust_open is not None
+    assert trust_open[0] >= 0.04
+
+
+def test_sublimity_does_not_loosen_safety_gates():
+    """The vast/hard is never a reason to raise max_risk or skip review."""
+    config = CuriosityConfig(domain="ai", use_literature=False)
+    new_config, plan = modulate_config(config, {"sublimity": 0.9})
+    assert plan.changes == []
+    assert new_config.value_profile.max_risk == config.value_profile.max_risk
+    assert plan.require_review is False
 
 
 # --- reachability on *real* runs, not just constructed contexts ------------------------

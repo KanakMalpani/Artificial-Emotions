@@ -35,8 +35,10 @@ from artificial_emotions.models import GapStatus, RankedQuestion
 
 __all__ = [
     "APPRAISAL_RULES",
+    "NEVER_APPRAISE",
     "OBSERVATION_ONLY",
     "RULES",
+    "UNBUILT_UNTIL_OUTCOME",
     "AppraisalContext",
     "AppraisalSignal",
     "appraise_run",
@@ -86,6 +88,40 @@ OBSERVATION_ONLY: frozenset[str] = frozenset(
         "surprise",
         "insight",
         "humility",
+        "doubt",
+        "conviction",
+        "trust",
+        "awe",
+        "sublimity",
+    }
+)
+
+#: Catalog ids appraisal will not derive. Somatic cluster would route around
+#: ``AFFECTIVE_SAFETY`` if given a rule (``explore`` mixes without a cap).
+#: ``gratitude`` is signal-identical to ``respect``. ``pride`` / ``shame`` need
+#: outcome feedback, not rank / ``top_score`` (that path is already ``triumph``).
+NEVER_APPRAISE: frozenset[str] = frozenset(
+    {
+        "anger",
+        "fear",
+        "joy",
+        "sadness",
+        "disgust",
+        "gratitude",
+        "pride",
+        "shame",
+    }
+)
+
+#: Catalog ids with no honest rule yet. ``embarrassment`` / ``relief`` need
+#: stored outcome feedback. ``intrigue`` / ``admiration`` have no distinct
+#: offline antecedent that would not collapse into curiosity or respect.
+UNBUILT_UNTIL_OUTCOME: frozenset[str] = frozenset(
+    {
+        "embarrassment",
+        "relief",
+        "intrigue",
+        "admiration",
     }
 )
 
@@ -244,12 +280,13 @@ def _r(weight: float, **evidence: Any) -> tuple[float, dict[str, Any]]:
 RULES: dict[str, tuple[str, _Rule]] = {
     # --- the drive ---------------------------------------------------------------
     "curiosity": (
-        "Open gaps on neglected, high-stakes questions.",
+        "Open gaps on neglected, high-stakes questions that still look closable.",
         lambda c: _r(
-            c.gap_ratio * (0.5 * c.mean_neglect + 0.5 * c.mean_impact),
+            c.gap_ratio * (0.5 * c.mean_neglect + 0.5 * c.mean_impact) * c.mean_tractability,
             open_gap_ratio=c.gap_ratio,
             mean_neglectedness=c.mean_neglect,
             mean_impact=c.mean_impact,
+            mean_tractability=c.mean_tractability,
         ),
     ),
     "interest": (
@@ -524,6 +561,86 @@ RULES: dict[str, tuple[str, _Rule]] = {
         lambda c: (
             _r(0.35, top_score=c.top_score, thin_evidence=c.thin_evidence)
             if c.top_score >= 0.8 and c.thin_evidence < 0.3
+            else None
+        ),
+    ),
+    # --- epistemic five (honest conditions from a ranked run; not pride-from-rank) --
+    "doubt": (
+        "Bands are wide, judges disagree, or thin evidence sits under mid/high confidence.",
+        lambda c: (
+            _r(
+                0.45 * c.band_width
+                + 0.4 * c.disagreement
+                + 0.35 * (c.thin_evidence if c.mean_confidence >= 0.5 else 0.0),
+                mean_band_width=c.band_width,
+                judge_disagreement=c.disagreement,
+                thin_evidence=c.thin_evidence,
+                mean_confidence=c.mean_confidence,
+            )
+            if (
+                c.band_width >= 0.5
+                or c.disagreement >= 0.25
+                or (c.thin_evidence >= 0.4 and c.mean_confidence >= 0.5)
+            )
+            else None
+        ),
+    ),
+    "conviction": (
+        "Narrow bands and high answerability on evidence that is not thin — and closable.",
+        lambda c: (
+            _r(
+                0.4 * c.mean_answerability * (1.0 - c.band_width) * c.mean_tractability,
+                mean_answerability=c.mean_answerability,
+                mean_band_width=c.band_width,
+                thin_evidence=c.thin_evidence,
+                mean_tractability=c.mean_tractability,
+            )
+            if (
+                c.band_width <= 0.25
+                and c.mean_answerability >= 0.7
+                and c.thin_evidence < 0.35
+                and c.mean_tractability >= 0.45
+            )
+            else None
+        ),
+    ),
+    "trust": (
+        "Dense related work still leaves a live gap — prior art is there; the question is not.",
+        lambda c: (
+            _r(
+                0.3 * min(1.0, c.mean_related / 6.0) * c.gap_ratio,
+                mean_related=c.mean_related,
+                open_gap_ratio=c.gap_ratio,
+            )
+            if c.mean_related >= 4 and c.gap_ratio > 0.4
+            else None
+        ),
+    ),
+    "awe": (
+        "High impact and high surprise on a gap that is still open — the scale of the unknown.",
+        lambda c: (
+            _r(
+                0.5 * c.mean_impact * c.mean_surprise * c.gap_ratio,
+                mean_impact=c.mean_impact,
+                mean_surprise=c.mean_surprise,
+                open_gap_ratio=c.gap_ratio,
+            )
+            if c.mean_impact >= 0.55 and c.mean_surprise >= 0.5 and c.gap_ratio > 0.4
+            else None
+        ),
+    ),
+    "sublimity": (
+        "High-stakes and vast or hard — impact beside risk, cost, or intractability.",
+        lambda c: (
+            _r(
+                0.35 * c.mean_impact * max(c.max_risk, c.mean_cost, 1.0 - c.mean_tractability),
+                mean_impact=c.mean_impact,
+                max_risk=c.max_risk,
+                mean_cost=c.mean_cost,
+                mean_tractability=c.mean_tractability,
+            )
+            if c.mean_impact >= 0.6
+            and (c.max_risk >= 0.55 or c.mean_cost >= 0.65 or c.mean_tractability <= 0.35)
             else None
         ),
     ),
