@@ -233,7 +233,8 @@ def _modulating_emotions() -> set[str]:
     Wave 2: the if-ladder is gone; catalog ``effects`` are the contract.
     ``inspect.getsource(modulate_config)`` would miss catalog-driven ids.
     ``drop_dual_use`` / ``forbid_similar_jump`` are plan flags — they count
-    as acting even though explore does not yet drop dual-use items.
+    as acting; explore omits ``dual_use_high`` items when ``drop_dual_use``
+    fires (heuristic residual remains).
     """
     acting: set[str] = set()
     for entry in emotion_catalog()["emotions"]:
@@ -505,8 +506,9 @@ def test_appraisal_never_invents_vocabulary_outside_the_catalog():
 def test_plan_flags_count_as_real_use_with_stance():
     """``drop_dual_use`` / ``forbid_similar_jump`` are plan flags, not a new effect id.
 
-    Explore does not yet drop dual-use items; the flag plus a stance driver is
-    the honest use. Frustration/resignation stop is ``jump_ground``, not ``stop``.
+    Explore omits ``dual_use_high`` items when ``drop_dual_use`` fires;
+    ``forbid_similar_jump`` skips similar-domain hops when opted in.
+    Frustration/resignation stop is ``jump_ground``, not ``stop``.
     """
     by_id = {e["id"]: e for e in emotion_catalog()["emotions"]}
     assert "drop_dual_use" in by_id["disgust"]["effects"]

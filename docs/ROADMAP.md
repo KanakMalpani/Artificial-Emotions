@@ -137,7 +137,7 @@ ValueProfile + Domain/Topic
 
 P1 W1–W9 and P2 W10–W15 are ✅. PyPI is shipped — it is **not** the next wedge and **not** the bar for calling the product v1.0.
 
-When idle: stay on **P0** (honesty loop). Do not start optional explore flags or v1.x calibration unless the user asks.
+When idle: stay on **P0** (honesty loop). Do not start v1.x calibration unless the user asks. **W-explore** is enacted.
 
 ### P0 — Honesty & regression (always eligible)
 
@@ -176,7 +176,7 @@ When idle: stay on **P0** (honesty loop). Do not start optional explore flags or
 | ID | Wedge | Notes |
 |----|-------|-------|
 | **P0** | Honesty loop | Keep LIMITS/PROOFS true; green suite — always eligible |
-| **W-explore** | Optional later `drop_dual_use` / `forbid_similar_jump` in `explore.py` | Enactment only if the user asks; not a default P1 ID |
+| **W-explore** | ✅ Enacted `drop_dual_use` / `forbid_similar_jump` in `explore.py` | Explore may omit `dual_use_high` on disgust; anger opt-in skips similar-domain jumps. Heuristic residual remains — not dual-use solved |
 | **W-cal** | v1.x calibration / preference learning | Longitudinal flywheel; not an install gate |
 
 Do **not** call the product v1.0 until **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP.
@@ -186,7 +186,7 @@ Do **not** call the product v1.0 until **§10**. LIMITS still: heuristic scores,
 1. If tests red → fix tests (P0).  
 2. Else if honesty drift → LIMITS/PROOFS (P0a).  
 3. Else stay on the P0 honesty loop.  
-4. Do not start moonshots, explore-flag enactment, or v1.x calibration unless the user explicitly asks.  
+4. Do not start moonshots or v1.x calibration unless the user explicitly asks. **W-explore** is already enacted — do not re-implement it.  
 5. Do not treat PyPI or a completed §7.4 install box as permission to claim v1.0.
 
 ---

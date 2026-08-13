@@ -60,6 +60,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Composite eval report includes soundness + hivemind sections (`emotions eval report`)
 - Agent card `/v1/agent` includes affective-safety blurb (not biometric ERS; provoke is opt-in framing)
 - Dual-use: weighted heuristic classifier + combo signals + `human_review_risk` flag (W14) — **not** a biosafety oracle; residual evasion risk remains
+- Explore may omit items flagged `dual_use_high` when disgust/`drop_dual_use` fires; the classifier remains heuristic with residual evasion — **not** a biosafety oracle and not dual-use solved
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
 - In-process HTTP rate limit (`CURIOSITY_API_RATE_LIMIT_PER_MINUTE`, default 60/min; `0` disables) — per-process soft guard, not a WAF
@@ -69,7 +70,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS, rate limit
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (965)
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (978)
 - Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy

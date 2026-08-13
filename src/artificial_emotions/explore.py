@@ -37,6 +37,7 @@ from artificial_emotions.emotions import mix_emotions
 from artificial_emotions.models import CuriosityConfig, Domain, RankedQuestion
 from artificial_emotions.modulate import modulate_config
 from artificial_emotions.pipeline import CuriosityEngine
+from artificial_emotions.safety import drop_dual_use_items
 from artificial_emotions.trajectory import Trajectory, TrajectoryStep, question_terms
 
 __all__ = ["MAX_STEPS", "explore"]
@@ -60,14 +61,47 @@ _JUMP_ORDER: dict[str, str] = {
     "general": "ai",
 }
 
+# Jump-with-forbid skips the current domain's cluster. energy sits in both
+# physical and earth, so it is similar to physics, materials, *and* climate.
+_CLUSTERS: tuple[frozenset[str], ...] = (
+    frozenset({"biology", "medicine"}),
+    frozenset({"physics", "materials", "energy"}),
+    frozenset({"climate", "energy"}),
+    frozenset({"ai", "social"}),
+    frozenset({"general"}),
+)
 
-def _next_domain(current: str, visited: list[str]) -> str:
-    """Pick unvisited ground, following the jump order."""
-    candidate = _JUMP_ORDER.get(str(current).lower(), "general")
+
+def _domain_cluster(domain: str) -> frozenset[str]:
+    """Domains similar to ``domain`` (including itself). Unknown → only itself."""
+    key = str(domain).lower()
+    similar: set[str] = {key}
+    for cluster in _CLUSTERS:
+        if key in cluster:
+            similar.update(cluster)
+    return frozenset(similar)
+
+
+def _next_domain(
+    current: str,
+    visited: list[str],
+    forbid_similar: bool = False,
+) -> str:
+    """Pick unvisited ground, following the jump order.
+
+    When ``forbid_similar``, skip candidates in the current domain's cluster.
+    If no dissimilar unvisited domain remains, stay (return current) — do not
+    invent a domain.
+    """
+    current_key = str(current).lower()
+    forbidden = _domain_cluster(current_key) if forbid_similar else frozenset()
+    candidate = _JUMP_ORDER.get(current_key, "general")
     for _ in range(len(_JUMP_ORDER)):
-        if candidate not in visited:
+        if candidate not in visited and candidate not in forbidden:
             return candidate
         candidate = _JUMP_ORDER.get(candidate, "general")
+    if forbid_similar:
+        return current_key
     return candidate
 
 
@@ -79,7 +113,14 @@ def _driver_of(plan_dict: dict[str, Any], knob: str) -> str:
     return "affect"
 
 
-def _step_note(plan_dict: dict[str, Any], primary: str, made_progress: bool) -> str:
+def _step_note(
+    plan_dict: dict[str, Any],
+    primary: str,
+    made_progress: bool,
+    *,
+    dropped_ids: list[str] | None = None,
+    similar_jump_skipped: bool = False,
+) -> str:
     if plan_dict.get("stop"):
         note = str(plan_dict.get("stop_reason", "Stopping."))
     elif plan_dict.get("suggest_domain_jump"):
@@ -93,8 +134,45 @@ def _step_note(plan_dict: dict[str, Any], primary: str, made_progress: bool) -> 
         note = f"Kept going on {primary}."
     because = str(plan_dict.get("because") or "").strip()
     if plan_dict.get("ambivalence_enacted") and because:
-        return f"{note} {because}"
+        note = f"{note} {because}"
+    if dropped_ids:
+        note = f"{note} Dropped dual-use items: {', '.join(dropped_ids)}."
+    if similar_jump_skipped:
+        note = f"{note} Similar-domain jump skipped."
     return note
+
+
+def _resolve_jump(
+    current: str,
+    visited: list[str],
+    *,
+    forbid_similar: bool,
+    mem_scars: list[dict[str, Any]],
+    mem_affinities: list[dict[str, Any]],
+) -> tuple[str, Any | None, bool]:
+    """Next domain, optional scar bias, and whether a similar hop was skipped."""
+    similar_jump_skipped = False
+    jump_bias: Any | None = None
+    if mem_scars or mem_affinities:
+        from artificial_emotions.scars import next_domain_biased
+
+        nxt, jump_bias = next_domain_biased(
+            current,
+            visited,
+            scars=mem_scars,
+            affinities=mem_affinities,
+        )
+        if forbid_similar and nxt != current and nxt in _domain_cluster(current):
+            similar_jump_skipped = True
+            nxt = _next_domain(current, visited, forbid_similar=True)
+            jump_bias = None
+    else:
+        nxt = _next_domain(current, visited, forbid_similar=forbid_similar)
+        if forbid_similar:
+            unconstrained = _next_domain(current, visited, forbid_similar=False)
+            if unconstrained != nxt:
+                similar_jump_skipped = True
+    return nxt, jump_bias, similar_jump_skipped
 
 
 def _step_previous_features(
@@ -194,6 +272,8 @@ def explore(
     stop_reason = "Completed the requested number of steps."
     all_cost_effects: list[CostEffect] = []
     accumulated_frustration = 0.0
+    dropped_dual_use_ids: list[str] = []
+    require_review = False
 
     # A5: optional temperament (None = no-op for determinism).
     active_temperament = resolve_temperament(temperament, path=temperament_path)
@@ -336,6 +416,42 @@ def explore(
             plan.stop_reason = cost_plan.early_stop_reason
 
         plan_dict = plan.to_dict()
+        if plan.require_review:
+            require_review = True
+
+        dropped_ids: list[str] = []
+        if plan.drop_dual_use:
+            kept, dropped = drop_dual_use_items(items)
+            for item in dropped:
+                qid = str(getattr(getattr(item, "question", None), "id", "") or "")
+                if not qid:
+                    continue
+                dropped_ids.append(qid)
+                if qid not in dropped_dual_use_ids:
+                    dropped_dual_use_ids.append(qid)
+            items = kept  # empty is allowed; do not invent replacements
+
+        current_domain = str(config.domain)
+        will_jump = (
+            plan.suggest_domain_jump
+            and allow_domain_jump
+            and not cost_plan.suppress_domain_jump
+            and not plan.stop
+        )
+        jump_to: str | None = None
+        similar_jump_skipped = False
+        pending_jump_bias: Any | None = None
+        if will_jump:
+            visited_for_jump = list(trail.domains_visited)
+            if current_domain not in visited_for_jump:
+                visited_for_jump.append(current_domain)
+            jump_to, pending_jump_bias, similar_jump_skipped = _resolve_jump(
+                current_domain,
+                visited_for_jump,
+                forbid_similar=bool(plan.forbid_similar_jump),
+                mem_scars=mem_scars,
+                mem_affinities=mem_affinities,
+            )
 
         # Attention after distraction / avoidance — may be worse than the corpus top.
         focus = pick_focus_item(items, cost_plan)
@@ -347,7 +463,13 @@ def explore(
                 best_effective = effective
 
         made_progress = bool(new_ids)
-        note = _step_note(plan_dict, mix["primary"], made_progress)
+        note = _step_note(
+            plan_dict,
+            mix["primary"],
+            made_progress,
+            dropped_ids=dropped_ids,
+            similar_jump_skipped=similar_jump_skipped,
+        )
         if cost_dicts:
             note = f"{note} Cost: {cost_dicts[0]['disclosure']}"
 
@@ -388,21 +510,10 @@ def explore(
             break
 
         config = new_config
-        if plan.suggest_domain_jump and allow_domain_jump and not cost_plan.suppress_domain_jump:
-            if mem_scars or mem_affinities:
-                from artificial_emotions.scars import next_domain_biased
-
-                nxt, jump_bias = next_domain_biased(
-                    str(config.domain),
-                    trail.domains_visited,
-                    scars=mem_scars,
-                    affinities=mem_affinities,
-                )
-                if jump_bias is not None:
-                    scar_applications.append(jump_bias)
-            else:
-                nxt = _next_domain(str(config.domain), trail.domains_visited)
-            config = config.model_copy(update={"domain": nxt})
+        if jump_to is not None:
+            if pending_jump_bias is not None:
+                scar_applications.append(pending_jump_bias)
+            config = config.model_copy(update={"domain": jump_to})
 
     plan_out = decompose_ranked(best, depth=decompose_depth) if best is not None else None
 
@@ -442,6 +553,7 @@ def explore(
         "investigation_plan": plan_out,
         "weights_modulated": allow_weight_deltas,
         "somatic_modulate": bool(somatic_modulate),
+        "require_review": require_review,
         "honesty": "affect_driven_search",
         "claims_not": [
             "an answer to any question it surfaced",
@@ -453,6 +565,8 @@ def explore(
         ],
         "docs": "docs/EMOTIONS.md",
     }
+    if dropped_dual_use_ids:
+        result["dropped_dual_use_ids"] = list(dropped_dual_use_ids)
 
     if any("ambivalence_enacted" in (step.claims or []) for step in trail.steps):
         claims = list(result.get("claims_not") or [])

@@ -15,7 +15,7 @@ Pipeline + OpenAlex/S2 gap gate + multi-axis scores + MCP/HTTP/CLI/web + offline
 ## Top next wedges (pick first unfinished)
 
 1. **P0 honesty loop** — keep LIMITS/PROOFS true; green suite (roadmap §2 W-P0a / W-P0b)  
-2. Optional later: enact `drop_dual_use` / `forbid_similar_jump` in explore (not default; user must ask)  
+2. ✅ **W-explore** — `drop_dual_use` / `forbid_similar_jump` enacted in explore (omit `dual_use_high` on disgust; similar-jump skip on anger `--somatic-modulate`). Heuristic residual remains; not dual-use solved.  
 3. v1.x calibration / preference learning (longitudinal; not an install gate)  
 
 P1 W1–W9 and P2 W10–W15 are ✅, including PyPI (`artificial-emotions` **0.4.1**). Do **not** call v1.0 until roadmap **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP. Full queue: roadmap **§2**.

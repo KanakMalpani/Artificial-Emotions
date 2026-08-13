@@ -7,6 +7,9 @@ a condition. This is on `main` at package **0.4.1** — there is **no 0.4.2 tag*
 yet, and this block is not a version bump.
 
 ### Changed
+- **Explore honors `drop_dual_use` / `forbid_similar_jump`.** Disgust may omit
+  `dual_use_high` items; anger `--somatic-modulate` skips similar-domain jumps.
+  Classifier remains heuristic — not dual-use solved (LIMITS).
 - **The catalog is the contract.** All **54** emotion rows carry a non-empty
   `when` (or `requires: outcome_event` plus a firing fixture) and a use. Coverage
   floor is `MIN_CATALOG_SHARE = 1.0`.

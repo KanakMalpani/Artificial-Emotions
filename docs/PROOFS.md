@@ -147,6 +147,8 @@ emotions preferences suggest-pair --candidates a,b,c --path prefs.jsonl --json
 ```bash
 pytest tests/test_mid_horizon.py::test_w14_dual_use_beyond_keywords -q
 # Weighted patterns + combos + human_review_risk; LIMITS still lists residual evasion risk
+pytest tests/test_explore_enacted_flags.py -q
+# W-explore: explore may omit dual_use_high when drop_dual_use fires; still not a biosafety oracle
 ```
 
 ## Multi-judge disagreement (W15)

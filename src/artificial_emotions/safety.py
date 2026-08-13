@@ -8,7 +8,18 @@ for high-confidence dual-use signals.
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import Any, TypeVar
+
+__all__ = [
+    "DualUseAssessment",
+    "assess_dual_use",
+    "drop_dual_use_items",
+    "is_dual_use_drop",
+]
+
+_T = TypeVar("_T")
 
 
 @dataclass(frozen=True)
@@ -127,3 +138,20 @@ def assess_dual_use(
         hard_reject_likely=hard,
         method="weighted_heuristic_v1",
     )
+
+
+def is_dual_use_drop(item: Any) -> bool:
+    """True only when ``dual_use_high`` is on the item. Mere review risk is kept."""
+    return "dual_use_high" in (item.flags or [])
+
+
+def drop_dual_use_items(items: Sequence[_T]) -> tuple[list[_T], list[_T]]:
+    """Split items into (kept, dropped). Does not invent replacements or re-score."""
+    kept: list[_T] = []
+    dropped: list[_T] = []
+    for item in items:
+        if is_dual_use_drop(item):
+            dropped.append(item)
+        else:
+            kept.append(item)
+    return kept, dropped
