@@ -81,15 +81,20 @@ def _driver_of(plan_dict: dict[str, Any], knob: str) -> str:
 
 def _step_note(plan_dict: dict[str, Any], primary: str, made_progress: bool) -> str:
     if plan_dict.get("stop"):
-        return plan_dict.get("stop_reason", "Stopping.")
-    if plan_dict.get("suggest_domain_jump"):
-        return f"{_driver_of(plan_dict, 'domain').capitalize()} pushed a change of ground."
-    if plan_dict.get("force_decompose"):
+        note = str(plan_dict.get("stop_reason", "Stopping."))
+    elif plan_dict.get("suggest_domain_jump"):
+        note = f"{_driver_of(plan_dict, 'domain').capitalize()} pushed a change of ground."
+    elif plan_dict.get("force_decompose"):
         driver = _driver_of(plan_dict, "force_decompose")
-        return f"{driver.capitalize()} called for the ladder rather than more breadth."
-    if not made_progress:
-        return "Nothing new surfaced this step."
-    return f"Kept going on {primary}."
+        note = f"{driver.capitalize()} called for the ladder rather than more breadth."
+    elif not made_progress:
+        note = "Nothing new surfaced this step."
+    else:
+        note = f"Kept going on {primary}."
+    because = str(plan_dict.get("because") or "").strip()
+    if plan_dict.get("ambivalence_enacted") and because:
+        return f"{note} {because}"
+    return note
 
 
 def explore(
@@ -253,6 +258,7 @@ def explore(
             signal_weights,
             allow_weight_deltas=allow_weight_deltas,
             exhausted=trail.is_exhausted(),
+            ambivalence=mix.get("ambivalence"),
         )
 
         # A3: costs — affect downside. Never loosens safety gates (enforced in costs).
@@ -320,6 +326,8 @@ def explore(
                 ambivalence=float(mix["ambivalence"]["score"]),
                 made_progress=made_progress,
                 note=note,
+                claims=list(plan.claims) if plan.ambivalence_enacted else [],
+                because=plan.because if plan.ambivalence_enacted else "",
             )
         )
 
@@ -388,6 +396,13 @@ def explore(
         ],
         "docs": "docs/EMOTIONS.md",
     }
+
+    if any("ambivalence_enacted" in (step.claims or []) for step in trail.steps):
+        claims = list(result.get("claims_not") or [])
+        token = "a motive for holding opposing catalog entries"
+        if token not in claims:
+            claims.append(token)
+        result["claims_not"] = claims
 
     # A3: every cost disclosed — root summary + optional closing monologue.
     if all_cost_effects:

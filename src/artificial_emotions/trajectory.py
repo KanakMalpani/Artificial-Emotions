@@ -64,6 +64,8 @@ class TrajectoryStep:
     ambivalence: float = 0.0
     made_progress: bool = True
     note: str = ""
+    claims: list[str] = field(default_factory=list)
+    because: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -82,6 +84,8 @@ class TrajectoryStep:
             "costs": list(self.costs),
             "made_progress": self.made_progress,
             "note": self.note,
+            "claims": list(self.claims),
+            "because": self.because,
         }
 
 

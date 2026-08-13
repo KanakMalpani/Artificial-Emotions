@@ -27,6 +27,7 @@ from typing import Any
 from artificial_emotions.models import CuriosityConfig
 
 __all__ = [
+    "AMBIVALENCE_ENACT_THRESHOLD",
     "MAX_WEIGHT_DELTA",
     "ModulationChange",
     "ModulationPlan",
@@ -37,6 +38,19 @@ __all__ = [
 MAX_WEIGHT_DELTA = 0.08
 
 _STRENGTH_FLOOR = 0.15  # below this an emotion is present but not driving
+
+#: ``detect_ambivalence`` score at which exclusive expansions must not both apply.
+AMBIVALENCE_ENACT_THRESHOLD = 0.35
+
+#: Honesty tokens on an enacted payload — a pattern in the mix, not a motive.
+_AMBIVALENCE_CLAIMS = ("ambivalence_enacted", "pattern_not_motive")
+
+#: Knobs that disagree when both sides of a named opposite pair fire.
+#: Applying both in one step treats disagreement as agreement.
+_EXCLUSIVE_KNOBS: dict[str, frozenset[str]] = {
+    "curiosity": frozenset({"n_candidates", "value_profile.weight_surprise"}),
+    "boredom": frozenset({"diversity_threshold", "domain", "value_profile.weight_neglectedness"}),
+}
 
 
 @dataclass(frozen=True)
@@ -78,9 +92,23 @@ class ModulationPlan:
     force_soundness: bool = False
     stop: bool = False
     stop_reason: str = ""
+    ambivalence_enacted: bool = False
+    skipped_exclusive: list[str] = field(default_factory=list)
+    because: str = ""
+    claims: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        honesty = (
+            "Affect modulates search behaviour. ValueProfile weights are "
+            "untouched unless allow_weight_deltas was set, and any delta is "
+            f"capped at ±{MAX_WEIGHT_DELTA} and listed above."
+        )
+        if self.ambivalence_enacted:
+            honesty += (
+                " Ambivalence is enacted as a pattern, not a motive "
+                "(ambivalence_enacted, pattern_not_motive)."
+            )
+        out: dict[str, Any] = {
             "changes": [c.to_dict() for c in self.changes],
             "n_changes": len(self.changes),
             "weights_touched": self.weights_touched,
@@ -91,16 +119,89 @@ class ModulationPlan:
             "force_soundness": self.force_soundness,
             "stop": self.stop,
             "stop_reason": self.stop_reason,
-            "honesty": (
-                "Affect modulates search behaviour. ValueProfile weights are "
-                "untouched unless allow_weight_deltas was set, and any delta is "
-                f"capped at ±{MAX_WEIGHT_DELTA} and listed above."
-            ),
+            "honesty": honesty,
         }
+        if self.ambivalence_enacted:
+            out["ambivalence_enacted"] = True
+            out["pattern_not_motive"] = True
+            out["claims"] = list(self.claims)
+            out["because"] = self.because
+            out["skipped_exclusive"] = list(self.skipped_exclusive)
+        return out
 
 
 def _strength(weights: dict[str, float], emotion: str) -> float:
     return float(weights.get(emotion, 0.0))
+
+
+def _ambivalence_skips(
+    mix_weights: dict[str, float],
+    ambivalence: dict[str, Any] | None,
+) -> tuple[frozenset[str], dict[str, Any] | None]:
+    """Knobs to withhold when a named opposite pair is above the enact threshold.
+
+    Returns ``(skip, record)``. ``record`` is None when exclusive expansions may
+    both apply (no named pair, score too low, or the pair has no exclusive knobs).
+    """
+    if not ambivalence:
+        return frozenset(), None
+    score = float(ambivalence.get("score") or 0.0)
+    if score < AMBIVALENCE_ENACT_THRESHOLD:
+        return frozenset(), None
+    pairs = list(ambivalence.get("pairs") or [])
+    if not pairs:
+        return frozenset(), None
+    comps = [str(c).lower() for c in (pairs[0].get("components") or [])]
+    if len(comps) != 2:
+        return frozenset(), None
+    left, right = comps
+    exclusive_left = _EXCLUSIVE_KNOBS.get(left, frozenset())
+    exclusive_right = _EXCLUSIVE_KNOBS.get(right, frozenset())
+    if not exclusive_left and not exclusive_right:
+        return frozenset(), None
+    wa = float(mix_weights.get(left, 0.0))
+    wb = float(mix_weights.get(right, 0.0))
+    if wa <= 0.0 or wb <= 0.0:
+        return frozenset(), None
+
+    if wa > wb:
+        louder = left
+    elif wb > wa:
+        louder = right
+    else:
+        louder = left
+
+    skip: set[str] = set(_EXCLUSIVE_KNOBS.get(louder, ()))
+    # Freeze search width whenever either side would move it — never widen and
+    # shrink as if the pair agreed.
+    if "n_candidates" in exclusive_left or "n_candidates" in exclusive_right:
+        skip.add("n_candidates")
+    if wa == wb:
+        skip.update(_EXCLUSIVE_KNOBS.get(right if louder == left else left, ()))
+
+    parts = [
+        f"Named opposite pair {left} vs {right} at tension {score:.2f}.",
+        (
+            "Exclusive expansions disagree — skipped louder-side "
+            f"({louder}) exclusive move(s) rather than applying both."
+        ),
+    ]
+    if "n_candidates" in skip:
+        parts.append("n_candidates frozen this step.")
+    parts.append(
+        "Discriminating observation: whether this step's returns are still "
+        "novel open gaps or repeats of already-mined ground."
+    )
+    because = " ".join(parts)
+    record = {
+        "pair": [left, right],
+        "score": score,
+        "louder": louder,
+        "skipped": sorted(skip),
+        "because": because,
+        "claims": list(_AMBIVALENCE_CLAIMS),
+    }
+    return frozenset(skip), record
 
 
 def modulate_config(
@@ -109,6 +210,7 @@ def modulate_config(
     *,
     allow_weight_deltas: bool = False,
     exhausted: bool = False,
+    ambivalence: dict[str, Any] | None = None,
 ) -> tuple[CuriosityConfig, ModulationPlan]:
     """Return a new config shaped by the current affect, plus the audit trail.
 
@@ -117,6 +219,9 @@ def modulate_config(
         mix_weights: normalized emotion weights from the appraised mix.
         allow_weight_deltas: permit bounded ValueProfile nudges (default off).
         exhausted: the trajectory has stopped surfacing anything new.
+        ambivalence: ``detect_ambivalence`` payload from the mix. When its
+            score is ≥ ``AMBIVALENCE_ENACT_THRESHOLD`` on a named pair with
+            exclusive knobs, those knobs are not applied as if they agreed.
 
     Returns:
         ``(new_config, plan)``. The input config is never mutated.
@@ -124,6 +229,23 @@ def modulate_config(
     plan = ModulationPlan()
     updates: dict[str, Any] = {}
     profile = config.value_profile
+    skip, enacted = _ambivalence_skips(mix_weights, ambivalence)
+    if enacted is not None:
+        plan.ambivalence_enacted = True
+        plan.skipped_exclusive = list(enacted["skipped"])
+        plan.because = str(enacted["because"])
+        plan.claims = list(enacted["claims"])
+        plan.changes.append(
+            ModulationChange(
+                "ambivalence_exclusive",
+                "apply_both",
+                "skip_louder",
+                "ambivalence",
+                float(enacted["score"]),
+                plan.because,
+                bounded_by="ambivalence_enacted",
+            )
+        )
 
     curiosity = _strength(mix_weights, "curiosity")
     confusion = _strength(mix_weights, "confusion") + _strength(mix_weights, "perplexity")
@@ -152,7 +274,7 @@ def modulate_config(
         )
 
     # --- curiosity widens the net ---------------------------------------------
-    if curiosity >= _STRENGTH_FLOOR:
+    if curiosity >= _STRENGTH_FLOOR and "n_candidates" not in skip:
         before = config.n_candidates
         after = min(64, int(round(before * (1.0 + 0.5 * curiosity))))
         if after != before:
@@ -200,22 +322,23 @@ def modulate_config(
 
     # --- boredom pushes off the mined vein ------------------------------------
     if boredom >= _STRENGTH_FLOOR:
-        before = config.diversity_threshold
-        after = round(max(0.5, before - 0.15 * boredom), 4)
-        if after != before:
-            updates["diversity_threshold"] = after
-            plan.changes.append(
-                ModulationChange(
-                    "diversity_threshold",
-                    before,
-                    after,
-                    "boredom",
-                    boredom,
-                    "Ground already covered — suppress near-duplicates harder.",
-                    bounded_by="diversity_threshold >= 0.5",
+        if "diversity_threshold" not in skip:
+            before = config.diversity_threshold
+            after = round(max(0.5, before - 0.15 * boredom), 4)
+            if after != before:
+                updates["diversity_threshold"] = after
+                plan.changes.append(
+                    ModulationChange(
+                        "diversity_threshold",
+                        before,
+                        after,
+                        "boredom",
+                        boredom,
+                        "Ground already covered — suppress near-duplicates harder.",
+                        bounded_by="diversity_threshold >= 0.5",
+                    )
                 )
-            )
-        if boredom >= 0.3 or exhausted:
+        if "domain" not in skip and (boredom >= 0.3 or exhausted):
             plan.suggest_domain_jump = True
             plan.changes.append(
                 ModulationChange(
@@ -416,11 +539,11 @@ def modulate_config(
     # --- opt-in, bounded weight nudges ----------------------------------------
     if allow_weight_deltas:
         deltas: dict[str, float] = {}
-        if curiosity >= _STRENGTH_FLOOR:
+        if curiosity >= _STRENGTH_FLOOR and "value_profile.weight_surprise" not in skip:
             deltas["weight_surprise"] = min(MAX_WEIGHT_DELTA, 0.1 * curiosity)
         if confusion >= _STRENGTH_FLOOR:
             deltas["weight_tractability"] = min(MAX_WEIGHT_DELTA, 0.1 * confusion)
-        if boredom >= _STRENGTH_FLOOR:
+        if boredom >= _STRENGTH_FLOOR and "value_profile.weight_neglectedness" not in skip:
             deltas["weight_neglectedness"] = min(MAX_WEIGHT_DELTA, 0.1 * boredom)
         if deltas:
             fields: dict[str, Any] = {}
