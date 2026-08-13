@@ -202,11 +202,20 @@
         "curiosity_target",
         "information_gap"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "gap_ratio", "op": "ge", "value": 0.25},
+        {"feature": "gap_ratio", "op": "le", "value": 0.55},
+        {"feature": "mean_surprise", "op": "ge", "value": 0.12},
+        {"feature": "mean_surprise", "op": "lt", "value": 0.28}
+      ],
+      "effects": [
+        "widen_search"
+      ],
+      "use_for": "Widen search slightly when a mid-open gap carries moderate surprise — weaker than curiosity, and below the surprise rule's bar.",
+      "coercion": "low",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "uncertainty",
@@ -248,11 +257,19 @@
         "Celebrate a resolved check without claiming the system 'is happy'."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "gap_ratio", "op": "gt", "value": 0.6},
+        {"feature": "mean_tractability", "op": "ge", "value": 0.7},
+        {"feature": "mean_cost", "op": "le", "value": 0.35}
+      ],
+      "effects": [
+        "stay_course"
+      ],
+      "use_for": "Stay the course when the field is open, tractable, and cheap — stricter than enjoyment; search knobs stay opt-in.",
+      "coercion": "high",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "sadness",
@@ -269,11 +286,18 @@
         "If used, pair with concrete support / next facts — not guilt."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "answered_ratio", "op": "ge", "value": 0.5},
+        {"feature": "gap_ratio", "op": "le", "value": 0.4}
+      ],
+      "effects": [
+        "narrow_search"
+      ],
+      "use_for": "Narrow search when a high answered_ratio shows a dying line — more than disappointment's any-answered cue; search knobs stay opt-in.",
+      "coercion": "high",
+      "requires": [
+        "offline"
+      ]
     },
     {
       "id": "anger",
@@ -290,11 +314,19 @@
         "Prefer naming a blocked goal or safety concern over outrage rhetoric."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "previous.top_id", "op": "ne", "value": ""},
+        {"feature": "top_repeated", "op": "eq", "value": false},
+        {"feature": "steps_without_progress", "op": "ge", "value": 1}
+      ],
+      "effects": [
+        "forbid_similar_jump"
+      ],
+      "use_for": "Forbid a similar jump when progress is blocked and the previous top was abandoned — not frustration's repeated dead-end; search knobs stay opt-in.",
+      "coercion": "high",
+      "requires": [
+        "previous_step"
+      ]
     },
     {
       "id": "fear",
@@ -311,11 +343,18 @@
         "State concrete risks and mitigations without panic copy."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "max_risk", "op": "ge", "value": 0.65},
+        {"feature": "mean_tractability", "op": "le", "value": 0.35}
+      ],
+      "effects": [
+        "tighten_safety"
+      ],
+      "use_for": "Tighten safety when max risk is high and tractability is low — not anxiety's dual-use-or-risk cue. Never raises the risk ceiling.",
+      "coercion": "high",
+      "requires": [
+        "risk_flags"
+      ]
     },
     {
       "id": "disgust",
@@ -332,11 +371,18 @@
         "Prefer precise critique of methods over disgust metaphors."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "dual_use_ratio", "op": "gt", "value": 0}
+      ],
+      "effects": [
+        "tighten_safety",
+        "drop_dual_use"
+      ],
+      "use_for": "Tighten safety and drop dual-use candidates when dual-use flags are present — contamination, not anxiety's max-risk path. Never loosens safety.",
+      "coercion": "high",
+      "requires": [
+        "risk_flags"
+      ]
     },
     {
       "id": "anticipation",
@@ -397,11 +443,18 @@
         "Acknowledge a clean falsifier pass or solid operationalization."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "outcome.result", "op": "eq", "value": ["partial_progress", "answered"]},
+        {"feature": "outcome.question_id", "op": "ne", "value": ""}
+      ],
+      "effects": [
+        "stay_course"
+      ],
+      "use_for": "Stay the course after a logged partial_progress or answered outcome on a named question — silent without that event; not triumph-from-rank.",
+      "coercion": "low",
+      "requires": [
+        "outcome_event"
+      ]
     },
     {
       "id": "shame",
@@ -418,11 +471,20 @@
         "Prefer error-correction framing over shaming."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "outcome.result", "op": "eq", "value": ["contradicted", "already_answered"]},
+        {"feature": "mean_confidence", "op": "ge", "value": 0.6},
+        {"feature": "outcome.question_id", "op": "ne", "value": ""}
+      ],
+      "effects": [
+        "demand_literature",
+        "decompose"
+      ],
+      "use_for": "Demand literature and decompose after a logged contradicted or already_answered outcome following high confidence — silent without that event.",
+      "coercion": "low",
+      "requires": [
+        "outcome_event"
+      ]
     },
     {
       "id": "gratitude",
@@ -439,11 +501,19 @@
         "Credit prior literature and collaborators explicitly."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "mean_related", "op": "ge", "value": 1},
+        {"feature": "mean_related", "op": "lt", "value": 5},
+        {"feature": "top_ops_len", "op": "ge", "value": 40}
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface credit when the operationalization depends on related methods — enabling work, not respect's volume of prior art.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "admiration",
@@ -460,11 +530,19 @@
         "Point to a concrete method worth emulating."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "mean_citations", "op": "ge", "value": 25},
+        {"feature": "mean_citations", "op": "lt", "value": 100},
+        {"feature": "gap_ratio", "op": "gt", "value": 0.3}
+      ],
+      "effects": [
+        "surface_only"
+      ],
+      "use_for": "Surface credit for high-quality prior work while the gap remains open — quality, not respect's volume or envy's occupation.",
+      "coercion": "low",
+      "requires": [
+        "literature"
+      ]
     },
     {
       "id": "hope",
@@ -504,11 +582,19 @@
         "Mark when a gap is likely_answered with evidence."
       ],
       "cue_tags": [],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "previous.max_risk", "op": "ge", "value": 0.5},
+        {"feature": "max_risk", "op": "lt", "value": 0.4}
+      ],
+      "effects": [
+        "stay_course",
+        "surface_only"
+      ],
+      "use_for": "Surface when previous max risk was high and this step's risk dropped; stay_course only if search knobs are opted in.",
+      "coercion": "low",
+      "requires": [
+        "previous_step"
+      ]
     },
     {
       "id": "frustration",
@@ -1259,11 +1345,18 @@
       "cue_tags": [
         "overclaim_risk"
       ],
-      "when": [],
-      "effects": [],
-      "use_for": "",
-      "coercion": "",
-      "requires": []
+      "when": [
+        {"feature": "previous.hubris", "op": "gt", "value": 0},
+        {"feature": "ungrounded_ratio", "op": "gt", "value": 0}
+      ],
+      "effects": [
+        "demand_literature"
+      ],
+      "use_for": "Demand literature when the previous step's hubris meets an ungrounded contradiction this step — same-session correction, not a logged shame outcome.",
+      "coercion": "low",
+      "requires": [
+        "previous_step"
+      ]
     },
     {
       "id": "respect",

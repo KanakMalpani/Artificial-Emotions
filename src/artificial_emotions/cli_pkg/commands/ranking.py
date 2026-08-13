@@ -123,6 +123,7 @@ def _explore(args: argparse.Namespace) -> int:
         allow_weight_deltas=args.affect_weights,
         allow_domain_jump=not args.no_jump,
         persist_memory=persist,
+        preference_log_path=getattr(args, "preference_log", None),
     )
     if args.json:
         print(json.dumps(payload, indent=2))

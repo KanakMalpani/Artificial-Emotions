@@ -49,6 +49,7 @@ __all__ = [
     "AppraisalSignal",
     "appraise_run",
     "build_context",
+    "context_feature",
     "signals_to_weights",
     "validate_catalog_entry",
     "validate_emotion_catalog",
@@ -211,9 +212,14 @@ class AppraisalContext:
     ``term_saturation``, ``steps_without_progress``, ``rejected_ratio``,
     ``top_repeated``.
 
-    Reserved dotted names for Wave 1 (not fields on this dataclass yet):
-    ``previous.max_risk``, ``previous.hubris``, ``previous.top_id``,
-    ``outcome.result``, ``outcome.question_id``.
+    Wave 1 previous/outcome fields (dotted catalog names in parentheses):
+    ``previous_max_risk`` (``previous.max_risk``),
+    ``previous_hubris`` (``previous.hubris``),
+    ``previous_top_id`` (``previous.top_id``),
+    ``outcome_result`` (``outcome.result``),
+    ``outcome_question_id`` (``outcome.question_id``).
+    Empty ``outcome_result`` / ``outcome_question_id`` means unset — do not
+    treat them as a fabricated outcome. Read via :func:`context_feature`.
     """
 
     n: int
@@ -247,25 +253,51 @@ class AppraisalContext:
     steps_without_progress: int
     rejected_ratio: float
     top_repeated: bool
+    previous_max_risk: float = 0.0
+    previous_hubris: float = 0.0
+    previous_top_id: str = ""
+    outcome_result: str = ""
+    outcome_question_id: str = ""
+
+
+#: Dotted catalog ``when`` names → :class:`AppraisalContext` fields.
+_DOTTED_FEATURE_FIELDS: dict[str, str] = {
+    "previous.max_risk": "previous_max_risk",
+    "previous.hubris": "previous_hubris",
+    "previous.top_id": "previous_top_id",
+    "outcome.result": "outcome_result",
+    "outcome.question_id": "outcome_question_id",
+}
 
 
 #: Feature names catalog ``when`` clauses may address.
 #:
-#: Current :class:`AppraisalContext` fields plus Wave 1 dotted paths
-#: (``previous.max_risk``, ``previous.hubris``, ``previous.top_id``,
-#: ``outcome.result``, ``outcome.question_id``). Interpreter consumes those
-#: paths if present; Twelve owns wiring them. Do not invent extra names here
-#: without adding the matching context field.
+#: :class:`AppraisalContext` fields plus dotted aliases for previous/outcome.
+#: Interpreter reads these via :func:`context_feature`. Do not invent extra
+#: names here without adding the matching context field.
 CATALOG_WHEN_FEATURES: frozenset[str] = frozenset(
-    {f.name for f in fields(AppraisalContext)}
-    | {
-        "previous.max_risk",
-        "previous.hubris",
-        "previous.top_id",
-        "outcome.result",
-        "outcome.question_id",
-    }
+    {f.name for f in fields(AppraisalContext)} | set(_DOTTED_FEATURE_FIELDS)
 )
+
+
+def context_feature(ctx: AppraisalContext, name: str) -> Any:
+    """Read a catalog ``when`` feature, including dotted previous/outcome paths.
+
+    ``outcome.result`` is stripped and lowercased. Empty strings mean unset,
+    not a fabricated outcome. This is a getter only — Interpreter owns
+    ``evaluate_when`` / ``appraise_run`` dispatch.
+
+    ``eq`` / ``ne`` against a list ``value`` is membership (pride/shame
+    result sets). Interpreter should honour that when evaluating ``when``.
+    """
+    field_name = _DOTTED_FEATURE_FIELDS.get(name, name)
+    value = getattr(ctx, field_name)
+    if field_name == "outcome_result":
+        return str(value or "").strip().lower()
+    if field_name in {"outcome_question_id", "previous_top_id"}:
+        return str(value or "").strip()
+    return value
+
 
 _WHEN_CLAUSE_KEYS: tuple[str, ...] = ("feature", "op", "value")
 
@@ -370,6 +402,10 @@ def build_context(
     steps_without_progress: int = 0,
     rejected_count: int = 0,
     previous_top_id: str | None = None,
+    previous_max_risk: float = 0.0,
+    previous_hubris: float = 0.0,
+    outcome_result: str = "",
+    outcome_question_id: str = "",
 ) -> AppraisalContext:
     """Reduce a run to the numbers the rules reason over."""
     seen = seen_question_ids or set()
@@ -433,6 +469,11 @@ def build_context(
         steps_without_progress=int(steps_without_progress),
         rejected_ratio=(rejected_count / n if n else 0.0),
         top_repeated=bool(previous_top_id and previous_top_id == top.question.id),
+        previous_max_risk=float(previous_max_risk or 0.0),
+        previous_hubris=float(previous_hubris or 0.0),
+        previous_top_id=str(previous_top_id or ""),
+        outcome_result=str(outcome_result or "").strip().lower(),
+        outcome_question_id=str(outcome_question_id or "").strip(),
     )
 
 
@@ -870,6 +911,10 @@ def appraise_run(
     steps_without_progress: int = 0,
     rejected_count: int = 0,
     previous_top_id: str | None = None,
+    previous_max_risk: float = 0.0,
+    previous_hubris: float = 0.0,
+    outcome_result: str = "",
+    outcome_question_id: str = "",
     mood_bias: Any | None = None,
     temperament: Any | None = None,
 ) -> list[AppraisalSignal]:
@@ -902,6 +947,10 @@ def appraise_run(
         steps_without_progress=steps_without_progress,
         rejected_count=rejected_count,
         previous_top_id=previous_top_id,
+        previous_max_risk=previous_max_risk,
+        previous_hubris=previous_hubris,
+        outcome_result=outcome_result,
+        outcome_question_id=outcome_question_id,
     )
 
     bias_active = bool(mood_bias is not None and getattr(mood_bias, "is_active", False))

@@ -32,6 +32,7 @@ __all__ = [
     "fit_bt_offline",
     "learn_profile_weight_hints",
     "load_preference_events",
+    "outcome_for_appraisal",
     "preference_score_adjustments",
     "read_preference_events",
     "suggest_next_pair",
@@ -112,6 +113,39 @@ def read_preference_events(path: str | Path) -> Iterator[PreferenceEvent]:
 
 def load_preference_events(path: str | Path) -> list[PreferenceEvent]:
     return list(read_preference_events(path))
+
+
+def outcome_for_appraisal(
+    path: str | Path | None,
+    *,
+    question_ids: Iterable[str] | None = None,
+) -> tuple[str, str]:
+    """Latest matching outcome event as ``(result, question_id)``.
+
+    Returns ``("", "")`` when ``path`` is missing, empty, or has no ``outcome``
+    event with a question id. Does not invent results. When ``question_ids`` is
+    given, only events whose ``question_id`` is in that set match — pride/shame
+    stay silent without a matching logged outcome.
+    """
+    if not path:
+        return "", ""
+    allowed: set[str] | None = None
+    if question_ids is not None:
+        allowed = {str(q).strip() for q in question_ids if str(q).strip()}
+    latest: PreferenceEvent | None = None
+    for ev in load_preference_events(path):
+        if (ev.event_type or "").lower() != "outcome":
+            continue
+        qid = (ev.question_id or "").strip()
+        if not qid:
+            continue
+        if allowed is not None and qid not in allowed:
+            continue
+        latest = ev
+    if latest is None:
+        return "", ""
+    result = str((latest.labels or {}).get("result") or "").strip().lower()
+    return result, (latest.question_id or "").strip()
 
 
 def events_from_ranked(

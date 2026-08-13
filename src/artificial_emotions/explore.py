@@ -97,6 +97,21 @@ def _step_note(plan_dict: dict[str, Any], primary: str, made_progress: bool) -> 
     return note
 
 
+def _step_previous_features(
+    items: list[RankedQuestion],
+    signals: list[Any],
+    top_id: str | None,
+) -> tuple[float, float, str]:
+    """Carry max_risk / hubris / top_id into the next step's appraisal context."""
+    max_risk = max((float(i.scores.risk) for i in items), default=0.0) if items else 0.0
+    hubris = 0.0
+    for sig in signals:
+        if getattr(sig, "emotion", None) == "hubris":
+            hubris = float(sig.weight)
+            break
+    return max_risk, hubris, str(top_id or "")
+
+
 def explore(
     *,
     domain: str = "ai",
@@ -113,6 +128,7 @@ def explore(
     seed: int = 42,
     persist_memory: bool = False,
     memory_path: str | None = None,
+    preference_log_path: str | None = None,
     temperament: str | Any | None = None,
     temperament_path: str | None = None,
 ) -> dict[str, Any]:
@@ -128,6 +144,9 @@ def explore(
             after the run. Default False — MCP/HTTP must not enable this.
             Honours ``CURIOSITY_NO_MEMORY=1`` (no read/write).
         memory_path: optional override for the memory JSON path (tests).
+        preference_log_path: opt-in JSONL; matching ``outcome`` events feed
+            pride/shame context features. Silent when none match. Not a
+            snapshot writer — ranking ``--preference-log`` still owns appends.
         temperament: A5 preset name (``restless``/``cautious``/``dogged``/
             ``flighty``), ``custom`` to load ``temperament.toml``, a
             ``Temperament`` instance, or ``None`` (default — no personality
@@ -183,6 +202,9 @@ def explore(
     scar_applications: list[Any] = []
     mem_scars: list[dict[str, Any]] = []
     mem_affinities: list[dict[str, Any]] = []
+    prev_max_risk = 0.0
+    prev_hubris = 0.0
+    mem_prev_top_id: str | None = None
     if persist_memory:
         from artificial_emotions.affect import threshold_bias_from_pad
         from artificial_emotions.memory import PersistentMemory, memory_disabled
@@ -206,11 +228,18 @@ def explore(
                 }
             mem_scars = list(mem.scars)
             mem_affinities = list(mem.affinities)
+            snap = mem.previous_step
+            if snap is not None and not snap.is_empty():
+                prev_max_risk = float(snap.max_risk)
+                prev_hubris = float(snap.hubris)
+                mem_prev_top_id = str(snap.top_id or "") or None
             config, scar_applications = apply_history_biases(config, mem_scars, mem_affinities)
 
     # A5 baseline_mood biases appraisal floors when no stronger carryover is active.
     if mood_bias is None and active_temperament is not None:
         mood_bias = mood_bias_from_temperament(active_temperament)
+
+    from artificial_emotions.preferences import outcome_for_appraisal
 
     for step_index in range(1, steps + 1):
         items = CuriosityEngine(config).run()
@@ -225,16 +254,29 @@ def explore(
 
         new_ids = trail.observe(items)
 
-        previous_top_id = trail.steps[-1].top_question_id if trail.steps else None
+        previous_top_id = trail.steps[-1].top_question_id if trail.steps else mem_prev_top_id
+        item_ids = {
+            i.question.id
+            for i in items
+            if getattr(i, "question", None) is not None and i.question.id
+        }
+        outcome_result, outcome_qid = outcome_for_appraisal(
+            preference_log_path, question_ids=item_ids
+        )
         signals = appraise_run(
             items,
             seen_question_ids=seen_before,
             term_saturation=saturation_before,
             steps_without_progress=trail.steps_without_progress(),
             previous_top_id=previous_top_id,
+            previous_max_risk=prev_max_risk,
+            previous_hubris=prev_hubris,
+            outcome_result=outcome_result,
+            outcome_question_id=outcome_qid,
             mood_bias=mood_bias,
             temperament=active_temperament,
         )
+        prev_max_risk, prev_hubris, _ = _step_previous_features(items, signals, previous_top_id)
         mix = mix_emotions(signals_to_weights(signals))
         last_mix = mix
 
@@ -450,9 +492,17 @@ def explore(
             apply_avoidance_to_feeling,
             detect_avoidance,
         )
-        from artificial_emotions.memory import persist_explore_if_enabled
+        from artificial_emotions.memory import PreviousStepSnapshot, persist_explore_if_enabled
 
-        mem = persist_explore_if_enabled(result, enabled=True, path=memory_path)
+        last_top = trail.steps[-1].top_question_id if trail.steps else None
+        closing_prev = PreviousStepSnapshot(
+            max_risk=prev_max_risk,
+            hubris=prev_hubris,
+            top_id=str(last_top or ""),
+        )
+        mem = persist_explore_if_enabled(
+            result, enabled=True, path=memory_path, previous_step=closing_prev
+        )
         if mem is not None:
             patterns = detect_avoidance(mem.encounters, mem.selections)
             if patterns:

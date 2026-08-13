@@ -30,6 +30,7 @@ __all__ = [
     "SCHEMA_VERSION",
     "MoodState",
     "PersistentMemory",
+    "PreviousStepSnapshot",
     "SessionRecord",
     "default_memory_path",
     "memory_disabled",
@@ -153,6 +154,37 @@ class MoodState:
 
 
 @dataclass
+class PreviousStepSnapshot:
+    """Last explore step's features for the next session's step 1."""
+
+    max_risk: float = 0.0
+    hubris: float = 0.0
+    top_id: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "max_risk": float(self.max_risk),
+            "hubris": float(self.hubris),
+            "top_id": str(self.top_id or ""),
+        }
+
+    def is_empty(self) -> bool:
+        return (
+            float(self.max_risk) == 0.0 and float(self.hubris) == 0.0 and not str(self.top_id or "")
+        )
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any] | None) -> PreviousStepSnapshot:
+        if not data:
+            return cls()
+        return cls(
+            max_risk=float(data.get("max_risk") or 0.0),
+            hubris=float(data.get("hubris") or 0.0),
+            top_id=str(data.get("top_id") or ""),
+        )
+
+
+@dataclass
 class SessionRecord:
     """One completed CLI explore session (capped history)."""
 
@@ -208,6 +240,7 @@ class PersistentMemory:
     path: Path = field(default_factory=default_memory_path)
     sessions: list[SessionRecord] = field(default_factory=list)
     mood_carryover: MoodState = field(default_factory=MoodState)
+    previous_step: PreviousStepSnapshot = field(default_factory=PreviousStepSnapshot)
     scars: list[dict[str, Any]] = field(default_factory=list)
     affinities: list[dict[str, Any]] = field(default_factory=list)
     encounters: dict[str, int] = field(default_factory=dict)
@@ -255,6 +288,9 @@ class PersistentMemory:
         mem.mood_carryover = MoodState.from_dict(
             raw.get("mood_carryover") if isinstance(raw.get("mood_carryover"), dict) else None
         )
+        mem.previous_step = PreviousStepSnapshot.from_dict(
+            raw.get("previous_step") if isinstance(raw.get("previous_step"), dict) else None
+        )
         mem.scars = [s for s in (raw.get("scars") or []) if isinstance(s, dict)]
         mem.affinities = [a for a in (raw.get("affinities") or []) if isinstance(a, dict)]
         enc = raw.get("encounters") or {}
@@ -288,6 +324,7 @@ class PersistentMemory:
             "privacy_ack": bool(self.privacy_ack),
             "sessions": [s.to_dict() for s in self.sessions],
             "mood_carryover": self.mood_carryover.to_dict(),
+            "previous_step": self.previous_step.to_dict(),
             "scars": list(self.scars),
             "affinities": list(self.affinities),
             "encounters": dict(sorted(self.encounters.items())),
@@ -495,6 +532,7 @@ class PersistentMemory:
         """Wipe all remembered state (and delete the file when saved)."""
         self.sessions = []
         self.mood_carryover = MoodState()
+        self.previous_step = PreviousStepSnapshot()
         self.scars = []
         self.affinities = []
         self.encounters = {}
@@ -550,11 +588,14 @@ def persist_explore_if_enabled(
     *,
     enabled: bool,
     path: Path | str | None = None,
+    previous_step: PreviousStepSnapshot | None = None,
 ) -> PersistentMemory | None:
     """Save an explore result when persistence is requested and not opted out."""
     if not enabled or memory_disabled():
         return None
     mem = PersistentMemory.load(path)
     mem.record_explore_result(result)
+    if previous_step is not None:
+        mem.previous_step = previous_step
     mem.save()
     return mem

@@ -325,6 +325,14 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=("Do not read/write ~/.artificial_emotions/memory.json (also: CURIOSITY_NO_MEMORY=1)"),
     )
+    explore_p.add_argument(
+        "--preference-log",
+        default=None,
+        help=(
+            "Opt-in JSONL path; matching outcome events feed pride/shame appraisal "
+            "(silent if none match)"
+        ),
+    )
     explore_p.add_argument("--json", action="store_true")
 
     decompose_p = sub.add_parser(
