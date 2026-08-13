@@ -153,13 +153,13 @@ ranked set, a different thing asked of it.
 
 | Stance | Asks | Driven by |
 |--------|------|-----------|
-| `doubt` | Which of these am I most likely to be wrong about? | skepticism, suspicion, hubris, humility |
-| `safety` | Which could hurt someone, and who reviews it? | anxiety, reluctance, compassion |
-| `focus` | If I could only pursue one, what exactly would I do first? | absorption, determination, persistence |
-| `close` | What should we stop doing, and what do we write down? | disappointment, resignation, satisfaction |
+| `doubt` | Which of these am I most likely to be wrong about? | skepticism, suspicion, hubris, humility, pride, shame |
+| `safety` | Which could hurt someone, and who reviews it? | anxiety, reluctance, compassion, fear, disgust |
+| `focus` | If I could only pursue one, what exactly would I do first? | absorption, determination, persistence, joy |
+| `close` | What should we stop doing, and what do we write down? | disappointment, resignation, satisfaction, sadness, anger |
 | `taste` | Which are badly posed, regardless of whether they matter? | elegance, parsimony, dissonance, clarity |
-| `wonder` | What is most surprising, regardless of whether it is valuable? | wonder, surprise, insight, interest, enjoyment, uncertainty |
-| `survey` | Who already owns this ground? | respect, envy, recognition |
+| `wonder` | What is most surprising, regardless of whether it is valuable? | wonder, surprise, insight, interest, enjoyment, uncertainty, intrigue |
+| `survey` | Who already owns this ground? | respect, envy, recognition, admiration, gratitude |
 
 **Second trust boundary.** A stance is a *view*. It never rescores or reorders
 the ranked set it was handed — every payload carries

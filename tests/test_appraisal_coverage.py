@@ -1,8 +1,10 @@
 """Guards against the emotion catalog becoming decoration.
 
-An earlier version could derive 13 of 54 catalogued emotions, and only **four**
-ever fired across all nine domains. The other fifty were furniture. These tests
-make that state unreachable:
+Past hole: an earlier version could derive 13 of 54 catalogued emotions, and
+only **four** ever fired across all nine domains. The other fifty were furniture.
+
+Current guard: ``MIN_CATALOG_SHARE = 1.0`` — every catalog id has a condition
+and a use. These tests make the old hole unreachable:
 
 * every rule in ``RULES`` must be **firable** — constructible inputs exist that
   trigger it, so no rule is dead code;
@@ -13,8 +15,7 @@ make that state unreachable:
 * every catalog id has a **condition** — non-empty ``when``, or
   ``requires: outcome_event`` plus a fixture that fires it — and a **use**
   (an effect other than only ``surface_only``, a stance driver, or an
-  imagination driver). ``MIN_CATALOG_SHARE = 1.0``; unnamed holes are not
-  licensed by a low floor;
+  imagination driver). Unnamed holes are not licensed by a low floor;
 * every catalog emotion must **have a use** — it steers the search, or it
   drives a stance, or it drives a wired imaginative lens. Being named and
   disclaimed is not a use.

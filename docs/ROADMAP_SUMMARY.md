@@ -14,12 +14,11 @@ Pipeline + OpenAlex/S2 gap gate + multi-axis scores + MCP/HTTP/CLI/web + offline
 
 ## Top next wedges (pick first unfinished)
 
-1. Owner-gated **PyPI publish** (blocks calling v1.0)  
-2. Live multi-provider LLM smoke with real keys (private notes; no secrets in repo)  
-3. Preference *learning* / longitudinal calibration (v1.x)  
-4. Optional deeper neglectedness / funding adapters (research spike)  
+1. **P0 honesty loop** — keep LIMITS/PROOFS true; green suite (roadmap §2 W-P0a / W-P0b)  
+2. Optional later: enact `drop_dual_use` / `forbid_similar_jump` in explore (not default; user must ask)  
+3. v1.x calibration / preference learning (longitudinal; not an install gate)  
 
-P2 W10–W15 and core WO-0.4 hardening are ✅. Full queue: roadmap **§2**.
+P1 W1–W9 and P2 W10–W15 are ✅, including PyPI (`artificial-emotions` **0.4.1**). Do **not** call v1.0 until roadmap **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP. Full queue: roadmap **§2**.
 
 ## Agent ops (one-liners)
 
@@ -37,7 +36,7 @@ P2 W10–W15 and core WO-0.4 hardening are ✅. Full queue: roadmap **§2**.
 | Horizon | Versions | Intent |
 |---------|----------|--------|
 | **Near** | v0.2 | ✅ Embeddings optional, multi-provider notes, presets, UX honesty, packaging prep |
-| **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge; remaining: PyPI → **credible v1** |
+| **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge + PyPI 0.4.1; remaining: honesty / proof gates (do not call v1.0 until ROADMAP §10) |
 | **Long** | v1.x→v2+ | Flywheel, preference learning, enterprise, AI-Scientist upstream |
 | **Moonshots** | — | Approximate VOI, surprise search, lab closed-loop, epistemic emotion elicitation — not default backlog |
 
@@ -49,4 +48,4 @@ Explicit values · related ≠ answered · answerability/risk gates · anti-McNa
 
 ## Proof rule
 
-Do not claim “calibrated,” “works on every host,” “dual-use solved,” or “v1.0” until matching **proof gates** (roadmap §10) are met. PyPI remains the main open v1.0 gate.
+Do not claim “calibrated,” “works on every host,” “dual-use solved,” or “v1.0” until matching **proof gates** (roadmap §10) are met. Remaining v1.0 bar is honesty / LIMITS (heuristic scores, phrase-level gaps, dual-use residual, local HTTP), not PyPI install.

@@ -10,10 +10,10 @@ Product documentation for **Artificial Emotions** (v0.4.1 — Alive). Start at t
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Pipeline modules, Alive continuity/imagination map, trust boundaries |
 | [PROOFS.md](PROOFS.md) | Demo commands for verified behaviors |
 | [DESIGN.md](DESIGN.md) | Short product invariants |
-| [PLAN_ALIVE.md](PLAN_ALIVE.md) | Continuity + imagination (Track C / `web/` removed — historical) |
+| [PLAN_ALIVE.md](PLAN_ALIVE.md) | Historical stub — Alive shipped in `[0.4.0]`; not an active plan |
 | [ROADMAP.md](ROADMAP.md) | Agent playbook + roadmap — stuck? start §0→§3→§2 |
 | [ROADMAP_SUMMARY.md](ROADMAP_SUMMARY.md) | 1-page summary + top wedges |
-| [PUBLISHING.md](PUBLISHING.md) | Maintainer PyPI notes (not published yet — install from git) |
+| [PUBLISHING.md](PUBLISHING.md) | Maintainer PyPI notes — `pip install artificial-emotions` (0.4.1) |
 
 **Examples:** [`../examples/README.md`](../examples/README.md) · **Contributing:** [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
 

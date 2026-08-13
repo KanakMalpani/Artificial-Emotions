@@ -16,7 +16,7 @@
 ## Table of contents
 
 0. [How to use this roadmap (agents)](#0-how-to-use-this-roadmap-agents)
-1. [Current v0.1 truth — do not rebuild](#1-current-v01-truth--do-not-rebuild)
+1. [Current truth — do not rebuild the pipeline](#1-current-truth--do-not-rebuild-the-pipeline)
 2. [Priority queue / next wedges](#2-priority-queue--next-wedges)
 3. [Stuck playbooks (if → then)](#3-stuck-playbooks-if--then)
 4. [Invariants checklist](#4-invariants-checklist)
@@ -78,9 +78,9 @@
 
 ---
 
-## 1. Current v0.1 truth — do not rebuild
+## 1. Current truth — do not rebuild the pipeline
 
-Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is listed here, improve it or extend it — do not recreate from scratch.**
+Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is listed here, improve it or extend it — do not recreate from scratch.** Product version today is **0.4.1**, not v0.1.
 
 ### Verified working (as of 2026-07-23)
 
@@ -126,7 +126,7 @@ ValueProfile + Domain/Topic
 | Dual-use residual risk | Weighted heuristic + review flag shipped (W14); not a trained oracle | Keep hard reject; LIMITS residual |
 | LLM paths often untested live | Smoke with mocked + optional live matrix; no secrets in repo |
 | MCP tools-only | Resources/prompts later if hosts need them |
-| No PyPI yet | Packaging wedge; owner-gated publish — Actions still blocked by billing/spending until payment clears |
+| PyPI | Published as `artificial-emotions` at **0.4.1**; next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) |
 | Public GitHub may lag local | Never force-push; never commit secrets |
 
 **Why this design?** Prefer LIMITS + DESIGN + this playbook.
@@ -135,7 +135,9 @@ ValueProfile + Domain/Topic
 
 ## 2. Priority queue / next wedges
 
-When idle or stuck choosing work: take the **first unfinished** item. Highest leverage first.
+P1 W1–W9 and P2 W10–W15 are ✅. PyPI is shipped — it is **not** the next wedge and **not** the bar for calling the product v1.0.
+
+When idle: stay on **P0** (honesty loop). Do not start optional explore flags or v1.x calibration unless the user asks.
 
 ### P0 — Honesty & regression (always eligible)
 
@@ -144,7 +146,7 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 | **W-P0a** | Keep LIMITS/PROOFS true after behavior changes | `docs/LIMITS.md`, `docs/PROOFS.md` | Claims match code | Diff reviewed; no new overclaim | Overclaiming |
 | **W-P0b** | Green suite | `tests/` | `pytest -q` | All green | Any F-mode regression |
 
-### P1 — Next product wedges (v0.2 front)
+### P1 — Product wedges (v0.2 front) — all ✅
 
 | ID | Wedge | Files to touch | Success test | Done when | F-modes |
 |----|-------|----------------|--------------|-----------|---------|
@@ -155,10 +157,10 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 | **W5** | Expand F7 phrase-gaming + F13 paraphrase adversarial tests | `tests/test_failure_modes.py`, maybe `verify.py` / `diversity.py` | New cases fail-then-pass intentionally | ✅ Suite still encodes F1–F15 | F7, F13 |
 | **W6** | ~~Web: briefs primary~~ (`web/` **removed**) | — | Historical wedge; SPA deleted | ✅ Was shipped; surface retired | F8, F11 |
 | **W7** | MCP host recipes (Claude Code, VS Code Copilot, Continue, Windsurf) | `docs/PLUGINS.md` | Copy-paste recipe + `--list-tools` smoke note per host | ✅ PLUGINS lists host; no “works everywhere” without smoke | plugins |
-| **W8** | PyPI packaging prep (owner publishes) | `pyproject.toml`, CI if present | Build/sdist works locally | ✅ LIMITS notes “why not yet” (owner-gated; not published) | dist |
+| **W8** | PyPI packaging (owner publishes) | `pyproject.toml`, CI if present | Build/sdist works locally | ✅ Published as `artificial-emotions` at 0.4.1; next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) | dist |
 | **W9** | Seed contribution guide + domain pack format | `CONTRIBUTING.md`, `seeds.py` | Contributor can add a seed without breaking schema | ✅ Quality bar: operationalization + one primary unknown | F2, F9 |
 
-### P2 — Credible mid-term (v0.3 → v1.0) — pick after P1 pressure eases
+### P2 — Credible mid-term (v0.3 → v1.0) — all ✅
 
 | ID | Wedge | Files (expected) | Success test | Done when | F-modes |
 |----|-------|------------------|--------------|-----------|---------|
@@ -169,12 +171,23 @@ When idle or stuck choosing work: take the **first unfinished** item. Highest le
 | **W14** | Dual-use beyond keywords *or* explicit LIMITS cap | `safety.py`, `scoring.py` | Classifier eval sample **or** LIMITS sentence | ✅ Claim matches LIMITS (residual risk) | F10 |
 | **W15** | Multi-judge ensemble + disagreement entropy flag | `judge.py`, `scoring.py`, `pipeline.py` | Flag when judges diverge | ✅ Bands widen / flag set | F5, F8 |
 
+### Remaining next (honest leftover — do not implement here)
+
+| ID | Wedge | Notes |
+|----|-------|-------|
+| **P0** | Honesty loop | Keep LIMITS/PROOFS true; green suite — always eligible |
+| **W-explore** | Optional later `drop_dual_use` / `forbid_similar_jump` in `explore.py` | Enactment only if the user asks; not a default P1 ID |
+| **W-cal** | v1.x calibration / preference learning | Longitudinal flywheel; not an install gate |
+
+Do **not** call the product v1.0 until **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP.
+
 ### How to pick under ambiguity
 
 1. If tests red → fix tests (P0).  
 2. Else if honesty drift → LIMITS/PROOFS (P0a).  
-3. Else take next unfinished **W1→W9**.  
-4. Do not start moonshots or enterprise while P1 open unless user explicitly asks.
+3. Else stay on the P0 honesty loop.  
+4. Do not start moonshots, explore-flag enactment, or v1.x calibration unless the user explicitly asks.  
+5. Do not treat PyPI or a completed §7.4 install box as permission to claim v1.0.
 
 ---
 
@@ -461,7 +474,7 @@ flowchart LR
 Agent checklist before anyone says “v1.0”:
 
 - [x] Stable `/v1/...` API + semver changelog (version `0.3.0`; changelog via git / ROADMAP)  
-- [ ] PyPI install without clone  
+- [x] PyPI install without clone (`pip install artificial-emotions`; **0.4.1** on PyPI)  
 - [x] Eval harness + published **methodology** (no magic accuracy %)  
 - [x] Dual-use stronger than keywords **or** LIMITS explicit residual risk  
 - [x] Multi-literature **or** documented single-source limits  
@@ -472,6 +485,8 @@ Agent checklist before anyone says “v1.0”:
 - [x] Positioning: decision aids, not oracles  
 
 Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding default-on.
+
+**This checklist being complete does not mean the product is v1.0.** Do not call v1.0 until **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP. Next PyPI upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)).
 
 ### 7.5 v1.x → v2+ — agent-sized themes
 
@@ -551,7 +566,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | W6 Eval | Calibration | `tests/`, `examples/`, future `evals/` | Fixtures; no vanity accuracy % |
 | W7 Safety | Dual-use | `scoring.py`, future `safety/` | Classifier + review |
 | W8 Domains | Seeds | `seeds.py`, `CONTRIBUTING.md` | Packs + quality bar |
-| W9 Packaging | Distro | `pyproject.toml` | PyPI; extras; no secrets |
+| W9 Packaging | Distro | `pyproject.toml` | Next upload: Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)); extras; no secrets |
 | W10 Community | Process | GitHub Issues, CONTRIBUTING | Good-first-issues ↔ F-modes |
 | W11 Enterprise | API ops | `api.py` | Optional auth; don't break local demos |
 | W12 Flywheel | Outcomes | future store/schema | Multi-outcome; anti-McNamara |
@@ -574,7 +589,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | “Semantic diversity” | Embedding path tested; default vs optional labeled |
 | “Literature-grounded” | Show `gap.related_works` + status; no full-text claim if abstracts-only |
 | “PyPI one-liner install” | Public package version matching git tag |
-| “v1.0” | All §7.4 checklist items |
+| “v1.0” | §7.4 **and** honesty bar in [`LIMITS.md`](LIMITS.md): heuristic scores, phrase-level gaps, dual-use residual, local HTTP. PyPI install is **not** sufficient. |
 
 **When in doubt: update LIMITS first, market second.**
 
@@ -588,7 +603,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | **M1** | 0.2.x | Embeddings optional; PyPI or documented block; multi-provider notes; UX honesty | Install; provider smoke |
 | **M2** | 0.3.x | Expert protocol + fixtures; 2nd lit optional | Spot-check fail rate tracked |
 | **M3** | 0.4–0.5 | Dual-use uplift *or* LIMITS cap; multi-judge | Risk FN sample audit |
-| **M4** | 1.0.0 | Semver API; PyPI; eval methodology; invariants everywhere | Honesty checklist |
+| **M4** | 1.0.0 | Semver API; eval methodology; invariants everywhere; LIMITS honesty bar (not PyPI-as-gate) | Honesty / proof gates |
 | **M5** | 1.x | Opt-in longitudinal schema + first calibration notebook | Multi-outcome curves |
 | **M6** | 2.0 | Profile sharing + AI-Scientist upstream examples | External integrations |
 

@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased — catalog-driven affect (2026-08-13)
+
+Catalog `when` / `effects` is the appraisal contract. Every named emotion has
+a condition. This is on `main` at package **0.4.1** — there is **no 0.4.2 tag**
+yet, and this block is not a version bump.
+
+### Changed
+- **The catalog is the contract.** All **54** emotion rows carry a non-empty
+  `when` (or `requires: outcome_event` plus a firing fixture) and a use. Coverage
+  floor is `MIN_CATALOG_SHARE = 1.0`.
+- **Somatic search knobs stay opt-in** via `--somatic-modulate`
+  (`CuriosityConfig.somatic_modulate`). High-coercion ids still appraise and
+  surface when the flag is off. They never raise the risk ceiling.
+- **Pride and shame need logged outcomes.** They fire on `outcome_result` plus a
+  question id (`--preference-log`); they stay silent without one. They are not
+  triumph-from-rank.
+
+### Honesty
+- No 0.4.2 release. Do not treat this Unreleased section as shipped-under-a-tag.
+
 ## [0.4.1] — memory integrity + API serve hardening
 
 Patch release for silent memory wipe risk and open HTTP serve defaults that

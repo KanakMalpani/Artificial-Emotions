@@ -723,7 +723,7 @@ Install: `pip install artificial-emotions` (or editable `pip install -e ".[dev]"
 | [**docs/ARCHITECTURE.md**](docs/ARCHITECTURE.md) | Module map, Alive continuity/imagination, trust boundaries |
 | [**docs/LIMITS.md**](docs/LIMITS.md) | Verified capabilities and honest bounds |
 | [**docs/EMOTIONS.md**](docs/EMOTIONS.md) | Catalog, mixing, affect safety |
-| [**docs/PLAN_ALIVE.md**](docs/PLAN_ALIVE.md) | Continuity + imagination (Track C / `web/` historical) |
+| [**docs/PLAN_ALIVE.md**](docs/PLAN_ALIVE.md) | Historical stub — Alive shipped in 0.4.0; not an active plan |
 | [**docs/PLUGINS.md**](docs/PLUGINS.md) | Host-by-host MCP setup |
 | [**docs/PROOFS.md**](docs/PROOFS.md) | Reproducible behaviour demos |
 | [**CHANGELOG.md**](CHANGELOG.md) | `[0.4.1]` release notes |
