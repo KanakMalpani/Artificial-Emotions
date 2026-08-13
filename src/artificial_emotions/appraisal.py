@@ -27,23 +27,31 @@ background (OCC-flavoured, not an OCC implementation).
 from __future__ import annotations
 
 import statistics
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass, field, fields
 from typing import Any
 
 from artificial_emotions.models import GapStatus, RankedQuestion
 
 __all__ = [
     "APPRAISAL_RULES",
+    "CATALOG_SCHEMA_KEYS",
+    "CATALOG_WHEN_FEATURES",
+    "COERCION_LEVELS",
+    "EFFECT_IDS",
     "NEVER_APPRAISE",
     "OBSERVATION_ONLY",
+    "REQUIRES_TOKENS",
     "RULES",
     "UNBUILT_UNTIL_OUTCOME",
+    "WHEN_OPS",
     "AppraisalContext",
     "AppraisalSignal",
     "appraise_run",
     "build_context",
     "signals_to_weights",
+    "validate_catalog_entry",
+    "validate_emotion_catalog",
 ]
 
 # Lazy catalog PAD lookup for mood-congruent threshold floors (A2).
@@ -125,6 +133,48 @@ UNBUILT_UNTIL_OUTCOME: frozenset[str] = frozenset(
     }
 )
 
+#: Frozen catalog effect vocabulary. Wave 2 implements these; do not invent extras.
+EFFECT_IDS: frozenset[str] = frozenset(
+    {
+        "widen_search",
+        "narrow_search",
+        "demand_literature",
+        "decompose",
+        "jump_ground",
+        "forbid_similar_jump",
+        "tighten_safety",
+        "drop_dual_use",
+        "stay_course",
+        "surface_only",
+    }
+)
+
+#: Catalog ``when`` comparison operators. Wave 1 ``evaluate_when`` consumes these.
+WHEN_OPS: frozenset[str] = frozenset({"ge", "le", "gt", "lt", "eq", "ne"})
+
+#: Search-effect opt-in. ``high`` search effects require ``--somatic-modulate``.
+COERCION_LEVELS: frozenset[str] = frozenset({"low", "high"})
+
+#: What a catalog row needs before it may fire. Empty is a Wave 0 placeholder.
+REQUIRES_TOKENS: frozenset[str] = frozenset(
+    {
+        "offline",
+        "literature",
+        "risk_flags",
+        "previous_step",
+        "outcome_event",
+    }
+)
+
+#: Per-emotion catalog keys later waves fill. Do not rename.
+CATALOG_SCHEMA_KEYS: tuple[str, ...] = (
+    "when",
+    "effects",
+    "use_for",
+    "coercion",
+    "requires",
+)
+
 
 @dataclass(frozen=True)
 class AppraisalSignal:
@@ -146,7 +196,25 @@ class AppraisalSignal:
 
 @dataclass(frozen=True)
 class AppraisalContext:
-    """Everything a rule is allowed to look at, computed once per run."""
+    """Everything a rule is allowed to look at, computed once per run.
+
+    Catalog ``when`` clauses use these feature names (see
+    :data:`CATALOG_WHEN_FEATURES`):
+
+    ``n``, ``gap_ratio``, ``mean_impact``, ``mean_neglect``, ``mean_surprise``,
+    ``mean_tractability``, ``mean_answerability``, ``mean_risk``,
+    ``mean_confidence``, ``mean_cost``, ``max_risk``, ``disagreement``,
+    ``band_width``, ``score_spread``, ``top_score``, ``top_answerability``,
+    ``top_ops_len``, ``top_clause_count``, ``thin_evidence``, ``dense_yet_open``,
+    ``answered_ratio``, ``dual_use_ratio``, ``ungrounded_ratio``,
+    ``duplicate_ratio``, ``repeat_ratio``, ``mean_related``, ``mean_citations``,
+    ``term_saturation``, ``steps_without_progress``, ``rejected_ratio``,
+    ``top_repeated``.
+
+    Reserved dotted names for Wave 1 (not fields on this dataclass yet):
+    ``previous.max_risk``, ``previous.hubris``, ``previous.top_id``,
+    ``outcome.result``, ``outcome.question_id``.
+    """
 
     n: int
     gap_ratio: float
@@ -179,6 +247,108 @@ class AppraisalContext:
     steps_without_progress: int
     rejected_ratio: float
     top_repeated: bool
+
+
+#: Feature names catalog ``when`` clauses may address.
+#:
+#: Current :class:`AppraisalContext` fields plus Wave 1 dotted paths
+#: (``previous.max_risk``, ``previous.hubris``, ``previous.top_id``,
+#: ``outcome.result``, ``outcome.question_id``). Interpreter consumes those
+#: paths if present; Twelve owns wiring them. Do not invent extra names here
+#: without adding the matching context field.
+CATALOG_WHEN_FEATURES: frozenset[str] = frozenset(
+    {f.name for f in fields(AppraisalContext)}
+    | {
+        "previous.max_risk",
+        "previous.hubris",
+        "previous.top_id",
+        "outcome.result",
+        "outcome.question_id",
+    }
+)
+
+_WHEN_CLAUSE_KEYS: tuple[str, ...] = ("feature", "op", "value")
+
+
+def _requires_tokens(raw: object, *, emotion_id: str) -> list[str]:
+    if isinstance(raw, str):
+        return [raw] if raw else []
+    if isinstance(raw, list):
+        tokens: list[str] = []
+        for item in raw:
+            if not isinstance(item, str):
+                raise ValueError(f"{emotion_id}: requires entries must be strings, got {item!r}")
+            if item:
+                tokens.append(item)
+        return tokens
+    raise ValueError(f"{emotion_id}: requires must be a string or list of strings")
+
+
+def validate_catalog_entry(entry: Mapping[str, Any]) -> None:
+    """Raise ``ValueError`` if one catalog emotion violates the schema contract.
+
+    Empty ``when`` / ``effects`` / ``use_for`` and empty ``coercion`` /
+    ``requires`` are Wave 0 placeholders. Unknown effect ids, ``when`` ops,
+    coercion levels, ``requires`` tokens, and ``when`` features fail.
+    """
+    eid = str(entry.get("id") or "<unknown>")
+    missing = [k for k in CATALOG_SCHEMA_KEYS if k not in entry]
+    if missing:
+        raise ValueError(f"{eid}: missing catalog schema keys {missing}")
+
+    when = entry["when"]
+    if not isinstance(when, list):
+        raise ValueError(f"{eid}: when must be a list of {{feature, op, value}} clauses")
+    for clause in when:
+        if not isinstance(clause, Mapping):
+            raise ValueError(f"{eid}: when clause must be an object, got {clause!r}")
+        clause_missing = [k for k in _WHEN_CLAUSE_KEYS if k not in clause]
+        if clause_missing:
+            raise ValueError(f"{eid}: when clause missing keys {clause_missing}")
+        op = clause["op"]
+        if op not in WHEN_OPS:
+            raise ValueError(f"{eid}: unknown when op {op!r}")
+        feature = clause["feature"]
+        if feature not in CATALOG_WHEN_FEATURES:
+            raise ValueError(f"{eid}: unknown when feature {feature!r}")
+
+    effects = entry["effects"]
+    if not isinstance(effects, list):
+        raise ValueError(f"{eid}: effects must be a list of effect ids")
+    unknown_effects = sorted({e for e in effects if e not in EFFECT_IDS})
+    if unknown_effects:
+        raise ValueError(f"{eid}: unknown effect id(s): {unknown_effects}")
+
+    use_for = entry["use_for"]
+    if not isinstance(use_for, str):
+        raise ValueError(f"{eid}: use_for must be a string")
+
+    coercion = entry["coercion"]
+    if not isinstance(coercion, str):
+        raise ValueError(f"{eid}: coercion must be a string")
+    if coercion and coercion not in COERCION_LEVELS:
+        raise ValueError(f"{eid}: unknown coercion {coercion!r}")
+
+    unknown_requires = sorted(
+        {t for t in _requires_tokens(entry["requires"], emotion_id=eid) if t not in REQUIRES_TOKENS}
+    )
+    if unknown_requires:
+        raise ValueError(f"{eid}: unknown requires token(s): {unknown_requires}")
+
+
+def validate_emotion_catalog(catalog: Mapping[str, Any] | None = None) -> None:
+    """Validate every emotion row in ``catalog`` (or the shipped catalog)."""
+    if catalog is None:
+        from artificial_emotions.emotions import emotion_catalog
+
+        catalog = emotion_catalog()
+    emotions = catalog.get("emotions") if isinstance(catalog, Mapping) else None
+    if not isinstance(emotions, list) or not emotions:
+        raise ValueError("emotion catalog is missing a non-empty emotions list")
+    for entry in emotions:
+        if not isinstance(entry, Mapping):
+            raise ValueError("catalog emotion entry must be an object")
+        validate_catalog_entry(entry)
 
 
 def _mean(values: Sequence[float]) -> float:

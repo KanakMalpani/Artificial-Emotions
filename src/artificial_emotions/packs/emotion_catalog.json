@@ -28,7 +28,12 @@
       "cue_tags": [
         "information_gap",
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "interest",
@@ -47,7 +52,12 @@
       ],
       "cue_tags": [
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "confusion",
@@ -67,7 +77,12 @@
       "cue_tags": [
         "confusion_risk",
         "information_gap"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "surprise",
@@ -87,7 +102,12 @@
       "cue_tags": [
         "surprise_signal",
         "incongruity"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "awe",
@@ -107,7 +127,12 @@
       "cue_tags": [
         "incongruity",
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "wonder",
@@ -127,7 +152,12 @@
       "cue_tags": [
         "curiosity_target",
         "information_gap"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "boredom",
@@ -146,7 +176,12 @@
       ],
       "cue_tags": [
         "boredom_guard"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "intrigue",
@@ -166,7 +201,12 @@
       "cue_tags": [
         "curiosity_target",
         "information_gap"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "uncertainty",
@@ -186,7 +226,12 @@
       "cue_tags": [
         "information_gap",
         "confusion_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "joy",
@@ -202,7 +247,12 @@
       "elicit_hints": [
         "Celebrate a resolved check without claiming the system 'is happy'."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "sadness",
@@ -218,7 +268,12 @@
       "elicit_hints": [
         "If used, pair with concrete support / next facts — not guilt."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "anger",
@@ -234,7 +289,12 @@
       "elicit_hints": [
         "Prefer naming a blocked goal or safety concern over outrage rhetoric."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "fear",
@@ -250,7 +310,12 @@
       "elicit_hints": [
         "State concrete risks and mitigations without panic copy."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "disgust",
@@ -266,7 +331,12 @@
       "elicit_hints": [
         "Prefer precise critique of methods over disgust metaphors."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "anticipation",
@@ -284,7 +354,12 @@
       ],
       "cue_tags": [
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "trust",
@@ -300,7 +375,12 @@
       "elicit_hints": [
         "Surface evidence quality and confidence bands."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "pride",
@@ -316,7 +396,12 @@
       "elicit_hints": [
         "Acknowledge a clean falsifier pass or solid operationalization."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "shame",
@@ -332,7 +417,12 @@
       "elicit_hints": [
         "Prefer error-correction framing over shaming."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "gratitude",
@@ -348,7 +438,12 @@
       "elicit_hints": [
         "Credit prior literature and collaborators explicitly."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "admiration",
@@ -364,7 +459,12 @@
       "elicit_hints": [
         "Point to a concrete method worth emulating."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "hope",
@@ -382,7 +482,12 @@
       ],
       "cue_tags": [
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "relief",
@@ -398,7 +503,12 @@
       "elicit_hints": [
         "Mark when a gap is likely_answered with evidence."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "frustration",
@@ -416,7 +526,12 @@
       ],
       "cue_tags": [
         "confusion_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "anxiety",
@@ -434,7 +549,12 @@
       ],
       "cue_tags": [
         "confusion_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "enjoyment",
@@ -452,7 +572,12 @@
       ],
       "cue_tags": [
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "doubt",
@@ -472,7 +597,12 @@
       "cue_tags": [
         "information_gap",
         "confusion_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "conviction",
@@ -491,7 +621,12 @@
       ],
       "cue_tags": [
         "overclaim_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "perplexity",
@@ -512,7 +647,12 @@
         "confusion_risk",
         "incongruity",
         "information_gap"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "insight",
@@ -532,7 +672,12 @@
       "cue_tags": [
         "insight_candidate",
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "skepticism",
@@ -552,7 +697,12 @@
       "cue_tags": [
         "overclaim_risk",
         "confusion_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "absorption",
@@ -571,7 +721,12 @@
       ],
       "cue_tags": [
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "disorientation",
@@ -591,7 +746,12 @@
       "cue_tags": [
         "confusion_risk",
         "scope_creep_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "recognition",
@@ -611,7 +771,12 @@
       "cue_tags": [
         "insight_candidate",
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "suspicion",
@@ -631,7 +796,12 @@
       "cue_tags": [
         "incongruity",
         "overclaim_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "clarity",
@@ -650,7 +820,12 @@
       ],
       "cue_tags": [
         "insight_candidate"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "humility",
@@ -670,7 +845,12 @@
       "cue_tags": [
         "overclaim_risk",
         "information_gap"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "hubris",
@@ -690,7 +870,12 @@
       "cue_tags": [
         "overclaim_risk",
         "dead_end_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "elegance",
@@ -709,7 +894,12 @@
       ],
       "cue_tags": [
         "insight_candidate"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "sublimity",
@@ -729,7 +919,12 @@
       "cue_tags": [
         "incongruity",
         "scope_creep_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "dissonance",
@@ -749,7 +944,12 @@
       "cue_tags": [
         "incongruity",
         "confusion_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "parsimony",
@@ -769,7 +969,12 @@
       "cue_tags": [
         "insight_candidate",
         "overclaim_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "determination",
@@ -788,7 +993,12 @@
       ],
       "cue_tags": [
         "curiosity_target"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "impatience",
@@ -808,7 +1018,12 @@
       "cue_tags": [
         "overclaim_risk",
         "scope_creep_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "reluctance",
@@ -827,7 +1042,12 @@
       ],
       "cue_tags": [
         "dead_end_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "urgency",
@@ -846,7 +1066,12 @@
       ],
       "cue_tags": [
         "overclaim_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "persistence",
@@ -865,7 +1090,12 @@
       ],
       "cue_tags": [
         "dead_end_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "triumph",
@@ -885,7 +1115,12 @@
       "cue_tags": [
         "insight_candidate",
         "overclaim_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "disappointment",
@@ -904,7 +1139,12 @@
       ],
       "cue_tags": [
         "information_gap"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "satisfaction",
@@ -923,7 +1163,12 @@
       ],
       "cue_tags": [
         "boredom_guard"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "resignation",
@@ -943,7 +1188,12 @@
       "cue_tags": [
         "dead_end_risk",
         "boredom_guard"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "compassion",
@@ -960,7 +1210,12 @@
         "Name who is affected by getting this wrong.",
         "Check the ValueProfile actually encodes that."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "envy",
@@ -979,7 +1234,12 @@
       ],
       "cue_tags": [
         "overclaim_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "embarrassment",
@@ -998,7 +1258,12 @@
       ],
       "cue_tags": [
         "overclaim_risk"
-      ]
+      ],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     },
     {
       "id": "respect",
@@ -1015,7 +1280,12 @@
         "Cite what the prior work actually established.",
         "Separate respect for rigour from agreement with conclusions."
       ],
-      "cue_tags": []
+      "cue_tags": [],
+      "when": [],
+      "effects": [],
+      "use_for": "",
+      "coercion": "",
+      "requires": []
     }
   ],
   "plutchik_primary_dyads": [
