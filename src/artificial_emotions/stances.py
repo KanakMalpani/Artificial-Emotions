@@ -9,12 +9,13 @@ A stance fixes that. Each one is a different question you can ask of the same
 ranked set, driven by a different cluster of emotions, and returning a genuinely
 different view:
 
-    doubt    — skepticism, suspicion, hubris, doubt   "which of these is wrong?"
-    safety   — anxiety, reluctance, compassion        "which of these could hurt someone?"
-    focus    — absorption, determination, conviction  "stop widening; go deep on one"
-    close    — disappointment, resignation            "what should we stop doing?"
-    taste    — elegance, parsimony, dissonance        "which of these are badly posed?"
-    survey   — respect, envy, recognition, trust      "who already owns this ground?"
+    doubt    — skepticism, suspicion, hubris, doubt, pride, shame
+    safety   — anxiety, reluctance, compassion, fear, disgust
+    focus    — absorption, determination, conviction, joy
+    close    — disappointment, resignation, sadness, anger
+    taste    — elegance, parsimony, dissonance
+    wonder   — wonder, surprise, insight, intrigue
+    survey   — respect, envy, recognition, trust, admiration, gratitude
 
 Curiosity answers "what is worth investigating". These answer the other
 questions a working researcher actually has, and each is useless in the others'
@@ -376,28 +377,48 @@ STANCES: dict[str, Stance] = {
             name="doubt",
             asks="Which of these am I most likely to be wrong about?",
             use_when="Before you act on a ranking, or before you show it to someone.",
-            driving_emotions=("skepticism", "suspicion", "hubris", "humility", "doubt"),
+            driving_emotions=(
+                "skepticism",
+                "suspicion",
+                "hubris",
+                "humility",
+                "doubt",
+                "pride",
+                "shame",
+            ),
             lens=_lens_doubt,
         ),
         Stance(
             name="safety",
             asks="Which of these could hurt someone, and who reviews it?",
             use_when="Any set touching dual-use, clinical, or deployment territory.",
-            driving_emotions=("anxiety", "reluctance", "compassion"),
+            driving_emotions=("anxiety", "reluctance", "compassion", "fear", "disgust"),
             lens=_lens_safety,
         ),
         Stance(
             name="focus",
             asks="If I could only pursue one, what exactly would I do first?",
             use_when="You have decided. You want a plan, not more options.",
-            driving_emotions=("absorption", "determination", "persistence", "conviction"),
+            driving_emotions=(
+                "absorption",
+                "determination",
+                "persistence",
+                "conviction",
+                "joy",
+            ),
             lens=_lens_focus,
         ),
         Stance(
             name="close",
             asks="What should we stop doing, and what should we write down about it?",
             use_when="End of a sprint, or when a line has stopped paying.",
-            driving_emotions=("disappointment", "resignation", "satisfaction"),
+            driving_emotions=(
+                "disappointment",
+                "resignation",
+                "satisfaction",
+                "sadness",
+                "anger",
+            ),
             lens=_lens_close,
         ),
         Stance(
@@ -421,6 +442,7 @@ STANCES: dict[str, Stance] = {
                 "uncertainty",
                 "awe",
                 "sublimity",
+                "intrigue",
             ),
             lens=_lens_wonder,
         ),
@@ -428,7 +450,14 @@ STANCES: dict[str, Stance] = {
             name="survey",
             asks="Who already owns this ground?",
             use_when="Before committing effort, to avoid duplicating live work.",
-            driving_emotions=("respect", "envy", "recognition", "trust"),
+            driving_emotions=(
+                "respect",
+                "envy",
+                "recognition",
+                "trust",
+                "admiration",
+                "gratitude",
+            ),
             lens=_lens_survey,
         ),
     )

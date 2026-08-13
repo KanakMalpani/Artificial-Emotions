@@ -19,7 +19,6 @@ make that state unreachable:
 
 from __future__ import annotations
 
-import inspect
 from dataclasses import replace
 
 import pytest
@@ -183,15 +182,25 @@ def test_no_rule_fires_on_a_neutral_context(emotion: str, neutral_context: Appra
 
 
 def _modulating_emotions() -> set[str]:
-    """Emotions the modulator actually reads.
+    """Emotions whose catalog effects change search (not ``surface_only`` only).
 
-    Matches any quoted occurrence rather than the ``_strength(...)`` call shape:
-    some emotions are read through a loop over ``(name, note)`` pairs, so the
-    call-shape pattern silently under-reports and the guard would pass by
-    accident.
+    Wave 2: the if-ladder is gone; catalog ``effects`` are the contract.
+    ``inspect.getsource(modulate_config)`` would miss catalog-driven ids.
     """
-    source = inspect.getsource(modulate_config)
-    return {e for e in RULES if f'"{e}"' in source}
+    by_id = {e["id"]: e for e in emotion_catalog()["emotions"]}
+    acting: set[str] = set()
+    for eid in RULES:
+        effects = [str(x) for x in (by_id.get(eid, {}).get("effects") or [])]
+        if any(x != "surface_only" for x in effects):
+            acting.add(eid)
+    return acting
+
+
+def _appraisable_ids() -> set[str]:
+    """Ids appraisal can actually emit: RULES plus catalog rows with ``when``."""
+    return set(RULES) | {
+        str(entry["id"]) for entry in emotion_catalog()["emotions"] if entry.get("when")
+    }
 
 
 def _stance_driving_emotions() -> set[str]:
@@ -239,7 +248,7 @@ def test_every_emotion_has_a_use_not_merely_a_disclaimer():
 
 def test_stances_only_claim_emotions_the_system_can_actually_appraise():
     """A stance driven by a feeling that never fires is a marketing claim."""
-    invented = _stance_driving_emotions() - set(RULES)
+    invented = _stance_driving_emotions() - _appraisable_ids()
     assert not invented, f"stances claim {sorted(invented)}, which appraisal never derives"
 
 

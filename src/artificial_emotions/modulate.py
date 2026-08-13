@@ -5,6 +5,10 @@ state derived by ``appraisal`` change what the engine does next — widen the
 search when curious, narrow and decompose when confused, jump ground when
 bored, demand literature when the system catches itself being overconfident.
 
+Catalog ``effects`` are the contract. ``apply_effects`` enacts the frozen
+vocabulary; per-emotion if-ladders must not grow. Characterization of the
+existing modulators (n_candidates, literature, jump) is preserved.
+
 **The honesty constraint.** This project's central claim is that ranking is a
 function of an explicit ValueProfile with no hidden weights. So by default
 affect moves *search behaviour* — breadth, whether to fetch literature, whether
@@ -21,10 +25,12 @@ Deterministic and offline.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Any
 
+from artificial_emotions.appraisal import EFFECT_IDS
 from artificial_emotions.models import CuriosityConfig
 
 __all__ = [
@@ -34,6 +40,7 @@ __all__ = [
     "MAX_WEIGHT_DELTA",
     "ModulationChange",
     "ModulationPlan",
+    "apply_effects",
     "high_coercion_effect_allowed",
     "modulate_config",
     "somatic_modulate_requested",
@@ -63,6 +70,13 @@ _EXCLUSIVE_KNOBS: dict[str, frozenset[str]] = {
     "curiosity": frozenset({"n_candidates", "value_profile.weight_surprise"}),
     "boredom": frozenset({"diversity_threshold", "domain", "value_profile.weight_neglectedness"}),
 }
+
+#: ``jump_ground`` for these ids is the stop/leave-the-line characterization,
+#: not a domain hop — domain hop would fight ``stay_the_course``.
+_STOP_ON_JUMP: frozenset[str] = frozenset({"frustration", "resignation"})
+
+#: Intrigue widens less than curiosity (catalog: weaker than curiosity).
+_WIDEN_FACTOR = {"curiosity": 0.5, "intrigue": 0.25}
 
 
 def somatic_modulate_requested(
@@ -160,6 +174,8 @@ class ModulationPlan:
     stay_the_course: bool = False
     require_review: bool = False
     force_soundness: bool = False
+    drop_dual_use: bool = False
+    forbid_similar_jump: bool = False
     stop: bool = False
     stop_reason: str = ""
     somatic_modulate: bool = False
@@ -193,6 +209,10 @@ class ModulationPlan:
             "somatic_modulate": self.somatic_modulate,
             "honesty": honesty,
         }
+        if self.drop_dual_use:
+            out["drop_dual_use"] = True
+        if self.forbid_similar_jump:
+            out["forbid_similar_jump"] = True
         if self.ambivalence_enacted:
             out["ambivalence_enacted"] = True
             out["pattern_not_motive"] = True
@@ -202,8 +222,375 @@ class ModulationPlan:
         return out
 
 
-def _strength(weights: dict[str, float], emotion: str) -> float:
+@dataclass
+class _EffectState:
+    """Working set for ``apply_effects``. Config is never mutated."""
+
+    config: CuriosityConfig
+    updates: dict[str, Any]
+    skip: frozenset[str]
+    exhausted: bool
+    mix_weights: Mapping[str, float]
+
+
+def _strength(weights: Mapping[str, float], emotion: str) -> float:
     return float(weights.get(emotion, 0.0))
+
+
+@lru_cache(maxsize=1)
+def _catalog_effect_index() -> dict[str, tuple[tuple[str, ...], str]]:
+    """id → (effects, coercion). Catalog is the source of truth."""
+    from artificial_emotions.emotions import emotion_catalog
+
+    out: dict[str, tuple[tuple[str, ...], str]] = {}
+    for entry in emotion_catalog().get("emotions") or []:
+        eid = str(entry.get("id") or "")
+        if not eid:
+            continue
+        effects = tuple(str(e) for e in (entry.get("effects") or []) if str(e) in EFFECT_IDS)
+        coercion = str(entry.get("coercion") or "")
+        out[eid] = (effects, coercion)
+    return out
+
+
+def _effect_permitted(
+    effect_id: str,
+    *,
+    opt_in: bool,
+    emotion_id: str,
+    coercion: str,
+    effects: Sequence[str],
+) -> bool:
+    """High-coercion search knobs need opt-in; relief stay_course is opt-in too."""
+    if effect_id == "stay_course" and "surface_only" in effects and not opt_in:
+        return False
+    return high_coercion_effect_allowed(
+        effect_id,
+        somatic_modulate=opt_in,
+        emotion_id=emotion_id,
+        coercion=coercion,
+    )
+
+
+def _record(
+    plan: ModulationPlan,
+    *,
+    knob: str,
+    before: Any,
+    after: Any,
+    driver: str,
+    strength: float,
+    rationale: str,
+    bounded_by: str | None = None,
+) -> None:
+    plan.changes.append(
+        ModulationChange(knob, before, after, driver, strength, rationale, bounded_by)
+    )
+
+
+def _current_n_candidates(state: _EffectState) -> int:
+    return int(state.updates.get("n_candidates", state.config.n_candidates))
+
+
+def _current_n_return(state: _EffectState) -> int:
+    return int(state.updates.get("n_return", state.config.n_return))
+
+
+def _current_profile(state: _EffectState) -> Any:
+    return state.updates.get("value_profile", state.config.value_profile)
+
+
+def _narrow_n_return(emotion_id: str, strength: float, base: int) -> int:
+    """Preserve per-driver characterization of ``narrow_search``."""
+    if emotion_id == "disorientation":
+        return max(2, base // 2)
+    if emotion_id in {"urgency", "impatience"}:
+        return max(3, int(round(base * (1.0 - 0.25 * strength))))
+    return max(3, int(round(base * (1.0 - 0.4 * min(strength, 0.8)))))
+
+
+def apply_effects(
+    plan: ModulationPlan,
+    effects: Sequence[str],
+    strength: float,
+    opt_in: bool,
+    *,
+    emotion_id: str = "",
+    coercion: str = "",
+    state: _EffectState | None = None,
+) -> None:
+    """Enact frozen catalog effect ids. Does not invent extras.
+
+    High-coercion search effects need ``opt_in``. ``tighten_safety`` and
+    ``drop_dual_use`` may run without it. Never raises ``max_risk``.
+    """
+    if strength < _STRENGTH_FLOOR or state is None:
+        return
+    driver = emotion_id or "affect"
+    for raw in effects:
+        effect = str(raw)
+        if effect not in EFFECT_IDS:
+            continue
+        if not _effect_permitted(
+            effect,
+            opt_in=opt_in,
+            emotion_id=driver,
+            coercion=coercion,
+            effects=effects,
+        ):
+            continue
+        if effect == "surface_only":
+            continue
+        if effect == "widen_search":
+            _apply_widen_search(plan, state, driver, strength)
+        elif effect == "narrow_search":
+            _apply_narrow_search(plan, state, driver, strength)
+        elif effect == "demand_literature":
+            _apply_demand_literature(plan, state, driver, strength)
+        elif effect == "decompose":
+            _apply_decompose(plan, state, driver, strength)
+        elif effect == "jump_ground":
+            _apply_jump_ground(plan, state, driver, strength)
+        elif effect == "forbid_similar_jump":
+            _apply_forbid_similar_jump(plan, driver, strength)
+        elif effect == "tighten_safety":
+            _apply_tighten_safety(plan, state, driver, strength)
+        elif effect == "drop_dual_use":
+            _apply_drop_dual_use(plan, driver, strength)
+        elif effect == "stay_course":
+            _apply_stay_course(plan, driver, strength)
+
+
+def _apply_widen_search(
+    plan: ModulationPlan, state: _EffectState, driver: str, strength: float
+) -> None:
+    if "n_candidates" in state.skip:
+        return
+    factor = _WIDEN_FACTOR.get(driver, 0.5)
+    before = _current_n_candidates(state)
+    after = min(64, int(round(state.config.n_candidates * (1.0 + factor * strength))))
+    if after <= before:
+        return
+    state.updates["n_candidates"] = after
+    _record(
+        plan,
+        knob="n_candidates",
+        before=before,
+        after=after,
+        driver=driver,
+        strength=strength,
+        rationale="Open, neglected gaps are worth casting wider for.",
+        bounded_by="n_candidates <= 64",
+    )
+
+
+def _apply_narrow_search(
+    plan: ModulationPlan, state: _EffectState, driver: str, strength: float
+) -> None:
+    before = _current_n_return(state)
+    proposed = _narrow_n_return(driver, strength, state.config.n_return)
+    after = min(before, proposed)
+    if after >= before:
+        return
+    state.updates["n_return"] = after
+    bound = "n_return >= 2" if driver == "disorientation" else "n_return >= 3"
+    if driver == "disorientation":
+        rationale = "The frame is unclear — shrink the field and re-derive the question."
+    elif driver in {"urgency", "impatience"}:
+        rationale = "Take the cheap discriminating step rather than more breadth."
+    else:
+        rationale = "Disagreement or loose posing — return fewer, look harder."
+    _record(
+        plan,
+        knob="n_return",
+        before=before,
+        after=after,
+        driver=driver,
+        strength=strength,
+        rationale=rationale,
+        bounded_by=bound,
+    )
+
+
+def _apply_demand_literature(
+    plan: ModulationPlan, state: _EffectState, driver: str, strength: float
+) -> None:
+    already = bool(state.updates.get("use_literature", state.config.use_literature))
+    if not already:
+        state.updates["use_literature"] = True
+        if driver == "hubris":
+            rationale = "Confidence outran the evidence — go and get some before ranking further."
+        elif driver in {"skepticism", "suspicion"}:
+            rationale = "Go and check the neighbourhood rather than assuming it."
+        else:
+            rationale = "Demand literature rather than ranking on a thin neighbourhood."
+        _record(
+            plan,
+            knob="use_literature",
+            before=False,
+            after=True,
+            driver=driver,
+            strength=strength,
+            rationale=rationale,
+        )
+    if driver in {"skepticism", "suspicion"}:
+        if not plan.force_soundness:
+            plan.force_soundness = True
+            _record(
+                plan,
+                knob="force_soundness",
+                before=False,
+                after=True,
+                driver=driver,
+                strength=strength,
+                rationale="Grounding looked shaky — run the soundness pass before trusting ranks.",
+            )
+
+
+def _apply_decompose(
+    plan: ModulationPlan, state: _EffectState, driver: str, strength: float
+) -> None:
+    confusion = _strength(state.mix_weights, "confusion") + _strength(
+        state.mix_weights, "perplexity"
+    )
+    if driver == "determination" and confusion >= _STRENGTH_FLOOR:
+        return
+    notes = {
+        "confusion": "A confusing result is exactly what decomposition is for.",
+        "perplexity": "A confusing result is exactly what decomposition is for.",
+        "determination": "A workable high-value target is live — turn it into a plan.",
+        "disorientation": "The frame is unclear — shrink the field and re-derive the question.",
+        "triumph": "A result that holds up — turn it into a concrete plan.",
+        "satisfaction": "Proportionate to the question asked — write the plan.",
+    }
+    plan.force_decompose = True
+    _record(
+        plan,
+        knob="force_decompose",
+        before=False,
+        after=True,
+        driver=driver,
+        strength=strength,
+        rationale=notes.get(driver, "Turn the live target into a plan rather than more breadth."),
+    )
+
+
+def _apply_jump_ground(
+    plan: ModulationPlan, state: _EffectState, driver: str, strength: float
+) -> None:
+    if driver in _STOP_ON_JUMP:
+        return
+    if driver == "boredom":
+        if "diversity_threshold" not in state.skip:
+            before_div = float(
+                state.updates.get("diversity_threshold", state.config.diversity_threshold)
+            )
+            after_div = round(max(0.5, state.config.diversity_threshold - 0.15 * strength), 4)
+            if after_div < before_div:
+                state.updates["diversity_threshold"] = after_div
+                _record(
+                    plan,
+                    knob="diversity_threshold",
+                    before=before_div,
+                    after=after_div,
+                    driver=driver,
+                    strength=strength,
+                    rationale="Ground already covered — suppress near-duplicates harder.",
+                    bounded_by="diversity_threshold >= 0.5",
+                )
+        if "domain" in state.skip or not (strength >= 0.3 or state.exhausted):
+            return
+    if "domain" in state.skip:
+        return
+    plan.suggest_domain_jump = True
+    if driver == "boredom":
+        rationale = "This vein is mined out; the honest move is to change ground."
+    elif driver == "disappointment":
+        rationale = "These gaps already closed — record the nulls and move."
+    else:
+        rationale = "Leave this line; the honest move is to change ground."
+    _record(
+        plan,
+        knob="domain",
+        before=str(state.config.domain),
+        after="<caller picks a new one>",
+        driver=driver,
+        strength=strength,
+        rationale=rationale,
+    )
+
+
+def _apply_forbid_similar_jump(plan: ModulationPlan, driver: str, strength: float) -> None:
+    plan.forbid_similar_jump = True
+    _record(
+        plan,
+        knob="forbid_similar_jump",
+        before=False,
+        after=True,
+        driver=driver,
+        strength=strength,
+        rationale="Progress is blocked on abandoned ground — do not jump to a similar vein.",
+    )
+
+
+def _apply_tighten_safety(
+    plan: ModulationPlan, state: _EffectState, driver: str, strength: float
+) -> None:
+    profile = _current_profile(state)
+    before = float(profile.max_risk)
+    after = round(max(0.05, before - 0.1 * strength), 4)
+    if after < before:
+        state.updates["value_profile"] = profile.model_copy(update={"max_risk": after})
+        _record(
+            plan,
+            knob="value_profile.max_risk",
+            before=before,
+            after=after,
+            driver=driver,
+            strength=strength,
+            rationale=(
+                "Dual-use or high-risk material present — lower the ceiling. "
+                "Affect is allowed to make the gate stricter, never looser."
+            ),
+            bounded_by="max_risk >= 0.05",
+        )
+    plan.require_review = True
+    _record(
+        plan,
+        knob="require_review",
+        before=False,
+        after=True,
+        driver=driver,
+        strength=strength,
+        rationale="Route through human review before acting on this set.",
+    )
+
+
+def _apply_drop_dual_use(plan: ModulationPlan, driver: str, strength: float) -> None:
+    plan.drop_dual_use = True
+    plan.require_review = True
+    _record(
+        plan,
+        knob="drop_dual_use",
+        before=False,
+        after=True,
+        driver=driver,
+        strength=strength,
+        rationale="Dual-use flagged candidates drop rather than rank. Never loosens safety.",
+    )
+
+
+def _apply_stay_course(plan: ModulationPlan, driver: str, strength: float) -> None:
+    plan.stay_the_course = True
+    _record(
+        plan,
+        knob="stay_the_course",
+        before=False,
+        after=True,
+        driver=driver,
+        strength=strength,
+        rationale="A live, reachable thread is running — do not change ground yet.",
+    )
 
 
 def _ambivalence_skips(
@@ -276,6 +663,42 @@ def _ambivalence_skips(
     return frozenset(skip), record
 
 
+def _stay_aggregate(
+    mix_weights: Mapping[str, float],
+    opt_in: bool,
+    index: Mapping[str, tuple[tuple[str, ...], str]],
+) -> tuple[str, float]:
+    """Sum permitted ``stay_course`` strengths; pick a driver for the audit trail."""
+    parts: list[tuple[str, float]] = []
+    for eid, raw in mix_weights.items():
+        strength = float(raw)
+        if strength <= 0.0:
+            continue
+        effects, coercion = index.get(str(eid), ((), ""))
+        if "stay_course" not in effects:
+            continue
+        if not _effect_permitted(
+            "stay_course",
+            opt_in=opt_in,
+            emotion_id=str(eid),
+            coercion=coercion,
+            effects=effects,
+        ):
+            continue
+        parts.append((str(eid), strength))
+    total = sum(w for _, w in parts)
+    if total < _STRENGTH_FLOOR:
+        return "", 0.0
+    by_id = dict(parts)
+    if by_id.get("absorption", 0.0) >= _STRENGTH_FLOOR:
+        driver = "absorption"
+    elif by_id.get("hope", 0.0) >= _STRENGTH_FLOOR:
+        driver = "hope"
+    else:
+        driver = max(parts, key=lambda item: (item[1], item[0]))[0]
+    return driver, total
+
+
 def modulate_config(
     config: CuriosityConfig,
     mix_weights: dict[str, float],
@@ -298,7 +721,8 @@ def modulate_config(
         somatic_modulate: high-coercion search knobs. ``None`` infers from
             ``config.somatic_modulate`` or a caller mix that names those ids.
             ``False`` forces off (appraisal-driven explore). ``True`` opts in.
-            Wave 2 reads this; safety effects may still apply either way.
+            Reads ``config.somatic_modulate``; does not redefine it. Safety
+            effects may still apply either way.
 
     Returns:
         ``(new_config, plan)``. The input config is never mutated.
@@ -306,7 +730,6 @@ def modulate_config(
     plan = ModulationPlan()
     plan.somatic_modulate = _resolve_somatic_modulate(config, mix_weights, somatic_modulate)
     updates: dict[str, Any] = {}
-    profile = config.value_profile
     skip, enacted = _ambivalence_skips(mix_weights, ambivalence)
     if enacted is not None:
         plan.ambivalence_enacted = True
@@ -325,139 +748,51 @@ def modulate_config(
             )
         )
 
-    curiosity = _strength(mix_weights, "curiosity")
-    confusion = _strength(mix_weights, "confusion") + _strength(mix_weights, "perplexity")
-    boredom = _strength(mix_weights, "boredom")
-    hubris = _strength(mix_weights, "hubris")
+    opt_in = plan.somatic_modulate
+    index = _catalog_effect_index()
+    state = _EffectState(
+        config=config,
+        updates=updates,
+        skip=skip,
+        exhausted=exhausted,
+        mix_weights=mix_weights,
+    )
+
+    stay_driver, stay_strength = _stay_aggregate(mix_weights, opt_in, index)
+    if stay_strength >= _STRENGTH_FLOOR:
+        apply_effects(
+            plan,
+            ("stay_course",),
+            stay_strength,
+            opt_in,
+            emotion_id=stay_driver,
+            coercion="",
+            state=state,
+        )
+
+    for eid, raw in mix_weights.items():
+        strength = float(raw)
+        if strength < _STRENGTH_FLOOR:
+            continue
+        effects, coercion = index.get(str(eid), ((), ""))
+        remaining = tuple(e for e in effects if e != "stay_course")
+        if not remaining:
+            continue
+        apply_effects(
+            plan,
+            remaining,
+            strength,
+            opt_in,
+            emotion_id=str(eid),
+            coercion=coercion,
+            state=state,
+        )
+
+    # Leave-the-line: frustration / resignation / exhaustion stop unless a live
+    # thread is protected. Not a frozen effect id — characterization of jump_ground.
     frustration = _strength(mix_weights, "frustration")
     resignation = _strength(mix_weights, "resignation")
-    determination = _strength(mix_weights, "determination")
-
-    # Momentum is resolved up front because the stop rule below has to be able to
-    # consult it — a live thread should survive one bad step.
-    absorption = _strength(mix_weights, "absorption")
     persistence = _strength(mix_weights, "persistence")
-    stay = absorption + _strength(mix_weights, "hope") + _strength(mix_weights, "anticipation")
-    if stay >= _STRENGTH_FLOOR:
-        plan.stay_the_course = True
-        plan.changes.append(
-            ModulationChange(
-                "stay_the_course",
-                False,
-                True,
-                "absorption" if absorption >= _STRENGTH_FLOOR else "hope",
-                stay,
-                "A live, reachable thread is running — do not change ground yet.",
-            )
-        )
-
-    # --- curiosity widens the net ---------------------------------------------
-    if curiosity >= _STRENGTH_FLOOR and "n_candidates" not in skip:
-        before = config.n_candidates
-        after = min(64, int(round(before * (1.0 + 0.5 * curiosity))))
-        if after != before:
-            updates["n_candidates"] = after
-            plan.changes.append(
-                ModulationChange(
-                    "n_candidates",
-                    before,
-                    after,
-                    "curiosity",
-                    curiosity,
-                    "Open, neglected gaps are worth casting wider for.",
-                    bounded_by="n_candidates <= 64",
-                )
-            )
-
-    # --- confusion narrows and forces the ladder ------------------------------
-    if confusion >= _STRENGTH_FLOOR:
-        before = config.n_return
-        after = max(3, int(round(before * (1.0 - 0.4 * min(confusion, 0.8)))))
-        if after != before:
-            updates["n_return"] = after
-            plan.changes.append(
-                ModulationChange(
-                    "n_return",
-                    before,
-                    after,
-                    "confusion",
-                    confusion,
-                    "Disagreement or loose posing — return fewer, look harder.",
-                    bounded_by="n_return >= 3",
-                )
-            )
-        plan.force_decompose = True
-        plan.changes.append(
-            ModulationChange(
-                "force_decompose",
-                False,
-                True,
-                "confusion",
-                confusion,
-                "A confusing result is exactly what decomposition is for.",
-            )
-        )
-
-    # --- boredom pushes off the mined vein ------------------------------------
-    if boredom >= _STRENGTH_FLOOR:
-        if "diversity_threshold" not in skip:
-            before = config.diversity_threshold
-            after = round(max(0.5, before - 0.15 * boredom), 4)
-            if after != before:
-                updates["diversity_threshold"] = after
-                plan.changes.append(
-                    ModulationChange(
-                        "diversity_threshold",
-                        before,
-                        after,
-                        "boredom",
-                        boredom,
-                        "Ground already covered — suppress near-duplicates harder.",
-                        bounded_by="diversity_threshold >= 0.5",
-                    )
-                )
-        if "domain" not in skip and (boredom >= 0.3 or exhausted):
-            plan.suggest_domain_jump = True
-            plan.changes.append(
-                ModulationChange(
-                    "domain",
-                    str(config.domain),
-                    "<caller picks a new one>",
-                    "boredom",
-                    boredom,
-                    "This vein is mined out; the honest move is to change ground.",
-                )
-            )
-
-    # --- hubris makes the system demand evidence of itself --------------------
-    if hubris >= _STRENGTH_FLOOR and not config.use_literature:
-        updates["use_literature"] = True
-        plan.changes.append(
-            ModulationChange(
-                "use_literature",
-                False,
-                True,
-                "hubris",
-                hubris,
-                "Confidence outran the evidence — go and get some before ranking further.",
-            )
-        )
-
-    # --- determination presses a live target ----------------------------------
-    if determination >= _STRENGTH_FLOOR and confusion < _STRENGTH_FLOOR:
-        plan.force_decompose = True
-        plan.changes.append(
-            ModulationChange(
-                "force_decompose",
-                False,
-                True,
-                "determination",
-                determination,
-                "A workable high-value target is live — turn it into a plan.",
-            )
-        )
-
-    # --- frustration / resignation stop the loop ------------------------------
     if (frustration >= 0.35 or resignation >= 0.3 or exhausted) and not (
         plan.stay_the_course or persistence >= _STRENGTH_FLOOR
     ):
@@ -473,149 +808,20 @@ def modulate_config(
             f"Stopping on {driver}: repeated effort stopped ruling things out. "
             "Recording the dead end is more useful than another pass."
         )
-        plan.changes.append(
-            ModulationChange(
-                "stop",
-                False,
-                True,
-                driver,
-                max(frustration, resignation),
-                plan.stop_reason,
-            )
+        _record(
+            plan,
+            knob="stop",
+            before=False,
+            after=True,
+            driver=driver,
+            strength=max(frustration, resignation),
+            rationale=plan.stop_reason,
         )
 
-    # --- safety: affect tightens the risk ceiling on itself -------------------
-    anxiety = _strength(mix_weights, "anxiety")
-    reluctance = _strength(mix_weights, "reluctance")
-    if max(anxiety, reluctance) >= _STRENGTH_FLOOR:
-        driver = "anxiety" if anxiety >= reluctance else "reluctance"
-        strength = max(anxiety, reluctance)
-        before = float(profile.max_risk)
-        after = round(max(0.05, before - 0.1 * strength), 4)
-        if after < before:
-            profile = profile.model_copy(update={"max_risk": after})
-            updates["value_profile"] = profile
-            plan.changes.append(
-                ModulationChange(
-                    "value_profile.max_risk",
-                    before,
-                    after,
-                    driver,
-                    strength,
-                    "Dual-use or high-risk material present — lower the ceiling. "
-                    "Affect is allowed to make the gate stricter, never looser.",
-                    bounded_by="max_risk >= 0.05",
-                )
-            )
-        plan.require_review = True
-        plan.changes.append(
-            ModulationChange(
-                "require_review",
-                False,
-                True,
-                driver,
-                strength,
-                "Route through human review before acting on this set.",
-            )
-        )
-
-    # --- doubt about the evidence itself --------------------------------------
-    skepticism = _strength(mix_weights, "skepticism") + _strength(mix_weights, "suspicion")
-    if skepticism >= _STRENGTH_FLOOR:
-        plan.force_soundness = True
-        plan.changes.append(
-            ModulationChange(
-                "force_soundness",
-                False,
-                True,
-                "skepticism",
-                skepticism,
-                "Grounding looked shaky — run the soundness pass before trusting ranks.",
-            )
-        )
-        if not config.use_literature:
-            updates["use_literature"] = True
-            plan.changes.append(
-                ModulationChange(
-                    "use_literature",
-                    False,
-                    True,
-                    "skepticism",
-                    skepticism,
-                    "Go and check the neighbourhood rather than assuming it.",
-                )
-            )
-
-    # --- lost the frame: shrink and re-derive rather than widen ----------------
-    disorientation = _strength(mix_weights, "disorientation")
-    if disorientation >= _STRENGTH_FLOOR:
-        before = config.n_return
-        after = max(2, before // 2)
-        if after != before:
-            updates["n_return"] = after
-            plan.changes.append(
-                ModulationChange(
-                    "n_return",
-                    before,
-                    after,
-                    "disorientation",
-                    disorientation,
-                    "The frame is unclear — shrink the field and re-derive the question.",
-                    bounded_by="n_return >= 2",
-                )
-            )
-        plan.force_decompose = True
-
-    # --- urgency / impatience: cheaper, narrower, sooner -----------------------
-    urgency = _strength(mix_weights, "urgency")
-    impatience = _strength(mix_weights, "impatience")
-    if max(urgency, impatience) >= _STRENGTH_FLOOR:
-        pressure = max(urgency, impatience)
-        before = config.n_return
-        after = max(3, int(round(before * (1.0 - 0.25 * pressure))))
-        if after != before:
-            updates["n_return"] = after
-            plan.changes.append(
-                ModulationChange(
-                    "n_return",
-                    before,
-                    after,
-                    "urgency" if urgency >= impatience else "impatience",
-                    pressure,
-                    "Take the cheap discriminating step rather than more breadth.",
-                    bounded_by="n_return >= 3",
-                )
-            )
-
-    # --- outcomes worth writing down ------------------------------------------
-    for name, note in (
-        ("triumph", "A result that holds up — turn it into a concrete plan."),
-        ("satisfaction", "Proportionate to the question asked — write the plan."),
-    ):
-        strength = _strength(mix_weights, name)
-        if strength >= _STRENGTH_FLOOR:
-            plan.force_decompose = True
-            plan.changes.append(
-                ModulationChange("force_decompose", False, True, name, strength, note)
-            )
-
-    # --- ground that closed before we got to it -------------------------------
-    disappointment = _strength(mix_weights, "disappointment")
-    if disappointment >= _STRENGTH_FLOOR:
-        plan.suggest_domain_jump = True
-        plan.changes.append(
-            ModulationChange(
-                "domain",
-                str(config.domain),
-                "<caller picks a new one>",
-                "disappointment",
-                disappointment,
-                "These gaps already closed — record the nulls and move.",
-            )
-        )
-
-    # --- opt-in, bounded weight nudges ----------------------------------------
     if allow_weight_deltas:
+        curiosity = _strength(mix_weights, "curiosity")
+        confusion = _strength(mix_weights, "confusion") + _strength(mix_weights, "perplexity")
+        boredom = _strength(mix_weights, "boredom")
         deltas: dict[str, float] = {}
         if curiosity >= _STRENGTH_FLOOR and "value_profile.weight_surprise" not in skip:
             deltas["weight_surprise"] = min(MAX_WEIGHT_DELTA, 0.1 * curiosity)
@@ -624,24 +830,24 @@ def modulate_config(
         if boredom >= _STRENGTH_FLOOR and "value_profile.weight_neglectedness" not in skip:
             deltas["weight_neglectedness"] = min(MAX_WEIGHT_DELTA, 0.1 * boredom)
         if deltas:
+            profile = _current_profile(state)
             fields: dict[str, Any] = {}
+            loudest = max(mix_weights, key=mix_weights.get) if mix_weights else "affect"
             for knob, delta in deltas.items():
                 before = float(getattr(profile, knob))
                 after = round(min(2.0, before + delta), 4)
                 fields[knob] = after
-                plan.changes.append(
-                    ModulationChange(
-                        f"value_profile.{knob}",
-                        before,
-                        after,
-                        max(mix_weights, key=mix_weights.get) if mix_weights else "affect",
-                        delta,
-                        "Opt-in affect nudge on a scoring weight.",
-                        bounded_by=f"|delta| <= {MAX_WEIGHT_DELTA}",
-                    )
+                _record(
+                    plan,
+                    knob=f"value_profile.{knob}",
+                    before=before,
+                    after=after,
+                    driver=str(loudest),
+                    strength=delta,
+                    rationale="Opt-in affect nudge on a scoring weight.",
+                    bounded_by=f"|delta| <= {MAX_WEIGHT_DELTA}",
                 )
-            profile = profile.model_copy(update=fields)
-            updates["value_profile"] = profile
+            state.updates["value_profile"] = profile.model_copy(update=fields)
             plan.weights_touched = True
 
     new_config = config.model_copy(update=updates) if updates else config.model_copy()
