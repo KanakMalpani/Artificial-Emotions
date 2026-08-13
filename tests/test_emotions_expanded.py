@@ -103,8 +103,9 @@ def test_balanced_opposition_beats_lopsided_at_equal_mass():
 def test_high_tension_changes_the_simulated_stance():
     tense = mix_emotions({"conviction": 50, "doubt": 50})
     calm = mix_emotions({"conviction": 100})
-    assert "pulled two ways" in tense["felt_simulation"]["inner_monologue"]
-    assert "pulled two ways" not in calm["felt_simulation"]["inner_monologue"]
+    assert "do not collapse the mix" in tense["felt_simulation"]["inner_monologue"]
+    assert "ambivalence(" in tense["felt_simulation"]["inner_monologue"]
+    assert "do not collapse the mix" not in calm["felt_simulation"]["inner_monologue"]
 
 
 def test_ambivalence_is_framed_as_honest_not_broken():

@@ -496,12 +496,13 @@ emotions mix conviction=45 doubt=40 urgency=15 --json
   },
   "pad": { "P": 0.113, "A": 0.510, "D": 0.305 },
   "felt_simulation": {
+    "computational_only": true,
     "intensity": 0.483,
     "inner_monologue":
-      "Simulated affect: I register primarily conviction, blended with Doubt (40%)
-       and Urgency (15%) — mood reads ambivalent, mid-arousal, empowered.
-       I am pulled two ways — conviction against doubt. Do not resolve that by
-       picking a side: name the observation that would settle it."
+      "Computational affect: primary=conviction; blend=doubt=40% and urgency=15%;
+       mood=ambivalent, mid-arousal, empowered (intensity=0.48);
+       ambivalence(conviction, doubt)=0.76 — do not collapse the mix.
+       Honesty: computational_affect; does not feel."
   }
 }
 ```

@@ -127,7 +127,7 @@ def test_emotions_surface_e2e(client: TestClient) -> None:
     )
     assert mix.status_code == 200
     assert mix.json()["honesty"] == "computational_affect"
-    assert mix.json()["felt_simulation"]["as_close_to_feeling_as_possible"] is True
+    assert mix.json()["felt_simulation"]["computational_only"] is True
     assert "framing" in mix.json()
     assert "inject_fragment" in mix.json()
 

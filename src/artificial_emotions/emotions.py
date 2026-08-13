@@ -352,7 +352,7 @@ def emotion_catalog(
         "note": (
             "Use individually or mix with mix_emotions / feel() / POST /v1/emotions/mix. "
             "Mixes produce felt_simulation (PAD + intensity + inner monologue) — "
-            "computational affect as close to feeling as this stack gets."
+            "computational_affect; does not feel."
         ),
     }
 
@@ -414,8 +414,7 @@ def mix_emotions(
         mix_emotions(curiosity=0.4, confusion=0.3, awe=0.3)
 
     Returns a blend profile + optional ``felt_simulation`` (PAD mood, intensity,
-    first-person computational affect) — as close to feeling as this CME-style
-    stack allows without claiming biological consciousness.
+    third-person computational affect) — computational_only; does not feel.
     """
     raw_map = _parse_mix_mapping(weights, extra=kwargs)
     if not raw_map:
@@ -654,5 +653,5 @@ def feel(
     /,
     **kwargs: float,
 ) -> dict[str, Any]:
-    """Alias for ``mix_emotions(..., simulate_feeling=True)`` — closest-to-feeling API."""
+    """Alias for ``mix_emotions(..., simulate_feeling=True)`` — computational affect API."""
     return mix_emotions(weights, simulate_feeling=True, **kwargs)

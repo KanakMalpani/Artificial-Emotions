@@ -298,7 +298,7 @@ class MixEmotionsRequest(BaseModel):
     )
     simulate_feeling: bool = Field(
         True,
-        description="Include felt_simulation (PAD mood, intensity, and first-person prose) in response",
+        description="Include felt_simulation (PAD mood, intensity, and computational inner_monologue) in response",
     )
 
     @field_validator("weights")

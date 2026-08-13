@@ -95,6 +95,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 | Axis scores are not EVSI/ENBS | No shared utility / PSA model | VOI worksheet is template fill only |
 | Multi-model / ensemble generation | Artificial Hivemind homogenization risk | Jaccard/embedding diversity + hivemind eval metric; disagreement ≠ value |
 | Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; optional `mix_intensity_cap`; agent safety blurb; no silent user-affect inference |
+| PAD mood carryover (4h half-life) | Continuity of stored P/A/D across sessions | Computational carryover, not a VAD experience claim |
 | No longitudinal outcome calibration yet | Need impact follow-up data | Preference JSONL + thin re-rank + tiny weight hints; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |
 | Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains; agentic scaffolding can uplift dual-use proxies (BioVeil MATRIX) | Human review hook + LIMITS residual; do not strip risk from inject/MCP; not BioVeil-certified |

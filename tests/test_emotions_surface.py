@@ -76,7 +76,7 @@ def test_mix_emotions_percentages():
     assert "pad" in blend and "P" in blend["pad"]
     assert "curiosity_target" in blend["cue_tags"] or "information_gap" in blend["cue_tags"]
     assert blend["felt_simulation"] is not None
-    assert blend["felt_simulation"]["as_close_to_feeling_as_possible"] is True
+    assert blend["felt_simulation"]["computational_only"] is True
     assert "inner_monologue" in blend["felt_simulation"]
     assert "intensity" in blend["felt_simulation"]
     assert (
@@ -90,7 +90,9 @@ def test_feel_alias():
 
     out = feel(curiosity=50, awe=50)
     assert out["felt_simulation"]["intensity"] >= 0
-    assert "Simulated affect" in out["felt_simulation"]["inner_monologue"]
+    assert "Computational affect" in out["felt_simulation"]["inner_monologue"]
+    assert out["felt_simulation"]["computational_only"] is True
+    assert "does not feel" in out["felt_simulation"]["inner_monologue"]
 
 
 def test_mix_emotions_unit_weights_and_kwargs():

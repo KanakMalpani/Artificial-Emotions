@@ -116,7 +116,7 @@ def test_avoidance_is_not_claimed_as_a_motive() -> None:
 
     feeling = apply_avoidance_to_feeling(
         {
-            "inner_monologue": "Simulated affect: I register primarily curiosity.",
+            "inner_monologue": "Computational affect: primary=curiosity. Honesty: computational_affect; does not feel.",
             "not_claimed": ["biological emotion"],
         },
         patterns,

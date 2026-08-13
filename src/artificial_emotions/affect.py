@@ -1,8 +1,8 @@
 """PAD mood, felt-simulation prose, and blend/tension structure.
 
 The internals behind ``mix_emotions``: how a weighted set of catalog entries
-becomes a mood reading, a first-person simulation, a named compound, and a
-measure of how much of the mix is in tension with itself.
+becomes a mood reading, a third-person computational inner_monologue, a named
+compound, and a measure of how much of the mix is in tension with itself.
 
 Also owns A2 mood carryover decay and appraisal-threshold bias: session mood
 survives the process, decays exponentially toward neutral, and may shift how
@@ -227,53 +227,52 @@ def simulation_prose(
     triad_name: str | None = None,
     ambivalence: dict[str, Any] | None = None,
 ) -> str:
-    """First-person-style simulation text (labeled as computational)."""
+    """Third-person computational affect text (not phenomenal first-person)."""
+    shown_primary = str((by_id.get(primary) or {}).get("id") or primary_label or primary).lower()
     qual = pad_qualitative(pad)
     parts = [
-        f"Simulated affect: I register primarily {primary_label.lower()}",
+        f"Computational affect: primary={shown_primary}",
     ]
     if len(ordered) > 1:
-        secondary = [f"{by_id[eid].get('label', eid)} ({100 * w:.0f}%)" for eid, w in ordered[1:3]]
-        parts.append(", blended with " + " and ".join(secondary))
+        secondary = [f"{eid}={100 * w:.0f}%" for eid, w in ordered[1:3]]
+        parts.append("; blend=" + " and ".join(secondary))
     parts.append(
-        f" — mood reads {qual['valence']}, {qual['arousal']}, {qual['dominance']} "
-        f"(intensity {intensity:.2f}"
+        f"; mood={qual['valence']}, {qual['arousal']}, {qual['dominance']} "
+        f"(intensity={intensity:.2f}"
     )
     if dyad_name:
-        parts.append(f", compound hint “{dyad_name}”")
+        parts.append(f", compound={dyad_name}")
     if triad_name:
-        parts.append(f", blend “{triad_name}”")
-    parts.append(").")
+        parts.append(f", triad={triad_name}")
+    parts.append(")")
     # Opposing entries held at once change how the stance should be used.
     tension = float((ambivalence or {}).get("score") or 0.0)
     top_pair = ((ambivalence or {}).get("pairs") or [{}])[0].get("components")
     if tension >= 0.35 and top_pair:
         parts.append(
-            f" I am pulled two ways — {top_pair[0]} against {top_pair[1]}. "
-            "Do not resolve that by picking a side: name the observation that "
-            "would settle it."
+            f"; ambivalence({top_pair[0]}, {top_pair[1]})={tension:.2f} "
+            "— do not collapse the mix. Name the observation that would settle it."
         )
     elif tension > 0 and top_pair:
         parts.append(
-            f" A minor counter-current of {top_pair[1]} sits under the {top_pair[0]}; "
-            "worth keeping visible rather than smoothing away."
+            f"; ambivalence({top_pair[0]}, {top_pair[1]})={tension:.2f} "
+            "— keep both weights visible rather than smoothing away."
         )
-    # Somatic / investigation metaphor (WASABI-ish, not clinical).
+    # Investigation next-step hint from PAD (computational, not a felt urge).
     if pad["A"] >= 0.6 and pad["P"] >= 0.0:
-        parts.append(" The pull is to lean in: name the incongruity and take one probing step.")
+        parts.append(" Next: name the incongruity and take one probing step.")
     elif pad["A"] >= 0.55 and pad["P"] < 0:
         parts.append(
-            " Activation is high with negative valence — scaffold carefully; "
+            " High activation with negative valence — scaffold carefully; "
             "shrink the question before escalating stakes."
         )
     elif pad["A"] < 0.4:
         parts.append(
-            " Arousal is low — deepen interest with a concrete unknown rather than shock tactics."
+            " Low arousal — deepen the unknown with a concrete question rather than shock tactics."
         )
     else:
-        parts.append(
-            " Hold the mix as a lived investigative stance: one experiment, one falsifier."
-        )
+        parts.append(" Investigative stance: one experiment, one falsifier.")
+    parts.append(" Honesty: computational_affect; does not feel.")
     return "".join(parts)
 
 
@@ -286,7 +285,7 @@ def build_felt_simulation(
     triad: dict[str, Any] | None = None,
     ambivalence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Closest-to-feeling layer: intensity, mood labels, first-person simulation."""
+    """Computational affect layer: intensity, mood labels, third-person inner_monologue."""
     # Intensity: arousal + how peaked the mix is (low entropy → sharper “feeling”).
     masses = [w for _, w in ordered]
     peak = masses[0] if masses else 0.0
@@ -319,7 +318,7 @@ def build_felt_simulation(
     )
     return {
         "mode": "computational_affect",
-        "as_close_to_feeling_as_possible": True,
+        "computational_only": True,
         "primary_feeling": primary_id,
         "primary_label": primary_label,
         "intensity": round(intensity, 4),
