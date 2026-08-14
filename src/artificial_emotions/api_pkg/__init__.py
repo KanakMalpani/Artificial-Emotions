@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from artificial_emotions import __version__
+from artificial_emotions.api_pkg.audit import AuditMiddleware
 from artificial_emotions.api_pkg.error_handlers import register_error_handlers
 from artificial_emotions.api_pkg.rate_limit import RateLimitMiddleware
 from artificial_emotions.api_pkg.routers import (
@@ -41,7 +42,8 @@ def create_app() -> FastAPI:
     )
 
     origins = cors_origins()
-    # Order: CORS (inner) → auth → rate-limit (outer). Starlette: last-added = outermost.
+    # Order: CORS (inner) → auth → rate-limit → audit (outer).
+    # Starlette: last-added = outermost, so 401/429 still reach the audit log.
     application.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
@@ -51,6 +53,7 @@ def create_app() -> FastAPI:
     )
     application.add_middleware(OptionalApiKeyMiddleware)
     application.add_middleware(RateLimitMiddleware)
+    application.add_middleware(AuditMiddleware)
 
     register_error_handlers(application)
 

@@ -408,7 +408,7 @@ Horizons remain ambitious; each phase is a **checklist of work orders**, not vag
 | **Now** | v0.1 | Shipped local curiosity layer + plugins |
 | **Near** | **v0.2** | Harden, embeddings optional, provider proof, PyPI |
 | **Mid** | **v0.3 → v1.0** | Eval, multi-lit, safety, credible trust bar |
-| **Long** | **v1.x → v2+** | Flywheel, packs, enterprise, ecosystem |
+| **Long** | **v1.x → v2+** | Flywheel, packs, enterprise (**local-v1 shipped**; multi-tenant/SLOs remain §10), ecosystem |
 | **Moonshots** | research tracks | Speculative — not default backlog |
 
 ```mermaid
@@ -496,10 +496,10 @@ Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding de
 | Data flywheel | Schema for ranked-Q → outcomes; multi-outcome; never citations-only |
 | Preference learning | Learn weights **within** a profile — never universal rank |
 | Domain packs | Versioned packs + seed quality review |
-| Enterprise/API | Keys, quotas, audit — must not break offline demos |
+| Enterprise/API | **Local-v1 shipped** (0.4.1): opt-in keys, in-process rate limit, CORS deny, opt-in per-key quota (`CURIOSITY_API_QUOTA_*`), opt-in audit JSONL (`CURIOSITY_AUDIT_LOG`). Unset keeps offline/local DX. **Not** multi-tenant, SSO, TLS, WAF, or SLOs — those remain §10 “production-ready enterprise.” |
 | Agent ecosystems | Deeper tool examples (LangGraph, etc.) only with recipes |
 | Interop | Export / webhooks for “new unknowns” |
-| v2 bar | Calibration reports; profile sharing; Curiosity Layer API for AI Scientists; threat model |
+| v2 bar | Calibration reports; profile sharing; Curiosity Layer API for AI Scientists; production threat model + SLOs (local-v1 threat model already ships) |
 
 **Even at v2+, never claim:** omniscient literature; value-neutral science priority; replacement of human judgment; guaranteed breakthroughs.
 
@@ -569,7 +569,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | W8 Domains | Seeds | `seeds.py`, `CONTRIBUTING.md` | Packs + quality bar |
 | W9 Packaging | Distro | `pyproject.toml` | Next upload: Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)); extras; no secrets |
 | W10 Community | Process | GitHub Issues, CONTRIBUTING | Good-first-issues ↔ F-modes |
-| W11 Enterprise | API ops | `api.py` | Optional auth; don't break local demos |
+| W11 Enterprise | API ops | `api.py`, `api_pkg/` | Local-v1 shipped: optional auth, rate limit, opt-in quota/audit; don't break local demos. Not multi-tenant. |
 | W12 Flywheel | Outcomes | future store/schema | Multi-outcome; anti-McNamara |
 | W13 Docs loop | Docs | `docs/LIMITS.md` ↔ README claims | Tag open Qs to milestones |
 
@@ -714,6 +714,7 @@ Stay in the wedge. Absorb ideas as modules, not mission creep.
 | This playbook / roadmap | `docs/ROADMAP.md` |
 | 1-page summary | `docs/ROADMAP_SUMMARY.md` |
 | Honest bounds | `docs/LIMITS.md` |
+| Local HTTP threat model | `docs/THREAT_MODEL.md` |
 | Demo proofs | `docs/PROOFS.md` |
 | Architecture | `docs/ARCHITECTURE.md` |
 | Plugins | `docs/PLUGINS.md` |

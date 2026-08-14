@@ -7,6 +7,11 @@ a condition. This is on `main` at package **0.4.1** — there is **no 0.4.2 tag*
 yet, and this block is not a version bump.
 
 ### Added
+- **Local HTTP threat model.** `docs/THREAT_MODEL.md` names the v0.4.1
+  `emotions serve` posture (in-process rate limit, CORS deny-by-default,
+  auth opt-in, opt-in per-key quota, opt-in audit JSONL). Not a production
+  SLO. ROADMAP §7.5 enterprise = this local-v1, not multi-tenant.
+  `GET /v1/agent` honesty points at it.
 - **Outcome-event weight hints.** `learn_profile_weight_hints` consumes
   `event_type=outcome` rows with `score_axes` plus `labels.result` (tiny
   prefer/reject-like deltas; floors so no axis zeros). Silent without usable
@@ -23,6 +28,13 @@ yet, and this block is not a version bump.
   offline JSONL and reports counts, outcome mix, and hint magnitudes — **no
   accuracy %**. Shared `--path` on `eval` (optional; default smoke fixture).
   Not a calibration certificate.
+- **Per-key HTTP quota.** Opt-in `CURIOSITY_API_QUOTA_REQUESTS` plus
+  `CURIOSITY_API_QUOTA_WINDOW_S` (default 86400s). Unset/0 = no quota (local
+  DX unchanged). 429 `quota_exceeded` with `Retry-After`. In-process per
+  matched API key — not multi-tenant, not a billing meter.
+- **Opt-in audit JSONL.** Set `CURIOSITY_AUDIT_LOG` to a file path. Records
+  HTTP method+path and MCP tool name + status only. Default off. Never
+  bodies, headers, query strings, or API keys. Local operator log, not a SIEM.
 
 ### Changed
 - **Explore honors `drop_dual_use` / `forbid_similar_jump`.** Disgust may omit

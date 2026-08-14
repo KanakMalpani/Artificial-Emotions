@@ -109,7 +109,9 @@ def build_parser() -> argparse.ArgumentParser:
         "serve",
         help=(
             "Start the HTTP API (CORS deny-by-default; auth opt-in via "
-            "CURIOSITY_API_KEY; rate limit via CURIOSITY_API_RATE_LIMIT_PER_MINUTE)"
+            "CURIOSITY_API_KEY; rate limit via CURIOSITY_API_RATE_LIMIT_PER_MINUTE; "
+            "opt-in per-key quota via CURIOSITY_API_QUOTA_REQUESTS; "
+            "opt-in audit JSONL via CURIOSITY_AUDIT_LOG)"
         ),
     )
     serve_p.add_argument("--host", default="127.0.0.1")

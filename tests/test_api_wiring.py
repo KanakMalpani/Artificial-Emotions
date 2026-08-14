@@ -94,6 +94,7 @@ def test_middleware_order_rate_limit_auth_cors():
     """Order is load-bearing: Starlette runs the last-added middleware outermost."""
     names = [m.cls.__name__ for m in app.user_middleware]
     assert names == [
+        "AuditMiddleware",
         "RateLimitMiddleware",
         "OptionalApiKeyMiddleware",
         "CORSMiddleware",

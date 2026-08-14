@@ -22,6 +22,7 @@ from artificial_emotions.agent_tools import (
     mcp_resource_read,
     mcp_tool_list,
 )
+from artificial_emotions.api_pkg.audit import record_audit
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "artificial-emotions"
@@ -138,13 +139,16 @@ def handle_message(msg: dict[str, Any]) -> dict[str, Any] | None:
             return _err(id_, INVALID_PARAMS, "arguments must be an object")
         try:
             result = dispatch_tool(name, arguments)
+            record_audit(channel="mcp", name=name, status="ok")
             return _ok(id_, _tool_result(result, is_error=False))
         except KeyError:
+            record_audit(channel="mcp", name=name, status="error")
             return _ok(
                 id_,
                 _tool_result(f"Unknown tool: {name}", is_error=True),
             )
         except Exception as exc:  # noqa: BLE001 — surface to the model
+            record_audit(channel="mcp", name=name, status="error")
             _log(f"tool error ({name}): {exc}")
             return _ok(
                 id_,

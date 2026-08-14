@@ -37,7 +37,7 @@ P1 W1–W9 and P2 W10–W15 are ✅, including PyPI (`artificial-emotions` **0.4
 |---------|----------|--------|
 | **Near** | v0.2 | ✅ Embeddings optional, multi-provider notes, presets, UX honesty, packaging prep |
 | **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge + PyPI 0.4.1; remaining: honesty / proof gates (do not call v1.0 until ROADMAP §10) |
-| **Long** | v1.x→v2+ | Flywheel, preference learning, enterprise, AI-Scientist upstream |
+| **Long** | v1.x→v2+ | Flywheel, preference learning, enterprise (**local-v1 shipped**; multi-tenant/SLOs remain §10), AI-Scientist upstream |
 | **Moonshots** | — | Approximate VOI, surprise search, lab closed-loop, epistemic emotion elicitation — not default backlog |
 
 Phased **work-order checklists**: roadmap **§7**.

@@ -68,6 +68,8 @@ split by concern:
 |--------|-------|
 | `api_pkg/__init__.py` | `create_app()` — middleware, error handlers, router wiring |
 | `api_pkg/security.py` | Opt-in API-key middleware and path/key helpers |
+| `api_pkg/rate_limit.py` | In-process host rate limit + opt-in per-key quota |
+| `api_pkg/audit.py` | Opt-in JSONL audit (HTTP/MCP names + status; default off) |
 | `api_pkg/error_handlers.py` | Exception → stable `{"error": {...}}` envelope |
 | `api_pkg/schemas.py` | Pydantic request models (names are public OpenAPI schemas) |
 | `api_pkg/routers/meta.py` | `/`, `/health`, `/ready`, `/v1/agent`, `/v1/domains` |
@@ -219,6 +221,7 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 - Network: OpenAlex (public), optional Semantic Scholar, optional OpenAI-compatible endpoint.
 - No secrets in repo; API keys via environment only (`.env.example`).
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path / SSRF hygiene).
+- Local `emotions serve` threat model (rate limit, CORS deny, auth opt-in, opt-in per-key quota and audit JSONL; not an SLO): [THREAT_MODEL.md](THREAT_MODEL.md).
 - Literature classifier is heuristic — confidence reflected in output.
 - Rankings require an explicit `ValueProfile` (defaults provided, not hidden).
 - Emotion cues are `annotation_only`; mixes emit `computational_affect` /

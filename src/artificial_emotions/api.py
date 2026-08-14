@@ -6,6 +6,7 @@
 
     api_pkg/__init__.py      app assembly — middleware, handlers, router wiring
     api_pkg/security.py      opt-in API-key middleware
+    api_pkg/audit.py         opt-in JSONL name+status audit (default off)
     api_pkg/error_handlers.py exception → stable JSON envelope
     api_pkg/schemas.py       pydantic request models
     api_pkg/routers/         handlers grouped by URL prefix

@@ -14,6 +14,9 @@ Env reference (see also ``.env.example``)::
     CURIOSITY_API_KEY / ARTIFICIAL_CURIOSITY_API_KEY / CURIOSITY_API_KEYS
     CURIOSITY_CORS_ORIGINS — comma list; default empty (deny). Opt-in e.g. http://127.0.0.1:3000
     CURIOSITY_API_RATE_LIMIT_PER_MINUTE — HTTP soft limit per client host (default 60; 0 disables)
+    CURIOSITY_API_QUOTA_REQUESTS — per-key HTTP budget (unset/0 = no quota, local DX)
+    CURIOSITY_API_QUOTA_WINDOW_S — quota sliding window seconds (default 86400; ignored when quota off)
+    CURIOSITY_AUDIT_LOG — opt-in JSONL path (HTTP/MCP names + status; default off; never bodies)
     CURIOSITY_HOST / CURIOSITY_PORT — serve defaults
     CURIOSITY_MCP_TIER     — MCP tool tier (core|investigate|affect|research|full)
     CURIOSITY_NO_MEMORY    — set to 1 to disable PersistentMemory read/write
@@ -83,6 +86,26 @@ def api_rate_limit_per_minute() -> int:
     return max(0, _env_int("CURIOSITY_API_RATE_LIMIT_PER_MINUTE", 60))
 
 
+def audit_log_path() -> str | None:
+    """Opt-in JSONL path for HTTP/MCP name+status audit. Unset/empty → off."""
+    raw = _env("CURIOSITY_AUDIT_LOG")
+    return raw or None
+
+
+def api_quota_requests() -> int:
+    """Per-key HTTP request budget. ``0`` / unset disables (local DX unchanged)."""
+    return max(0, _env_int("CURIOSITY_API_QUOTA_REQUESTS", 0))
+
+
+def api_quota_window_s() -> int:
+    """Sliding window for ``CURIOSITY_API_QUOTA_REQUESTS``. Default 86400s.
+
+    ``0`` or invalid values fall back to 86400. Ignored when the quota is off.
+    """
+    raw = max(0, _env_int("CURIOSITY_API_QUOTA_WINDOW_S", 86400))
+    return raw if raw > 0 else 86400
+
+
 @dataclass(frozen=True)
 class AppConfig:
     """Resolved runtime settings (non-secret summary safe to expose in /health)."""
@@ -90,6 +113,9 @@ class AppConfig:
     api_keys_configured: bool = False
     cors_origins: tuple[str, ...] = ()
     api_rate_limit_per_minute: int = 60
+    api_quota_requests: int = 0
+    api_quota_window_s: int = 86400
+    audit_log_enabled: bool = False
     host: str = "127.0.0.1"
     port: int = 8000
     llm_timeout_s: float = 90.0
@@ -113,6 +139,9 @@ def get_config() -> AppConfig:
         api_keys_configured=bool(keys),
         cors_origins=tuple(cors_origins()),
         api_rate_limit_per_minute=api_rate_limit_per_minute(),
+        api_quota_requests=api_quota_requests(),
+        api_quota_window_s=api_quota_window_s(),
+        audit_log_enabled=bool(audit_log_path()),
         host=_env("CURIOSITY_HOST", "127.0.0.1") or "127.0.0.1",
         port=int(_env_float("CURIOSITY_PORT", 8000)),
         llm_timeout_s=_env_float("LLM_TIMEOUT_S", 90.0),
@@ -138,7 +167,10 @@ def literature_timeout_s() -> float:
 
 __all__ = [
     "AppConfig",
+    "api_quota_requests",
+    "api_quota_window_s",
     "api_rate_limit_per_minute",
+    "audit_log_path",
     "clear_config_cache",
     "configured_api_keys",
     "cors_origins",

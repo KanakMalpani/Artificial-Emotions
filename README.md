@@ -7,7 +7,7 @@
 *A curiosity engine that ranks what we don't yet know — then decomposes it into something you can actually go and test.*
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-1020%20passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1039%20passing-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -705,7 +705,7 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 1020 tests · 87% · floor enforced
+pytest -q --cov --cov-report=term-missing     # 1039 passed, 1 skipped · 87% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 
@@ -737,7 +737,7 @@ Domain packs, seed questions, eval fixtures, and honesty patches are all welcome
 
 One rule above the rest: **don't add a claim the code can't back.** If a feature needs a caveat, the caveat ships inside the response payload — not in a footnote nobody reads.
 
-**Security.** Keep credentials in local env files; never commit `.env`, keys, or tokens. Before exposing HTTP beyond localhost set `CURIOSITY_API_KEY`, and don't bind `0.0.0.0` without auth. Report vulnerabilities privately to the maintainer rather than in a public issue.
+**Security.** Keep credentials in local env files; never commit `.env`, keys, or tokens. Before exposing HTTP beyond localhost set `CURIOSITY_API_KEY`, and don't bind `0.0.0.0` without auth. Optional name+status audit: `CURIOSITY_AUDIT_LOG=/path/to/audit.jsonl` (default off; never logs bodies or keys). Report vulnerabilities privately to the maintainer rather than in a public issue.
 
 ---
 

@@ -240,6 +240,10 @@ Errors use a stable shape: `{"error":{"code":"unknown_emotion","message":"…"}}
 
 Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health`, `/ready`, and `/` stay open; health reports `api_auth_required`. Do not bind `0.0.0.0` without a key.
 
+Opt-in per-key request budget: set `CURIOSITY_API_QUOTA_REQUESTS` (and optionally `CURIOSITY_API_QUOTA_WINDOW_S`, default 86400). Unset = no quota. Exceeding the budget returns HTTP 429 with `error.code=quota_exceeded`. In-process only — not a billing meter.
+
+Opt-in audit JSONL: set `CURIOSITY_AUDIT_LOG` to a file path. Logs HTTP method+path and MCP tool names plus status. Default off. Never request/response bodies, headers, or API keys.
+
 Central env reference: `artificial_emotions.config` and `.env.example` (`LLM_TIMEOUT_S`, `LITERATURE_TIMEOUT_S`, `CURIOSITY_CORS_ORIGINS`, …).
 
 Example:

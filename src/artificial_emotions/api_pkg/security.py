@@ -23,7 +23,9 @@ __all__ = [
     "OptionalApiKeyMiddleware",
     "api_key_matches",
     "is_auth_open_path",
+    "matching_configured_key",
     "normalize_request_path",
+    "provided_api_key",
     "redact_base_url",
 ]
 
@@ -50,19 +52,34 @@ def is_auth_open_path(path: str) -> bool:
     return p.startswith("/docs/") or p.startswith("/redoc/")
 
 
-def api_key_matches(provided: str, keys: set[str]) -> bool:
-    """Constant-time key check; never raises on length/type mismatch (always → fail closed)."""
+def provided_api_key(request: Request) -> str:
+    """Bearer token or ``X-API-Key``; empty if neither is present."""
+    auth = request.headers.get("authorization") or ""
+    if auth.lower().startswith("bearer "):
+        token = auth[7:].strip()
+        if token:
+            return token
+    return (request.headers.get("x-api-key") or "").strip()
+
+
+def matching_configured_key(provided: str, keys: set[str]) -> str | None:
+    """Return the configured key that matches ``provided``, or ``None`` (fail closed)."""
     if not provided or not isinstance(provided, str):
-        return False
+        return None
     for key in keys:
         if not isinstance(key, str):
             continue
         try:
             if secrets.compare_digest(provided, key):
-                return True
+                return key
         except (TypeError, ValueError):
             continue
-    return False
+    return None
+
+
+def api_key_matches(provided: str, keys: set[str]) -> bool:
+    """Constant-time key check; never raises on length/type mismatch (always → fail closed)."""
+    return matching_configured_key(provided, keys) is not None
 
 
 def redact_base_url(url: str | None) -> str | None:
@@ -84,12 +101,7 @@ class OptionalApiKeyMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         if is_auth_open_path(request.url.path):
             return await call_next(request)
-        provided = ""
-        auth = request.headers.get("authorization") or ""
-        if auth.lower().startswith("bearer "):
-            provided = auth[7:].strip()
-        if not provided:
-            provided = (request.headers.get("x-api-key") or "").strip()
+        provided = provided_api_key(request)
         if not api_key_matches(provided, keys):
             return JSONResponse(
                 status_code=401,

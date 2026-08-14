@@ -65,13 +65,15 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Neglectedness/cost proxies: density/cites + trend/funding cues + investigation-scale lexicon — **not** funding DBs
 - Optional HTTP API keys (`CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS`) — unset = open local demo (WO-0.4.6)
 - In-process HTTP rate limit (`CURIOSITY_API_RATE_LIMIT_PER_MINUTE`, default 60/min; `0` disables) — per-process soft guard, not a WAF
+- Opt-in per-key HTTP quota (`CURIOSITY_API_QUOTA_REQUESTS` / `CURIOSITY_API_QUOTA_WINDOW_S`, default window 86400s) — unset/0 = no quota; in-process; not a billing meter
+- Opt-in JSONL audit (`CURIOSITY_AUDIT_LOG`) of HTTP method+path / MCP tool name + status — default off; never bodies or keys
 - CORS default deny (empty allow list); opt-in via `CURIOSITY_CORS_ORIGINS` (was `*` for the removed web demo)
 - Versioned domain packs (`artificial_emotions/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment, climate, affective science, aging biology, and materials catalysis packs
 - Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness (**503** when not ready)
-- Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS, rate limit
+- Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS, rate limit, quota, audit
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1020)
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1039 passed, 1 skipped)
 - Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
@@ -109,16 +111,24 @@ Honest bounds for **v0.4.1** — do not overclaim.
 | Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — not claimed done |
 | Unauthenticated local HTTP when API key unset | Demo DX by design | Documented; set key + avoid `0.0.0.0` for non-local |
 | HTTP rate limit is per-process only | In-memory sliding window by client host | Soft guard for local serve; use a reverse proxy/WAF for multi-instance |
+| HTTP quota is per-process and per matched key | In-memory sliding window; no key → no quota bucket | Opt-in `CURIOSITY_API_QUOTA_*`; unset keeps local DX; not multi-tenant |
+| Audit JSONL is local names+status only | Opt-in file; not a SIEM | Set `CURIOSITY_AUDIT_LOG`; never logs bodies or keys; default off |
 | CORS default deny; auth still opt-in | Local CLI ergonomics vs browser demos | Set `CURIOSITY_CORS_ORIGINS` and/or API keys explicitly; not production hardening |
 | MCP / `use_llm` can incur provider cost | Tools may call paid LLM hosts | Operator controls keys + MCP tier; no silent billing claims |
 
 ## Security posture (HTTP serve)
 
-Default `emotions serve` is a **local soft guard**, not a hardened public API:
+Default `emotions serve` is a **local soft guard**, not a hardened public API.
+This is the **v1 baseline (local-v1)**. ROADMAP §7.5 “enterprise” means this
+posture — opt-in keys, in-process rate limit, CORS deny, opt-in per-key quota,
+opt-in audit JSONL — **not** multi-tenant SSO, TLS, a WAF, or SLOs.
+Detail: [`THREAT_MODEL.md`](THREAT_MODEL.md) (not a production SLO).
 
 - **Rate limiting:** in-process sliding window (default 60 req / 60s per client host). Not multi-instance safe; not a WAF.
+- **Quota:** opt-in per matched API key (`CURIOSITY_API_QUOTA_REQUESTS` / `CURIOSITY_API_QUOTA_WINDOW_S`). Unset or `0` = no quota. Open local serve (no keys) does not apply a quota. Not a billing meter.
 - **Auth:** required only when `CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS` (or alias) is set. Unset keys → open routes (local CLI DX). Binding `0.0.0.0` without keys is operator risk.
 - **CORS:** default empty allow list (deny). Opt-in via `CURIOSITY_CORS_ORIGINS`. Previously defaulted to `*` for the removed web demo.
+- **Audit:** opt-in JSONL via `CURIOSITY_AUDIT_LOG` (HTTP method+path and MCP tool name + status). Default off. Never request/response bodies, headers, query strings, or API keys. Local operator log, not a SIEM.
 - **No production hardening claim** — put a reverse proxy, TLS, and shared rate limits in front if you expose the API.
 
 ## Persistent memory (privacy)

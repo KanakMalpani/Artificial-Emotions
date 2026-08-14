@@ -47,6 +47,7 @@ def health() -> dict[str, Any]:
         "profiles": list_profile_names(),
         "api_auth_required": cfg.api_auth_required,
         "cors_origins": list(cfg.cors_origins),
+        "audit_log_enabled": cfg.audit_log_enabled,
     }
 
 
@@ -157,8 +158,17 @@ def agent_manifest() -> dict[str, Any]:
             "Dual-use risk filters: heuristics, not biosecurity authority",
             "Provoke: investigation framing for agents/humans — not persuasion toolkit",
             "Read curiosity://limits / docs/LIMITS.md before treating ranks as truth",
+            "Local HTTP serve: in-process rate limit, CORS deny-by-default, auth opt-in, opt-in per-key quota (unset CURIOSITY_API_QUOTA_REQUESTS = no quota) — not a production SLO (docs/THREAT_MODEL.md)",
+            "Opt-in audit JSONL (CURIOSITY_AUDIT_LOG): HTTP/MCP names + status only — never bodies or keys; default off",
         ],
         "resources_first": ["curiosity://limits", "curiosity://profiles", "curiosity://domains"],
+        "threat_model": "docs/THREAT_MODEL.md",
+        "audit": {
+            "opt_in_env": "CURIOSITY_AUDIT_LOG",
+            "records": "HTTP method+path and MCP tool name + status",
+            "never": "request/response bodies, headers, query strings, API keys",
+            "default": "off",
+        },
         "safety": (
             "Cues and emotion mixes are authoring/framing annotations — the software "
             "does not feel and does not infer user affect from biometrics. Provoke is "
