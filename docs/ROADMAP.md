@@ -177,6 +177,7 @@ When idle: stay on **P0** (honesty loop). Do not start v1.x calibration unless t
 |----|-------|-------|
 | **P0** | Honesty loop | Keep LIMITS/PROOFS true; green suite — always eligible |
 | **W-explore** | ✅ Enacted `drop_dual_use` / `forbid_similar_jump` in `explore.py` | Explore may omit `dual_use_high` on disgust; anger opt-in skips similar-domain jumps. Heuristic residual remains — not dual-use solved |
+| **W-rules** | ✅ Catalog-only appraisal dispatch | Production `appraise_run` walks catalog `when` only. `RULES` kept as a test golden (not a second runtime) |
 | **W-cal** | v1.x calibration / preference learning | Longitudinal flywheel; not an install gate |
 
 Do **not** call the product v1.0 until **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP.

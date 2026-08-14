@@ -29,7 +29,7 @@
 | diversity | `diversity.py` | Near-dup suppression |
 | brief | `brief.py` | Investigation briefs |
 | decompose | `decompose.py` | Curiosity depth: sub-questions, first step, falsifiers, stop rules |
-| appraisal | `appraisal.py` | Derives affect *from* a run — emotion as output, with evidence |
+| appraisal | `appraisal.py` | Derives affect *from* a run — emotion as output, with evidence. Runtime dispatch is catalog `when`; `RULES` lambdas are a characterization golden |
 | trajectory | `trajectory.py` | Session memory: seen ids, mined terms, dead ends, surprises |
 | modulate | `modulate.py` | Bounded, logged config changes driven by affect |
 | explore | `explore.py` | The loop: appraise → feel → modulate → remember |
@@ -132,7 +132,7 @@ rank → appraise → feel → modulate → remember → rank
 
 | Stage | Module | Contract |
 |-------|--------|----------|
-| Appraise | `appraisal.py` | Every signal carries `because` + `evidence`. Deterministic. |
+| Appraise | `appraisal.py` | Catalog `when` is the runtime contract; `RULES` is a test golden. Every signal carries `because` + `evidence`. Deterministic. |
 | Feel | `emotions.py` / `affect.py` | Signals become a mix with PAD, triads, ambivalence. |
 | Modulate | `modulate.py` | Changes **search behaviour**. ValueProfile weights untouched unless `allow_weight_deltas`, then capped at `MAX_WEIGHT_DELTA` and listed. |
 | Remember | `trajectory.py` | Boredom needs a past; this is that past. |
@@ -169,7 +169,9 @@ the ranked set it was handed — every payload carries
 `tests/test_appraisal_coverage.py` closes the loop: **every** appraisable emotion
 must either modulate search or drive a stance. Being named and disclaimed does
 not count as a use. Imagination kinds extend that usefulness story (stance twins);
-the coverage guard also counts wired imagination generators.
+the coverage guard also counts wired imagination generators. Production appraisal
+evaluates catalog `when` only; `RULES` stays a characterization golden, not a
+second runtime.
 
 ## Continuity (Alive)
 

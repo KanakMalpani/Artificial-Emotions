@@ -12,10 +12,12 @@ frustration because it happened, not because a caller asked for it.
 
 **Every catalog emotion must have a condition and a use.** An earlier version
 could derive 13 of 54 catalogued emotions and only four ever fired in practice,
-which made the other fifty decoration. The catalog is the contract: coverage
-asserts a non-empty ``when`` (or an ``outcome_event`` fixture) and a real use,
-and that each :data:`RULES` entry is firable and either modulates behaviour or
-is declared :data:`OBSERVATION_ONLY`.
+which made the other fifty decoration. The catalog is the **runtime** contract:
+production dispatch evaluates catalog ``when`` only — empty ``when`` does not
+fire. :data:`RULES` is characterization-only (``evaluate_when`` vs lambda);
+coverage still asserts a non-empty ``when`` (or an ``outcome_event`` fixture)
+and a real use, and that each :data:`RULES` entry is firable and either
+modulates behaviour or is declared :data:`OBSERVATION_ONLY`.
 
 Every signal carries its evidence. Affect you cannot audit is affect you cannot
 trust, and this project does not ship unauditable numbers.
@@ -597,8 +599,8 @@ def _eval_node(ctx: Any, node: Mapping[str, Any]) -> tuple[bool, float | None]:
 def evaluate_when(ctx: Any, when: Sequence[Any] | None) -> float | None:
     """Evaluate catalog ``when`` against an appraisal context.
 
-    Empty ``when`` means the row is not catalog-driven yet; the caller falls
-    back to :data:`RULES`. Returns ``None`` when the situation does not match.
+    Empty ``when`` does not match — production dispatch does not fall back to
+    :data:`RULES`. Returns ``None`` when the situation does not match.
     Missing ``previous.*`` / ``outcome.*`` features fail the clause rather than
     inventing a value. ``eq`` / ``ne`` against a list ``value`` is membership.
     """
@@ -1188,6 +1190,16 @@ RULES: dict[str, tuple[str, _Rule]] = {
 APPRAISAL_RULES: dict[str, str] = {name: why for name, (why, _fn) in RULES.items()}
 
 
+def _signal_because(eid: str, entry: Mapping[str, Any]) -> str:
+    """Catalog ``use_for`` when present; else RULES why-string; else description."""
+    use_for = str(entry.get("use_for") or "").strip()
+    if use_for:
+        return use_for
+    if eid in RULES:
+        return RULES[eid][0]
+    return str(entry.get("description") or eid)
+
+
 def appraise_run(
     items: Sequence[RankedQuestion],
     *,
@@ -1207,12 +1219,18 @@ def appraise_run(
 
     Returns signals sorted by weight, each carrying the evidence that fired it.
 
+    Catalog ``when`` is the runtime contract. Each catalog id with a non-empty
+    ``when`` is evaluated via :func:`evaluate_when`; empty ``when`` skips the
+    id even if a :data:`RULES` lambda would fire. :data:`RULES` is
+    characterization-only. ``because`` is catalog ``use_for`` when present,
+    else the RULES why-string if that id has one.
+
     ``mood_bias`` (A2 ``MoodThresholdBias``) may shift the per-emotion weight
-    floor for signals that already have run support. Rules that return
-    ``None`` stay ``None`` — carryover never fabricates evidence.
+    floor for signals that already have run support. A ``when`` that does not
+    match stays unmatched — carryover never fabricates evidence.
 
     ``temperament`` (A5) may scale *supported* weights (reactivity / skepticism /
-    novelty). It never invents a signal that the rules did not fire.
+    novelty). It never invents a signal that the catalog did not fire.
     """
     if not items:
         return [
@@ -1242,7 +1260,6 @@ def appraise_run(
     bias_active = bool(mood_bias is not None and getattr(mood_bias, "is_active", False))
 
     signals: list[AppraisalSignal] = []
-    seen_ids: set[str] = set()
 
     def _emit(emotion: str, why: str, weight: float, evidence: dict[str, Any]) -> None:
         floor = _MIN_SIGNAL
@@ -1256,35 +1273,14 @@ def appraise_run(
                 }
             signals.append(AppraisalSignal(emotion, weight, why, evidence))
 
-    for emotion, (why, rule) in RULES.items():
-        seen_ids.add(emotion)
-        entry = catalog.get(emotion)
-        when = list(entry.get("when") or []) if entry else []
-        if when:
-            weight = evaluate_when(ctx, when)
-            if weight is None:
-                continue
-            _emit(emotion, why, weight, _when_evidence(ctx, when))
-            continue
-        # Empty when: Python RULES remain the fallback.
-        outcome = rule(ctx)
-        if outcome is None:
-            # No run support — mood must not invent a signal.
-            continue
-        weight, evidence = outcome
-        _emit(emotion, why, weight, evidence)
-
-    for eid, extra in catalog.items():
-        if eid in seen_ids:
-            continue
-        when = list(extra.get("when") or [])
+    for eid, entry in catalog.items():
+        when = list(entry.get("when") or [])
         if not when:
             continue
         weight = evaluate_when(ctx, when)
         if weight is None:
             continue
-        why = str(extra.get("use_for") or extra.get("description") or eid)
-        _emit(eid, why, weight, _when_evidence(ctx, when))
+        _emit(eid, _signal_because(eid, entry), weight, _when_evidence(ctx, when))
 
     signals.sort(key=lambda s: (-s.weight, s.emotion))
     if temperament is not None:

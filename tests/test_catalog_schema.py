@@ -2,7 +2,8 @@
 
 Wave 0 freezes key names and vocabularies. Placeholders (empty ``when``,
 ``effects``, ``use_for``) are allowed; unknown effect ids and unknown
-``requires`` tokens are not. Appraisal ``RULES`` behaviour is unchanged.
+``requires`` tokens are not. Catalog ``when`` / ``use_for`` is the runtime
+appraisal contract; ``RULES`` lambdas remain a characterization golden.
 """
 
 from __future__ import annotations

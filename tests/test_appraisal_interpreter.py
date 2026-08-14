@@ -1,5 +1,9 @@
 """Catalog-driven appraisal interpreter vs the existing RULES lambdas.
 
+The catalog is the runtime contract. ``RULES`` lambdas stay a characterization
+golden for ``evaluate_when`` (exact set, weights ``abs=1e-6``). Dispatch must
+not consult ``RULES`` at runtime.
+
 Tolerance (measured against the ported formulas, not guessed):
 
 * Emotion set: exact match on FIRING_CONTEXTS, a neutral context, and the
@@ -7,7 +11,7 @@ Tolerance (measured against the ported formulas, not guessed):
 * Weights: ``abs=1e-6`` (formulas copied; float rounding only).
 * Evidence keys: catalog feature names, not RULES aliases
   (``open_gap_ratio`` vs ``gap_ratio``). Not compared.
-* ``because``: still the RULES why-string for the 42.
+* ``because``: catalog ``use_for`` (not the RULES why-string).
 """
 
 from __future__ import annotations
@@ -66,9 +70,13 @@ def _rule_weights(ctx: AppraisalContext) -> dict[str, float]:
 
 
 def _catalog_weights(ctx: AppraisalContext, by_id: dict[str, dict]) -> dict[str, float]:
+    """Weights from catalog ``when`` via ``evaluate_when`` — never RULES fallback."""
     out: dict[str, float] = {}
     for emotion in RULES:
-        weight = evaluate_when(ctx, by_id[emotion]["when"])
+        when = by_id[emotion].get("when") or []
+        if not when:
+            continue
+        weight = evaluate_when(ctx, when)
         if weight is not None and weight >= _MIN_SIGNAL:
             out[emotion] = float(weight)
     return out
@@ -190,7 +198,17 @@ def ranked_ai():
     ).run()
 
 
-def test_empty_when_falls_back_to_rules(monkeypatch: pytest.MonkeyPatch, ranked_ai):
+def test_catalog_weights_skip_empty_when(neutral_context: AppraisalContext):
+    """Characterization: empty ``when`` is skip, not a RULES-lambda fallback."""
+    by_id = _catalog_by_id()
+    ctx = replace(neutral_context, **FIRING_CONTEXTS["curiosity"])
+    assert "curiosity" in _rule_weights(ctx)
+    patched = {**by_id, "curiosity": {**by_id["curiosity"], "when": []}}
+    assert "curiosity" not in _catalog_weights(ctx, patched)
+
+
+def test_empty_when_does_not_fire_even_if_rules_would(monkeypatch: pytest.MonkeyPatch, ranked_ai):
+    """Runtime: emptying catalog ``when`` must not consult the RULES lambda."""
     import copy
 
     from artificial_emotions import emotions as emotions_mod
@@ -201,12 +219,38 @@ def test_empty_when_falls_back_to_rules(monkeypatch: pytest.MonkeyPatch, ranked_
             entry["when"] = []
             break
     monkeypatch.setattr(emotions_mod, "emotion_catalog", lambda: clone)
+    ctx = build_context(ranked_ai)
+    rules_out = RULES["curiosity"][1](ctx)
+    assert rules_out is not None and rules_out[0] >= _MIN_SIGNAL
     signals = appraise_run(ranked_ai)
-    assert "curiosity" in {s.emotion for s in signals}
+    assert "curiosity" not in {s.emotion for s in signals}
+
+
+def test_appraise_run_because_matches_catalog_use_for(ranked_ai):
+    """Catalog-driven ``because`` is ``use_for``. Empty-items special case is not this path."""
+    by_id = _catalog_by_id()
+    runs = [
+        appraise_run(ranked_ai),
+        appraise_run(ranked_ai, seen_question_ids={i.question.id for i in ranked_ai}),
+        appraise_run(ranked_ai, steps_without_progress=3),
+    ]
+    checked: set[str] = set()
+    for signals in runs:
+        assert signals
+        for signal in signals:
+            expected = str(by_id[signal.emotion]["use_for"]).strip()
+            assert expected, signal.emotion
+            assert signal.because == expected, {
+                "emotion": signal.emotion,
+                "because": signal.because,
+                "use_for": expected,
+            }
+            checked.add(signal.emotion)
+    assert checked
 
 
 def test_six_step_five_domain_catalog_matches_rules(monkeypatch: pytest.MonkeyPatch):
-    """Live 6 x 5 offline explore: catalog when vs RULES lambdas on the same ctx."""
+    """Live 6 x 5 offline explore: catalog ``when`` vs RULES lambdas via evaluate_when."""
     from artificial_emotions import explore as explore_mod
     from artificial_emotions.appraisal import build_context
     from artificial_emotions.explore import explore

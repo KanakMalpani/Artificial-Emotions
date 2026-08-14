@@ -3,6 +3,10 @@
 Past hole: an earlier version could derive 13 of 54 catalogued emotions, and
 only **four** ever fired across all nine domains. The other fifty were furniture.
 
+The catalog is the **runtime** contract: production dispatch evaluates catalog
+``when`` only. ``RULES`` lambdas stay a characterization golden (``evaluate_when``
+vs lambda), not a second runtime.
+
 Current guard: ``MIN_CATALOG_SHARE = 1.0`` — every catalog id has a condition
 and a use. These tests make the old hole unreachable:
 

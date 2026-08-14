@@ -10,7 +10,7 @@ A **curiosity layer** for AI and research orgs: generate → verify → score �
 
 ## Now (v0.4) — do not rebuild
 
-Pipeline + OpenAlex/S2 gap gate + multi-axis scores + MCP/HTTP/CLI/web + offline seeds + domain packs + emotions surface (annotation only) + eval harness + preference JSONL + dual-use heuristic + multi-judge flags + neglectedness/cost proxies + optional HTTP API keys + structured errors / `/ready`. Limits: heuristic scoring, phrase-level gaps, dual-use residual risk, no outcome calibration. Details: roadmap §1 + [`LIMITS.md`](LIMITS.md).
+Pipeline + OpenAlex/S2 gap gate + multi-axis scores + MCP/HTTP/CLI + offline seeds + domain packs + emotions surface (annotation only) + eval harness + preference JSONL + dual-use heuristic + multi-judge flags + neglectedness/cost proxies + optional HTTP API keys + structured errors / `/ready`. Limits: heuristic scoring, phrase-level gaps, dual-use residual risk, no outcome calibration. Details: roadmap §1 + [`LIMITS.md`](LIMITS.md).
 
 ## Top next wedges (pick first unfinished)
 
