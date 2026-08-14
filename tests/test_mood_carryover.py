@@ -18,7 +18,8 @@ from artificial_emotions.affect import (
     decay_mood_pad,
     threshold_bias_from_pad,
 )
-from artificial_emotions.appraisal import RULES, appraise_run
+from artificial_emotions.appraisal import appraise_run, build_context, evaluate_when
+from artificial_emotions.emotions import emotion_catalog
 from artificial_emotions.memory import MoodState, PersistentMemory
 from artificial_emotions.models import CuriosityConfig
 from artificial_emotions.pipeline import CuriosityEngine
@@ -129,12 +130,10 @@ def test_carryover_biases_thresholds_but_never_fabricates_evidence(ranked) -> No
     assert near < hope_floor  # incongruent gate stays closed
 
     # Fabrication guard: frustration requires steps_without_progress >= 2.
-    # With zero dead-end steps the rule returns None — mood must not invent it.
-    why, rule = RULES["frustration"]
-    from artificial_emotions.appraisal import build_context
-
+    # With zero dead-end steps evaluate_when returns None — mood must not invent it.
+    by_id = {str(e["id"]): e for e in emotion_catalog()["emotions"]}
     ctx = build_context(ranked, steps_without_progress=0)
-    assert rule(ctx) is None
+    assert evaluate_when(ctx, by_id["frustration"]["when"]) is None
 
     signals = appraise_run(
         ranked,

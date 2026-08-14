@@ -14,9 +14,8 @@ frustration because it happened, not because a caller asked for it.
 could derive 13 of 54 catalogued emotions and only four ever fired in practice,
 which made the other fifty decoration. The catalog is the **runtime** contract:
 production dispatch evaluates catalog ``when`` only — empty ``when`` does not
-fire. :data:`RULES` is characterization-only (``evaluate_when`` vs lambda);
-coverage still asserts a non-empty ``when`` (or an ``outcome_event`` fixture)
-and a real use, and that each :data:`RULES` entry is firable and either
+fire. Coverage still asserts a non-empty ``when`` (or an ``outcome_event``
+fixture) and a real use, and that each catalogued emotion is firable and either
 modulates behaviour or is declared :data:`OBSERVATION_ONLY`.
 
 Every signal carries its evidence. Affect you cannot audit is affect you cannot
@@ -29,7 +28,7 @@ background (OCC-flavoured, not an OCC implementation).
 from __future__ import annotations
 
 import statistics
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, fields
 from typing import Any
 
@@ -43,7 +42,6 @@ __all__ = [
     "EFFECT_IDS",
     "OBSERVATION_ONLY",
     "REQUIRES_TOKENS",
-    "RULES",
     "WHEN_OPS",
     "AppraisalContext",
     "AppraisalSignal",
@@ -599,10 +597,9 @@ def _eval_node(ctx: Any, node: Mapping[str, Any]) -> tuple[bool, float | None]:
 def evaluate_when(ctx: Any, when: Sequence[Any] | None) -> float | None:
     """Evaluate catalog ``when`` against an appraisal context.
 
-    Empty ``when`` does not match — production dispatch does not fall back to
-    :data:`RULES`. Returns ``None`` when the situation does not match.
-    Missing ``previous.*`` / ``outcome.*`` features fail the clause rather than
-    inventing a value. ``eq`` / ``ne`` against a list ``value`` is membership.
+    Empty ``when`` does not match. Returns ``None`` when the situation does not
+    match. Missing ``previous.*`` / ``outcome.*`` features fail the clause rather
+    than inventing a value. ``eq`` / ``ne`` against a list ``value`` is membership.
     """
     if not when:
         return None
@@ -764,439 +761,17 @@ def build_context(
     )
 
 
-#: ``emotion -> (why it fires, weight function)``. Returning ``None`` or a
-#: sub-threshold weight means the rule did not fire this run.
-#
-#: Offline reachability of the original 37 (measured, not synthetic):
-#: literature-gated — perplexity, respect, envy, skepticism, satisfaction,
-#: triumph, disappointment; risk-flag — anxiety, reluctance; need live
-#: confidence / empty rank / a surprise bar that would otherwise enable
-#: OpenAlex — hubris, disorientation, suspicion. The rest are reachable
-#: on 6-step ``explore(..., use_literature=False)`` after Track B recalibration.
-#: Machine-checked in ``tests/test_appraisal_coverage.py``.
-_Rule = Callable[[AppraisalContext], tuple[float, dict[str, Any]] | None]
-
-
-def _r(weight: float, **evidence: Any) -> tuple[float, dict[str, Any]]:
-    return max(0.0, min(1.0, weight)), {
-        k: round(v, 3) if isinstance(v, float) else v for k, v in evidence.items()
-    }
-
-
-RULES: dict[str, tuple[str, _Rule]] = {
-    # --- the drive ---------------------------------------------------------------
-    "curiosity": (
-        "Open gaps on neglected, high-stakes questions that still look closable.",
-        lambda c: _r(
-            c.gap_ratio * (0.5 * c.mean_neglect + 0.5 * c.mean_impact) * c.mean_tractability,
-            open_gap_ratio=c.gap_ratio,
-            mean_neglectedness=c.mean_neglect,
-            mean_impact=c.mean_impact,
-            mean_tractability=c.mean_tractability,
-        ),
-    ),
-    "interest": (
-        "Most of the field is still open, even if nothing stands out.",
-        lambda c: _r(0.2, open_gap_ratio=c.gap_ratio) if c.gap_ratio > 0.5 else None,
-    ),
-    "wonder": (
-        "High impact with high surprise — the scale of the unknown is the draw.",
-        lambda c: (
-            _r(0.4 * c.mean_surprise, mean_impact=c.mean_impact, mean_surprise=c.mean_surprise)
-            if c.mean_impact >= 0.4 and c.mean_surprise >= 0.28
-            else None
-        ),
-    ),
-    "surprise": (
-        "The surprise axis ran high on an open gap.",
-        lambda c: (
-            _r(0.5 * c.mean_surprise * c.gap_ratio, mean_surprise=c.mean_surprise)
-            if c.mean_surprise >= 0.28 and c.gap_ratio > 0.3
-            else None
-        ),
-    ),
-    # --- difficulty --------------------------------------------------------------
-    "confusion": (
-        "Judges disagreed, answerability came in low, or thin evidence left wide bands.",
-        lambda c: (
-            _r(
-                0.6 * c.disagreement
-                + 0.5 * max(0.0, 0.55 - c.mean_answerability)
-                + 0.4 * c.band_width * c.thin_evidence,
-                judge_disagreement=c.disagreement,
-                mean_answerability=c.mean_answerability,
-                mean_band_width=c.band_width,
-                thin_evidence=c.thin_evidence,
-            )
-            if (
-                c.disagreement >= 0.2
-                or c.mean_answerability < 0.55
-                or (c.band_width >= 0.5 and c.thin_evidence >= 0.5)
-            )
-            else None
-        ),
-    ),
-    "perplexity": (
-        "Literature is dense yet the gap still refuses to close.",
-        lambda c: (
-            _r(0.5 * c.dense_yet_open, dense_yet_open=c.dense_yet_open)
-            if c.dense_yet_open > 0
-            else None
-        ),
-    ),
-    "uncertainty": (
-        "Score bands are wide — the evidence does not pin these down.",
-        lambda c: (
-            _r(0.5 * c.band_width, mean_band_width=c.band_width) if c.band_width >= 0.5 else None
-        ),
-    ),
-    "disorientation": (
-        "Nothing rankable came back, or answerability collapsed across the board.",
-        lambda c: (
-            _r(0.5, mean_answerability=c.mean_answerability)
-            if c.mean_answerability < 0.35
-            else None
-        ),
-    ),
-    "dissonance": (
-        "The top question sprawls across clauses — the shape is wrong.",
-        lambda c: _r(0.3, clause_count=c.top_clause_count) if c.top_clause_count >= 2 else None,
-    ),
-    # --- calibration: the project's own failure mode ------------------------------
-    "hubris": (
-        "Confidence outran the evidence actually gathered.",
-        lambda c: (
-            _r(
-                min(0.8, (c.mean_confidence - 0.5) + (c.thin_evidence - 0.4)),
-                thin_evidence_rate=c.thin_evidence,
-                mean_confidence=c.mean_confidence,
-            )
-            if c.thin_evidence >= 0.5 and c.mean_confidence >= 0.6
-            else None
-        ),
-    ),
-    "humility": (
-        "Thin evidence was met with correspondingly low confidence.",
-        lambda c: (
-            _r(0.35, thin_evidence_rate=c.thin_evidence, mean_confidence=c.mean_confidence)
-            if c.thin_evidence >= 0.5 and c.mean_confidence < 0.45
-            else None
-        ),
-    ),
-    "skepticism": (
-        "An LLM reader cited work that was not in the retrieved set.",
-        lambda c: (
-            _r(0.3 + 0.4 * c.ungrounded_ratio, ungrounded_ratio=c.ungrounded_ratio)
-            if c.ungrounded_ratio > 0
-            else None
-        ),
-    ),
-    "suspicion": (
-        "Results look unexpectedly strong for how little evidence backs them.",
-        lambda c: (
-            _r(0.3, mean_surprise=c.mean_surprise, thin_evidence=c.thin_evidence)
-            if c.mean_surprise >= 0.5 and c.thin_evidence >= 0.5
-            else None
-        ),
-    ),
-    # --- safety ------------------------------------------------------------------
-    "anxiety": (
-        "Dual-use or high-risk material is in the candidate set.",
-        lambda c: (
-            _r(
-                0.3 + 0.5 * max(c.dual_use_ratio, max(0.0, c.max_risk - 0.5)),
-                dual_use_ratio=c.dual_use_ratio,
-                max_risk=c.max_risk,
-            )
-            if c.dual_use_ratio > 0 or c.max_risk >= 0.5
-            else None
-        ),
-    ),
-    "reluctance": (
-        "High risk sits alongside high impact — pressing on has a cost.",
-        lambda c: (
-            _r(0.3, max_risk=c.max_risk, mean_impact=c.mean_impact)
-            if c.max_risk >= 0.5 and c.mean_impact >= 0.5
-            else None
-        ),
-    ),
-    "compassion": (
-        "Whoever bears the cost of getting this wrong should be named.",
-        lambda c: (
-            _r(0.25, mean_impact=c.mean_impact, max_risk=c.max_risk)
-            if c.mean_impact >= 0.4
-            else None
-        ),
-    ),
-    # --- momentum ----------------------------------------------------------------
-    "insight": (
-        "A strongly-scoring, well-posed candidate appeared.",
-        lambda c: (
-            _r(0.3 * c.top_score, top_score=c.top_score, top_answerability=c.top_answerability)
-            if c.top_score >= 0.7 and c.top_answerability >= 0.6
-            else None
-        ),
-    ),
-    "determination": (
-        "A high-value target is live and worth pressing.",
-        lambda c: (
-            _r(0.25, top_score=c.top_score)
-            if c.top_score >= 0.7 and c.top_answerability >= 0.6
-            else None
-        ),
-    ),
-    "hope": (
-        "Tractable and answerable — progress looks reachable.",
-        lambda c: (
-            _r(0.3, mean_tractability=c.mean_tractability, mean_answerability=c.mean_answerability)
-            if c.mean_tractability >= 0.6 and c.mean_answerability >= 0.6
-            else None
-        ),
-    ),
-    "anticipation": (
-        "One candidate clearly leads the field.",
-        lambda c: _r(0.25, score_spread=c.score_spread) if c.score_spread >= 0.08 else None,
-    ),
-    "recognition": (
-        "This resembles ground already covered — check the analogy before assuming novelty.",
-        lambda c: (
-            _r(0.25, term_saturation=c.term_saturation) if c.term_saturation >= 0.08 else None
-        ),
-    ),
-    "absorption": (
-        "The same target held across steps — the thread is worth protecting.",
-        lambda c: (
-            _r(0.3, top_repeated=c.top_repeated, repeat_ratio=c.repeat_ratio)
-            if c.top_repeated or c.repeat_ratio >= 0.8
-            else None
-        ),
-    ),
-    "urgency": (
-        "High impact at low cost — the cheap window is open now.",
-        lambda c: (
-            _r(0.3, mean_impact=c.mean_impact, mean_cost=c.mean_cost)
-            if c.mean_impact >= 0.4 and c.mean_cost <= 0.5
-            else None
-        ),
-    ),
-    "persistence": (
-        "Effort has not paid yet, but the ground is still open.",
-        lambda c: (
-            _r(0.25, steps_without_progress=c.steps_without_progress, gap_ratio=c.gap_ratio)
-            if c.steps_without_progress == 1 and c.gap_ratio > 0.5
-            else None
-        ),
-    ),
-    # --- aesthetics (surfaced, never acted on) -----------------------------------
-    "elegance": (
-        "The top operationalization is compact and still answerable.",
-        lambda c: (
-            _r(0.25, top_ops_len=c.top_ops_len, top_answerability=c.top_answerability)
-            if 40 <= c.top_ops_len <= 120 and c.top_answerability >= 0.6
-            else None
-        ),
-    ),
-    "parsimony": (
-        "A single clause carries the whole question.",
-        lambda c: (
-            _r(0.25, clause_count=c.top_clause_count, top_ops_len=c.top_ops_len)
-            if c.top_clause_count == 1 and 40 <= c.top_ops_len <= 140
-            else None
-        ),
-    ),
-    "clarity": (
-        "Answerability is high across the set — these are stated plainly.",
-        lambda c: (
-            _r(0.3, mean_answerability=c.mean_answerability)
-            if c.mean_answerability >= 0.75
-            else None
-        ),
-    ),
-    "enjoyment": (
-        "Open, tractable and cheap — the pleasant case.",
-        lambda c: (
-            _r(0.25, mean_cost=c.mean_cost, mean_tractability=c.mean_tractability)
-            if c.mean_cost <= 0.5 and c.mean_tractability >= 0.5 and c.gap_ratio > 0.5
-            else None
-        ),
-    ),
-    # --- social / prior work -----------------------------------------------------
-    "respect": (
-        "Substantial prior work exists here and earned its conclusions.",
-        lambda c: (
-            _r(0.25, mean_related=c.mean_related, mean_citations=c.mean_citations)
-            if c.mean_related >= 5
-            else None
-        ),
-    ),
-    "envy": (
-        "Heavily-cited work already occupies this ground — differentiate or collaborate.",
-        lambda c: _r(0.25, mean_citations=c.mean_citations) if c.mean_citations >= 100 else None,
-    ),
-    # --- stopping ----------------------------------------------------------------
-    "boredom": (
-        "This ground has already been covered in the session.",
-        lambda c: _r(
-            0.6 * c.repeat_ratio + 0.5 * max(0.0, c.term_saturation - 0.35),
-            repeat_ratio=c.repeat_ratio,
-            term_saturation=c.term_saturation,
-        ),
-    ),
-    "impatience": (
-        "Near-duplicates or a fully repeated ranking — the vein is thinning.",
-        lambda c: (
-            _r(
-                0.3,
-                duplicate_ratio=c.duplicate_ratio,
-                repeat_ratio=c.repeat_ratio,
-                term_saturation=c.term_saturation,
-            )
-            if c.duplicate_ratio >= 0.3 or (c.repeat_ratio >= 0.5 and c.term_saturation >= 0.5)
-            else None
-        ),
-    ),
-    "frustration": (
-        "Repeated effort has ruled nothing out.",
-        lambda c: (
-            _r(
-                min(0.7, 0.22 * max(c.steps_without_progress, 2 if c.repeat_ratio >= 0.8 else 0)),
-                steps=c.steps_without_progress,
-                repeat_ratio=c.repeat_ratio,
-            )
-            if c.steps_without_progress >= 2 or c.repeat_ratio >= 0.8
-            else None
-        ),
-    ),
-    "resignation": (
-        "Few candidates survived ranking — the return was thin or gates rejected most.",
-        lambda c: (
-            _r(
-                0.25 if c.n <= 3 and c.thin_evidence >= 0.5 else min(0.5, 0.15 * c.rejected_ratio),
-                rejected_ratio=c.rejected_ratio,
-                n=c.n,
-                thin_evidence=c.thin_evidence,
-            )
-            if c.rejected_ratio > 1.0 or (c.n <= 3 and c.thin_evidence >= 0.5)
-            else None
-        ),
-    ),
-    "disappointment": (
-        "Gaps closed before we got to them — the questions are already answered.",
-        lambda c: (
-            _r(0.3 + 0.4 * c.answered_ratio, answered_ratio=c.answered_ratio)
-            if c.answered_ratio > 0
-            else None
-        ),
-    ),
-    "satisfaction": (
-        "A well-posed, well-evidenced result — proportionate to the question asked.",
-        lambda c: (
-            _r(0.3, top_score=c.top_score, thin_evidence=c.thin_evidence)
-            if c.top_score >= 0.6 and c.thin_evidence < 0.5
-            else None
-        ),
-    ),
-    "triumph": (
-        "A strong result on evidence that actually holds up.",
-        lambda c: (
-            _r(0.35, top_score=c.top_score, thin_evidence=c.thin_evidence)
-            if c.top_score >= 0.8 and c.thin_evidence < 0.3
-            else None
-        ),
-    ),
-    # --- epistemic five (honest conditions from a ranked run; not pride-from-rank) --
-    "doubt": (
-        "Bands are wide, judges disagree, or thin evidence sits under mid/high confidence.",
-        lambda c: (
-            _r(
-                0.45 * c.band_width
-                + 0.4 * c.disagreement
-                + 0.35 * (c.thin_evidence if c.mean_confidence >= 0.5 else 0.0),
-                mean_band_width=c.band_width,
-                judge_disagreement=c.disagreement,
-                thin_evidence=c.thin_evidence,
-                mean_confidence=c.mean_confidence,
-            )
-            if (
-                c.band_width >= 0.5
-                or c.disagreement >= 0.25
-                or (c.thin_evidence >= 0.4 and c.mean_confidence >= 0.5)
-            )
-            else None
-        ),
-    ),
-    "conviction": (
-        "Narrow bands and high answerability on evidence that is not thin — and closable.",
-        lambda c: (
-            _r(
-                0.4 * c.mean_answerability * (1.0 - c.band_width) * c.mean_tractability,
-                mean_answerability=c.mean_answerability,
-                mean_band_width=c.band_width,
-                thin_evidence=c.thin_evidence,
-                mean_tractability=c.mean_tractability,
-            )
-            if (
-                c.band_width <= 0.25
-                and c.mean_answerability >= 0.7
-                and c.thin_evidence < 0.35
-                and c.mean_tractability >= 0.45
-            )
-            else None
-        ),
-    ),
-    "trust": (
-        "Dense related work still leaves a live gap — prior art is there; the question is not.",
-        lambda c: (
-            _r(
-                0.3 * min(1.0, c.mean_related / 6.0) * c.gap_ratio,
-                mean_related=c.mean_related,
-                open_gap_ratio=c.gap_ratio,
-            )
-            if c.mean_related >= 4 and c.gap_ratio > 0.4
-            else None
-        ),
-    ),
-    "awe": (
-        "High impact and high surprise on a gap that is still open — the scale of the unknown.",
-        lambda c: (
-            _r(
-                0.5 * c.mean_impact * c.mean_surprise * c.gap_ratio,
-                mean_impact=c.mean_impact,
-                mean_surprise=c.mean_surprise,
-                open_gap_ratio=c.gap_ratio,
-            )
-            if c.mean_impact >= 0.55 and c.mean_surprise >= 0.5 and c.gap_ratio > 0.4
-            else None
-        ),
-    ),
-    "sublimity": (
-        "High-stakes and vast or hard — impact beside risk, cost, or intractability.",
-        lambda c: (
-            _r(
-                0.35 * c.mean_impact * max(c.max_risk, c.mean_cost, 1.0 - c.mean_tractability),
-                mean_impact=c.mean_impact,
-                max_risk=c.max_risk,
-                mean_cost=c.mean_cost,
-                mean_tractability=c.mean_tractability,
-            )
-            if c.mean_impact >= 0.6
-            and (c.max_risk >= 0.55 or c.mean_cost >= 0.65 or c.mean_tractability <= 0.35)
-            else None
-        ),
-    ),
+#: Catalog ``use_for`` by emotion id. Empty-items confusion uses this map.
+APPRAISAL_RULES: dict[str, str] = {
+    eid: str(entry.get("use_for") or "").strip() for eid, entry in _catalog_by_id().items()
 }
-
-#: Back-compat: the flat ``emotion -> why`` mapping other modules and docs read.
-APPRAISAL_RULES: dict[str, str] = {name: why for name, (why, _fn) in RULES.items()}
 
 
 def _signal_because(eid: str, entry: Mapping[str, Any]) -> str:
-    """Catalog ``use_for`` when present; else RULES why-string; else description."""
+    """Catalog ``use_for`` when present; else description; else id."""
     use_for = str(entry.get("use_for") or "").strip()
     if use_for:
         return use_for
-    if eid in RULES:
-        return RULES[eid][0]
     return str(entry.get("description") or eid)
 
 
@@ -1221,9 +796,8 @@ def appraise_run(
 
     Catalog ``when`` is the runtime contract. Each catalog id with a non-empty
     ``when`` is evaluated via :func:`evaluate_when`; empty ``when`` skips the
-    id even if a :data:`RULES` lambda would fire. :data:`RULES` is
-    characterization-only. ``because`` is catalog ``use_for`` when present,
-    else the RULES why-string if that id has one.
+    id. ``because`` is catalog ``use_for`` when present, else ``description``,
+    else the emotion id.
 
     ``mood_bias`` (A2 ``MoodThresholdBias``) may shift the per-emotion weight
     floor for signals that already have run support. A ``when`` that does not

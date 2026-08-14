@@ -1,17 +1,14 @@
-"""Catalog-driven appraisal interpreter vs the existing RULES lambdas.
+"""Catalog-driven appraisal interpreter.
 
-The catalog is the runtime contract. ``RULES`` lambdas stay a characterization
-golden for ``evaluate_when`` (exact set, weights ``abs=1e-6``). Dispatch must
-not consult ``RULES`` at runtime.
+The catalog is the runtime contract. Production dispatch evaluates catalog
+``when`` via ``evaluate_when``; empty ``when`` does not fire.
 
-Tolerance (measured against the ported formulas, not guessed):
+Keep:
 
-* Emotion set: exact match on FIRING_CONTEXTS, a neutral context, and the
-  6-step x 5-domain offline explore suite.
-* Weights: ``abs=1e-6`` (formulas copied; float rounding only).
-* Evidence keys: catalog feature names, not RULES aliases
-  (``open_gap_ratio`` vs ``gap_ratio``). Not compared.
-* ``because``: catalog ``use_for`` (not the RULES why-string).
+* Emotion set: exact match on FIRING_CONTEXTS (named emotion fires) and the
+  6-step x 5-domain offline explore suite (``evaluate_when`` vs ``appraise_run``).
+* Weights: ``evaluate_when`` vs ``appraise_run`` on the same context must match.
+* ``because``: catalog ``use_for``.
 """
 
 from __future__ import annotations
@@ -23,7 +20,6 @@ import pytest
 from tests.test_appraisal_coverage import _OFFLINE_EXPLORE_DOMAINS, FIRING_CONTEXTS
 
 from artificial_emotions.appraisal import (
-    RULES,
     AppraisalContext,
     appraise_run,
     build_context,
@@ -34,7 +30,6 @@ from artificial_emotions.models import CuriosityConfig
 from artificial_emotions.pipeline import CuriosityEngine
 
 _MIN_SIGNAL = 0.04
-_WEIGHT_TOLERANCE = 1e-6
 _TWELVE_LEFTOVERS = frozenset(
     {
         "anger",
@@ -57,23 +52,11 @@ def _catalog_by_id() -> dict[str, dict]:
     return {str(e["id"]): e for e in emotion_catalog()["emotions"]}
 
 
-def _rule_weights(ctx: AppraisalContext) -> dict[str, float]:
+def _evaluate_when_weights(ctx: AppraisalContext, by_id: dict[str, dict]) -> dict[str, float]:
+    """Weights from catalog ``when`` via ``evaluate_when``."""
     out: dict[str, float] = {}
-    for emotion, (_why, rule) in RULES.items():
-        got = rule(ctx)
-        if got is None:
-            continue
-        weight, _evidence = got
-        if weight >= _MIN_SIGNAL:
-            out[emotion] = float(weight)
-    return out
-
-
-def _catalog_weights(ctx: AppraisalContext, by_id: dict[str, dict]) -> dict[str, float]:
-    """Weights from catalog ``when`` via ``evaluate_when`` — never RULES fallback."""
-    out: dict[str, float] = {}
-    for emotion in RULES:
-        when = by_id[emotion].get("when") or []
+    for emotion, entry in by_id.items():
+        when = entry.get("when") or []
         if not when:
             continue
         weight = evaluate_when(ctx, when)
@@ -82,17 +65,21 @@ def _catalog_weights(ctx: AppraisalContext, by_id: dict[str, dict]) -> dict[str,
     return out
 
 
-def _assert_weights_match(
-    rules_w: dict[str, float], cat_w: dict[str, float], *, label: str
-) -> None:
-    assert set(cat_w) == set(rules_w), {
+def _signal_weights(signals) -> dict[str, float]:
+    return {s.emotion: float(s.weight) for s in signals if s.weight >= _MIN_SIGNAL}
+
+
+def _assert_when_matches_appraise(ctx: AppraisalContext, signals, *, label: str) -> None:
+    when_w = _evaluate_when_weights(ctx, _catalog_by_id())
+    run_w = _signal_weights(signals)
+    assert set(when_w) == set(run_w), {
         "label": label,
-        "catalog_only": sorted(set(cat_w) - set(rules_w)),
-        "rules_only": sorted(set(rules_w) - set(cat_w)),
+        "evaluate_when_only": sorted(set(when_w) - set(run_w)),
+        "appraise_run_only": sorted(set(run_w) - set(when_w)),
     }
-    for emotion, expected in rules_w.items():
-        assert cat_w[emotion] == pytest.approx(expected, abs=_WEIGHT_TOLERANCE), (
-            f"{label}: {emotion} catalog {cat_w[emotion]} vs rules {expected}"
+    for emotion, expected in when_w.items():
+        assert run_w[emotion] == expected, (
+            f"{label}: {emotion} evaluate_when {expected} vs appraise_run {run_w[emotion]}"
         )
 
 
@@ -161,19 +148,14 @@ def test_previous_and_outcome_read_nested_or_flat():
     assert evaluate_when(SimpleNamespace(outcome=None), when_out) is None
 
 
-@pytest.mark.parametrize("emotion", sorted(RULES))
-def test_catalog_when_matches_rules_on_firing_fixtures(
-    emotion: str, neutral_context: AppraisalContext
-):
-    by_id = _catalog_by_id()
+@pytest.mark.parametrize("emotion", sorted(FIRING_CONTEXTS))
+def test_named_emotion_fires_on_firing_fixture(emotion: str, neutral_context: AppraisalContext):
     ctx = replace(neutral_context, **FIRING_CONTEXTS[emotion])
-    rules_w = _rule_weights(ctx)
-    cat_w = _catalog_weights(ctx, by_id)
-    assert emotion in rules_w
-    _assert_weights_match(rules_w, cat_w, label=f"firing:{emotion}")
+    weights = _evaluate_when_weights(ctx, _catalog_by_id())
+    assert emotion in weights
 
 
-@pytest.mark.parametrize("emotion", sorted(RULES))
+@pytest.mark.parametrize("emotion", sorted(FIRING_CONTEXTS))
 def test_catalog_when_stays_quiet_on_neutral_context(
     emotion: str, neutral_context: AppraisalContext
 ):
@@ -199,31 +181,42 @@ def ranked_ai():
 
 
 def test_catalog_weights_skip_empty_when(neutral_context: AppraisalContext):
-    """Characterization: empty ``when`` is skip, not a RULES-lambda fallback."""
+    """Empty ``when`` is skip — not a fire."""
     by_id = _catalog_by_id()
     ctx = replace(neutral_context, **FIRING_CONTEXTS["curiosity"])
-    assert "curiosity" in _rule_weights(ctx)
+    assert "curiosity" in _evaluate_when_weights(ctx, by_id)
     patched = {**by_id, "curiosity": {**by_id["curiosity"], "when": []}}
-    assert "curiosity" not in _catalog_weights(ctx, patched)
+    assert "curiosity" not in _evaluate_when_weights(ctx, patched)
 
 
-def test_empty_when_does_not_fire_even_if_rules_would(monkeypatch: pytest.MonkeyPatch, ranked_ai):
-    """Runtime: emptying catalog ``when`` must not consult the RULES lambda."""
+def test_empty_when_does_not_fire_even_if_evaluate_when_would(
+    monkeypatch: pytest.MonkeyPatch, ranked_ai
+):
+    """Runtime: emptying catalog ``when`` must omit the id even when evaluate_when would fire."""
     import copy
 
-    from artificial_emotions import emotions as emotions_mod
+    from artificial_emotions import appraisal as appraisal_mod
+
+    by_id = _catalog_by_id()
+    ctx = build_context(ranked_ai)
+    live = evaluate_when(ctx, by_id["curiosity"]["when"])
+    assert live is not None and live >= _MIN_SIGNAL
 
     clone = copy.deepcopy(emotion_catalog())
     for entry in clone["emotions"]:
         if entry["id"] == "curiosity":
             entry["when"] = []
             break
-    monkeypatch.setattr(emotions_mod, "emotion_catalog", lambda: clone)
-    ctx = build_context(ranked_ai)
-    rules_out = RULES["curiosity"][1](ctx)
-    assert rules_out is not None and rules_out[0] >= _MIN_SIGNAL
+    patched = {str(e["id"]): e for e in clone["emotions"]}
+    monkeypatch.setattr(appraisal_mod, "_catalog_by_id", lambda: patched)
     signals = appraise_run(ranked_ai)
     assert "curiosity" not in {s.emotion for s in signals}
+
+
+def test_evaluate_when_matches_appraise_run_on_ranked(ranked_ai):
+    ctx = build_context(ranked_ai)
+    signals = appraise_run(ranked_ai)
+    _assert_when_matches_appraise(ctx, signals, label="ranked-ai")
 
 
 def test_appraise_run_because_matches_catalog_use_for(ranked_ai):
@@ -249,19 +242,21 @@ def test_appraise_run_because_matches_catalog_use_for(ranked_ai):
     assert checked
 
 
-def test_six_step_five_domain_catalog_matches_rules(monkeypatch: pytest.MonkeyPatch):
-    """Live 6 x 5 offline explore: catalog ``when`` vs RULES lambdas via evaluate_when."""
+def test_six_step_five_domain_evaluate_when_matches_appraise_run(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Live 6 x 5 offline explore: catalog ``when`` vs ``appraise_run`` weights."""
     from artificial_emotions import explore as explore_mod
     from artificial_emotions.appraisal import build_context
     from artificial_emotions.explore import explore
 
-    by_id = _catalog_by_id()
     original = explore_mod.appraise_run
     mismatches: list[str] = []
     compared = 0
 
     def wrapped(items, **kwargs):
         nonlocal compared
+        signals = original(items, **kwargs)
         if items:
             ctx = build_context(
                 items,
@@ -270,17 +265,17 @@ def test_six_step_five_domain_catalog_matches_rules(monkeypatch: pytest.MonkeyPa
                 steps_without_progress=int(kwargs.get("steps_without_progress") or 0),
                 rejected_count=int(kwargs.get("rejected_count") or 0),
                 previous_top_id=kwargs.get("previous_top_id"),
+                previous_max_risk=float(kwargs.get("previous_max_risk") or 0.0),
+                previous_hubris=float(kwargs.get("previous_hubris") or 0.0),
+                outcome_result=str(kwargs.get("outcome_result") or ""),
+                outcome_question_id=str(kwargs.get("outcome_question_id") or ""),
             )
             try:
-                _assert_weights_match(
-                    _rule_weights(ctx),
-                    _catalog_weights(ctx, by_id),
-                    label=f"explore-step-{compared}",
-                )
+                _assert_when_matches_appraise(ctx, signals, label=f"explore-step-{compared}")
             except AssertionError as exc:
                 mismatches.append(str(exc))
             compared += 1
-        return original(items, **kwargs)
+        return signals
 
     monkeypatch.setattr(explore_mod, "appraise_run", wrapped)
     for domain in _OFFLINE_EXPLORE_DOMAINS:
@@ -294,4 +289,4 @@ def test_six_step_five_domain_catalog_matches_rules(monkeypatch: pytest.MonkeyPa
             persist_memory=False,
         )
     assert compared >= 5 * 1, f"expected a 6-step x 5-domain suite, compared {compared} steps"
-    assert not mismatches, "catalog vs RULES mismatches:\n" + "\n".join(mismatches)
+    assert not mismatches, "evaluate_when vs appraise_run mismatches:\n" + "\n".join(mismatches)

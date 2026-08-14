@@ -3,7 +3,7 @@
 Wave 0 freezes key names and vocabularies. Placeholders (empty ``when``,
 ``effects``, ``use_for``) are allowed; unknown effect ids and unknown
 ``requires`` tokens are not. Catalog ``when`` / ``use_for`` is the runtime
-appraisal contract; ``RULES`` lambdas remain a characterization golden.
+appraisal contract.
 """
 
 from __future__ import annotations
@@ -16,7 +16,6 @@ from artificial_emotions.appraisal import (
     COERCION_LEVELS,
     EFFECT_IDS,
     REQUIRES_TOKENS,
-    RULES,
     WHEN_OPS,
     validate_catalog_entry,
     validate_emotion_catalog,
@@ -175,10 +174,9 @@ _TWELVE_LEFTOVERS = frozenset(
 )
 
 
-def test_ruled_emotions_have_catalog_when():
-    by_id = {e["id"]: e for e in emotion_catalog()["emotions"]}
-    missing = [eid for eid in RULES if not by_id[eid]["when"]]
-    assert not missing, f"RULES ids still have empty when: {missing}"
+def test_catalog_ids_have_non_empty_when():
+    missing = [e["id"] for e in emotion_catalog()["emotions"] if not e.get("when")]
+    assert not missing, f"catalog ids still have empty when: {missing}"
 
 
 def test_twelve_leftovers_are_filled():

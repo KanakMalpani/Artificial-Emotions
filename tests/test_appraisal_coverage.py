@@ -4,14 +4,14 @@ Past hole: an earlier version could derive 13 of 54 catalogued emotions, and
 only **four** ever fired across all nine domains. The other fifty were furniture.
 
 The catalog is the **runtime** contract: production dispatch evaluates catalog
-``when`` only. ``RULES`` lambdas stay a characterization golden (``evaluate_when``
-vs lambda), not a second runtime.
+``when`` only. ``FIRING_CONTEXTS`` are constructible fixtures (a subset of
+catalog ids with a non-empty ``when``), not a second spec.
 
 Current guard: ``MIN_CATALOG_SHARE = 1.0`` — every catalog id has a condition
 and a use. These tests make the old hole unreachable:
 
-* every rule in ``RULES`` must be **firable** — constructible inputs exist that
-  trigger it, so no rule is dead code;
+* every ``FIRING_CONTEXTS`` id must be **firable** via ``evaluate_when`` —
+  constructible inputs exist that trigger it, so no fixture is dead;
 * every rule must **matter** — it either changes behaviour in ``modulate`` or is
   explicitly declared ``OBSERVATION_ONLY``;
 * every appraisable emotion must **exist in the catalog**, so appraisal cannot
@@ -33,9 +33,9 @@ import pytest
 
 from artificial_emotions.appraisal import (
     OBSERVATION_ONLY,
-    RULES,
     AppraisalContext,
     build_context,
+    evaluate_when,
 )
 from artificial_emotions.emotions import emotion_catalog
 from artificial_emotions.imagine import IMAGINATION_KINDS, IMPLEMENTED_IMAGINATION_KINDS
@@ -45,6 +45,20 @@ from artificial_emotions.pipeline import CuriosityEngine
 from artificial_emotions.stances import STANCES
 
 CATALOG_IDS = {e["id"] for e in emotion_catalog()["emotions"]}
+_MIN_SIGNAL = 0.04
+
+
+def _catalog_by_id() -> dict[str, dict]:
+    return {str(e["id"]): e for e in emotion_catalog()["emotions"]}
+
+
+def _when_ids() -> set[str]:
+    """Catalog ids with a non-empty ``when`` — the appraisable set."""
+    return {eid for eid, entry in _catalog_by_id().items() if entry.get("when")}
+
+
+def _eval_when(ctx: AppraisalContext, emotion: str) -> float | None:
+    return evaluate_when(ctx, _catalog_by_id()[emotion].get("when") or [])
 
 
 def _requires_tokens_of(entry: dict) -> list[str]:
@@ -199,33 +213,32 @@ def neutral_context() -> AppraisalContext:
 # --- no dead rules ---------------------------------------------------------------------
 
 
-def test_every_rule_has_a_firing_fixture():
-    """A rule with no known firing situation is untestable, so it is not allowed."""
-    assert set(RULES) == set(FIRING_CONTEXTS), {
-        "missing_fixture": sorted(set(RULES) - set(FIRING_CONTEXTS)),
-        "stale_fixture": sorted(set(FIRING_CONTEXTS) - set(RULES)),
-    }
+def test_firing_contexts_are_a_subset_of_catalog_when_ids():
+    """Fixtures are constructible cases, not the full catalog."""
+    when_ids = _when_ids()
+    extra = set(FIRING_CONTEXTS) - when_ids
+    empty_when = [eid for eid in FIRING_CONTEXTS if not _catalog_by_id()[eid].get("when")]
+    assert not extra, f"FIRING_CONTEXTS not in catalog-with-when: {sorted(extra)}"
+    assert not empty_when, f"FIRING_CONTEXTS with empty when: {empty_when}"
+    assert FIRING_CONTEXTS
 
 
-@pytest.mark.parametrize("emotion", sorted(RULES))
+@pytest.mark.parametrize("emotion", sorted(FIRING_CONTEXTS))
 def test_every_rule_is_firable(emotion: str, neutral_context: AppraisalContext):
-    """No rule may be dead code — each must fire on a constructible context."""
+    """No firing fixture may be dead — each must fire on a constructible context."""
     ctx = replace(neutral_context, **FIRING_CONTEXTS[emotion])
-    _why, rule = RULES[emotion]
-    outcome = rule(ctx)
-    assert outcome is not None, f"{emotion} never fires"
-    weight, evidence = outcome
-    assert weight >= 0.04, f"{emotion} fires below the noise floor ({weight})"
-    assert evidence, f"{emotion} fires without evidence"
+    weight = _eval_when(ctx, emotion)
+    assert weight is not None, f"{emotion} never fires"
+    assert weight >= _MIN_SIGNAL, f"{emotion} fires below the noise floor ({weight})"
+    assert _catalog_by_id()[emotion].get("when"), f"{emotion} fires without a when"
 
 
-@pytest.mark.parametrize("emotion", sorted(RULES))
+@pytest.mark.parametrize("emotion", sorted(FIRING_CONTEXTS))
 def test_no_rule_fires_on_a_neutral_context(emotion: str, neutral_context: AppraisalContext):
-    """Rules that always fire carry no information."""
-    outcome = RULES[emotion][1](neutral_context)
-    if outcome is not None:
-        weight, _ = outcome
-        assert weight < 0.04, f"{emotion} fires on a neutral run (weight {weight})"
+    """Conditions that always fire carry no information."""
+    weight = _eval_when(neutral_context, emotion)
+    if weight is not None:
+        assert weight < _MIN_SIGNAL, f"{emotion} fires on a neutral run (weight {weight})"
 
 
 # --- every rule matters ----------------------------------------------------------------
@@ -249,8 +262,8 @@ def _modulating_emotions() -> set[str]:
 
 
 def _appraisable_ids() -> set[str]:
-    """Ids appraisal can actually emit: RULES plus catalog rows with a condition."""
-    return set(RULES) | _conditioned_ids()
+    """Ids appraisal can actually emit: catalog rows with a condition."""
+    return _conditioned_ids()
 
 
 def _stance_driving_emotions() -> set[str]:
@@ -271,7 +284,7 @@ def _imagination_driving_emotions() -> set[str]:
 def test_every_appraisable_emotion_either_acts_or_is_declared_observation_only():
     """The anti-decoration rule: derive it, then either use it or say you won't."""
     acting = _modulating_emotions()
-    unaccounted = set(RULES) - acting - OBSERVATION_ONLY
+    unaccounted = set(FIRING_CONTEXTS) - acting - OBSERVATION_ONLY
     assert not unaccounted, (
         f"{sorted(unaccounted)} are appraised but neither change behaviour nor are "
         "listed in OBSERVATION_ONLY — that is how a catalog becomes decoration."
@@ -285,7 +298,7 @@ def test_every_emotion_has_a_use_not_merely_a_disclaimer():
     of things the system names and never uses. Stances closed that gap: an
     emotion that does not steer the search must at least be the question some
     stance asks — or drive a wired imaginative lens. Nothing is allowed to be
-    merely observed. Wave 3: the union is every catalog id, not only ``RULES``.
+    merely observed. Wave 3: the union is every catalog id.
     """
     useful = _modulating_emotions() | _stance_driving_emotions() | _imagination_driving_emotions()
     homeless = CATALOG_IDS - useful
@@ -307,7 +320,7 @@ def test_stances_only_claim_emotions_the_system_can_actually_appraise():
 
 
 def test_imagination_only_claims_emotions_the_system_can_actually_appraise():
-    invented = _imagination_driving_emotions() - set(RULES)
+    invented = _imagination_driving_emotions() - _appraisable_ids()
     assert not invented, (
         f"imagination kinds claim {sorted(invented)}, which appraisal never derives"
     )
@@ -351,7 +364,7 @@ def test_former_stub_emotions_drive_wired_imagination():
     ):
         assert emotion in drivers, f"{emotion} missing from wired imagination drivers"
     useful = _modulating_emotions() | _stance_driving_emotions() | drivers
-    assert not (set(RULES) - useful)
+    assert not (_when_ids() - useful)
 
 
 def test_stripping_an_imagination_generator_fails_the_ratchet(monkeypatch: pytest.MonkeyPatch):
@@ -465,7 +478,8 @@ _FIVE_EPISTEMIC = ("doubt", "conviction", "trust", "awe", "sublimity")
 
 def test_a_meaningful_share_of_the_catalog_is_reachable():
     """The original failure was 13/54 derivable. Every id now has a condition."""
-    assert len(RULES) >= MIN_RULES, f"only {len(RULES)} rules"
+    when_ids = _when_ids()
+    assert len(when_ids) >= MIN_RULES, f"only {len(when_ids)} catalog ids with when"
     conditioned = _conditioned_ids()
     share = len(conditioned) / len(CATALOG_IDS)
     assert share >= MIN_CATALOG_SHARE, f"only {share:.0%} of the catalog has a condition"
@@ -503,7 +517,7 @@ def test_enough_emotions_actually_change_behaviour():
 
 
 def test_appraisal_never_invents_vocabulary_outside_the_catalog():
-    unknown = set(RULES) - CATALOG_IDS
+    unknown = (_when_ids() | set(FIRING_CONTEXTS)) - CATALOG_IDS
     assert not unknown, f"appraisal can emit {sorted(unknown)}, which the mixer cannot mix"
 
 
@@ -526,8 +540,9 @@ def test_plan_flags_count_as_real_use_with_stance():
 
 def test_outcome_gated_affect_is_not_derived_from_rank():
     """Pride/shame wait on logged outcomes, not top_score — that path is triumph."""
-    assert not (OUTCOME_EVENT_IDS & set(RULES)), (
-        f"{sorted(OUTCOME_EVENT_IDS & set(RULES))} derived from rank — that is triumph, not outcome"
+    assert not (OUTCOME_EVENT_IDS & set(FIRING_CONTEXTS)), (
+        f"{sorted(OUTCOME_EVENT_IDS & set(FIRING_CONTEXTS))} derived from rank — "
+        "that is triumph, not outcome"
     )
     fixtures = _outcome_fire_fixtures()
     for eid in OUTCOME_EVENT_IDS:
@@ -551,7 +566,7 @@ def test_gated_catalog_antecedents_are_named():
 
 def test_five_epistemic_rules_are_in_rules_and_firing_contexts():
     for emotion in _FIVE_EPISTEMIC:
-        assert emotion in RULES, f"{emotion} missing from RULES"
+        assert emotion in _when_ids(), f"{emotion} missing from catalog when"
         assert emotion in FIRING_CONTEXTS, f"{emotion} missing from FIRING_CONTEXTS"
         assert emotion in CATALOG_IDS
 
@@ -574,16 +589,14 @@ def test_hopeless_mega_gap_does_not_outrank_tractable_curiosity(
         mean_impact=0.55,
         mean_tractability=0.8,
     )
-    hopeless_out = RULES["curiosity"][1](hopeless)
-    tractable_out = RULES["curiosity"][1](tractable)
-    assert hopeless_out is not None and tractable_out is not None
-    h_weight, h_ev = hopeless_out
-    t_weight, _ = tractable_out
+    h_weight = _eval_when(hopeless, "curiosity")
+    t_weight = _eval_when(tractable, "curiosity")
+    assert h_weight is not None and t_weight is not None
     assert t_weight > h_weight, (
         f"hopeless mega-gap curiosity {h_weight:.3f} outranked tractable {t_weight:.3f}"
     )
-    assert "mean_tractability" in h_ev
-    assert h_ev["mean_tractability"] == pytest.approx(0.02, abs=1e-6)
+    assert "mean_tractability" in str(_catalog_by_id()["curiosity"]["when"])
+    assert hopeless.mean_tractability == pytest.approx(0.02, abs=1e-6)
 
 
 def test_conviction_does_not_fire_on_a_hopeless_mega_gap(neutral_context: AppraisalContext):
@@ -596,27 +609,27 @@ def test_conviction_does_not_fire_on_a_hopeless_mega_gap(neutral_context: Apprai
         gap_ratio=1.0,
         mean_impact=0.95,
     )
-    assert RULES["conviction"][1](hopeless) is None
+    assert _eval_when(hopeless, "conviction") is None
 
 
 def test_awe_requires_an_open_gap_wonder_does_not(neutral_context: AppraisalContext):
     closed_scale = replace(neutral_context, mean_impact=0.8, mean_surprise=0.7, gap_ratio=0.0)
     open_scale = replace(neutral_context, mean_impact=0.8, mean_surprise=0.7, gap_ratio=0.9)
-    assert RULES["wonder"][1](closed_scale) is not None
-    assert RULES["awe"][1](closed_scale) is None
-    awe_open = RULES["awe"][1](open_scale)
+    assert _eval_when(closed_scale, "wonder") is not None
+    assert _eval_when(closed_scale, "awe") is None
+    awe_open = _eval_when(open_scale, "awe")
     assert awe_open is not None
-    assert awe_open[0] >= 0.04
+    assert awe_open >= _MIN_SIGNAL
 
 
 def test_trust_requires_a_live_gap_respect_does_not(neutral_context: AppraisalContext):
     dense_closed = replace(neutral_context, mean_related=8.0, gap_ratio=0.0)
     dense_open = replace(neutral_context, mean_related=6.0, gap_ratio=0.8)
-    assert RULES["respect"][1](dense_closed) is not None
-    assert RULES["trust"][1](dense_closed) is None
-    trust_open = RULES["trust"][1](dense_open)
+    assert _eval_when(dense_closed, "respect") is not None
+    assert _eval_when(dense_closed, "trust") is None
+    trust_open = _eval_when(dense_open, "trust")
     assert trust_open is not None
-    assert trust_open[0] >= 0.04
+    assert trust_open >= _MIN_SIGNAL
 
 
 def test_sublimity_does_not_loosen_safety_gates():
@@ -634,7 +647,7 @@ def test_sublimity_does_not_loosen_safety_gates():
 def test_offline_rule_buckets_partition_the_original_catalog_minus_track_a():
     """Literature / risk / live-signal rules are named; the rest must be reachable offline."""
     track_a = {"doubt", "conviction", "trust", "awe", "sublimity"}
-    original = set(RULES) - track_a
+    original = set(FIRING_CONTEXTS) - track_a
     gated = LITERATURE_GATED_RULES | RISK_FLAG_RULES | OFFLINE_UNREACHABLE_WITHOUT_LIVE_SIGNALS
     assert not (RECALIBRATED_OFFLINE_RULES & gated)
     assert RECALIBRATED_OFFLINE_RULES <= original

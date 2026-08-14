@@ -15,10 +15,10 @@ import pytest
 
 from artificial_emotions.appraisal import (
     EFFECT_IDS,
-    RULES,
     AppraisalContext,
     build_context,
     context_feature,
+    evaluate_when,
     validate_catalog_entry,
 )
 from artificial_emotions.emotions import emotion_catalog
@@ -75,6 +75,10 @@ def _row(eid: str) -> dict:
         if entry["id"] == eid:
             return entry
     raise AssertionError(f"missing catalog id {eid}")
+
+
+def _eval(ctx: AppraisalContext, eid: str) -> float | None:
+    return evaluate_when(ctx, _row(eid)["when"])
 
 
 def _cmp(actual: object, op: str, expected: object) -> bool:
@@ -243,33 +247,33 @@ def test_anger_needs_previous_top_id(neutral: AppraisalContext) -> None:
 
 def test_pride_is_not_triumph_from_rank(neutral: AppraisalContext) -> None:
     ctx = replace(neutral, **FIRING["pride"])
-    assert RULES["triumph"][1](ctx) is None
+    assert _eval(ctx, "triumph") is None
     assert when_holds(ctx, _row("pride")["when"])
 
 
 def test_admiration_is_not_respect_or_envy(neutral: AppraisalContext) -> None:
     ctx = replace(neutral, **FIRING["admiration"])
-    assert RULES["respect"][1](ctx) is None
-    assert RULES["envy"][1](ctx) is None
+    assert _eval(ctx, "respect") is None
+    assert _eval(ctx, "envy") is None
     assert when_holds(ctx, _row("admiration")["when"])
 
 
 def test_gratitude_is_not_respect(neutral: AppraisalContext) -> None:
     ctx = replace(neutral, **FIRING["gratitude"])
-    assert RULES["respect"][1](ctx) is None
+    assert _eval(ctx, "respect") is None
     assert when_holds(ctx, _row("gratitude")["when"])
 
 
 def test_joy_is_stricter_than_enjoyment(neutral: AppraisalContext) -> None:
     mere = replace(neutral, mean_cost=0.5, mean_tractability=0.5, gap_ratio=0.51)
-    assert RULES["enjoyment"][1](mere) is not None
+    assert _eval(mere, "enjoyment") is not None
     assert not when_holds(mere, _row("joy")["when"])
     assert when_holds(replace(neutral, **FIRING["joy"]), _row("joy")["when"])
 
 
 def test_fear_is_not_anxiety_dual_use_only(neutral: AppraisalContext) -> None:
     anxious = replace(neutral, dual_use_ratio=0.5, max_risk=0.2, mean_tractability=0.8)
-    assert RULES["anxiety"][1](anxious) is not None
+    assert _eval(anxious, "anxiety") is not None
     assert not when_holds(anxious, _row("fear")["when"])
     assert when_holds(replace(neutral, **FIRING["fear"]), _row("fear")["when"])
 

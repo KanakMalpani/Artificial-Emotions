@@ -1,7 +1,7 @@
 """Catalog-only production dispatch: empty ``when`` does not fire.
 
-:data:`RULES` remains a characterization golden. Emptying ``curiosity.when``
-must not consult the curiosity lambda even when that lambda would fire.
+Emptying ``curiosity.when`` must omit curiosity from ``appraise_run`` even
+when ``evaluate_when`` on the live catalog ``when`` would fire.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ import copy
 
 import pytest
 
-from artificial_emotions.appraisal import RULES, appraise_run, build_context
+from artificial_emotions.appraisal import appraise_run, build_context, evaluate_when
 from artificial_emotions.emotions import emotion_catalog
 from artificial_emotions.models import (
     GapEvidence,
@@ -50,14 +50,14 @@ def open_gap_items() -> list[RankedQuestion]:
     return [_open_gap_item()]
 
 
-def test_empty_curiosity_when_does_not_fire_even_if_rules_would(
+def test_empty_curiosity_when_does_not_fire_even_if_evaluate_when_would(
     monkeypatch: pytest.MonkeyPatch, open_gap_items: list[RankedQuestion]
 ) -> None:
     ctx = build_context(open_gap_items)
-    outcome = RULES["curiosity"][1](ctx)
-    assert outcome is not None
-    weight, _evidence = outcome
-    assert weight >= 0.04
+    by_id = {str(e["id"]): e for e in emotion_catalog()["emotions"]}
+    live = evaluate_when(ctx, by_id["curiosity"]["when"])
+    assert live is not None
+    assert live >= 0.04
 
     clone = copy.deepcopy(emotion_catalog())
     for entry in clone["emotions"]:
