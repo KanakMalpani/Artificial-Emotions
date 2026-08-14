@@ -26,7 +26,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Demo proofs: `docs/PROOFS.md` (includes multi-provider smoke matrix notes — no secrets)
 - CLI, Python API, FastAPI (`:8000`) — briefs, `[low–high]` bands, and profile name on agent surfaces
 - Expert-eval / spot-check harness: `emotions eval` + `evals/fixtures/` (v1+v2 adversarial) + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**; stratified `by_gold_status`)
-- Elicit A/B process eval: `emotions eval elicit` + `examples/elicit_ab_protocol.json` (lexical investigation-quality rubric — **not** EES)
+- Elicit A/B process eval: `emotions eval elicit` + `examples/elicit_ab_protocol.json` + AI/climate sample responses (lexical investigation-quality rubric — **not** EES, **not** an elicitation league)
 - Gap-status hand-label metric: `emotions eval gap-status` + `evals/fixtures/gap_status_handlabel_v1.json` (status_accuracy + related_but_unanswered_recall + false_answered_rate)
 - OpenAlex `has_funder` / lit rationale keys (`openalex_hit_n`, `mean_cited_by`, `funder_field_missing_rate`) attach to score rationale only — **no silent neglectedness weight change**
 - Opt-in preference JSONL schema (`preference_log_path` / `--preference-log`) — no DB required (W13); **CLI/config only** (not HTTP body — path injection)
@@ -37,9 +37,9 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Profile compare (`emotions compare-profiles` / `POST /v1/profiles/compare` / MCP `compare_profiles` / web two-column panel): side-by-side offline ranks + Kendall τ + top-k Jaccard + veto tip — **no silent consensus merge**
 - Constitution compare + risk veto (`POST /v1/profiles/constitution-compare` / MCP `constitution_compare` / web Compare + veto): primary vs safety-veto + hard `max_risk` flag/drop — **not** a constitutional optimum
 - MCP progressive disclosure via `CURIOSITY_MCP_TIER=core|investigate|affect|research|full` (default `full`); agent card exposes `tool_tiers`
-- Dual-use red-team fixtures (`evals/fixtures/dual_use_redteam_v1.json`) — regression checks, not a biosecurity oracle
+- Dual-use red-team fixtures (`evals/fixtures/dual_use_redteam_v1.json`) — small regression corpus with `residual_may_miss` items; **not** a biosecurity oracle, **not** a red-team league, **not** dual-use solved
 - Form-only brief critic (`emotions critique-brief` / `POST /v1/briefs/critique` / MCP `critique_brief`) — does **not** re-rank
-- VOI worksheet fill (`emotions voi-worksheet` / `POST /v1/voi/worksheet` / MCP `voi_worksheet`) — template metadata only; **not** EVSI/ENBS
+- VOI worksheet fill (`emotions voi-worksheet` / `POST /v1/voi/worksheet` / MCP `voi_worksheet`) — template metadata only; payload `evsi: null` / `honesty: not_evsi`; optional `estimate_evsi` hook returns None without data; **not** EVSI/ENBS
 - Composite eval report (`emotions eval report`) — diagnostics-first (soundness/critique/risk before elicit means; ErrEval cousin) + gap_f1 + gap-status + hivemind
 - Failure-knowledge seed phrases in domain packs (null/replication gaps) — not a dark-reactions corpus claim
 - Open-gap abstract lexicon includes null/replication phrases (dampen false “answered”) — still not full-text comprehension
@@ -74,9 +74,10 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS, rate limit, quota, audit
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
 - Ranked-unknowns export (`emotions export unknowns` / `POST /v1/export/unknowns` / MCP `export_unknowns`): JSON document of an already-ranked set (or CLI runs the pipeline). File / HTTP body is the v1 path. Arbitrary webhook URLs are **not** accepted (SSRF). Does not re-rank. HTTP does **not** write files (`out_path` rejected).
+- Outcome-loop dry-run (`emotions loop --outcomes PATH`): preference JSONL `event_type=outcome` → suggested re-rank + next explore step. Does **not** run experiments, does **not** call `explore`. Not a lab closed-loop. CLI only (path; no HTTP path injection)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1078 passed, 1 skipped)
-- Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions pack check`, `emotions export unknowns --no-literature --json`, `emotions-mcp --list-tools`, `--list-resources`
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1112 passed, 1 skipped)
+- Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions pack check`, `emotions export unknowns --no-literature --json`, `emotions loop --outcomes evals/fixtures/outcome_loop_smoke_v1.jsonl --json`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
 - Failure-mode suite: `tests/test_failure_modes.py` encodes F1–F15 from `docs/LIMITS.md` / failure-mode tests
@@ -98,7 +99,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 | Seed set is curated (+ optional packs) | Offline reliability | LLM generation + CONTRIBUTING pack bar |
 | Value weights are named presets or custom | No universal value-free ranking | Pass `profile_name` or custom `ValueProfile`; AI can shrink collective focus (McNamara / Hao *Nature* 2026; Bisht et al.) |
 | Ranked unknowns ≠ post-execution quality | Ideation–execution gap (arXiv 2506.20803) | Treat ranks as decision aids; outcome flywheel is sparse / deferred |
-| Axis scores are not EVSI/ENBS | No shared utility / PSA model | VOI worksheet is template fill only |
+| Axis scores are not EVSI/ENBS | No shared utility / PSA model | VOI worksheet is template fill only (`evsi: null`, `honesty: not_evsi`) |
 | Multi-model / ensemble generation | Artificial Hivemind homogenization risk | Jaccard/embedding diversity + hivemind eval metric; disagreement ≠ value |
 | Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; optional `mix_intensity_cap`; agent safety blurb; no silent user-affect inference |
 | PAD mood carryover (4h half-life) | Continuity of stored P/A/D across sessions | Computational carryover, not a VAD experience claim |
@@ -110,7 +111,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 | Multi-judge ensemble needs live LLM | Offline uses single heuristic | Documented; disagreement flag only when ≥2 judges return |
 | PyPI publish depends on Actions billing | Failed payment / spending limit aborts runners in ~2s | Fix Billing & plans; re-run `publish.yml` (see PUBLISHING) |
 | Absolute local paths may remain in older git commits | Working-tree scrub does not rewrite history | Accept residual username-in-history risk, or squash/filter before first public clone wave |
-| Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — not claimed done |
+| Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — v1 does **not** claim VOI, EVSI, or a lab loop. VOI worksheet is not EVSI; `emotions loop --outcomes` is a dry-run (JSONL → suggested re-rank / next explore), **not** experiment execution. Dual-use fixture expansion is not a league; residual stays residual. |
 | Unauthenticated local HTTP when API key unset | Demo DX by design | Documented; set key + avoid `0.0.0.0` for non-local |
 | HTTP rate limit is per-process only | In-memory sliding window by client host | Soft guard for local serve; use a reverse proxy/WAF for multi-instance |
 | HTTP quota is per-process and per matched key | In-memory sliding window; no key → no quota bucket | Opt-in `CURIOSITY_API_QUOTA_*`; unset keeps local DX; not multi-tenant |

@@ -271,7 +271,7 @@ def agent_manifest() -> dict[str, Any]:
         "voi_worksheet": {
             "method": "POST",
             "path": "/v1/voi/worksheet",
-            "note": "Template fill only — not computed EVSI.",
+            "note": "Template fill only — evsi is null, honesty=not_evsi; not computed EVSI.",
         },
         "surprise_worksheet": {
             "method": "POST",

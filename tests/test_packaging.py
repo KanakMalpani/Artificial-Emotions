@@ -18,6 +18,7 @@ from artificial_emotions.bayesian import default_surprise_worksheet_path
 from artificial_emotions.compare import default_constitution_path
 from artificial_emotions.elicit_eval import default_protocol_path
 from artificial_emotions.evals import default_fixtures_dir
+from artificial_emotions.outcome_loop import default_outcome_loop_fixture
 from artificial_emotions.voi import default_voi_template_path
 
 _PYPROJECT = Path(__file__).resolve().parents[1] / "pyproject.toml"
@@ -28,11 +29,13 @@ _REQUIRED_FILES = [
     "examples/constitution_veto_stack.json",
     "examples/elicit_ab_protocol.json",
     "examples/elicit_ab_sample_responses.json",
+    "examples/elicit_ab_sample_responses_climate.json",
     "examples/voi_worksheet_template.json",
     "examples/discovery_corpus_demo.json",
     "examples/discovery_corpus_timesplit_demo.json",
     "evals/fixtures/cooccur_neglectedness_smoke_v1.json",
     "evals/fixtures/preference_calibration_smoke_v1.jsonl",
+    "evals/fixtures/outcome_loop_smoke_v1.jsonl",
 ]
 
 
@@ -76,6 +79,7 @@ def test_default_paths_all_exist():
         default_constitution_path(),
         default_protocol_path(),
         default_voi_template_path(),
+        default_outcome_loop_fixture(),
     ):
         assert path.is_file(), path
     assert default_fixtures_dir().is_dir()

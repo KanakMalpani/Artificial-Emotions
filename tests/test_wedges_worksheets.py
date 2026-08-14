@@ -181,7 +181,11 @@ def test_voi_worksheet_and_eval_report():
         domain="biology",
     )
     assert sheet["link_to_ranked_question"]["question_id"] == "q1"
-    assert "EVSI" in (sheet.get("honesty") or "") or "EVSI" in str(sheet.get("external_compute"))
+    assert sheet["evsi"] is None
+    assert sheet["honesty"] == "not_evsi"
+    assert "EVSI" in (sheet.get("honesty_note") or "") or "EVSI" in str(
+        sheet.get("external_compute")
+    )
 
     root = Path(__file__).resolve().parents[1]
     report = build_eval_report(
@@ -205,6 +209,9 @@ def test_voi_worksheet_and_eval_report():
         json={"question": "Test unknown?", "profile_name": "humanity_default"},
     )
     assert vres.status_code == 200
+    vbody = vres.json()
+    assert vbody["evsi"] is None
+    assert vbody["honesty"] == "not_evsi"
     agent = client.get("/v1/agent")
     assert agent.status_code == 200
     assert "card" in agent.json()

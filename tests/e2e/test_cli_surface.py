@@ -94,6 +94,8 @@ def test_voi_worksheet_fills_metadata(capsys):
         capsys, ["voi-worksheet", "--question-id", "q-1", "--question", "Why X?", "--json"]
     )
     assert payload["link_to_ranked_question"]["question_id"] == "q-1"
+    assert payload["evsi"] is None
+    assert payload["honesty"] == "not_evsi"
     # The worksheet must keep saying it is not a computed EVSI.
     assert "EVSI" in json.dumps(payload)
 
@@ -133,6 +135,19 @@ def test_critique_brief_is_form_only(capsys):
     assert payload
     # Critique must not re-rank anything.
     assert "curiosity_score" not in json.dumps(payload)
+
+
+def test_outcome_loop_dry_run_json(capsys):
+    from artificial_emotions.outcome_loop import default_outcome_loop_fixture
+
+    payload = _json_out(
+        capsys,
+        ["loop", "--outcomes", str(default_outcome_loop_fixture()), "--json"],
+    )
+    assert payload["mode"] == "dry_run"
+    assert payload["experiments_run"] == 0
+    assert payload["executed"] is False
+    assert "not a lab closed-loop" in payload["honesty"].lower()
 
 
 # --- eval harnesses ----------------------------------------------------------------
@@ -277,6 +292,7 @@ def test_every_subcommand_is_wired_into_main():
         "export",
         "emotions",
         "epistemic",
+        "loop",
     } <= names
 
 

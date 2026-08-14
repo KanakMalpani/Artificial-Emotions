@@ -379,8 +379,10 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "name": "voi_worksheet",
         "description": (
             "Fill a VOI worksheet template with ranked-question metadata for "
-            "domains that already have an external decision model. Not EVSI/ENBS; "
-            "scores remain decision aids under a ValueProfile — not oracles."
+            "domains that already have an external decision model. Payload "
+            "honesty is not_evsi and evsi is null without an external PSA/"
+            "utility model. Not EVSI/ENBS; scores remain decision aids under "
+            "a ValueProfile — not oracles."
         ),
         "input_schema": VOI_WORKSHEET_SCHEMA,
         "handler": handle_voi_worksheet,

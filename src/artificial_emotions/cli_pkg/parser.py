@@ -367,6 +367,30 @@ def build_parser() -> argparse.ArgumentParser:
     )
     explore_p.add_argument("--json", action="store_true")
 
+    loop_p = sub.add_parser(
+        "loop",
+        help=(
+            "Dry-run: outcome JSONL → suggested re-rank / next explore "
+            "(does not run experiments; not a lab closed-loop)"
+        ),
+        description=(
+            "Dry-run: read event_type=outcome rows from preference JSONL and "
+            "suggest a re-rank plus a next explore step. Does not run "
+            "experiments. Not a lab closed-loop."
+        ),
+    )
+    loop_p.add_argument(
+        "--outcomes",
+        required=True,
+        help="Preference JSONL path with event_type=outcome rows",
+    )
+    loop_p.add_argument(
+        "--profile",
+        default=None,
+        help="Optional ValueProfile filter (default: all events in the file)",
+    )
+    loop_p.add_argument("--json", action="store_true")
+
     decompose_p = sub.add_parser(
         "decompose",
         help="Open one unknown into sub-questions, a first step, and falsifiers (never an answer)",

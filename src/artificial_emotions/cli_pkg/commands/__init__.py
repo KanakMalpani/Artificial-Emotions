@@ -11,6 +11,7 @@ from artificial_emotions.cli_pkg.commands.dream import _dream
 from artificial_emotions.cli_pkg.commands.emotions import _emotions
 from artificial_emotions.cli_pkg.commands.evaluation import _eval, _validate
 from artificial_emotions.cli_pkg.commands.export import _export
+from artificial_emotions.cli_pkg.commands.loop import _loop
 from artificial_emotions.cli_pkg.commands.memory import _memory
 from artificial_emotions.cli_pkg.commands.preferences import _preferences
 from artificial_emotions.cli_pkg.commands.profiles import _compare_profiles, _profiles
@@ -41,6 +42,7 @@ __all__ = [
     "_export",
     "_explore",
     "_imagine",
+    "_loop",
     "_memory",
     "_preferences",
     "_profiles",

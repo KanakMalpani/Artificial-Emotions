@@ -301,7 +301,7 @@ def handle_voi_worksheet(
     domain: str = "",
     **_extra: Any,
 ) -> dict[str, Any]:
-    """Fill VOI worksheet metadata — not computed EVSI."""
+    """Fill VOI worksheet metadata — evsi is null, honesty=not_evsi."""
     from artificial_emotions.voi import fill_voi_worksheet
 
     return fill_voi_worksheet(

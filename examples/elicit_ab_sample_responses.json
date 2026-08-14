@@ -1,6 +1,7 @@
 {
   "name": "elicit_ab_sample_responses",
-  "honesty": "Synthetic agent write-ups for offline A/B rubric smoke — not human expert grades.",
+  "version": "0.1.1",
+  "honesty": "Synthetic agent write-ups for offline A/B rubric smoke — not human expert grades, not EES, not an elicitation league.",
   "responses": {
     "A_baseline": "I would look into the top question. We should study it more and gather more data. An experiment could help.",
     "B_incongruity": "The primary information gap is which internal signals predict goal-misgeneralization (AUROC>0.8 across ≥3 environments). First experiment: run a controlled multi-environment eval measuring candidate activation probes as the independent variable against a known misgeneralization label. Falsifier: if probe AUROC stays ≤0.55 under distribution shift, reduce confidence in that signal family. Prefer a discriminating observation over vague further research.",

@@ -137,7 +137,7 @@ ValueProfile + Domain/Topic
 
 P1 W1–W9 and P2 W10–W15 are ✅. PyPI is shipped — it is **not** the next wedge and **not** the bar for calling the product v1.0.
 
-When idle: stay on **P0** (honesty loop). **W-explore**, **W-rules**, and **W-cal** scaffolding are enacted. Do not claim calibrated scores. Do not start moonshots unless the user asks.
+When idle: stay on **P0** (honesty loop). **W-explore**, **W-rules**, and **W-cal** scaffolding are enacted. Do not claim calibrated scores. §7.6 honesty/dry-run stubs shipped; moonshots remain moonshots (not VOI, not EVSI, not a lab loop). Do not start further moonshots unless the user asks.
 
 ### P0 — Honesty & regression (always eligible)
 
@@ -507,14 +507,16 @@ Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding de
 
 | Moonshot | Idea |
 |----------|------|
-| Approximate VOI at scale | Structured EVSI where estimable |
+| Approximate VOI at scale | Structured EVSI where estimable. Honesty stub shipped: worksheet `evsi: null` / `honesty: not_evsi`; `estimate_evsi` returns None without data. Not EVSI. |
 | Bayesian surprise search | Surprisal-guided exploration |
 | Cross-org curiosity standard | Shared unknowns schema |
-| Lab closed-loop | Curiosity → experiment → re-rank (still not “we write Nature”) |
+| Lab closed-loop | **Dry-run stub shipped** (`emotions loop --outcomes PATH`): JSONL → suggested re-rank / next explore. Does **not** run experiments. Still not a lab closed-loop. CLI only (no `/v1` path injection). |
 | Constitutional curiosity | Multi-stakeholder ValueProfile negotiation |
-| Adversarial red-team league | Continuous F1–F15 corpus |
+| Adversarial red-team league | Continuous F1–F15 corpus. Small fixture expansion shipped (`evals/fixtures/dual_use_redteam_v1.json`); **not** a league. Dual-use residual stays residual. |
 | Affect / epistemic-emotion track | Research-only CME notes → optional incongruity UX cues / provoke elicitation eval; never claim the engine “feels” ([LIMITS.md](LIMITS.md)) |
 | Epistemic emotion elicitation | Near moonshot / research wedge: measure whether incongruity-framed injects raise investigation quality (human or agent A/B + optional EES); ship only annotation-level cues (`epistemic_cues.py`), not OCC/PAD engines |
+
+**Stubs shipped; moonshots remain moonshots.** v0.4.1 ships fail-closed VOI honesty fields (additive on existing `POST /v1/voi/worksheet`), a CLI-only outcome dry-run, and a small elicit/dual-use fixture expansion. v1 does **not** claim VOI, EVSI, or a lab closed-loop. Dual-use residual stays residual.
 
 Only pick these if the user explicitly asks or P1–P2 are clear.
 
@@ -590,6 +592,8 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | “Semantic diversity” | Embedding path tested; default vs optional labeled |
 | “Literature-grounded” | Show `gap.related_works` + status; no full-text claim if abstracts-only |
 | “PyPI one-liner install” | Public package version matching git tag |
+| “VOI / computed EVSI” | External PSA + utilities + ConVOI/ISPOR; worksheet `evsi: null` / `honesty: not_evsi` is **not** EVSI |
+| “Lab closed-loop” | Experiment execution that re-ranks from real results; `emotions loop --outcomes` is a dry-run stub |
 | “v1.0” | §7.4 **and** honesty bar in [`LIMITS.md`](LIMITS.md): heuristic scores, phrase-level gaps, dual-use residual, local HTTP. PyPI install is **not** sufficient. |
 
 **When in doubt: update LIMITS first, market second.**

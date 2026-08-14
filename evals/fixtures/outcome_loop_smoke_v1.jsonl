@@ -1,0 +1,7 @@
+{"schema_version":"preference_event.v1","event_type":"prefer","profile_name":"humanity_default","question_id":"loop-ignore","notes":"Prefer must not drive the outcome loop"}
+{"schema_version":"preference_event.v1","event_type":"outcome","profile_name":"humanity_default","domain":"ai","question_id":"loop-a","labels":{"result":"null"},"notes":"Superseded by a later partial_progress on the same id"}
+{"schema_version":"preference_event.v1","event_type":"outcome","profile_name":"humanity_default","domain":"ai","question_id":"loop-b","labels":{"result":"null"},"notes":"Dead-end — deprioritize"}
+{"schema_version":"preference_event.v1","event_type":"outcome","profile_name":"humanity_default","domain":"biology","question_id":"loop-c","labels":{"result":"answered"},"notes":"Resolved — deprioritize for next explore"}
+{"schema_version":"preference_event.v1","event_type":"outcome","profile_name":"humanity_default","domain":"ai","question_id":"loop-a","labels":{"result":"partial_progress"},"notes":"Latest wins — keep loop-a in view"}
+{"schema_version":"preference_event.v1","event_type":"outcome","profile_name":"alignment_lab","question_id":"loop-other","labels":{"result":"abandoned"},"notes":"Other profile — excluded when --profile humanity_default"}
+{"schema_version":"preference_event.v1","event_type":"outcome","profile_name":"humanity_default","labels":{"result":"partial_progress"},"notes":"No question_id — counted in mix, not ranked"}

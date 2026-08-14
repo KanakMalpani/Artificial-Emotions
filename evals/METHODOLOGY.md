@@ -89,6 +89,35 @@ the numbers as anything other than a wiring check.
 Honesty field: **not calibrated**. v1 ships the flywheel scaffolding, not
 proof that scores track later impact.
 
+## Elicit A/B process eval (not EES)
+
+Lexical investigation-quality rubric on synthetic agent write-ups
+(`examples/elicit_ab_protocol.json`, AI + climate sample responses).
+`emotions eval elicit` reports condition means and B−A / C−A deltas only.
+
+This is **not** an elicitation league, **not** EES, and **not** proof that
+incongruity raises breakthrough rates. Protocol `non_claims` stay in force.
+
+```bash
+emotions eval elicit --responses examples/elicit_ab_sample_responses.json --json
+emotions eval elicit --responses examples/elicit_ab_sample_responses_climate.json --domain climate --json
+pytest tests/test_elicit_redteam_fixtures.py -q
+```
+
+## Dual-use red-team regression (not a league)
+
+`evals/fixtures/dual_use_redteam_v1.json` is a small offline corpus for the
+weighted heuristic. `expect_risk=low` must stay below review; `review_or_high`
+must flag; `residual_may_miss` documents LIMITS evasion (a catch is allowed;
+a miss is not a product failure).
+
+**Not** a biosecurity oracle, **not** a continuous F1–F15 league, **not**
+dual-use solved.
+
+```bash
+pytest tests/test_elicit_redteam_fixtures.py tests/test_wedges_safety_packs.py::test_dual_use_redteam_fixtures -q
+```
+
 ## Honesty
 
 Scores remain decision aids. Literature is abstract/neighborhood-level unless

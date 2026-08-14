@@ -731,7 +731,7 @@
     "type": "function",
     "function": {
       "name": "voi_worksheet",
-      "description": "Fill a VOI worksheet template with ranked-question metadata for domains that already have an external decision model. Not EVSI/ENBS; scores remain decision aids under a ValueProfile \u2014 not oracles.",
+      "description": "Fill a VOI worksheet template with ranked-question metadata for domains that already have an external decision model. Payload honesty is not_evsi and evsi is null without an external PSA/utility model. Not EVSI/ENBS; scores remain decision aids under a ValueProfile \u2014 not oracles.",
       "parameters": {
         "type": "object",
         "properties": {

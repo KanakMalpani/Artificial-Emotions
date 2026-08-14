@@ -90,6 +90,8 @@ python -c "from artificial_emotions.agent_tools import dispatch_tool; print(disp
 emotions eval
 emotions eval --json
 emotions eval elicit --responses examples/elicit_ab_sample_responses.json --json
+emotions eval elicit --responses examples/elicit_ab_sample_responses_climate.json --domain climate --json
+# Lexical A/B smoke — not EES, not an elicitation league
 emotions eval gap-status --json
 emotions eval report --json
 # Hand-label metrics: status_accuracy, related_but_unanswered_recall, false_answered_rate
@@ -111,7 +113,8 @@ emotions compare-profiles --domain ai --a humanity_default --b alignment_lab --n
 ```bash
 emotions critique-brief --question "What is A? What is B?" --ops "do everything" --json
 emotions voi-worksheet --question "Which biomarkers…?" --profile humanity_default --json
-# HTTP: POST /v1/briefs/critique  POST /v1/voi/worksheet — form-only / template fill (not EVSI)
+# HTTP: POST /v1/briefs/critique  POST /v1/voi/worksheet — form-only / template fill
+# JSON includes honesty=not_evsi and evsi=null (not computed EVSI)
 ```
 
 ## Second literature backend (W11)
@@ -147,6 +150,8 @@ emotions preferences suggest-pair --candidates a,b,c --path prefs.jsonl --json
 ```bash
 pytest tests/test_mid_horizon.py::test_w14_dual_use_beyond_keywords -q
 # Weighted patterns + combos + human_review_risk; LIMITS still lists residual evasion risk
+pytest tests/test_elicit_redteam_fixtures.py tests/test_wedges_safety_packs.py::test_dual_use_redteam_fixtures -q
+# Small dual-use + elicit fixture regression — not a league; not dual-use solved
 pytest tests/test_explore_enacted_flags.py -q
 # W-explore: explore may omit dual_use_high when drop_dual_use fires; still not a biosafety oracle
 ```
@@ -193,9 +198,18 @@ This repo’s CI/agent sessions do **not** claim live multi-provider passes — 
 
 ```bash
 emotions voi-worksheet --question-id q1 --question "Which biomarkers?" --json
+# honesty=not_evsi, evsi=null — not computed EVSI
 emotions surprise-worksheet --question-id q1 --predicted-surprise 0.7 --belief-shift 2 --json
 # HTTP: POST /v1/voi/worksheet  POST /v1/surprise/worksheet
 # Belief-shift logging only — does not rename ScoreAxes.surprise
+```
+
+## Outcome loop dry-run (not experiment execution)
+
+```bash
+emotions loop --outcomes evals/fixtures/outcome_loop_smoke_v1.jsonl --json
+# Suggested re-rank + next explore step from logged outcomes.
+# Does not run experiments. Not a lab closed-loop. CLI only.
 ```
 
 ## Offline vs literature compare

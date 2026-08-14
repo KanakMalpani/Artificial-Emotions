@@ -82,7 +82,7 @@ def briefs_critique(req: CritiqueBriefRequest) -> dict[str, Any]:
 
 @router.post("/v1/voi/worksheet")
 def voi_worksheet(req: VoiWorksheetRequest) -> dict[str, Any]:
-    """Fill VOI worksheet metadata — not computed EVSI/ENBS."""
+    """Fill VOI worksheet metadata — evsi is null, honesty=not_evsi; not EVSI/ENBS."""
     from artificial_emotions.voi import fill_voi_worksheet
 
     return fill_voi_worksheet(

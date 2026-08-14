@@ -1,0 +1,11 @@
+{
+  "name": "elicit_ab_sample_responses_climate",
+  "version": "0.1.0",
+  "domain": "climate",
+  "honesty": "Synthetic agent write-ups for offline A/B rubric smoke — not human expert grades, not EES, not an elicitation league.",
+  "responses": {
+    "A_baseline": "I would look into drought. We should study it more and gather more data. An experiment could help.",
+    "B_incongruity": "The primary information gap is which soil-moisture satellite products best predict drought-related crop yield loss at county scale. First experiment: compare AUROC of at least three public products as the independent variable against a pre-registered yield-loss label. Falsifier: if holdout AUROC stays at or below 0.55, reduce confidence in that product family. Prefer a discriminating observation over vague further research.",
+    "C_mix_framing_optional": "Missing knowledge: which public drought indices predict county-scale yield loss before harvest. Concrete first investigation: compare three drought indices; independent variable = index family. Outcome that would refute the leading hypothesis: indices fail to beat chance on a pre-registered holdout. If confusion_risk, first clarify an enabling sub-question with a cheap pilot before a large program."
+  }
+}

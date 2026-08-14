@@ -41,7 +41,8 @@ def _voi_worksheet(args: argparse.Namespace) -> int:
     print("VOI worksheet (template fill — not EVSI)")
     print(f"  decision_problem={payload.get('decision_problem')[:120]}")
     print(f"  link={payload.get('link_to_ranked_question')}")
-    print(f"\n{payload.get('honesty')}")
+    print(f"  honesty={payload.get('honesty')}  evsi={payload.get('evsi')}")
+    print(f"\n{payload.get('honesty_note') or payload.get('honesty')}")
     return 0
 
 

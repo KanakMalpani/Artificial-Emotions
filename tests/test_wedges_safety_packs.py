@@ -57,6 +57,10 @@ def test_dual_use_redteam_fixtures():
         if expect == "low":
             assert assessment.risk < 0.45, item["question_id"]
             assert not assessment.hard_reject_likely
+        elif expect == "residual_may_miss":
+            notes = (item.get("notes") or "").lower()
+            assert "residual" in notes or "may miss" in notes, item["question_id"]
+            # LIMITS residual: do not require a catch; do not claim dual-use solved.
         else:
             assert assessment.risk >= 0.45 or assessment.needs_human_review, item["question_id"]
             assert (

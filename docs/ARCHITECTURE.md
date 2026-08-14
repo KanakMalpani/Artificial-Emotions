@@ -47,6 +47,8 @@
 | affect | `affect.py` | PAD mood, felt simulation, blends and tension |
 | pipeline | `pipeline.py` | Orchestration (`CuriosityEngine`) |
 | export_unknowns | `export_unknowns.py` | Ranked-set JSON document (file / HTTP body; no webhooks) |
+| voi | `voi.py` | VOI worksheet fill (`evsi: null`, `honesty: not_evsi`); formula hook returns None without data — not EVSI |
+| outcome_loop | `outcome_loop.py` | Dry-run: outcome JSONL → suggested re-rank / next explore (not experiment execution) |
 | provoke | `provoke.py` | Instant spark + inject pack |
 | emotions | `emotions.py` | Catalog / mix / cues (`annotation_only` + `computational_affect`) |
 | resources | `resources.py` | Packaged data paths for worksheets / eval fixtures |
@@ -238,7 +240,7 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 1. Add a domain pack JSON under `artificial_emotions/packs/` (see CONTRIBUTING), then `emotions pack check`.
 2. Swap / merge literature backends (`literature_backend=openalex|semantic_scholar|both`).
 3. Optional embedding diversity: `pip install '.[embeddings]'`.
-4. Preference JSONL → thin re-rank / outcome-event weight hints / eval calibration telemetry (scaffolding shipped; still not calibrated).
+4. Preference JSONL → thin re-rank / outcome-event weight hints / eval calibration telemetry (scaffolding shipped; still not calibrated). Outcome-loop dry-run (`emotions loop --outcomes`) suggests next explore without running experiments.
 5. Keep tool schemas in sync via `agent_tools.py` (MCP, OpenAI JSON, HTTP).
 
 See also: [DESIGN.md](DESIGN.md) · [LIMITS.md](LIMITS.md) · [PLUGINS.md](PLUGINS.md).

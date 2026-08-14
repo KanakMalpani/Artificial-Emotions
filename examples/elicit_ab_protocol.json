@@ -1,7 +1,8 @@
 {
   "name": "epistemic_elicit_ab_protocol",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "honesty": "Research/eval protocol only — not an EES API; cues remain annotation_only.",
+  "fixture_note": "Small A/B smoke fixtures only — not an elicitation league, not EES.",
   "see": [
     "private local notes; not in the public tree",
     "src/artificial_emotions/epistemic_cues.py"

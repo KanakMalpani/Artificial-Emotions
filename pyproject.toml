@@ -83,6 +83,7 @@ packages = ["src/artificial_emotions"]
 "examples/constitution_veto_stack.json" = "artificial_emotions/data/examples/constitution_veto_stack.json"
 "examples/elicit_ab_protocol.json" = "artificial_emotions/data/examples/elicit_ab_protocol.json"
 "examples/elicit_ab_sample_responses.json" = "artificial_emotions/data/examples/elicit_ab_sample_responses.json"
+"examples/elicit_ab_sample_responses_climate.json" = "artificial_emotions/data/examples/elicit_ab_sample_responses_climate.json"
 "examples/voi_worksheet_template.json" = "artificial_emotions/data/examples/voi_worksheet_template.json"
 "examples/discovery_corpus_demo.json" = "artificial_emotions/data/examples/discovery_corpus_demo.json"
 "examples/discovery_corpus_timesplit_demo.json" = "artificial_emotions/data/examples/discovery_corpus_timesplit_demo.json"

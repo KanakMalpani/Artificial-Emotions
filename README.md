@@ -545,6 +545,7 @@ emotions compare-profiles --a humanity_default --b alignment_lab # whose values?
 emotions mix curiosity=40 confusion=30 awe=30 --json             # affect
 emotions profiles                                                # list presets
 emotions pack check                                              # CONTRIBUTING pack bar
+emotions loop --outcomes evals/fixtures/outcome_loop_smoke_v1.jsonl --json  # dry-run; not experiments
 ```
 
 Domains: `ai` · `biology` · `physics` · `climate` · `medicine` · `materials` · `social` · `energy` · `general`

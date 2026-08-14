@@ -48,6 +48,20 @@ yet, and this block is not a version bump.
 - **LangGraph host recipe.** Copy-paste snippet in `docs/PLUGINS.md` loads
   `GET /v1/agent/tools` and executes via `http_fallbacks`. `langgraph` is not
   a package extra. Smoke is the tools payload, not a LangGraph CI job.
+- **VOI worksheet honesty fields.** `fill_voi_worksheet` (CLI `voi-worksheet`,
+  `POST /v1/voi/worksheet`, MCP `voi_worksheet`) always emits `evsi: null` and
+  `honesty: not_evsi`. Optional `estimate_evsi` hook returns None without
+  PSA/utility data and never invents a number. Additive `/v1` fields only.
+  Not EVSI/ENBS.
+- **Outcome-loop dry-run.** `emotions loop --outcomes PATH` reads preference
+  JSONL `event_type=outcome` rows and suggests a re-rank plus a next explore
+  step. Does **not** run experiments and does **not** call `explore`. Not a
+  lab closed-loop. CLI only (no HTTP path injection). Fixture:
+  `evals/fixtures/outcome_loop_smoke_v1.jsonl`.
+- **Elicit A/B + dual-use fixture expansion.** Extra climate elicit sample
+  responses (`examples/elicit_ab_sample_responses_climate.json`) and a larger
+  dual-use red-team regression corpus (`residual_may_miss` documents LIMITS
+  evasion). Not a league; not dual-use solved; not EES.
 
 ### Changed
 - **Explore honors `drop_dual_use` / `forbid_similar_jump`.** Disgust may omit
@@ -65,6 +79,8 @@ yet, and this block is not a version bump.
 
 ### Honesty
 - No 0.4.2 release. Do not treat this Unreleased section as shipped-under-a-tag.
+- §7.6 stubs shipped; moonshots remain moonshots. v1 does not claim VOI, EVSI,
+  or a lab closed-loop. Dual-use residual stays residual.
 
 ## [0.4.1] — memory integrity + API serve hardening
 

@@ -14,7 +14,7 @@ Sample payloads, protocols, and harnesses for Artificial Emotions. Prefer the sh
 | [`emotions_annotate_request.json`](emotions_annotate_request.json) / [`emotions_annotate_response.json`](emotions_annotate_response.json) | Cue annotate I/O |
 | [`emotions_cues_response.json`](emotions_cues_response.json) | Cue vocabulary |
 | [`emotions_elicit_response.json`](emotions_elicit_response.json) | Elicit helpers snapshot |
-| [`elicit_ab_protocol.json`](elicit_ab_protocol.json) / [`elicit_ab_sample_responses.json`](elicit_ab_sample_responses.json) | Elicit A/B process eval |
+| [`elicit_ab_protocol.json`](elicit_ab_protocol.json) / [`elicit_ab_sample_responses.json`](elicit_ab_sample_responses.json) / [`elicit_ab_sample_responses_climate.json`](elicit_ab_sample_responses_climate.json) | Elicit A/B process eval (AI + climate smoke; not a league) |
 | [`voi_worksheet_template.json`](voi_worksheet_template.json) | VOI worksheet fill (not EVSI) |
 | [`bayesian_surprise_worksheet.json`](bayesian_surprise_worksheet.json) | Belief-shift logging template |
 | [`constitution_veto_stack.json`](constitution_veto_stack.json) | Primary + safety-veto profile stack |

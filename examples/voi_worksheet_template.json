@@ -1,7 +1,9 @@
 {
   "name": "voi_worksheet_template",
   "version": "0.1.0",
-  "honesty": "Blank worksheet for domains that already have a decision model. Not computed EVSI. Supporting notes are private local notes; not in the public tree.",
+  "honesty": "not_evsi",
+  "honesty_note": "Blank worksheet for domains that already have a decision model. Not computed EVSI. Supporting notes are private local notes; not in the public tree.",
+  "evsi": null,
   "decision_problem": "",
   "options": [],
   "uncertain_parameters": [],
