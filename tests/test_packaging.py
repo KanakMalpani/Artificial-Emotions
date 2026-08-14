@@ -124,3 +124,17 @@ def test_find_data_dir_resolution(tmp_path, monkeypatch):
 
     monkeypatch.setattr(resources, "repo_root", lambda: tmp_path / "gone")
     assert resources.find_data_dir("evals/fixtures") == tmp_path / "absent/evals/fixtures"
+
+
+def test_pytest_pythonpath_keeps_repo_root_importable():
+    """Ubuntu collection has `src` on the path, not cwd.
+
+    `from tests.*` then raises ``ModuleNotFoundError: No module named 'tests'``
+    (publish.yml run 31850928558). Repo root must stay on pythonpath.
+    """
+    data = tomllib.loads(_PYPROJECT.read_text(encoding="utf-8"))
+    pythonpath = data["tool"]["pytest"]["ini_options"]["pythonpath"]
+    assert "." in pythonpath, (
+        "pythonpath must include '.' so test modules can import each other "
+        "as tests.* when pytest/importlib does not put cwd on sys.path"
+    )

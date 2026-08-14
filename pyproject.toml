@@ -104,7 +104,7 @@ include = [
 ]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 testpaths = ["tests"]
 markers = [
   "e2e: end-to-end surface tests (API TestClient + CLI main)",

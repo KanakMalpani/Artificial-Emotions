@@ -8,7 +8,7 @@
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](docs/ROADMAP.md)
-[![Tests](https://img.shields.io/badge/tests-1112%20passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1113%20passing-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -710,7 +710,7 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 1112 passed, 1 skipped · 87% · floor enforced
+pytest -q --cov --cov-report=term-missing     # 1113 passed, 1 skipped · 87% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 

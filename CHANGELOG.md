@@ -84,6 +84,11 @@ closed-loop, phenomenal feeling, production HTTP, or dual-use solved.
 - §7.6 stubs shipped; moonshots remain moonshots. v1 does not claim VOI, EVSI,
   or a lab closed-loop. Dual-use residual stays residual.
 
+### Fixed
+- Pytest `pythonpath` includes the repo root so Ubuntu collection can import
+  `tests.*`. Tag `v1.0.0` CI died in collection (`No module named 'tests'`);
+  local Windows still collected. Runtime package unchanged.
+
 ## [0.4.1] — memory integrity + API serve hardening
 
 Patch release for silent memory wipe risk and open HTTP serve defaults that
