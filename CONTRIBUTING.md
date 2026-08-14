@@ -98,11 +98,14 @@ Minimum shape:
 }
 ```
 
-Same quality bar as seeds. Template sketch: [`examples/pack_meta_template.json`](examples/pack_meta_template.json).
+Same quality bar as seeds. Lint with `emotions pack check` (bundled packs) or
+`emotions pack check --path your_pack.json`. Template sketch:
+[`examples/pack_meta_template.json`](examples/pack_meta_template.json).
 
 ### Checklist before opening a seed/pack PR
 
 - [ ] `pytest -q` green
+- [ ] `emotions pack check` green (bundled, or `--path` your pack)
 - [ ] Operationalization + why_it_matters present
 - [ ] No secrets / no `.env`
 - [ ] `docs/LIMITS.md` unchanged unless claims changed
@@ -123,3 +126,4 @@ When changing public behavior:
 2. Add a PROOFS one-liner if the behavior is demo-worthy.
 3. Keep README status table accurate (version, PyPI, honesty).
 4. Keep `examples/openai_tools.json` in sync with `agent_tools.py` (regenerate or edit both).
+5. Host-side agent recipes (LangGraph, etc.) live in [`docs/PLUGINS.md`](docs/PLUGINS.md). Do **not** add those frameworks as package extras. Include a smoke note (`GET /v1/agent/tools`) — do not claim CI coverage of the host framework.

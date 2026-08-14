@@ -7,6 +7,11 @@ a condition. This is on `main` at package **0.4.1** — there is **no 0.4.2 tag*
 yet, and this block is not a version bump.
 
 ### Added
+- **Ranked-unknowns export.** `emotions export unknowns --json` (optional `--out FILE`,
+  `--from` a previous `run --json`) plus `POST /v1/export/unknowns` wrap pipeline
+  output as a JSON document. File / HTTP body is the v1 path. Arbitrary webhook
+  URLs are **not** accepted (SSRF). Does not re-rank. MCP `export_unknowns`
+  takes inline questions only.
 - **Local HTTP threat model.** `docs/THREAT_MODEL.md` names the v0.4.1
   `emotions serve` posture (in-process rate limit, CORS deny-by-default,
   auth opt-in, opt-in per-key quota, opt-in audit JSONL). Not a production
@@ -35,6 +40,14 @@ yet, and this block is not a version bump.
 - **Opt-in audit JSONL.** Set `CURIOSITY_AUDIT_LOG` to a file path. Records
   HTTP method+path and MCP tool name + status only. Default off. Never
   bodies, headers, query strings, or API keys. Local operator log, not a SIEM.
+- **Domain pack lint.** `emotions pack check` lints bundled (or `--path`)
+  domain packs against the CONTRIBUTING seed/pack bar: operationalization
+  (≥20 chars) and stakeholder `why_it_matters` (no placeholders). Exit 1 on
+  errors. Not a scientific review; not dual-use solved. `emotions pack`
+  still loads affective_science seeds.
+- **LangGraph host recipe.** Copy-paste snippet in `docs/PLUGINS.md` loads
+  `GET /v1/agent/tools` and executes via `http_fallbacks`. `langgraph` is not
+  a package extra. Smoke is the tools payload, not a LangGraph CI job.
 
 ### Changed
 - **Explore honors `drop_dual_use` / `forbid_similar_jump`.** Disgust may omit

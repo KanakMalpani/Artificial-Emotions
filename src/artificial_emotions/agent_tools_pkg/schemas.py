@@ -480,6 +480,28 @@ IDEA_GRAPH_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+EXPORT_UNKNOWNS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "questions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "items": {"type": "object"},
+            "description": (
+                "Ranked unknowns from rank_unknowns / POST /v1/curiosity/run. "
+                "Reused as-is; this tool does not re-rank."
+            ),
+        },
+        "domain": {"type": "string", "default": ""},
+        "topic": {"type": "string", "default": ""},
+        "profile_name": {"type": "string"},
+        "literature_backend": {"type": "string", "default": "none"},
+    },
+    "required": ["questions"],
+    "additionalProperties": False,
+}
+
 SOUNDNESS_PASS_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {

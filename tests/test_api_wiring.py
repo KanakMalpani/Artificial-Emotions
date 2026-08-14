@@ -44,6 +44,7 @@ EXPECTED_PATHS = {
     "/v1/evals/cross-model-vote",
     "/v1/evals/idea-graph",
     "/v1/evals/soundness",
+    "/v1/export/unknowns",
     "/v1/imagination",
     "/v1/imagination/transfer",
     "/v1/imagination/{kind}",
@@ -114,6 +115,7 @@ def test_create_app_builds_an_equivalent_independent_app():
         "create_app",
         "RunRequest",
         "ProvokeRequest",
+        "ExportUnknownsRequest",
         "MixEmotionsRequest",
         "AnnotateEmotionsRequest",
         "OptionalApiKeyMiddleware",
@@ -128,7 +130,13 @@ def test_public_names_stay_importable_from_the_api_module(name: str):
 
 def test_openapi_schema_components_are_present():
     schemas = app.openapi()["components"]["schemas"]
-    for expected in ("RunRequest", "ProvokeRequest", "MixEmotionsRequest", "ValueProfile"):
+    for expected in (
+        "RunRequest",
+        "ProvokeRequest",
+        "MixEmotionsRequest",
+        "ExportUnknownsRequest",
+        "ValueProfile",
+    ):
         assert expected in schemas
 
 

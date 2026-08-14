@@ -4,7 +4,7 @@ Product documentation for **Artificial Emotions** (v0.4.1 — Alive). Start at t
 
 | Doc | Purpose |
 |-----|---------|
-| [PLUGINS.md](PLUGINS.md) | MCP / HTTP / OpenAI tools / CLI install |
+| [PLUGINS.md](PLUGINS.md) | MCP / HTTP / OpenAI tools / CLI install; LangGraph host recipe (`/v1/agent/tools`) |
 | [EMOTIONS.md](EMOTIONS.md) | Epistemic cues, catalog, % mixes, and the seven stances — annotation only (does not feel) |
 | [LIMITS.md](LIMITS.md) | Honest bounds — what works, what doesn’t (memory defaults, imagination quarantine) |
 | [THREAT_MODEL.md](THREAT_MODEL.md) | Local `emotions serve` — rate limit, CORS deny, auth opt-in, opt-in quota and audit JSONL; not a production SLO |

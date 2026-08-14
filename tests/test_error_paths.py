@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from artificial_emotions import CuriosityError, mix_emotions
-from artificial_emotions.api import ProvokeRequest, RunRequest, app
+from artificial_emotions.api import ExportUnknownsRequest, ProvokeRequest, RunRequest, app
 from artificial_emotions.config import clear_config_cache
 from artificial_emotions.errors import (
     ERR_AUTH_REQUIRED,
@@ -105,6 +105,8 @@ def test_http_ignores_cache_dir_and_client_llm_base_url():
     assert "literature_cache_dir" not in RunRequest.model_fields
     assert "llm_base_url" not in RunRequest.model_fields
     assert "llm_base_url" not in ProvokeRequest.model_fields
+    assert "llm_base_url" not in ExportUnknownsRequest.model_fields
+    assert "literature_cache_dir" not in ExportUnknownsRequest.model_fields
 
     client = TestClient(app)
     # Extra body fields are ignored; must not mkdir or call attacker URL.

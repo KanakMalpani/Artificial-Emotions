@@ -450,6 +450,33 @@ def handle_idea_graph(
     )
 
 
+def handle_export_unknowns(
+    *,
+    questions: list[dict[str, Any]] | None = None,
+    domain: str = "",
+    topic: str = "",
+    profile_name: str | None = None,
+    literature_backend: str = "none",
+    **extra: Any,
+) -> dict[str, Any]:
+    """Wrap an already-ranked set as a JSON document. No webhook URLs (SSRF)."""
+    from artificial_emotions.export_unknowns import (
+        DELIVERY_HTTP_BODY,
+        export_unknowns,
+        reject_webhook_fields,
+    )
+
+    reject_webhook_fields(extra)
+    return export_unknowns(
+        list(questions or []),
+        domain=domain,
+        topic=topic,
+        profile_name=profile_name,
+        literature_backend=literature_backend or "none",
+        delivery=DELIVERY_HTTP_BODY,
+    )
+
+
 def handle_soundness_pass(
     *,
     candidates: list[dict[str, Any]] | None = None,

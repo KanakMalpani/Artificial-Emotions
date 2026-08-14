@@ -96,6 +96,7 @@ def root() -> dict[str, Any]:
         "ready": "/ready",
         "provoke": "GET or POST /v1/curiosity/provoke",
         "run": "POST /v1/curiosity/run",
+        "export_unknowns": ("POST /v1/export/unknowns (ranked-set JSON document; no webhook URLs)"),
         "emotions": (
             "GET /v1/emotions/cues · GET /v1/emotions/catalog · "
             "POST /v1/emotions/mix · POST /v1/emotions/annotate · "
@@ -160,6 +161,7 @@ def agent_manifest() -> dict[str, Any]:
             "Read curiosity://limits / docs/LIMITS.md before treating ranks as truth",
             "Local HTTP serve: in-process rate limit, CORS deny-by-default, auth opt-in, opt-in per-key quota (unset CURIOSITY_API_QUOTA_REQUESTS = no quota) — not a production SLO (docs/THREAT_MODEL.md)",
             "Opt-in audit JSONL (CURIOSITY_AUDIT_LOG): HTTP/MCP names + status only — never bodies or keys; default off",
+            "Ranked-unknowns export is a JSON document (CLI --out / HTTP body). Arbitrary webhook URLs are not accepted (SSRF)",
         ],
         "resources_first": ["curiosity://limits", "curiosity://profiles", "curiosity://domains"],
         "threat_model": "docs/THREAT_MODEL.md",
@@ -193,6 +195,14 @@ def agent_manifest() -> dict[str, Any]:
                 "use_llm": False,
                 "profile_name": "humanity_default",
             },
+        },
+        "export_unknowns": {
+            "method": "POST",
+            "path": "/v1/export/unknowns",
+            "note": (
+                "Reuse questions from /v1/curiosity/run. File / JSON body is the "
+                "v1 path — arbitrary webhook URLs are not accepted (SSRF)."
+            ),
         },
         "compare_profiles": {
             "method": "POST",
@@ -295,6 +305,7 @@ def agent_manifest() -> dict[str, Any]:
                 "preference_weight_hints",
                 "cross_model_vote",
                 "export_idea_graph",
+                "export_unknowns",
                 "soundness_pass",
                 "list_epistemic_cues",
                 "emotion_catalog",
@@ -386,6 +397,7 @@ def agent_tools() -> dict[str, Any]:
         "http_fallbacks": {
             "provoke_curiosity": "GET|POST /v1/curiosity/provoke",
             "rank_unknowns": "POST /v1/curiosity/run",
+            "export_unknowns": "POST /v1/export/unknowns",
             "list_domains": "GET /v1/domains",
             "list_profiles": "GET /v1/profiles",
             "list_epistemic_cues": "GET /v1/emotions/cues",

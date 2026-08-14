@@ -33,6 +33,7 @@ def test_mcp_tool_list_has_required_tools():
         "preference_weight_hints",
         "cross_model_vote",
         "export_idea_graph",
+        "export_unknowns",
         "soundness_pass",
         "list_epistemic_cues",
         "emotion_catalog",

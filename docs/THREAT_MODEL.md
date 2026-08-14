@@ -131,6 +131,7 @@ explicitly. CORS is not authentication.
 |-------|--------|
 | No `llm_base_url` on HTTP bodies | SSRF / key leak — env/CLI only |
 | No `literature_cache_dir` on HTTP bodies | Path injection — env/CLI only |
+| No `webhook_url` / callback URLs on `POST /v1/export/unknowns` | SSRF — file / JSON body is the v1 export path |
 | Preference hints/summarize | Inline events only (max 500) |
 | Memory `forget` / `reset` | `confirm=true`; HTTP explore does not auto-write |
 | Structured errors | `{ "error": { "code", "message", "details?" } }` — no secrets |

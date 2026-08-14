@@ -221,7 +221,7 @@ pytest tests/e2e -q
 # or: pytest -m e2e -q
 ```
 
-Covers: `GET /health` → domains/profiles/agent/tools → fast provoke → `POST /v1/curiosity/run` with `use_literature=false`; emotions (`/v1/emotions/*` mix/catalog); `POST /v1/preferences/hints`; CLI `spark` / `run --no-literature` / `profiles` / `eval` / `emotions` / `preferences hints`.
+Covers: `GET /health` → domains/profiles/agent/tools → fast provoke → `POST /v1/curiosity/run` with `use_literature=false`; emotions (`/v1/emotions/*` mix/catalog); `POST /v1/preferences/hints`; CLI `spark` / `run --no-literature` / `profiles` / `eval` / `emotions` / `preferences hints`. LangGraph snippet in `docs/PLUGINS.md` is host-side docs; its smoke is `GET /v1/agent/tools`, not a LangGraph CI job.
 
 
 ## Epistemic cues / emotions (annotation only)
@@ -230,6 +230,7 @@ Covers: `GET /health` → domains/profiles/agent/tools → fast provoke → `POS
 emotions cues --json
 emotions annotate "What remains unknown about epistemic emotion elicitation?" --surprise 0.7 --json
 emotions pack --json
+emotions pack check --json
 # HTTP: GET /v1/emotions/cues  POST /v1/emotions/annotate  GET /v1/emotions/pack
 # Docs: docs/EMOTIONS.md — does not claim the system feels
 ```

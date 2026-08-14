@@ -22,7 +22,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Agent manifest: `GET /v1/agent`
 - OpenAI-compatible tool schemas: `GET /v1/agent/tools` + `examples/openai_tools.json`
 - MCP stdio server: `emotions-mcp` (tools + resources: `curiosity://domains|profiles|limits`)
-- Plugin install docs: `docs/PLUGINS.md` (Cursor, Claude Desktop, Claude Code, VS Code Copilot, Continue, Windsurf, HTTP, OpenAI tools)
+- Plugin install docs: `docs/PLUGINS.md` (Cursor, Claude Desktop, Claude Code, VS Code Copilot, Continue, Windsurf, HTTP, OpenAI tools, LangGraph host-side recipe via `GET /v1/agent/tools` — `langgraph` is not a package dependency; not CI-tested against LangGraph releases)
 - Demo proofs: `docs/PROOFS.md` (includes multi-provider smoke matrix notes — no secrets)
 - CLI, Python API, FastAPI (`:8000`) — briefs, `[low–high]` bands, and profile name on agent surfaces
 - Expert-eval / spot-check harness: `emotions eval` + `evals/fixtures/` (v1+v2 adversarial) + `evals/METHODOLOGY.md` (offline; **no vanity accuracy %**; stratified `by_gold_status`)
@@ -69,12 +69,14 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Opt-in JSONL audit (`CURIOSITY_AUDIT_LOG`) of HTTP method+path / MCP tool name + status — default off; never bodies or keys
 - CORS default deny (empty allow list); opt-in via `CURIOSITY_CORS_ORIGINS` (was `*` for the removed web demo)
 - Versioned domain packs (`artificial_emotions/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment, climate, affective science, aging biology, and materials catalysis packs
+- Domain pack lint (`emotions pack check`): CONTRIBUTING operationalization + why_it_matters bar on bundled (or `--path`) packs. Exit 1 on errors. Not a scientific review; not dual-use solved
 - Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness (**503** when not ready)
 - Central env config module (`artificial_emotions.config`) — LLM_*, CURIOSITY_API_KEY, timeouts, CORS, rate limit, quota, audit
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path injection / SSRF)
+- Ranked-unknowns export (`emotions export unknowns` / `POST /v1/export/unknowns` / MCP `export_unknowns`): JSON document of an already-ranked set (or CLI runs the pipeline). File / HTTP body is the v1 path. Arbitrary webhook URLs are **not** accepted (SSRF). Does not re-rank. HTTP does **not** write files (`out_path` rejected).
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1039 passed, 1 skipped)
-- Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions-mcp --list-tools`, `--list-resources`
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1078 passed, 1 skipped)
+- Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions pack check`, `emotions export unknowns --no-literature --json`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
 - Failure-mode suite: `tests/test_failure_modes.py` encodes F1–F15 from `docs/LIMITS.md` / failure-mode tests

@@ -46,6 +46,7 @@
 | validate | `validate.py` | Time-split retrospective validation with a random baseline (also gates transfer) |
 | affect | `affect.py` | PAD mood, felt simulation, blends and tension |
 | pipeline | `pipeline.py` | Orchestration (`CuriosityEngine`) |
+| export_unknowns | `export_unknowns.py` | Ranked-set JSON document (file / HTTP body; no webhooks) |
 | provoke | `provoke.py` | Instant spark + inject pack |
 | emotions | `emotions.py` | Catalog / mix / cues (`annotation_only` + `computational_affect`) |
 | resources | `resources.py` | Packaged data paths for worksheets / eval fixtures |
@@ -74,7 +75,7 @@ split by concern:
 | `api_pkg/schemas.py` | Pydantic request models (names are public OpenAPI schemas) |
 | `api_pkg/routers/meta.py` | `/`, `/health`, `/ready`, `/v1/agent`, `/v1/domains` |
 | `api_pkg/routers/profiles.py` | `/v1/profiles`, compare, constitution-compare |
-| `api_pkg/routers/curiosity.py` | `/v1/curiosity/run`, `/v1/curiosity/provoke` |
+| `api_pkg/routers/curiosity.py` | `/v1/curiosity/run`, `/v1/curiosity/provoke`, `/v1/export/unknowns` |
 | `api_pkg/routers/preferences.py` | `/v1/preferences/*` |
 | `api_pkg/routers/evaluation.py` | `/v1/evals/*`, worksheets, brief critique, `/v1/curiosity/decompose`, `/v1/curiosity/explore` |
 | `api_pkg/routers/emotions.py` | `/v1/emotions/*` and the `/v1/epistemic/*` alias |
@@ -97,6 +98,7 @@ middleware order, and that every router module is actually included.
 | `cli_pkg/commands/worksheets.py` | `critique-brief`, `voi-worksheet`, `surprise-worksheet`, `decompose` |
 | `cli_pkg/commands/preferences.py` | `preferences hints \| summarize \| suggest-pair` |
 | `cli_pkg/commands/evaluation.py` | `eval spotcheck \| elicit \| gap-status \| report \| cooccur \| calibration` |
+| `cli_pkg/commands/export.py` | `export unknowns` — ranked-set JSON document (`--out` file is v1; no webhooks) |
 | `cli_pkg/commands/emotions.py` | `emotions` / `epistemic` subcommands |
 | `cli_pkg/commands/memory.py` | `memory show\|forget\|reset\|avoiding` |
 | `cli_pkg/commands/dream.py` | `dream` — explicit offline reanalysis |
@@ -213,7 +215,7 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 | CLI | `emotions` (`imagine`, `memory`, `dream`, `validate --method transfer`, …) |
 | MCP | `emotions-mcp` — `TOOL_SPECS` in `agent_tools_pkg/registry.py` (includes imagination; memory/dream/transfer tools landing in parallel) |
 | HTTP | `emotions serve` → `:8000` — stances today; Alive routes land via `/v1` discovery |
-| OpenAI tools | `GET /v1/agent/tools` or `examples/openai_tools.json` |
+| OpenAI tools | `GET /v1/agent/tools` or `examples/openai_tools.json` — LangGraph host recipe in [`PLUGINS.md`](PLUGINS.md) |
 | Python | `CuriosityEngine`, `provoke`, emotion helpers, `imagine` / `transfer` / `memory` |
 
 ## Trust boundaries
@@ -221,6 +223,7 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 - Network: OpenAlex (public), optional Semantic Scholar, optional OpenAI-compatible endpoint.
 - No secrets in repo; API keys via environment only (`.env.example`).
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path / SSRF hygiene).
+- HTTP `POST /v1/export/unknowns` does **not** accept webhook/callback URLs (SSRF); file / JSON body is the v1 path, and `out_path` is rejected (path injection).
 - Local `emotions serve` threat model (rate limit, CORS deny, auth opt-in, opt-in per-key quota and audit JSONL; not an SLO): [THREAT_MODEL.md](THREAT_MODEL.md).
 - Literature classifier is heuristic — confidence reflected in output.
 - Rankings require an explicit `ValueProfile` (defaults provided, not hidden).
@@ -232,7 +235,7 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 
 ## Extension points
 
-1. Add a domain pack JSON under `artificial_emotions/packs/` (see CONTRIBUTING).
+1. Add a domain pack JSON under `artificial_emotions/packs/` (see CONTRIBUTING), then `emotions pack check`.
 2. Swap / merge literature backends (`literature_backend=openalex|semantic_scholar|both`).
 3. Optional embedding diversity: `pip install '.[embeddings]'`.
 4. Preference JSONL → thin re-rank / outcome-event weight hints / eval calibration telemetry (scaffolding shipped; still not calibrated).

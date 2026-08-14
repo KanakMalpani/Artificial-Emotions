@@ -29,6 +29,7 @@ __all__ = [
     "CritiqueBriefRequest",
     "DecomposeRequest",
     "DreamRequest",
+    "ExportUnknownsRequest",
     "ExploreRequest",
     "CrossModelVoteRequest",
     "IdeaGraphRequest",
@@ -324,6 +325,59 @@ class MixEmotionsRequest(BaseModel):
             except (TypeError, ValueError) as exc:
                 raise ValueError(f"weight for '{kid}' must be a number, got {val!r}") from exc
         return out
+
+
+class ExportUnknownsRequest(BaseModel):
+    """Wrap an already-ranked set. File/JSON body is the v1 path — no webhooks."""
+
+    questions: list[dict[str, Any]] = Field(
+        ...,
+        min_length=1,
+        max_length=64,
+        description=(
+            "Ranked unknowns from POST /v1/curiosity/run (or CLI run --json). "
+            "Reused as-is; this endpoint does not re-rank."
+        ),
+    )
+    domain: str = ""
+    topic: str = ""
+    profile_name: str | None = None
+    literature_backend: str = "none"
+    # Trap fields: declared so they cannot be silently ignored into an SSRF POST.
+    webhook_url: str | None = Field(
+        default=None,
+        description="Rejected. File/JSON body is the v1 path (SSRF).",
+    )
+    callback_url: str | None = Field(
+        default=None,
+        description="Rejected. File/JSON body is the v1 path (SSRF).",
+    )
+    notify_url: str | None = Field(default=None, description="Rejected (SSRF).")
+    hook_url: str | None = Field(default=None, description="Rejected (SSRF).")
+    out_path: str | None = Field(
+        default=None,
+        description="Rejected. HTTP returns JSON; file write is CLI-only.",
+    )
+
+    @field_validator("webhook_url", "callback_url", "notify_url", "hook_url")
+    @classmethod
+    def _reject_webhooks(cls, v: str | None) -> str | None:
+        if v is None or str(v).strip() == "":
+            return None
+        raise ValueError(
+            "Webhook URLs are not supported (SSRF). "
+            "File export is the v1 path; this endpoint returns the JSON document."
+        )
+
+    @field_validator("out_path")
+    @classmethod
+    def _reject_out_path(cls, v: str | None) -> str | None:
+        if v is None or str(v).strip() == "":
+            return None
+        raise ValueError(
+            "HTTP does not write files (path injection). "
+            "File export is CLI-only: emotions export unknowns --out PATH."
+        )
 
 
 class IdeaGraphRequest(BaseModel):

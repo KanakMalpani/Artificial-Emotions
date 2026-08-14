@@ -24,6 +24,27 @@ def _parse_mix_parts(parts: list[str]) -> dict[str, float]:
     return out
 
 
+def _print_pack_check(payload: dict) -> None:
+    print("Pack check (CONTRIBUTING operationalization + why_it_matters)")
+    print(
+        f"  packs={payload.get('n_packs')}  questions={payload.get('n_questions')}  "
+        f"errors={payload.get('n_errors')}  warnings={payload.get('n_warnings')}  "
+        f"ok={payload.get('ok')}"
+    )
+    for pack in payload.get("packs") or []:
+        source = str(pack.get("source") or pack.get("name") or "")
+        label = source.replace("\\", "/").rsplit("/", 1)[-1] or source
+        mark = "OK" if pack.get("ok") else "FAIL"
+        print(f"  [{mark}] {label}  {pack.get('n_questions')} questions")
+        for issue in pack.get("issues") or []:
+            qid = issue.get("question_id") or ""
+            loc = f"  {qid}" if qid else ""
+            print(f"    {issue.get('severity')} {issue.get('code')}{loc}: {issue.get('message')}")
+    honesty = payload.get("honesty")
+    if honesty:
+        print(f"\n{honesty}")
+
+
 def _emotions(args: argparse.Namespace) -> int:
     from artificial_emotions.emotions import (
         annotate_epistemic,
@@ -39,6 +60,7 @@ def _emotions(args: argparse.Namespace) -> int:
         print(
             "Usage: curiosity emotions {cues|catalog|mix|annotate|elicit|pack|memory|dream}\n"
             "  (alias: curiosity epistemic …)\n"
+            "  pack check: lint bundled (or --path) packs against CONTRIBUTING bar\n"
             "  mix example: curiosity emotions mix curiosity=40 confusion=30 awe=30\n"
             "Emotion tags/mixes are UX annotations — this system does not feel.",
             file=sys.stderr,
@@ -148,8 +170,21 @@ def _emotions(args: argparse.Namespace) -> int:
         return 0
 
     if cmd == "pack":
+        pack_cmd = getattr(args, "pack_cmd", None) or "load"
+        if pack_cmd == "check":
+            from artificial_emotions.packs import check_packs
+
+            payload = check_packs(
+                paths=getattr(args, "pack_paths", None),
+                name=getattr(args, "name", None),
+            )
+            if args.json:
+                print(json.dumps(payload, indent=2))
+            else:
+                _print_pack_check(payload)
+            return 0 if payload.get("ok") else 1
         try:
-            payload = emotion_pack(args.name)
+            payload = emotion_pack(getattr(args, "name", None) or "affective_science")
         except ValueError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1

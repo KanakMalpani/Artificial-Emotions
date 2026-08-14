@@ -6,7 +6,12 @@ from typing import Any
 
 from fastapi import APIRouter, Query
 
-from artificial_emotions.api_pkg.schemas import ProvokeRequest, RunRequest, safe_profile
+from artificial_emotions.api_pkg.schemas import (
+    ExportUnknownsRequest,
+    ProvokeRequest,
+    RunRequest,
+    safe_profile,
+)
 from artificial_emotions.config import get_config
 from artificial_emotions.models import CuriosityConfig
 from artificial_emotions.pipeline import CuriosityEngine
@@ -90,6 +95,24 @@ def provoke_get(
         llm_model=llm_model,
         judge_model=judge_model,
         diversity_backend=diversity_backend,
+    )
+
+
+@router.post("/v1/export/unknowns")
+def export_unknowns_route(req: ExportUnknownsRequest) -> dict[str, Any]:
+    """Return a ranked-set export document. File/JSON body only — no webhooks."""
+    from artificial_emotions.export_unknowns import (
+        DELIVERY_HTTP_BODY,
+        export_unknowns,
+    )
+
+    return export_unknowns(
+        req.questions,
+        domain=req.domain,
+        topic=req.topic,
+        profile_name=req.profile_name,
+        literature_backend=req.literature_backend,
+        delivery=DELIVERY_HTTP_BODY,
     )
 
 

@@ -6,6 +6,8 @@ Codes are public contract (see ``artificial_emotions.errors``).
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -20,6 +22,24 @@ from artificial_emotions.errors import (
 )
 
 __all__ = ["register_error_handlers"]
+
+
+def _jsonable_validation_errors(errors: list[Any]) -> list[Any]:
+    """Pydantic v2 may put Exception instances in ``ctx.error`` — those are not JSON."""
+    out: list[Any] = []
+    for err in errors:
+        if not isinstance(err, dict):
+            out.append(err)
+            continue
+        item = dict(err)
+        ctx = item.get("ctx")
+        if isinstance(ctx, dict):
+            item["ctx"] = {
+                key: (str(val) if isinstance(val, BaseException) else val)
+                for key, val in ctx.items()
+            }
+        out.append(item)
+    return out
 
 
 def _http_error_response(exc: CuriosityError) -> JSONResponse:
@@ -49,7 +69,7 @@ def register_error_handlers(app: FastAPI) -> None:
             content=error_payload(
                 ERR_VALIDATION,
                 "Request validation failed",
-                details={"errors": exc.errors()},
+                details={"errors": _jsonable_validation_errors(exc.errors())},
             ),
         )
 

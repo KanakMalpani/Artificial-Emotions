@@ -536,6 +536,7 @@ emotions validate --corpus corpus.json --cutoff 1986 --seeds "Fish oil"   # prov
 emotions explore --domain ai --steps 5                           # the curiosity loop
 emotions spark --domain biology --profile alignment_lab --json   # fast offline pack
 emotions run --domain ai --n 5 --no-literature --json            # full pipeline
+emotions export unknowns --no-literature --json                  # ranked-set JSON document
 emotions decompose "Which mechanism explains X?" --depth 2       # go deeper
 emotions imagine premortem --domain ai                           # quarantined imagination
 emotions memory show                                             # local CLI continuity
@@ -543,6 +544,7 @@ emotions dream                                                   # explicit hist
 emotions compare-profiles --a humanity_default --b alignment_lab # whose values?
 emotions mix curiosity=40 confusion=30 awe=30 --json             # affect
 emotions profiles                                                # list presets
+emotions pack check                                              # CONTRIBUTING pack bar
 ```
 
 Domains: `ai` · `biology` · `physics` · `climate` · `medicine` · `materials` · `social` · `energy` · `general`
@@ -626,6 +628,7 @@ emotions serve      # 127.0.0.1:8000 — interactive docs at /docs
 |---|---|
 | `GET\|POST /v1/curiosity/provoke` | Fast investigation pack |
 | `POST /v1/curiosity/run` | Full ranking pipeline |
+| `POST /v1/export/unknowns` | Ranked-set JSON export (reuse run output; no webhooks) |
 | `POST /v1/curiosity/decompose` | Sub-questions, first step, falsifiers |
 | `POST /v1/curiosity/explore` | The full loop: appraise → feel → modulate → remember |
 | `GET /v1/stances`, `/v1/stances/{stance}` | Non-curiosity views over a ranking |

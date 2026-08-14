@@ -23,6 +23,7 @@ from artificial_emotions.agent_tools_pkg.handlers import (
     handle_emotion_catalog,
     handle_emotion_pack,
     handle_explore_curiosity,
+    handle_export_unknowns,
     handle_idea_graph,
     handle_imagine_transfer,
     handle_list_domains,
@@ -56,6 +57,7 @@ from artificial_emotions.agent_tools_pkg.schemas import (
     EMOTION_CATALOG_SCHEMA,
     EMOTION_PACK_SCHEMA,
     EXPLORE_SCHEMA,
+    EXPORT_UNKNOWNS_SCHEMA,
     IDEA_GRAPH_SCHEMA,
     IMAGINE_TRANSFER_SCHEMA,
     LIST_DOMAINS_SCHEMA,
@@ -342,6 +344,18 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "handler": handle_idea_graph,
     },
     {
+        "name": "export_unknowns",
+        "description": (
+            "Export an already-ranked unknowns set as a JSON document "
+            "(file / HTTP body is the v1 path). Reuses pipeline output; does not "
+            "re-rank. Arbitrary webhook URLs are not accepted (SSRF). Scores are "
+            "decision aids under an explicit ValueProfile — not oracles. "
+            "Related literature ≠ answered."
+        ),
+        "input_schema": EXPORT_UNKNOWNS_SCHEMA,
+        "handler": handle_export_unknowns,
+    },
+    {
         "name": "soundness_pass",
         "description": (
             "Offline ScholarEval/InnoEval-cousin soundness pass on top-n briefs "
@@ -477,6 +491,7 @@ _TOOL_TIER: dict[str, str] = {
     "soundness_pass": "investigate",
     "cross_model_vote": "research",
     "export_idea_graph": "research",
+    "export_unknowns": "investigate",
     "surprise_worksheet": "research",
     "voi_worksheet": "research",
     "preference_weight_hints": "investigate",

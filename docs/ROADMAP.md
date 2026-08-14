@@ -495,10 +495,10 @@ Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding de
 |-------|-------------------------|
 | Data flywheel | Schema for ranked-Q → outcomes; multi-outcome; never citations-only |
 | Preference learning | Learn weights **within** a profile — never universal rank |
-| Domain packs | Versioned packs + seed quality review |
+| Domain packs | Versioned packs + `emotions pack check` against the CONTRIBUTING bar. Not a scientific review. |
 | Enterprise/API | **Local-v1 shipped** (0.4.1): opt-in keys, in-process rate limit, CORS deny, opt-in per-key quota (`CURIOSITY_API_QUOTA_*`), opt-in audit JSONL (`CURIOSITY_AUDIT_LOG`). Unset keeps offline/local DX. **Not** multi-tenant, SSO, TLS, WAF, or SLOs — those remain §10 “production-ready enterprise.” |
-| Agent ecosystems | Deeper tool examples (LangGraph, etc.) only with recipes |
-| Interop | Export / webhooks for “new unknowns” |
+| Agent ecosystems | Copy-paste LangGraph recipe in [`PLUGINS.md`](PLUGINS.md) via `GET /v1/agent/tools`. `langgraph` is not a package extra. Further hosts still need their own recipe + smoke note. |
+| Interop | **File export shipped** (`emotions export unknowns`, `POST /v1/export/unknowns`). Arbitrary webhook URLs are **not** accepted (SSRF). |
 | v2 bar | Calibration reports; profile sharing; Curiosity Layer API for AI Scientists; production threat model + SLOs (local-v1 threat model already ships) |
 
 **Even at v2+, never claim:** omniscient literature; value-neutral science priority; replacement of human judgment; guaranteed breakthroughs.

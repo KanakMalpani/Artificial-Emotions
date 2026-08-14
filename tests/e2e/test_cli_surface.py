@@ -40,6 +40,15 @@ def test_spark_json_shape(capsys):
     assert pack["domain"] == "ai"
 
 
+def test_export_unknowns_json_shape(capsys):
+    payload = _json_out(
+        capsys, ["export", "unknowns", "--domain", "ai", "--n", "2", "--no-literature", "--json"]
+    )
+    assert payload["format"] == "artificial_emotions.ranked_unknowns"
+    assert payload["webhooks"] is False
+    assert payload["questions"]
+
+
 def test_run_offline_json_is_a_ranked_list(capsys):
     rows = _json_out(
         capsys, ["run", "--domain", "biology", "--n", "3", "--no-literature", "--json"]
@@ -204,6 +213,9 @@ def test_emotions_annotate_returns_cues(capsys):
 def test_emotions_elicit_and_pack(capsys):
     assert _json_out(capsys, ["emotions", "elicit", "--json"])
     assert _json_out(capsys, ["emotions", "pack", "--json"])
+    check = _json_out(capsys, ["emotions", "pack", "check", "--json"])
+    assert check["ok"] is True
+    assert check["report"] == "pack_contributing_lint"
 
 
 def test_unknown_emotions_subcommand_is_rejected(capsys):
@@ -262,6 +274,7 @@ def test_every_subcommand_is_wired_into_main():
         "voi-worksheet",
         "surprise-worksheet",
         "eval",
+        "export",
         "emotions",
         "epistemic",
     } <= names

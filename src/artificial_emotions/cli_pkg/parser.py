@@ -518,11 +518,30 @@ def build_parser() -> argparse.ArgumentParser:
         elicit_p = emo_sub.add_parser("elicit", help="Incongruity → investigation framing helpers")
         elicit_p.add_argument("--json", action="store_true")
 
-        pack_p = emo_sub.add_parser("pack", help="Load affective_science (or named) domain pack")
+        pack_p = emo_sub.add_parser(
+            "pack",
+            help="Load a bundled domain pack, or `check` against the CONTRIBUTING bar",
+        )
+        pack_p.add_argument(
+            "pack_cmd",
+            nargs="?",
+            default=None,
+            choices=["check", "load"],
+            help=(
+                "check = lint operationalization + why_it_matters; omit or load = print pack seeds"
+            ),
+        )
         pack_p.add_argument(
             "--name",
-            default="affective_science",
-            help="Pack id (default: affective_science)",
+            default=None,
+            help="Pack id (load default: affective_science; check: filter bundled pack)",
+        )
+        pack_p.add_argument(
+            "--path",
+            action="append",
+            default=None,
+            dest="pack_paths",
+            help="Pack JSON to lint (repeatable; check only). Omit to lint bundled packs.",
         )
         pack_p.add_argument("--json", action="store_true")
 
@@ -549,6 +568,36 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     _fill_dream_arguments(dream_top)
+
+    export_p = sub.add_parser(
+        "export",
+        help=(
+            "Export a ranked unknowns JSON document (file / stdout). "
+            "Webhook URLs are not accepted (SSRF)"
+        ),
+    )
+    export_sub = export_p.add_subparsers(dest="export_cmd")
+    unk_p = export_sub.add_parser(
+        "unknowns",
+        help=(
+            "Export a ranked set (runs the pipeline, or --from a previous "
+            "run --json). File --out is the v1 path; no webhooks"
+        ),
+    )
+    _add_run_args(unk_p)
+    unk_p.add_argument(
+        "--out",
+        default=None,
+        help="Write the JSON document to this file (v1 delivery path)",
+    )
+    unk_p.add_argument(
+        "--from",
+        dest="from_path",
+        default=None,
+        help=(
+            "Reuse a previous `emotions run --json` or HTTP questions file instead of ranking again"
+        ),
+    )
 
     return p
 
