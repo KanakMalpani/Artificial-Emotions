@@ -35,6 +35,7 @@ from artificial_emotions.agent_tools_pkg.handlers import (
     handle_memory_reset,
     handle_memory_show,
     handle_mix_emotions,
+    handle_preference_weight_hints,
     handle_provoke_curiosity,
     handle_rank_unknowns,
     handle_soundness_pass,
@@ -67,6 +68,7 @@ from artificial_emotions.agent_tools_pkg.schemas import (
     MEMORY_RESET_SCHEMA,
     MEMORY_SHOW_SCHEMA,
     MIX_EMOTIONS_SCHEMA,
+    PREFERENCE_WEIGHT_HINTS_SCHEMA,
     PROVOKE_SCHEMA,
     RANK_SCHEMA,
     SOUNDNESS_PASS_SCHEMA,
@@ -370,6 +372,19 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "handler": handle_voi_worksheet,
     },
     {
+        "name": "preference_weight_hints",
+        "description": (
+            "Preview tiny ValueProfile weight deltas from inline labeled "
+            "prefer/reject/outcome events with score_axes (apply=false default). "
+            "Set apply=true to return an applied profile copy — never auto-overwrites "
+            "a named preset. Inline events only (no filesystem paths). Not calibrated "
+            "learning; scores remain decision aids under an explicit ValueProfile — "
+            "not oracles. Related literature ≠ answered."
+        ),
+        "input_schema": PREFERENCE_WEIGHT_HINTS_SCHEMA,
+        "handler": handle_preference_weight_hints,
+    },
+    {
         "name": "list_epistemic_cues",
         "description": (
             "List epistemic emotion cue tags (information_gap, incongruity, "
@@ -464,6 +479,7 @@ _TOOL_TIER: dict[str, str] = {
     "export_idea_graph": "research",
     "surprise_worksheet": "research",
     "voi_worksheet": "research",
+    "preference_weight_hints": "investigate",
     "list_epistemic_cues": "affect",
     "annotate_epistemic": "affect",
     "emotion_pack": "affect",

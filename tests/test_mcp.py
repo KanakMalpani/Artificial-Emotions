@@ -30,6 +30,7 @@ def test_mcp_tool_list_has_required_tools():
         "critique_brief",
         "voi_worksheet",
         "surprise_worksheet",
+        "preference_weight_hints",
         "cross_model_vote",
         "export_idea_graph",
         "soundness_pass",

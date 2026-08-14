@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +16,160 @@ from artificial_emotions.evals import (
 )
 from artificial_emotions.hivemind import top_n_pairwise_similarity
 from artificial_emotions.provoke import provoke
+from artificial_emotions.resources import find_data_file
 from artificial_emotions.safety import assess_dual_use
+
+DEFAULT_CALIBRATION_FIXTURE = "evals/fixtures/preference_calibration_smoke_v1.jsonl"
+
+_CALIBRATION_HONESTY = (
+    "Preference/outcome telemetry only — not calibrated scores, "
+    "not a ranking certificate, and not a published accuracy figure. "
+    "Counts, outcome mix, and hint magnitudes are flywheel scaffolding; "
+    "they do not prove the ValueProfile is correct."
+)
+
+_OUTCOME_HINT_PASSTHROUGH = (
+    "n_outcome",
+    "n_outcome_labeled",
+    "n_outcome_with_axes",
+)
+
+
+def _normalize_preference_events(
+    events: Iterable[Any] | str | Path,
+) -> list[Any]:
+    from artificial_emotions.preferences import PreferenceEvent, load_preference_events
+
+    if isinstance(events, (str, Path)):
+        return load_preference_events(events)
+    out = []
+    for e in events:
+        if isinstance(e, PreferenceEvent):
+            out.append(e)
+        else:
+            try:
+                out.append(PreferenceEvent.model_validate(e))
+            except Exception:  # noqa: BLE001
+                continue
+    return out
+
+
+def _hint_magnitudes(hints: dict[str, Any]) -> dict[str, Any]:
+    """Summarize weight-hint deltas without exposing a suggested profile apply path."""
+    raw = hints.get("deltas") or {}
+    deltas = raw if isinstance(raw, dict) else {}
+    abs_vals = [abs(float(v)) for v in deltas.values() if v is not None]
+    out: dict[str, Any] = {
+        "ok": hints.get("ok"),
+        "reason": hints.get("reason"),
+        "n_prefer": hints.get("n_prefer"),
+        "n_reject": hints.get("n_reject"),
+        "deltas": deltas,
+        "l1": round(sum(abs_vals), 4) if abs_vals else 0.0,
+        "max_abs": round(max(abs_vals), 4) if abs_vals else 0.0,
+        "n_nonzero": len(deltas),
+        "clamped_weights": list(hints.get("clamped_weights") or []),
+    }
+    # OutcomeHints may add outcome-labeled counts later — surface them if present.
+    for key in _OUTCOME_HINT_PASSTHROUGH:
+        if key in hints:
+            out[key] = hints[key]
+    return out
+
+
+def _outcome_mix(events: Iterable[Any]) -> dict[str, Any]:
+    by_result: dict[str, int] = {}
+    n_outcome = 0
+    for ev in events:
+        if str(getattr(ev, "event_type", "") or "").lower() != "outcome":
+            continue
+        n_outcome += 1
+        labels = getattr(ev, "labels", None) or {}
+        result = str(labels.get("result") or "unspecified").strip().lower() or "unspecified"
+        by_result[result] = by_result.get(result, 0) + 1
+    return {
+        "n_outcome": n_outcome,
+        "by_result": dict(sorted(by_result.items())),
+        "note": (
+            "Outcome mix is a count of event_type=outcome labels.result values. "
+            "Absent outcome events stay silent. Not a calibration certificate."
+        ),
+    }
+
+
+def default_calibration_fixture() -> Path:
+    return find_data_file(DEFAULT_CALIBRATION_FIXTURE)
+
+
+def build_calibration_report(
+    events: Iterable[Any] | str | Path | None = None,
+    *,
+    profile_name: str | None = "humanity_default",
+) -> dict[str, Any]:
+    """
+    Offline preference JSONL → counts, outcome mix, hint magnitudes.
+
+    Calls ``learn_profile_weight_hints`` for prefer/reject (and outcome events
+    if that helper already consumes them). Does not change hint semantics,
+    does not apply weights, and never reports an accuracy percentage.
+    """
+    from artificial_emotions.preferences import learn_profile_weight_hints
+
+    source: str | None
+    if events is None:
+        events = default_calibration_fixture()
+        source = str(events)
+    elif isinstance(events, (str, Path)):
+        source = str(events)
+    else:
+        source = None
+
+    missing = False
+    if isinstance(events, (str, Path)):
+        path = Path(events)
+        if not path.is_file():
+            missing = True
+            evs: list[Any] = []
+        else:
+            evs = _normalize_preference_events(path)
+    else:
+        evs = _normalize_preference_events(events)
+
+    if profile_name:
+        evs = [e for e in evs if (getattr(e, "profile_name", None) or "") in (profile_name, "")]
+
+    counts: dict[str, int] = {}
+    for ev in evs:
+        et = str(getattr(ev, "event_type", None) or "unknown").lower()
+        counts[et] = counts.get(et, 0) + 1
+
+    hints = learn_profile_weight_hints(evs, profile_name=profile_name)
+    outcomes = _outcome_mix(evs)
+
+    if missing:
+        reason = "missing_preference_jsonl"
+        ok = False
+    else:
+        reason = "ok"
+        ok = True
+
+    return {
+        "report": "preference_calibration_telemetry",
+        "ok": ok,
+        "reason": reason,
+        "n_events": len(evs),
+        "profile_name": profile_name,
+        "source": source,
+        "counts_by_type": dict(sorted(counts.items())),
+        "outcomes": outcomes,
+        "hint_magnitudes": _hint_magnitudes(hints),
+        "honesty": _CALIBRATION_HONESTY,
+        "docs": "evals/METHODOLOGY.md",
+        "methodology": (
+            "Offline preference JSONL telemetry: event counts, outcome mix, "
+            "and weight-hint magnitudes. Not calibrated. No accuracy %."
+        ),
+    }
 
 
 def build_eval_report(
@@ -24,6 +178,7 @@ def build_eval_report(
     gap_fixtures: str | Path | None = None,
     elicit_responses: str | Path | None = None,
     risk_probe_texts: list[str] | None = None,
+    preference_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """
     Assemble gap_f1-ish monitors, gap-status handlabel metrics, optional elicit means,
@@ -126,7 +281,7 @@ def build_eval_report(
     )
 
     # ErrEval-style diagnose-then-score: diagnostics sections first (insertion order).
-    return {
+    payload = {
         "sections": {
             "diagnostics_first": {
                 "order": [
@@ -198,3 +353,10 @@ def build_eval_report(
         ),
         "docs": "docs/PROOFS.md",
     }
+    if preference_path:
+        cal = build_calibration_report(preference_path)
+        payload["sections"]["calibration"] = cal
+        order = payload["sections"]["diagnostics_first"]["order"]
+        if "calibration" not in order:
+            order.append("calibration")
+    return payload

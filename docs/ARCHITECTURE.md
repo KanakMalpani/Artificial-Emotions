@@ -94,7 +94,7 @@ middleware order, and that every router module is actually included.
 | `cli_pkg/commands/profiles.py` | `profiles`, `compare-profiles` |
 | `cli_pkg/commands/worksheets.py` | `critique-brief`, `voi-worksheet`, `surprise-worksheet`, `decompose` |
 | `cli_pkg/commands/preferences.py` | `preferences hints \| summarize \| suggest-pair` |
-| `cli_pkg/commands/evaluation.py` | `eval spotcheck \| elicit \| gap-status \| report \| cooccur` |
+| `cli_pkg/commands/evaluation.py` | `eval spotcheck \| elicit \| gap-status \| report \| cooccur \| calibration` |
 | `cli_pkg/commands/emotions.py` | `emotions` / `epistemic` subcommands |
 | `cli_pkg/commands/memory.py` | `memory show\|forget\|reset\|avoiding` |
 | `cli_pkg/commands/dream.py` | `dream` — explicit offline reanalysis |
@@ -232,7 +232,7 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 1. Add a domain pack JSON under `artificial_emotions/packs/` (see CONTRIBUTING).
 2. Swap / merge literature backends (`literature_backend=openalex|semantic_scholar|both`).
 3. Optional embedding diversity: `pip install '.[embeddings]'`.
-4. Preference JSONL → thin re-rank / weight hints (not calibrated learning yet).
+4. Preference JSONL → thin re-rank / outcome-event weight hints / eval calibration telemetry (scaffolding shipped; still not calibrated).
 5. Keep tool schemas in sync via `agent_tools.py` (MCP, OpenAI JSON, HTTP).
 
 See also: [DESIGN.md](DESIGN.md) · [LIMITS.md](LIMITS.md) · [PLUGINS.md](PLUGINS.md).

@@ -294,6 +294,9 @@ class CuriosityConfig(BaseModel):
     preference_rerank_path: str | None = None
     # Optional labeled JSONL for tiny ValueProfile weight hints (CLI/config only).
     preference_learn_path: str | None = None
+    # When True with preference_learn_path, apply hints onto this run's profile copy.
+    # Default False = preview only (no auto-overwrite).
+    preference_learn_apply: bool = False
     # Optional versioned domain pack JSON paths (WO-0.3.6).
     domain_pack_paths: list[str] = Field(default_factory=list)
     # Include packaged example packs under artificial_emotions/packs/.

@@ -16,23 +16,28 @@ from artificial_emotions.api_pkg.schemas import (
     SuggestPairRequest,
     safe_profile,
 )
-from artificial_emotions.preferences import learn_profile_weight_hints, summarize_preferences
+from artificial_emotions.preferences import (
+    preview_or_apply_weight_hints,
+    summarize_preferences,
+)
 
 router = APIRouter()
 
 
 @router.post("/v1/preferences/hints")
 def preference_weight_hints(req: PreferenceHintsRequest) -> dict[str, Any]:
-    """Suggest tiny ValueProfile weight deltas from inline labeled events.
+    """Preview (default) or apply tiny ValueProfile weight deltas from inline events.
 
     No filesystem paths accepted (path injection). Not calibrated learning.
+    apply=false returns a preview; apply=true returns an applied profile copy.
     """
     profile = safe_profile(req.value_profile, req.profile_name)
-    return learn_profile_weight_hints(
+    return preview_or_apply_weight_hints(
         req.events,
         profile_name=req.profile_name or profile.name,
         base_profile=profile,
         max_delta=req.max_delta,
+        apply=bool(req.apply),
     )
 
 

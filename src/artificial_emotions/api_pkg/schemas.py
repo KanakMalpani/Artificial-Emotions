@@ -177,6 +177,14 @@ class PreferenceHintsRequest(BaseModel):
     )
     value_profile: ValueProfile | None = None
     max_delta: float = Field(0.08, ge=0.01, le=0.2)
+    apply: bool = Field(
+        False,
+        description=(
+            "If true, return applied_profile via apply_weight_hints_to_profile. "
+            "Default false (preview). Never overwrites a named preset. "
+            "Not calibrated learning. Inline events only — no filesystem paths."
+        ),
+    )
 
 
 class PreferenceSummarizeRequest(BaseModel):

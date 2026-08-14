@@ -6,6 +6,24 @@ Catalog `when` / `effects` is the appraisal contract. Every named emotion has
 a condition. This is on `main` at package **0.4.1** — there is **no 0.4.2 tag**
 yet, and this block is not a version bump.
 
+### Added
+- **Outcome-event weight hints.** `learn_profile_weight_hints` consumes
+  `event_type=outcome` rows with `score_axes` plus `labels.result` (tiny
+  prefer/reject-like deltas; floors so no axis zeros). Silent without usable
+  events. Apply still requires `apply_weight_hints_to_profile` / `--apply`.
+  Not calibrated.
+- **Preference weight-hint preview vs apply.** `emotions preferences hints`,
+  MCP `preference_weight_hints`, and `POST /v1/preferences/hints` default to
+  preview (`mode=preview`, `applied=false`). `--apply` / `apply=true` returns
+  an `applied_profile` copy via `apply_weight_hints_to_profile` — never
+  overwrites a named preset. HTTP/MCP take inline events only (no filesystem
+  paths). `emotions run --preference-learn` is preview unless
+  `--preference-learn-apply`. Not calibrated.
+- **Preference calibration telemetry.** `emotions eval calibration` reads
+  offline JSONL and reports counts, outcome mix, and hint magnitudes — **no
+  accuracy %**. Shared `--path` on `eval` (optional; default smoke fixture).
+  Not a calibration certificate.
+
 ### Changed
 - **Explore honors `drop_dual_use` / `forbid_similar_jump`.** Disgust may omit
   `dual_use_high` items; anger `--somatic-modulate` skips similar-domain jumps.

@@ -1,4 +1,4 @@
-"""Offline eval harnesses: spotcheck, elicit, gap-status, report, cooccur."""
+"""Offline eval harnesses: spotcheck, elicit, gap-status, report, cooccur, calibration."""
 
 from __future__ import annotations
 
@@ -79,6 +79,7 @@ def _eval(args: argparse.Namespace) -> int:
         payload = build_eval_report(
             fixtures=args.fixtures,
             elicit_responses=str(sample) if sample.is_file() else None,
+            preference_path=getattr(args, "path", None),
         )
         if args.json:
             print(json.dumps(payload, indent=2))
@@ -96,6 +97,47 @@ def _eval(args: argparse.Namespace) -> int:
         )
         el = secs.get("elicit_rubric") or {}
         print(f"  elicit means={el.get('condition_means')}  deltas={el.get('deltas')}")
+        cal = secs.get("calibration")
+        if cal:
+            hm = cal.get("hint_magnitudes") or {}
+            print(
+                f"  calibration n_events={cal.get('n_events')}  "
+                f"outcomes={((cal.get('outcomes') or {}).get('n_outcome'))}  "
+                f"hint_l1={hm.get('l1')}  (not calibrated)"
+            )
+        print(f"\n{payload.get('honesty')}")
+        return 0
+
+    if cmd == "calibration":
+        from artificial_emotions.eval_report import (
+            build_calibration_report,
+            default_calibration_fixture,
+        )
+
+        path = getattr(args, "path", None) or getattr(args, "fixtures", None)
+        if path:
+            payload = build_calibration_report(path, profile_name=args.profile)
+        else:
+            payload = build_calibration_report(
+                default_calibration_fixture(),
+                profile_name=args.profile,
+            )
+        if args.json:
+            print(json.dumps(payload, indent=2))
+            return 0
+        hm = payload.get("hint_magnitudes") or {}
+        outcomes = payload.get("outcomes") or {}
+        print("Preference calibration telemetry (not calibrated)")
+        print(
+            f"  n_events={payload.get('n_events')}  profile={payload.get('profile_name')}  "
+            f"ok={payload.get('ok')}  reason={payload.get('reason')}"
+        )
+        print(f"  counts: {payload.get('counts_by_type')}")
+        print(f"  outcomes n={outcomes.get('n_outcome')}  by_result={outcomes.get('by_result')}")
+        print(
+            f"  hint magnitudes l1={hm.get('l1')}  max_abs={hm.get('max_abs')}  "
+            f"n_nonzero={hm.get('n_nonzero')}  deltas={hm.get('deltas')}"
+        )
         print(f"\n{payload.get('honesty')}")
         return 0
 

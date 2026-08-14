@@ -70,7 +70,16 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         default=None,
         help=(
             "Opt-in labeled JSONL with score_axes for tiny ValueProfile weight hints "
-            "(profile-scoped; not calibrated; CLI only)"
+            "(profile-scoped; not calibrated; CLI only; preview unless "
+            "--preference-learn-apply)"
+        ),
+    )
+    p.add_argument(
+        "--preference-learn-apply",
+        action="store_true",
+        help=(
+            "Apply --preference-learn hints onto this run's ValueProfile copy "
+            "(default: preview only; never overwrites a named preset)"
         ),
     )
     p.add_argument(
@@ -147,13 +156,24 @@ def build_parser() -> argparse.ArgumentParser:
     pref_sub = pref_p.add_subparsers(dest="preferences_cmd")
     hints_p = pref_sub.add_parser(
         "hints",
-        help="Suggest tiny ValueProfile weight deltas from labeled prefer/reject JSONL",
+        help=(
+            "Preview (default) or apply tiny ValueProfile weight deltas from "
+            "labeled JSONL — not calibrated learning"
+        ),
     )
     hints_p.add_argument("--path", required=True, help="Labeled preference JSONL path")
     hints_p.add_argument(
         "--profile",
         default="humanity_default",
         help=f"ValueProfile preset ({', '.join(list_profile_names())})",
+    )
+    hints_p.add_argument(
+        "--apply",
+        action="store_true",
+        help=(
+            "Apply hints onto a profile copy (default: preview). "
+            "Never overwrites a named preset. Not calibrated learning."
+        ),
     )
     hints_p.add_argument("--json", action="store_true")
 
@@ -394,19 +414,27 @@ def build_parser() -> argparse.ArgumentParser:
 
     eval_p = sub.add_parser(
         "eval",
-        help="Offline eval harnesses (spotcheck / elicit A/B / gap-status; no vanity %%)",
+        help="Offline eval harnesses (spotcheck / elicit / calibration; no vanity %%)",
     )
     eval_p.add_argument(
         "eval_cmd",
         nargs="?",
         default="spotcheck",
-        choices=["spotcheck", "elicit", "gap-status", "report", "cooccur"],
-        help="Harness: spotcheck (default), elicit, gap-status, report, or cooccur",
+        choices=["spotcheck", "elicit", "gap-status", "report", "cooccur", "calibration"],
+        help=(
+            "Harness: spotcheck (default), elicit, gap-status, report, cooccur, "
+            "or calibration (preference JSONL telemetry — not calibrated)"
+        ),
     )
     eval_p.add_argument(
         "--fixtures",
         default=None,
         help="Fixture JSON/dir (spotcheck) or gap-status handlabel JSON",
+    )
+    eval_p.add_argument(
+        "--path",
+        default=None,
+        help="Preference JSONL for eval calibration (counts / outcome mix / hint magnitudes)",
     )
     eval_p.add_argument(
         "--responses",

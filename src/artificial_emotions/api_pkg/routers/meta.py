@@ -106,7 +106,7 @@ def root() -> dict[str, Any]:
         "profiles": "GET /v1/profiles",
         "preferences": (
             "POST /v1/preferences/hints · POST /v1/preferences/summarize "
-            "(inline events; no filesystem paths)"
+            "(inline events; no filesystem paths; hints default preview, apply=true for a copy)"
         ),
         "compare_profiles": "POST /v1/profiles/compare",
         "imagination": (
@@ -282,6 +282,7 @@ def agent_manifest() -> dict[str, Any]:
                 "critique_brief",
                 "voi_worksheet",
                 "surprise_worksheet",
+                "preference_weight_hints",
                 "cross_model_vote",
                 "export_idea_graph",
                 "soundness_pass",
@@ -383,6 +384,7 @@ def agent_tools() -> dict[str, Any]:
             "annotate_epistemic": "POST /v1/emotions/annotate",
             "emotion_pack": "GET /v1/emotions/pack",
             "elicit_helpers": "GET /v1/emotions/elicit",
+            "preference_weight_hints": "POST /v1/preferences/hints",
             "list_imagination_kinds": "GET /v1/imagination",
             "apply_imagination": "GET /v1/imagination/{kind}",
             "imagine_transfer": "POST /v1/imagination/transfer",

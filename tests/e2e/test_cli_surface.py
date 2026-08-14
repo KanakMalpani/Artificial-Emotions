@@ -129,7 +129,7 @@ def test_critique_brief_is_form_only(capsys):
 # --- eval harnesses ----------------------------------------------------------------
 
 
-@pytest.mark.parametrize("harness", ["spotcheck", "gap-status", "report", "cooccur"])
+@pytest.mark.parametrize("harness", ["spotcheck", "gap-status", "report", "cooccur", "calibration"])
 def test_eval_harnesses_run_offline(capsys, harness: str):
     payload = _json_out(capsys, ["eval", harness, "--json"])
     assert payload

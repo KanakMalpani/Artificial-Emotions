@@ -20,8 +20,8 @@ from artificial_emotions.preferences import (
     append_preference_event,
     apply_preference_rerank,
     apply_weight_hints_to_profile,
-    learn_profile_weight_hints,
     preference_score_adjustments,
+    preview_or_apply_weight_hints,
 )
 from artificial_emotions.scoring import (
     aggregate_curiosity,
@@ -75,19 +75,23 @@ class CuriosityEngine:
         # Optional profile-scoped weight hints from labeled JSONL (CLI/config only).
         weight_hint_meta: dict | None = None
         if self.config.preference_learn_path:
-            hints = learn_profile_weight_hints(
+            hints = preview_or_apply_weight_hints(
                 self.config.preference_learn_path,
                 profile_name=self.config.value_profile.name.split("+", 1)[0],
                 base_profile=self.config.value_profile,
+                apply=bool(self.config.preference_learn_apply),
             )
             if hints.get("ok"):
-                self.config.value_profile = apply_weight_hints_to_profile(
-                    self.config.value_profile, hints
-                )
+                if hints.get("applied"):
+                    self.config.value_profile = apply_weight_hints_to_profile(
+                        self.config.value_profile, hints
+                    )
                 weight_hint_meta = {
                     "deltas": hints.get("deltas"),
                     "n_prefer": hints.get("n_prefer"),
                     "n_reject": hints.get("n_reject"),
+                    "mode": hints.get("mode"),
+                    "applied": hints.get("applied"),
                 }
 
         candidates = generate_candidates(self.config)

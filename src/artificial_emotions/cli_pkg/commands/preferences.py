@@ -9,19 +9,24 @@ import sys
 
 def _preferences(args: argparse.Namespace) -> int:
     from artificial_emotions.preferences import (
-        learn_profile_weight_hints,
+        preview_or_apply_weight_hints,
         summarize_preferences,
     )
 
     cmd = getattr(args, "preferences_cmd", None)
     if cmd == "hints":
-        hints = learn_profile_weight_hints(args.path, profile_name=args.profile)
+        apply = bool(getattr(args, "apply", False))
+        hints = preview_or_apply_weight_hints(args.path, profile_name=args.profile, apply=apply)
         if args.json:
             print(json.dumps(hints, indent=2))
             return 0
-        print(f"Preference weight hints for profile={args.profile}")
+        mode = hints.get("mode") or ("apply" if apply else "preview")
+        print(f"Preference weight hints for profile={args.profile}  mode={mode}")
         print(f"  ok={hints.get('ok')}  reason={hints.get('reason')}")
-        print(f"  n_prefer={hints.get('n_prefer')}  n_reject={hints.get('n_reject')}")
+        print(
+            f"  applied={hints.get('applied')}  "
+            f"n_prefer={hints.get('n_prefer')}  n_reject={hints.get('n_reject')}"
+        )
         deltas = hints.get("deltas") or {}
         if deltas:
             print("  deltas:")
@@ -31,6 +36,11 @@ def _preferences(args: argparse.Namespace) -> int:
             print("  deltas: (none)")
         if hints.get("clamped_weights"):
             print(f"  clamped: {', '.join(hints['clamped_weights'])}")
+        if apply:
+            applied = hints.get("applied_profile") or {}
+            print(f"  applied_profile={applied.get('name') or '(unchanged copy)'}")
+        else:
+            print("  (preview only — pass --apply to return an applied profile copy)")
         print(f"\n{hints.get('honesty')}")
         return 0
     if cmd == "summarize":
@@ -73,10 +83,11 @@ def _preferences(args: argparse.Namespace) -> int:
         return 0
     print(
         "Usage:\n"
-        "  curiosity preferences hints --path labeled.jsonl [--profile NAME]\n"
+        "  curiosity preferences hints --path labeled.jsonl [--profile NAME] [--apply]\n"
         "  curiosity preferences summarize --path labeled.jsonl [--profile NAME]\n"
         "  curiosity preferences suggest-pair --candidates id1,id2,id3 [--path prefs.jsonl]\n"
-        "Preference tools are profile-scoped decision aids — not calibrated learning.",
+        "Preference tools are profile-scoped decision aids — not calibrated learning.\n"
+        "hints defaults to preview; --apply returns a profile copy (never overwrites a preset).",
         file=sys.stderr,
     )
     return 2

@@ -56,6 +56,7 @@ Tools exposed (core):
 - `provoke_curiosity` / `spark` — instant ranked unknowns + `inject` pack
 - `rank_unknowns` / `run_curiosity` — full pipeline (optional OpenAlex)
 - `list_domains`, `list_profiles`
+- `preference_weight_hints` — preview (default) or apply tiny ValueProfile weight deltas from inline events; not calibrated; no filesystem paths
 
 Affect / framing (optional — annotation only; does not feel): `list_epistemic_cues`, `emotion_catalog`, `mix_emotions`, `annotate_epistemic`, `emotion_pack`, `elicit_helpers`. Tier via `CURIOSITY_MCP_TIER`. Full list: `emotions-mcp --list-tools`.
 

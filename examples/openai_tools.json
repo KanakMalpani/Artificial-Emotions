@@ -763,6 +763,56 @@
   {
     "type": "function",
     "function": {
+      "name": "preference_weight_hints",
+      "description": "Preview tiny ValueProfile weight deltas from inline labeled prefer/reject/outcome events with score_axes (apply=false default). Set apply=true to return an applied profile copy \u2014 never auto-overwrites a named preset. Inline events only (no filesystem paths). Not calibrated learning; scores remain decision aids under an explicit ValueProfile \u2014 not oracles. Related literature \u2260 answered.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 500,
+            "items": {
+              "type": "object"
+            },
+            "description": "Inline labeled prefer/reject/outcome events with score_axes. Filesystem paths are not accepted."
+          },
+          "profile_name": {
+            "type": "string",
+            "enum": [
+              "alignment_lab",
+              "basic_science",
+              "climate_adaptation",
+              "funder_10y",
+              "humanity_default",
+              "near_term_ops",
+              "public_demo_strict_risk"
+            ],
+            "description": "Named ValueProfile preset. Rankings are never value-free."
+          },
+          "max_delta": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 0.2,
+            "default": 0.08,
+            "description": "Cap on each axis weight nudge (tiny hints, not calibrated)."
+          },
+          "apply": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, return applied_profile (a copy). Default false = preview. Never overwrites a named preset."
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "list_epistemic_cues",
       "description": "List epistemic emotion cue tags (information_gap, incongruity, confusion_risk, \u2026). UX annotations for investigation framing \u2014 NOT claims that the system feels emotions. See docs/EMOTIONS.md.",
       "parameters": {

@@ -5,7 +5,9 @@ or agent expresses preference among ranked unknowns.
 
 Beyond thin per-question re-rank, ``learn_profile_weight_hints`` suggests
 *small* ValueProfile weight deltas **within** a named profile from labeled
-prefer/reject events that carry score axes — never a universal rank oracle.
+prefer/reject events that carry score axes, and from ``event_type=outcome``
+rows that carry ``score_axes`` plus ``labels.result`` — never a universal
+rank oracle. Hints are not applied until ``apply_weight_hints_to_profile``.
 """
 
 from __future__ import annotations
@@ -31,6 +33,7 @@ __all__ = [
     "events_from_ranked",
     "fit_bt_offline",
     "learn_profile_weight_hints",
+    "preview_or_apply_weight_hints",
     "load_preference_events",
     "outcome_for_appraisal",
     "preference_score_adjustments",
@@ -48,9 +51,25 @@ _AXIS_TO_WEIGHT = {
 
 _HINT_HONESTY = (
     "Weight hints are tiny profile-scoped deltas from labeled prefer/reject "
-    "events with score axes — not calibrated learning, not universal ranking, "
+    "events with score axes, and from outcome events that carry score_axes "
+    "plus labels.result — not calibrated learning, not universal ranking, "
     "and not proof the profile is 'correct'."
 )
+
+# Outcome labels.result → prefer-like vs reject-like for axis means.
+# Progress outcomes nudge toward those axes; misses / dead-ends /
+# false-unknowns / logged nulls nudge away. Unknown tokens are skipped.
+_OUTCOME_PREFER_RESULTS = frozenset({"partial_progress", "answered"})
+_OUTCOME_REJECT_RESULTS = frozenset(
+    {
+        "contradicted",
+        "already_answered",
+        "answered_elsewhere",
+        "abandoned",
+        "null",
+    }
+)
+_WEIGHT_FLOOR = 0.15
 
 
 class PreferenceEvent(BaseModel):
@@ -293,6 +312,20 @@ def _mean_axes(rows: list[dict[str, float]]) -> dict[str, float]:
     return means
 
 
+def _event_result_label(ev: PreferenceEvent) -> str:
+    return str((ev.labels or {}).get("result") or "").strip().lower()
+
+
+def _outcome_result_bucket(result: str) -> str | None:
+    """Map labels.result to prefer-like / reject-like, or None if unknown."""
+    r = (result or "").strip().lower()
+    if r in _OUTCOME_PREFER_RESULTS:
+        return "prefer"
+    if r in _OUTCOME_REJECT_RESULTS:
+        return "reject"
+    return None
+
+
 def learn_profile_weight_hints(
     events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
     *,
@@ -305,8 +338,12 @@ def learn_profile_weight_hints(
     Suggest small ValueProfile weight deltas from labeled events with axes.
 
     Prefer/keep vs reject/already_answered: axes that are higher on preferred
-    items get a tiny positive weight nudge (and vice versa). Caps keep this a
-    *hint*, not calibrated learning. Profile-scoped only.
+    items get a tiny positive weight nudge (and vice versa). ``event_type=outcome``
+    rows with ``score_axes`` and a known ``labels.result`` join the same buckets
+    (progress → prefer-like; contradicted / already_answered / answered_elsewhere
+    / abandoned / null → reject-like). Caps keep this a *hint*, not calibrated
+    learning. Profile-scoped only. Does not mutate ``base_profile`` — callers
+    apply via ``apply_weight_hints_to_profile``.
     """
     if isinstance(events, (str, Path)):
         evs = load_preference_events(events)
@@ -323,6 +360,7 @@ def learn_profile_weight_hints(
 
     prefer_axes: list[dict[str, float]] = []
     reject_axes: list[dict[str, float]] = []
+    n_outcome = 0
     for ev in evs:
         if profile_name and ev.profile_name and ev.profile_name != profile_name:
             continue
@@ -334,6 +372,14 @@ def learn_profile_weight_hints(
             prefer_axes.append(axes)
         elif et in ("reject", "already_answered"):
             reject_axes.append(axes)
+        elif et == "outcome":
+            bucket = _outcome_result_bucket(_event_result_label(ev))
+            if bucket == "prefer":
+                prefer_axes.append(axes)
+                n_outcome += 1
+            elif bucket == "reject":
+                reject_axes.append(axes)
+                n_outcome += 1
 
     base = base_profile or resolve_value_profile(profile_name=profile_name or "humanity_default")
     n_pref = len(prefer_axes)
@@ -345,6 +391,7 @@ def learn_profile_weight_hints(
             "reason": "need_more_labeled_events_with_score_axes",
             "n_prefer": n_pref,
             "n_reject": n_rej,
+            "n_outcome": n_outcome,
             "deltas": {},
             "suggested_profile": base.model_dump(mode="json"),
             "honesty": _HINT_HONESTY,
@@ -366,7 +413,7 @@ def learn_profile_weight_hints(
     for weight_key, nudge in list(deltas.items()):
         cur = float(getattr(suggested, weight_key))
         # Guardrail: never drive a weight to 0 or below a floor (profile intent).
-        floor = 0.15
+        floor = _WEIGHT_FLOOR
         new = float(max(floor, min(3.0, cur + nudge)))
         if new == floor and cur + nudge < floor:
             clamped.append(weight_key)
@@ -386,6 +433,7 @@ def learn_profile_weight_hints(
         "reason": "ok" if deltas else ("clamped_to_empty" if clamped else "axes_too_similar"),
         "n_prefer": n_pref,
         "n_reject": n_rej,
+        "n_outcome": n_outcome,
         "deltas": deltas,
         "clamped_weights": clamped,
         "mean_prefer_axes": mean_p,
@@ -406,6 +454,41 @@ def apply_weight_hints_to_profile(
     if isinstance(suggested, dict):
         return ValueProfile.model_validate(suggested)
     return profile
+
+
+def preview_or_apply_weight_hints(
+    events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
+    *,
+    profile_name: str | None = None,
+    base_profile: ValueProfile | None = None,
+    max_delta: float = 0.08,
+    min_labeled: int = 2,
+    apply: bool = False,
+) -> dict[str, Any]:
+    """Preview (default) or apply tiny weight hints onto a profile copy.
+
+    Uses ``learn_profile_weight_hints`` then, only when ``apply=True``,
+    ``apply_weight_hints_to_profile``. Named presets are never overwritten
+    in place. Not calibrated learning.
+    """
+    hints = learn_profile_weight_hints(
+        events,
+        profile_name=profile_name,
+        base_profile=base_profile,
+        max_delta=max_delta,
+        min_labeled=min_labeled,
+    )
+    payload = dict(hints)
+    payload["mode"] = "apply" if apply else "preview"
+    payload["applied"] = False
+    if apply:
+        base = base_profile or resolve_value_profile(
+            profile_name=profile_name or "humanity_default"
+        )
+        applied_profile = apply_weight_hints_to_profile(base, hints)
+        payload["applied"] = bool(hints.get("ok"))
+        payload["applied_profile"] = applied_profile.model_dump(mode="json")
+    return payload
 
 
 def _normalize_events(
@@ -539,6 +622,7 @@ def summarize_preferences(
             "deltas": hints.get("deltas"),
             "clamped_weights": hints.get("clamped_weights"),
             "suggested_profile": hints.get("suggested_profile"),
+            "n_outcome": hints.get("n_outcome"),
         },
         "honesty": (
             "Preference summary is profile-scoped decision-aid telemetry — "

@@ -303,6 +303,44 @@ VOI_WORKSHEET_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+PREFERENCE_WEIGHT_HINTS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 500,
+            "items": {"type": "object"},
+            "description": (
+                "Inline labeled prefer/reject/outcome events with score_axes. "
+                "Filesystem paths are not accepted."
+            ),
+        },
+        "profile_name": {
+            "type": "string",
+            "enum": _PROFILE_ENUM,
+            "description": "Named ValueProfile preset. Rankings are never value-free.",
+        },
+        "max_delta": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 0.2,
+            "default": 0.08,
+            "description": "Cap on each axis weight nudge (tiny hints, not calibrated).",
+        },
+        "apply": {
+            "type": "boolean",
+            "default": False,
+            "description": (
+                "If true, return applied_profile (a copy). Default false = preview. "
+                "Never overwrites a named preset."
+            ),
+        },
+    },
+    "required": ["events"],
+    "additionalProperties": False,
+}
+
 LIST_EPISTEMIC_CUES_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {},

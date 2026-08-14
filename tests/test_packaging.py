@@ -32,6 +32,7 @@ _REQUIRED_FILES = [
     "examples/discovery_corpus_demo.json",
     "examples/discovery_corpus_timesplit_demo.json",
     "evals/fixtures/cooccur_neglectedness_smoke_v1.json",
+    "evals/fixtures/preference_calibration_smoke_v1.jsonl",
 ]
 
 

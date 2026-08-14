@@ -53,6 +53,42 @@ pytest tests/test_mid_horizon.py::test_w10_spotcheck_harness_offline -q
 5. Compare to system `gap.status`; track fail rate over time in LIMITS notes —
    never as a headline accuracy figure.
 
+## Preference / outcome calibration telemetry (W-cal)
+
+**Not a calibration certificate.** `emotions eval calibration` reads an offline
+preference JSONL and reports **counts**, **outcome mix**, and **hint magnitudes**
+only. It does **not** publish an accuracy %, Brier score, or ECE, and it does
+not apply weight hints.
+
+| Signal | Meaning |
+|--------|---------|
+| `counts_by_type` | `event_type` histogram (`prefer`, `reject`, `keep`, `outcome`, …) |
+| `outcomes.by_result` | Mix of `labels.result` on `event_type=outcome` (silent if none) |
+| `hint_magnitudes` | `l1` / `max_abs` of tiny `learn_profile_weight_hints` deltas |
+
+Weight hints come from labeled prefer/reject **and** from `event_type=outcome`
+rows that carry `score_axes` plus a known `labels.result`. Outcome rows are
+always counted in `outcomes.by_result` when present. This report does not
+call `apply_weight_hints_to_profile` and is **not** a calibration certificate.
+
+### How to run
+
+```bash
+emotions eval calibration --json
+emotions eval calibration --path prefs.jsonl --profile humanity_default --json
+# Optional: fold the same telemetry into the composite report
+emotions eval report --path prefs.jsonl --json
+pytest tests/test_eval_calibration.py -q
+```
+
+Default `--path` is the bundled smoke fixture
+`evals/fixtures/preference_calibration_smoke_v1.jsonl` (prefer/reject/keep plus
+two outcome breadcrumbs). Replace it with a real labeled log before treating
+the numbers as anything other than a wiring check.
+
+Honesty field: **not calibrated**. v1 ships the flywheel scaffolding, not
+proof that scores track later impact.
+
 ## Honesty
 
 Scores remain decision aids. Literature is abstract/neighborhood-level unless

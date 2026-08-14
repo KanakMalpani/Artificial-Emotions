@@ -313,6 +313,53 @@ def handle_voi_worksheet(
     )
 
 
+def handle_preference_weight_hints(
+    *,
+    events: list[dict[str, Any]] | None = None,
+    profile_name: str | None = "humanity_default",
+    max_delta: float = 0.08,
+    apply: bool = False,
+    path: Any = None,
+    events_path: Any = None,
+    **_extra: Any,
+) -> dict[str, Any]:
+    """Preview (default) or apply tiny ValueProfile weight hints from inline events."""
+    from artificial_emotions.preferences import preview_or_apply_weight_hints
+
+    if path is not None or events_path is not None or "preference_learn_path" in _extra:
+        return {
+            "ok": False,
+            "reason": "filesystem_paths_not_accepted",
+            "mode": "preview",
+            "applied": False,
+            "deltas": {},
+            "honesty": (
+                "Inline events only — filesystem paths are not accepted on MCP. "
+                "Weight hints are tiny profile-scoped deltas, not calibrated "
+                "learning. Decision aids under an explicit ValueProfile — not oracles."
+            ),
+        }
+    if not events:
+        return {
+            "ok": False,
+            "reason": "need_inline_events",
+            "mode": "preview" if not apply else "apply",
+            "applied": False,
+            "deltas": {},
+            "honesty": (
+                "Pass inline labeled events with score_axes. "
+                "Not calibrated learning. Decision aids under an explicit "
+                "ValueProfile — not oracles."
+            ),
+        }
+    return preview_or_apply_weight_hints(
+        events,
+        profile_name=profile_name,
+        max_delta=float(max_delta or 0.08),
+        apply=bool(apply),
+    )
+
+
 def handle_list_epistemic_cues(**_extra: Any) -> dict[str, Any]:
     """List epistemic cue tag vocabulary (UX annotations — not felt emotion)."""
     return list_epistemic_cues()

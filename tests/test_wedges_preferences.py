@@ -193,6 +193,13 @@ def test_preference_weight_hints(tmp_path: Path):
     ).run()
     assert results
     assert any("preference_weight_hints" in (r.flags or []) for r in results)
+    hint_meta = next(
+        r.metadata["preference_weight_hints"]
+        for r in results
+        if (r.metadata or {}).get("preference_weight_hints")
+    )
+    assert hint_meta["mode"] == "preview"
+    assert hint_meta["applied"] is False
 
 
 def test_preference_hints_api_inline():
@@ -236,6 +243,9 @@ def test_preference_hints_api_inline():
     assert data["ok"] is True
     assert "weight_impact" in data["deltas"]
     assert "suggested_profile" in data
+    assert data["mode"] == "preview"
+    assert data["applied"] is False
+    assert "applied_profile" not in data
 
 
 def test_preference_summarize_and_compare_profiles(tmp_path: Path):

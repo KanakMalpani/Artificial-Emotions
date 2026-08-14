@@ -34,6 +34,7 @@ def _run_engine(args: argparse.Namespace) -> int:
         preference_log_path=args.preference_log,
         preference_rerank_path=getattr(args, "preference_rerank", None),
         preference_learn_path=getattr(args, "preference_learn", None),
+        preference_learn_apply=bool(getattr(args, "preference_learn_apply", False)),
     )
     results = CuriosityEngine(config).run()
 
