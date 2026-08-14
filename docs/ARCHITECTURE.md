@@ -86,6 +86,14 @@ Routers spell out full paths (no `prefix=`) so any route can be found by
 grepping its literal URL. `tests/test_api_wiring.py` pins the served path set,
 middleware order, and that every router module is actually included.
 
+## `/v1` freeze (1.0.0)
+
+This cut **freezes** `/v1`. Changes are **additive only**: new fields or routes
+may appear; existing `/v1` paths, required fields, and response shapes must not
+break. No breaking `/v1` removals or incompatible renames in 1.0.0. HTTP remains
+**local-v1** (see [THREAT_MODEL.md](THREAT_MODEL.md)) — freeze is an API contract,
+not a production SLO.
+
 ## CLI layer
 
 `artificial_emotions.cli:main` backs the `emotions` console script (and the

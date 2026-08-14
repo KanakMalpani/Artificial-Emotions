@@ -1,6 +1,6 @@
 # Artificial Emotions — Roadmap Summary
 
-**Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `0.4.1`
+**Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `1.0.0` (last PyPI upload `0.4.1`; tag `v1.0.0` pending)
 
 > Agents: when stuck, open the full roadmap **§0 → §3 → §2**. This page is the executive skim only.
 
@@ -8,17 +8,21 @@
 
 A **curiosity layer** for AI and research orgs: generate → verify → score → diversify → brief — ranked *unanswered* questions with explicit `ValueProfile`, gap evidence, and uncertainty. Decision aids, not oracles. Not Q&A, not an end-to-end AI Scientist.
 
-## Now (v0.4) — do not rebuild
+## Now (v1.0.0) — do not rebuild
 
-Pipeline + OpenAlex/S2 gap gate + multi-axis scores + MCP/HTTP/CLI + offline seeds + domain packs + emotions surface (annotation only) + eval harness + preference JSONL + dual-use heuristic + multi-judge flags + neglectedness/cost proxies + optional HTTP API keys + structured errors / `/ready`. Limits: heuristic scoring, phrase-level gaps, dual-use residual risk, no outcome calibration. Details: roadmap §1 + [`LIMITS.md`](LIMITS.md).
+Pipeline + OpenAlex/S2 gap gate + multi-axis scores + MCP/HTTP/CLI + offline seeds + domain packs + emotions surface (annotation only) + eval harness + preference JSONL + dual-use heuristic + multi-judge flags + neglectedness/cost proxies + optional HTTP API keys + structured errors / `/ready`. Frozen `/v1` is additive-only. Limits: heuristic scoring, phrase-level gaps, dual-use residual risk, no outcome calibration, local HTTP (not production). Details: roadmap §1 + [`LIMITS.md`](LIMITS.md).
+
+This cut is **1.0.0** because roadmap **§7.4** is the trust bar and LIMITS is the contract — not because those slogans became true.
 
 ## Top next wedges (pick first unfinished)
 
 1. **P0 honesty loop** — keep LIMITS/PROOFS true; green suite (roadmap §2 W-P0a / W-P0b)  
-2. ✅ **W-explore** — `drop_dual_use` / `forbid_similar_jump` enacted in explore (omit `dual_use_high` on disgust; similar-jump skip on anger `--somatic-modulate`). Heuristic residual remains; not dual-use solved.  
-3. ✅ **W-cal** — outcome-event hints + `emotions eval calibration` + preview/apply. Scaffolding shipped; still **not calibrated**. No accuracy %. Proof remains v1.x / §10.  
+2. **v1.1 calibration proof** — W-cal scaffolding shipped; scores still **not calibrated**. No accuracy %. Proof remains §10.  
+3. **v1.1 production HTTP** — local-v1 shipped; **not** TLS, WAF, multi-tenant, or SLOs.  
 
-P1 W1–W9 and P2 W10–W15 are ✅, including PyPI (`artificial-emotions` **0.4.1**). Do **not** call v1.0 until roadmap **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP. Full queue: roadmap **§2**.
+Shipped leftovers (do not re-implement): ✅ **W-explore**, ✅ **W-rules**, ✅ **W-cal** scaffolding.
+
+P1 W1–W9 and P2 W10–W15 are ✅, including last PyPI upload (`artificial-emotions` **0.4.1**). Product on `main` is **1.0.0** pending tag. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP. Full queue: roadmap **§2**.
 
 ## Agent ops (one-liners)
 
@@ -36,8 +40,8 @@ P1 W1–W9 and P2 W10–W15 are ✅, including PyPI (`artificial-emotions` **0.4
 | Horizon | Versions | Intent |
 |---------|----------|--------|
 | **Near** | v0.2 | ✅ Embeddings optional, multi-provider notes, presets, UX honesty, packaging prep |
-| **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge + PyPI 0.4.1; remaining: honesty / proof gates (do not call v1.0 until ROADMAP §10) |
-| **Long** | v1.x→v2+ | Flywheel, preference learning, enterprise (**local-v1 shipped**; multi-tenant/SLOs remain §10), AI-Scientist upstream |
+| **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge + §7.4 trust bar — this cut is **1.0.0** (last PyPI upload 0.4.1) |
+| **Long** | v1.x→v2+ | **v1.1:** calibration proof + production HTTP; flywheel scaffolding shipped; enterprise local-v1 shipped (multi-tenant/SLOs remain §10) |
 | **Moonshots** | — | Approximate VOI honesty stub (`evsi: null` / `not_evsi`); lab closed-loop dry-run stub (`emotions loop --outcomes`; not experiment execution); surprise search and elicitation remain research — not default backlog |
 
 Phased **work-order checklists**: roadmap **§7**.
@@ -48,4 +52,4 @@ Explicit values · related ≠ answered · answerability/risk gates · anti-McNa
 
 ## Proof rule
 
-Do not claim “calibrated,” “works on every host,” “dual-use solved,” “VOI/EVSI,” “lab closed-loop,” or “v1.0” until matching **proof gates** (roadmap §10) are met. Remaining v1.0 bar is honesty / LIMITS (heuristic scores, phrase-level gaps, dual-use residual, local HTTP), not PyPI install. §7.6 stubs shipped; moonshots remain moonshots.
+Do not claim “calibrated,” “works on every host,” “dual-use solved,” “VOI/EVSI,” “lab closed-loop,” or “production-ready HTTP” until matching **proof gates** (roadmap §10) are met. **1.0.0** is allowed because §7.4 is the trust bar and LIMITS is the contract — not because those slogans became true. Remaining work is P0 + v1.1 (calibration proof, production HTTP), not a second v1.0 gate. §7.6 stubs shipped; moonshots remain moonshots.

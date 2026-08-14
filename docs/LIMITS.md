@@ -1,6 +1,6 @@
 # Known Limits (verified)
 
-Honest bounds for **v0.4.1** — do not overclaim.
+Honest bounds for **v1.0.0** — do not overclaim.
 
 ## Verified working (2026-07-24)
 
@@ -83,7 +83,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 - Failure-mode suite: `tests/test_failure_modes.py` encodes F1–F15 from `docs/LIMITS.md` / failure-mode tests
 - Explicit ValueProfile on provoke/inject (F11); recency-aware likely-answered gate (F12)
 - Download-and-run: `pip install -e .` then `emotions serve` **or** `emotions-mcp` — no vendor lock-in for LLM hosts
-- Packaging: on PyPI as `artificial-emotions` (`pip install artificial-emotions`); editable install still fine for contributors (see `docs/PUBLISHING.md`)
+- Packaging: last PyPI upload is `artificial-emotions` **0.4.1** (`pip install artificial-emotions`); product on `main` is **1.0.0** pending tag `v1.0.0`; editable install still fine for contributors (see `docs/PUBLISHING.md`)
 - Alive continuity + imagination: CLI memory defaults, scars/costs/temperament/avoidance as biases, quarantined imagination, corpus-gated transfer (~5× lift), explicit dream reanalysis — see sections below and `CHANGELOG` `[0.4.0]` (serve/memory integrity hardening in `[0.4.1]`)
 
 ## Known limits
@@ -101,7 +101,7 @@ Honest bounds for **v0.4.1** — do not overclaim.
 | Ranked unknowns ≠ post-execution quality | Ideation–execution gap (arXiv 2506.20803) | Treat ranks as decision aids; outcome flywheel is sparse / deferred |
 | Axis scores are not EVSI/ENBS | No shared utility / PSA model | VOI worksheet is template fill only (`evsi: null`, `honesty: not_evsi`) |
 | Multi-model / ensemble generation | Artificial Hivemind homogenization risk | Jaccard/embedding diversity + hivemind eval metric; disagreement ≠ value |
-| Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; optional `mix_intensity_cap`; agent safety blurb; no silent user-affect inference |
+| Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; optional `mix_intensity_cap`; agent safety blurb; no silent user-affect inference; **not phenomenal feeling** |
 | PAD mood carryover (4h half-life) | Continuity of stored P/A/D across sessions | Computational carryover, not a VAD experience claim |
 | No longitudinal outcome calibration yet | Need impact follow-up data | **W-cal** scaffolding shipped (outcome-event hints + eval calibration telemetry); still **not calibrated**; no accuracy %; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |

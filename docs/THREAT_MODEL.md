@@ -1,6 +1,6 @@
 # Threat model — local `emotions serve`
 
-Honest bounds for **v0.4.1**. This document describes the HTTP surface started by
+Honest bounds for **v1.0.0**. This document describes the HTTP surface started by
 `emotions serve` (`artificial_emotions.api:app`). It is a **local soft guard**,
 not a production SLO, not a WAF, and not a claim that the API is
 production-ready or multi-tenant. ROADMAP §7.5 “enterprise” here means this
@@ -61,7 +61,7 @@ a local process; opt-in `CURIOSITY_AUDIT_LOG` still records MCP tool names +
 status); CLI `emotions explore` persistence; literature classifiers as
 biosafety; phenomenal affect.
 
-## Controls that ship (v0.4.1)
+## Controls that ship (v1.0.0)
 
 ### Bind default
 
@@ -138,12 +138,12 @@ explicitly. CORS is not authentication.
 
 ## Local-v1 vs production enterprise
 
-ROADMAP §7.5 “enterprise” at **0.4.1** is this **local-v1** baseline: opt-in
+ROADMAP §7.5 “enterprise” at **1.0.0** is this **local-v1** baseline: opt-in
 keys, in-process rate limit, CORS deny, opt-in per-key quota, opt-in audit
 JSONL. Unset quota/audit keeps current local DX. It is **not** multi-tenant
 SSO, TLS, a WAF, or an SLO.
 
-| Control | Shape at 0.4.1 | Status |
+| Control | Shape at 1.0.0 | Status |
 |---------|----------------|--------|
 | **Quota** | Per-key budget (`CURIOSITY_API_QUOTA_*`); **429** `quota_exceeded` when exceeded | **Shipped, opt-in.** Unset/0 = no quota. |
 | **Audit JSONL** | Opt-in log of HTTP/MCP **tool names + status**; never secret bodies; default off | **Shipped, opt-in.** Unset = off. |

@@ -1,7 +1,7 @@
 # Artificial Emotions — Agent Playbook & Roadmap
 
 **Status:** Living operational plan (not a commitment ledger)  
-**Product version today:** `0.4.1` (see `pyproject.toml`)  
+**Product version today:** `1.0.0` (last PyPI upload `0.4.1`; tag `v1.0.0` pending)  
 **Repo root:** this clone (relative paths below)  
 **Public repo:** https://github.com/KanakMalpani/Artificial-Emotions  
 **Companion:** [`ROADMAP_SUMMARY.md`](ROADMAP_SUMMARY.md) (1-page)  
@@ -80,7 +80,7 @@
 
 ## 1. Current truth — do not rebuild the pipeline
 
-Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is listed here, improve it or extend it — do not recreate from scratch.** Product version today is **0.4.1**, not v0.1.
+Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is listed here, improve it or extend it — do not recreate from scratch.** Product version today is **1.0.0**, not v0.1. Last PyPI upload is **0.4.1** until DocsGuard tags `v1.0.0`.
 
 ### Verified working (as of 2026-07-23)
 
@@ -126,7 +126,7 @@ ValueProfile + Domain/Topic
 | Dual-use residual risk | Weighted heuristic + review flag shipped (W14); not a trained oracle | Keep hard reject; LIMITS residual |
 | LLM paths often untested live | Smoke with mocked + optional live matrix; no secrets in repo |
 | MCP tools-only | Resources/prompts later if hosts need them |
-| PyPI | Published as `artificial-emotions` at **0.4.1**; next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) |
+| PyPI | Last upload is `artificial-emotions` **0.4.1**; product on `main` is **1.0.0** pending tag `v1.0.0`. Next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) |
 | Public GitHub may lag local | Never force-push; never commit secrets |
 
 **Why this design?** Prefer LIMITS + DESIGN + this playbook.
@@ -135,9 +135,9 @@ ValueProfile + Domain/Topic
 
 ## 2. Priority queue / next wedges
 
-P1 W1–W9 and P2 W10–W15 are ✅. PyPI is shipped — it is **not** the next wedge and **not** the bar for calling the product v1.0.
+P1 W1–W9 and P2 W10–W15 are ✅. This cut is **1.0.0** because **§7.4** is the trust bar and [`LIMITS.md`](LIMITS.md) is the contract — not because calibrated scores, dual-use solved, or production HTTP became true.
 
-When idle: stay on **P0** (honesty loop). **W-explore**, **W-rules**, and **W-cal** scaffolding are enacted. Do not claim calibrated scores. §7.6 honesty/dry-run stubs shipped; moonshots remain moonshots (not VOI, not EVSI, not a lab loop). Do not start further moonshots unless the user asks.
+When idle: stay on **P0** (honesty loop). Next product work is **v1.1** (calibration proof, production HTTP). **W-explore**, **W-rules**, and **W-cal** scaffolding are enacted. Do not claim calibrated scores, dual-use solved, production HTTP (TLS/WAF/SLOs), phenomenal feeling, VOI/EVSI, or a lab that runs experiments. §7.6 honesty/dry-run stubs shipped; moonshots remain moonshots. Do not start further moonshots unless the user asks.
 
 ### P0 — Honesty & regression (always eligible)
 
@@ -157,7 +157,7 @@ When idle: stay on **P0** (honesty loop). **W-explore**, **W-rules**, and **W-ca
 | **W5** | Expand F7 phrase-gaming + F13 paraphrase adversarial tests | `tests/test_failure_modes.py`, maybe `verify.py` / `diversity.py` | New cases fail-then-pass intentionally | ✅ Suite still encodes F1–F15 | F7, F13 |
 | **W6** | ~~Web: briefs primary~~ (`web/` **removed**) | — | Historical wedge; SPA deleted | ✅ Was shipped; surface retired | F8, F11 |
 | **W7** | MCP host recipes (Claude Code, VS Code Copilot, Continue, Windsurf) | `docs/PLUGINS.md` | Copy-paste recipe + `--list-tools` smoke note per host | ✅ PLUGINS lists host; no “works everywhere” without smoke | plugins |
-| **W8** | PyPI packaging (owner publishes) | `pyproject.toml`, CI if present | Build/sdist works locally | ✅ Published as `artificial-emotions` at 0.4.1; next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) | dist |
+| **W8** | PyPI packaging (owner publishes) | `pyproject.toml`, CI if present | Build/sdist works locally | ✅ Last PyPI upload `artificial-emotions` **0.4.1**; product on `main` is **1.0.0** pending tag; next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) | dist |
 | **W9** | Seed contribution guide + domain pack format | `CONTRIBUTING.md`, `seeds.py` | Contributor can add a seed without breaking schema | ✅ Quality bar: operationalization + one primary unknown | F2, F9 |
 
 ### P2 — Credible mid-term (v0.3 → v1.0) — all ✅
@@ -171,24 +171,31 @@ When idle: stay on **P0** (honesty loop). **W-explore**, **W-rules**, and **W-ca
 | **W14** | Dual-use beyond keywords *or* explicit LIMITS cap | `safety.py`, `scoring.py` | Classifier eval sample **or** LIMITS sentence | ✅ Claim matches LIMITS (residual risk) | F10 |
 | **W15** | Multi-judge ensemble + disagreement entropy flag | `judge.py`, `scoring.py`, `pipeline.py` | Flag when judges diverge | ✅ Bands widen / flag set | F5, F8 |
 
-### Remaining next (honest leftover — do not implement here)
+### Remaining next (P0 + v1.1)
 
 | ID | Wedge | Notes |
 |----|-------|-------|
 | **P0** | Honesty loop | Keep LIMITS/PROOFS true; green suite — always eligible |
+| **v1.1-cal** | Calibration **proof** | W-cal scaffolding shipped; scores still **not calibrated**. No accuracy %. Proof remains §10 (longitudinal dataset + methodology + multi-outcome analysis) |
+| **v1.1-http** | Production HTTP | Local-v1 shipped (opt-in keys, in-process rate limit, CORS deny, opt-in quota/audit). **Not** TLS, WAF, multi-tenant, or SLOs — those remain §10 “production-ready enterprise.” |
+
+### Shipped leftovers (do not re-implement)
+
+| ID | Wedge | Notes |
+|----|-------|-------|
 | **W-explore** | ✅ Enacted `drop_dual_use` / `forbid_similar_jump` in `explore.py` | Explore may omit `dual_use_high` on disgust; anger opt-in skips similar-domain jumps. Heuristic residual remains — not dual-use solved |
 | **W-rules** | ✅ Catalog-only appraisal dispatch | `RULES` deleted. Catalog `when` / `use_for` is the only spec; `appraise_run` walks catalog `when` only |
-| **W-cal** | ✅ Scaffolding shipped — outcome-event weight hints + `emotions eval calibration` + preview/apply | Flywheel wiring exists; scores still **not calibrated**. No accuracy %. Not an install gate. Calibration proof remains v1.x / §10 |
+| **W-cal** | ✅ Scaffolding shipped — outcome-event weight hints + `emotions eval calibration` + preview/apply | Flywheel wiring exists; scores still **not calibrated**. No accuracy %. Not an install gate. Calibration proof is **v1.1-cal** / §10 |
 
-Do **not** call the product v1.0 until **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP.
+LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP (not production), not phenomenal feeling, VOI `not_evsi`, outcome loop dry-run only.
 
 ### How to pick under ambiguity
 
 1. If tests red → fix tests (P0).  
 2. Else if honesty drift → LIMITS/PROOFS (P0a).  
-3. Else stay on the P0 honesty loop.  
+3. Else stay on the P0 honesty loop, or pick **v1.1-cal** / **v1.1-http** if the user asks.  
 4. Do not start moonshots unless the user explicitly asks. **W-explore**, **W-rules**, and **W-cal** scaffolding are already enacted — do not re-implement them, and do not claim calibrated scores.  
-5. Do not treat PyPI or a completed §7.4 install box as permission to claim v1.0.
+5. This cut **is** 1.0.0 because §7.4 is the trust bar. Do **not** treat 1.0.0 as calibrated scores, dual-use solved, or production HTTP.
 
 ---
 
@@ -277,7 +284,7 @@ Do **not** call the product v1.0 until **§10**. LIMITS still: heuristic scores,
 |------|--------|
 | 1 | Diff README / PLUGINS / web copy against [`LIMITS.md`](LIMITS.md) |
 | 2 | Any new claim → update LIMITS first, then copy |
-| 3 | Check **§10 Proof gates** before “calibrated”, “every host”, “dual-use solved”, “v1.0” |
+| 3 | Check **§10 Proof gates** before “calibrated”, “every host”, “dual-use solved”, “production-ready” |
 | 4 | Prefer deleting a claim over soft-pedaling with vague adjectives |
 
 ### Context-lost / wrong workspace
@@ -407,8 +414,8 @@ Horizons remain ambitious; each phase is a **checklist of work orders**, not vag
 |---------|----------|-------|
 | **Now** | v0.1 | Shipped local curiosity layer + plugins |
 | **Near** | **v0.2** | Harden, embeddings optional, provider proof, PyPI |
-| **Mid** | **v0.3 → v1.0** | Eval, multi-lit, safety, credible trust bar |
-| **Long** | **v1.x → v2+** | Flywheel, packs, enterprise (**local-v1 shipped**; multi-tenant/SLOs remain §10), ecosystem |
+| **Mid** | **v0.3 → v1.0** | ✅ Eval, multi-lit, safety, §7.4 credible trust bar — this cut is **1.0.0** |
+| **Long** | **v1.x → v2+** | v1.1: calibration proof + production HTTP; packs/enterprise local-v1 shipped; multi-tenant/SLOs remain §10 |
 | **Moonshots** | research tracks | Speculative — not default backlog |
 
 ```mermaid
@@ -475,7 +482,7 @@ flowchart LR
 Agent checklist before anyone says “v1.0”:
 
 - [x] Stable `/v1/...` API + semver changelog (version `0.3.0`; changelog via git / ROADMAP)  
-- [x] PyPI install without clone (`pip install artificial-emotions`; **0.4.1** on PyPI)  
+- [x] PyPI install without clone (`pip install artificial-emotions`; last upload **0.4.1**; product **1.0.0** pending tag `v1.0.0`)  
 - [x] Eval harness + published **methodology** (no magic accuracy %)  
 - [x] Dual-use stronger than keywords **or** LIMITS explicit residual risk  
 - [x] Multi-literature **or** documented single-source limits  
@@ -487,7 +494,7 @@ Agent checklist before anyone says “v1.0”:
 
 Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding default-on.
 
-**This checklist being complete does not mean the product is v1.0.** Do not call v1.0 until **§10**. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP. Next PyPI upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)).
+**This cut is 1.0.0** because §7.4 is the trust bar and [`LIMITS.md`](LIMITS.md) is the contract. It does **not** mean calibrated scores, dual-use solved, or production HTTP (TLS/WAF/SLOs) — those remain §10 / v1.1. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP, not phenomenal feeling, VOI `not_evsi`, outcome loop dry-run only. Last PyPI upload is **0.4.1** until DocsGuard tags `v1.0.0`. Next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)).
 
 ### 7.5 v1.x → v2+ — agent-sized themes
 
@@ -496,7 +503,7 @@ Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding de
 | Data flywheel | Schema for ranked-Q → outcomes; multi-outcome; never citations-only |
 | Preference learning | Learn weights **within** a profile — never universal rank |
 | Domain packs | Versioned packs + `emotions pack check` against the CONTRIBUTING bar. Not a scientific review. |
-| Enterprise/API | **Local-v1 shipped** (0.4.1): opt-in keys, in-process rate limit, CORS deny, opt-in per-key quota (`CURIOSITY_API_QUOTA_*`), opt-in audit JSONL (`CURIOSITY_AUDIT_LOG`). Unset keeps offline/local DX. **Not** multi-tenant, SSO, TLS, WAF, or SLOs — those remain §10 “production-ready enterprise.” |
+| Enterprise/API | **Local-v1 shipped** (1.0.0): opt-in keys, in-process rate limit, CORS deny, opt-in per-key quota (`CURIOSITY_API_QUOTA_*`), opt-in audit JSONL (`CURIOSITY_AUDIT_LOG`). Unset keeps offline/local DX. **Not** multi-tenant, SSO, TLS, WAF, or SLOs — those remain §10 “production-ready enterprise” / **v1.1-http**. |
 | Agent ecosystems | Copy-paste LangGraph recipe in [`PLUGINS.md`](PLUGINS.md) via `GET /v1/agent/tools`. `langgraph` is not a package extra. Further hosts still need their own recipe + smoke note. |
 | Interop | **File export shipped** (`emotions export unknowns`, `POST /v1/export/unknowns`). Arbitrary webhook URLs are **not** accepted (SSRF). |
 | v2 bar | Calibration reports; profile sharing; Curiosity Layer API for AI Scientists; production threat model + SLOs (local-v1 threat model already ships) |
@@ -516,7 +523,7 @@ Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding de
 | Affect / epistemic-emotion track | Research-only CME notes → optional incongruity UX cues / provoke elicitation eval; never claim the engine “feels” ([LIMITS.md](LIMITS.md)) |
 | Epistemic emotion elicitation | Near moonshot / research wedge: measure whether incongruity-framed injects raise investigation quality (human or agent A/B + optional EES); ship only annotation-level cues (`epistemic_cues.py`), not OCC/PAD engines |
 
-**Stubs shipped; moonshots remain moonshots.** v0.4.1 ships fail-closed VOI honesty fields (additive on existing `POST /v1/voi/worksheet`), a CLI-only outcome dry-run, and a small elicit/dual-use fixture expansion. v1 does **not** claim VOI, EVSI, or a lab closed-loop. Dual-use residual stays residual.
+**Stubs shipped; moonshots remain moonshots.** v1.0.0 ships fail-closed VOI honesty fields (additive on existing `POST /v1/voi/worksheet`), a CLI-only outcome dry-run, and a small elicit/dual-use fixture expansion. v1 does **not** claim VOI, EVSI, or a lab closed-loop. Dual-use residual stays residual.
 
 Only pick these if the user explicitly asks or P1–P2 are clear.
 
@@ -585,16 +592,17 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | “Ranks by value to humanity” | Explicit ValueProfile on every surface; no “neutral” marketing |
 | “Works with any LLM” | Provider matrix notes ≥3 endpoints; offline path documented |
 | “MCP plugin for Cursor/Claude/…” | Recipe in PLUGINS.md + smoke per named host |
-| “Calibrated curiosity scores” | Longitudinal dataset + methodology + multi-outcome analysis |
-| “Safe against dual-use” | Classifier eval + review path; LIMITS residual risk |
+| “Calibrated curiosity scores” | Longitudinal dataset + methodology + multi-outcome analysis. W-cal scaffolding is **not** this claim. |
+| “Safe against dual-use” | Classifier eval + review path; LIMITS residual risk. Heuristic + fixtures are **not** dual-use solved. |
 | “Better than idea generators” | Comparative protocol vs baselines (human raters) |
-| “Production-ready enterprise” | Auth, quotas, audit, threat model, SLOs |
+| “Production-ready enterprise” | TLS, WAF, shared rate limits, multi-tenant isolation, SLOs. Local-v1 (opt-in keys, in-process quota/audit, threat model) is **not** this claim. |
 | “Semantic diversity” | Embedding path tested; default vs optional labeled |
 | “Literature-grounded” | Show `gap.related_works` + status; no full-text claim if abstracts-only |
-| “PyPI one-liner install” | Public package version matching git tag |
+| “PyPI one-liner install” | Public package version matching git tag (last upload **0.4.1**; **1.0.0** pending `v1.0.0`) |
 | “VOI / computed EVSI” | External PSA + utilities + ConVOI/ISPOR; worksheet `evsi: null` / `honesty: not_evsi` is **not** EVSI |
 | “Lab closed-loop” | Experiment execution that re-ranks from real results; `emotions loop --outcomes` is a dry-run stub |
-| “v1.0” | §7.4 **and** honesty bar in [`LIMITS.md`](LIMITS.md): heuristic scores, phrase-level gaps, dual-use residual, local HTTP. PyPI install is **not** sufficient. |
+| “The system feels / phenomenal affect” | Never. Cues are `annotation_only`; mixes are `computational_affect` / `felt_simulation`. `mcp_lint` forbids “feels curiosity” and “the ai is curious”; affect-copy tests reject experiential first-person. |
+| “v1.0.0 / credible public curiosity layer” | Met this cut: §7.4 + [`LIMITS.md`](LIMITS.md) as the contract. Does **not** license “calibrated,” “dual-use solved,” or “production-ready enterprise” — those remain the rows above. Last PyPI upload **0.4.1** until tag `v1.0.0`. |
 
 **When in doubt: update LIMITS first, market second.**
 
@@ -608,7 +616,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | **M1** | 0.2.x | Embeddings optional; PyPI or documented block; multi-provider notes; UX honesty | Install; provider smoke |
 | **M2** | 0.3.x | Expert protocol + fixtures; 2nd lit optional | Spot-check fail rate tracked |
 | **M3** | 0.4–0.5 | Dual-use uplift *or* LIMITS cap; multi-judge | Risk FN sample audit |
-| **M4** | 1.0.0 | Semver API; eval methodology; invariants everywhere; LIMITS honesty bar (not PyPI-as-gate) | Honesty / proof gates |
+| **M4** | 1.0.0 | **This cut.** Semver `/v1` freeze (additive only); eval methodology; invariants everywhere; LIMITS as contract (not calibrated / not production HTTP / not dual-use solved) | Honesty / LIMITS |
 | **M5** | 1.x | Opt-in longitudinal schema + first calibration notebook | Multi-outcome curves |
 | **M6** | 2.0 | Profile sharing + AI-Scientist upstream examples | External integrations |
 

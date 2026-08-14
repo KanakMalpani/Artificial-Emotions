@@ -21,7 +21,7 @@ from artificial_emotions.models import (
 from artificial_emotions.pipeline import CuriosityEngine
 from artificial_emotions.provoke import provoke
 
-__version__ = "0.4.1"
+__version__ = "1.0.0"
 
 __all__ = [
     "CuriosityConfig",

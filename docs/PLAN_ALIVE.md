@@ -1,7 +1,7 @@
 # Plan: frontend, imagination, and feeling alive
 
 **Status:** historical stub. Alive shipped in `[0.4.0]` (continuity + quarantined
-imagination). Current package is **0.4.1**. Do **not** implement the old
+imagination). Current product is **1.0.0** (last PyPI upload **0.4.1**). Do **not** implement the old
 three-track plan that used to live in this file.
 
 **Track C / frontend:** `web/` was **removed**. Continuity visual proof is

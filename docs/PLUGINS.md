@@ -286,7 +286,7 @@ LangGraph (or any `bind_tools` graph) can pass the same `tools` array — [§4](
 
 ## 4. LangGraph (host-side, optional)
 
-`langgraph` is **not** a runtime dependency of `artificial-emotions` (v0.4.1). Install it only in the agent project that will call this stack. This recipe is documentation, not a CI-tested extra.
+`langgraph` is **not** a runtime dependency of `artificial-emotions` (v1.0.0). Install it only in the agent project that will call this stack. This recipe is documentation, not a CI-tested extra.
 
 Load live OpenAI-compatible schemas from `GET /v1/agent/tools` and execute calls via that payload’s `http_fallbacks` against local `emotions serve`. Do not add webhook URLs. Rankings stay **decision aids** under an explicit `ValueProfile` — the graph does not answer the unknowns and does not feel.
 

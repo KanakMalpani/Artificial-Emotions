@@ -9,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
+from artificial_emotions import __version__
 from artificial_emotions.agent_tools import dispatch_tool, mcp_tool_list
 from artificial_emotions.api import app
 from artificial_emotions.api_pkg.schemas import ExportUnknownsRequest, RunRequest
@@ -52,7 +53,7 @@ def test_export_unknowns_reuses_pipeline_output_without_rerank():
     )
     assert doc["format"] == FORMAT_ID
     assert doc["format_version"] == 1
-    assert doc["package_version"] == "0.4.1"
+    assert doc["package_version"] == __version__
     assert doc["webhooks"] is False
     assert doc["changes_ranks"] is False
     assert doc["delivery"] == "stdout"

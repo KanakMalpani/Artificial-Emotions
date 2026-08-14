@@ -1,10 +1,12 @@
 # Changelog
 
-## Unreleased — catalog-driven affect (2026-08-13)
+## [1.0.0] — 2026-08-15
 
-Catalog `when` / `effects` is the appraisal contract. Every named emotion has
-a condition. This is on `main` at package **0.4.1** — there is **no 0.4.2 tag**
-yet, and this block is not a version bump.
+1.0.0 is a curiosity layer that ranks unknowns as **decision aids** under an
+explicit `ValueProfile`. Scores are **not calibrated**. Dual-use classification
+is heuristic and **residual**. HTTP (`emotions serve`) is a **local** soft
+guard, not a production SLO. This release does not claim EVSI, a lab
+closed-loop, phenomenal feeling, production HTTP, or dual-use solved.
 
 ### Added
 - **Ranked-unknowns export.** `emotions export unknowns --json` (optional `--out FILE`,
@@ -12,7 +14,7 @@ yet, and this block is not a version bump.
   output as a JSON document. File / HTTP body is the v1 path. Arbitrary webhook
   URLs are **not** accepted (SSRF). Does not re-rank. MCP `export_unknowns`
   takes inline questions only.
-- **Local HTTP threat model.** `docs/THREAT_MODEL.md` names the v0.4.1
+- **Local HTTP threat model.** `docs/THREAT_MODEL.md` names the local
   `emotions serve` posture (in-process rate limit, CORS deny-by-default,
   auth opt-in, opt-in per-key quota, opt-in audit JSONL). Not a production
   SLO. ROADMAP §7.5 enterprise = this local-v1, not multi-tenant.
@@ -67,9 +69,10 @@ yet, and this block is not a version bump.
 - **Explore honors `drop_dual_use` / `forbid_similar_jump`.** Disgust may omit
   `dual_use_high` items; anger `--somatic-modulate` skips similar-domain jumps.
   Classifier remains heuristic — not dual-use solved (LIMITS).
-- **The catalog is the contract.** All **54** emotion rows carry a non-empty
-  `when` (or `requires: outcome_event` plus a firing fixture) and a use. Coverage
-  floor is `MIN_CATALOG_SHARE = 1.0`.
+- **Catalog-only appraisal dispatch.** `appraise_run` evaluates catalog `when`
+  / `use_for` only. The former `RULES` golden is **deleted**. All **54** emotion
+  rows carry a non-empty `when` (or `requires: outcome_event` plus a firing
+  fixture) and a use. Coverage floor is `MIN_CATALOG_SHARE = 1.0`.
 - **Somatic search knobs stay opt-in** via `--somatic-modulate`
   (`CuriosityConfig.somatic_modulate`). High-coercion ids still appraise and
   surface when the flag is off. They never raise the risk ceiling.
@@ -78,7 +81,6 @@ yet, and this block is not a version bump.
   triumph-from-rank.
 
 ### Honesty
-- No 0.4.2 release. Do not treat this Unreleased section as shipped-under-a-tag.
 - §7.6 stubs shipped; moonshots remain moonshots. v1 does not claim VOI, EVSI,
   or a lab closed-loop. Dual-use residual stays residual.
 

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from artificial_emotions import __version__
 from artificial_emotions.cli import build_parser, main
 from artificial_emotions.outcome_loop import (
     default_outcome_loop_fixture,
@@ -37,7 +38,7 @@ def test_dry_run_fixture_reranks_and_suggests_continue():
     payload = dry_run_outcome_loop(default_outcome_loop_fixture())
     assert payload["mode"] == "dry_run"
     assert payload["report"] == "outcome_loop_dry_run"
-    assert payload["package_version"] == "0.4.1"
+    assert payload["package_version"] == __version__
     assert payload["ok"] is True
     assert payload["reason"] == "ok"
     assert payload["experiments_run"] == 0

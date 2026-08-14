@@ -410,7 +410,7 @@ def test_observation_only_emotions_really_do_not_act():
 # Ratchet floors. These sit just under what the code currently achieves, so
 # ordinary churn does not trip them but a real regression toward the old
 # "13 derivable, 4 firing" state does. Raise them as coverage grows; never lower.
-MIN_RULES = 40
+MIN_CATALOG_WHEN = 40
 MIN_CATALOG_SHARE = 1.0
 MIN_ACTING = 20
 MIN_FIRING_OFFLINE = 18
@@ -479,7 +479,7 @@ _FIVE_EPISTEMIC = ("doubt", "conviction", "trust", "awe", "sublimity")
 def test_a_meaningful_share_of_the_catalog_is_reachable():
     """The original failure was 13/54 derivable. Every id now has a condition."""
     when_ids = _when_ids()
-    assert len(when_ids) >= MIN_RULES, f"only {len(when_ids)} catalog ids with when"
+    assert len(when_ids) >= MIN_CATALOG_WHEN, f"only {len(when_ids)} catalog ids with when"
     conditioned = _conditioned_ids()
     share = len(conditioned) / len(CATALOG_IDS)
     assert share >= MIN_CATALOG_SHARE, f"only {share:.0%} of the catalog has a condition"

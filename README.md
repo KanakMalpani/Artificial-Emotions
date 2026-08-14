@@ -7,7 +7,8 @@
 *A curiosity engine that ranks what we don't yet know — then decomposes it into something you can actually go and test.*
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-1039%20passing-brightgreen.svg)](tests/)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](docs/ROADMAP.md)
+[![Tests](https://img.shields.io/badge/tests-1112%20passing-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -709,13 +710,13 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 1039 passed, 1 skipped · 87% · floor enforced
+pytest -q --cov --cov-report=term-missing     # 1112 passed, 1 skipped · 87% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 
 CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** — then builds the wheel, installs it into a clean environment, and exercises the data files and console scripts from *outside* the checkout. A package that only works inside its own source tree is a broken package.
 
-Install: `pip install artificial-emotions` (or editable `pip install -e ".[dev]"` from a clone).
+Install from a clone for **1.0.0** on `main` (tag `v1.0.0` pending). Last PyPI upload is **0.4.1**: `pip install artificial-emotions` (or editable `pip install -e ".[dev]"` from a clone).
 
 ---
 
@@ -730,7 +731,7 @@ Install: `pip install artificial-emotions` (or editable `pip install -e ".[dev]"
 | [**docs/PLAN_ALIVE.md**](docs/PLAN_ALIVE.md) | Historical stub — Alive shipped in 0.4.0; not an active plan |
 | [**docs/PLUGINS.md**](docs/PLUGINS.md) | Host-by-host MCP setup |
 | [**docs/PROOFS.md**](docs/PROOFS.md) | Reproducible behaviour demos |
-| [**CHANGELOG.md**](CHANGELOG.md) | `[0.4.1]` release notes |
+| [**CHANGELOG.md**](CHANGELOG.md) | `[1.0.0]` release notes |
 | [**examples/**](examples/README.md) | Payloads, protocols, tool schemas |
 
 ---

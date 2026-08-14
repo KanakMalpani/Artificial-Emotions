@@ -116,7 +116,7 @@ Do not add a “neutral” or value-free profile. New presets must name stakehol
 
 ## Publishing (maintainers)
 
-The package **is** on PyPI as `artificial-emotions` (currently 0.4.1). Releases remain owner-gated. See [`docs/PUBLISHING.md`](docs/PUBLISHING.md). Do not put tokens in the repo.
+The package **is** on PyPI as `artificial-emotions` (last upload **0.4.1**; product on `main` is **1.0.0** pending tag `v1.0.0`). Releases remain owner-gated. See [`docs/PUBLISHING.md`](docs/PUBLISHING.md). Do not put tokens in the repo.
 
 ## Docs / copy hygiene
 

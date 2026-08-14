@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "artificial-emotions"
-version = "0.4.1"
+version = "1.0.0"
 description = "Computational affect + a curiosity layer for AI: mix emotions, rank valuable unanswered questions, and decompose them into investigable steps"
 readme = "README.md"
 requires-python = ">=3.11"

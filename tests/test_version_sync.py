@@ -18,7 +18,7 @@ default must match ``__version__``.
 
 Mutation proof (2026-08-02): temporarily set LIMITS.md to ``v9.9.9``,
 ran ``pytest tests/test_version_sync.py::test_six_version_copies_agree -q``,
-watched it FAIL (``LIMITS.md: 9.9.9`` vs ``0.4.1`` elsewhere), then restored.
+watched it FAIL (``LIMITS.md: 9.9.9`` vs ``1.0.0`` elsewhere), then restored.
 ``test_version_guard_fails_on_intentional_mismatch`` re-enacts that failure
 mode without dirtying the tree.
 
