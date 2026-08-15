@@ -14,7 +14,7 @@ Product documentation for **Artificial Emotions** (v1.0.0 — Alive). Start at t
 | [PLAN_ALIVE.md](PLAN_ALIVE.md) | Historical stub — Alive shipped in `[0.4.0]`; not an active plan |
 | [ROADMAP.md](ROADMAP.md) | Agent playbook + roadmap — stuck? start §0→§3→§2 |
 | [ROADMAP_SUMMARY.md](ROADMAP_SUMMARY.md) | 1-page summary + top wedges |
-| [PUBLISHING.md](PUBLISHING.md) | Maintainer PyPI notes — last upload `artificial-emotions` 0.4.1; product 1.0.0 pending tag |
+| [PUBLISHING.md](PUBLISHING.md) | Maintainer PyPI notes — last upload `artificial-emotions` 1.0.0 (tag v1.0.0) |
 
 **Examples:** [`../examples/README.md`](../examples/README.md) · **Contributing:** [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
 

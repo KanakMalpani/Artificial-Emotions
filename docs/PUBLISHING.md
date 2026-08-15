@@ -1,6 +1,6 @@
 # Publishing to PyPI
 
-Package name: **`artificial-emotions`** · Product version today: **`1.0.0`** (pending tag `v1.0.0`). Last PyPI upload: **`0.4.1`**. `pyproject.toml` / `__version__` must match before the tag.
+Package name: **`artificial-emotions`** · Product version today: **`1.0.0`**. Last PyPI upload: **`1.0.0`** (tag `v1.0.0`). `pyproject.toml` / `__version__` must match before the tag.
 
 **Status:** published at [pypi.org/project/artificial-emotions](https://pypi.org/project/artificial-emotions/). Install with `pip install artificial-emotions`.
 
@@ -16,7 +16,7 @@ Once configured, GitHub Actions can publish without a long-lived API token.
    - Workflow: `publish.yml`
    - Environment: leave blank (or match a GitHub Environment if you add one later)
 2. In `.github/workflows/publish.yml`, enable OIDC by setting job `permissions.id-token: write` and remove the `password:` input from `pypa/gh-action-pypi-publish` (or keep token as fallback only while migrating).
-3. Create a GitHub Release / tag `v*` matching `pyproject.toml` (e.g. pending `v1.0.0`; last published tag `v0.4.1`).
+3. Create a GitHub Release / tag `v*` matching `pyproject.toml` (e.g. last published tag `v1.0.0`).
 
 ## Current path: API token (repository secret)
 
@@ -31,7 +31,7 @@ The publish workflow uploads with `secrets.PYPI_API_TOKEN` via [pypa/gh-action-p
 | Event | Behavior |
 |-------|----------|
 | GitHub Release published | Build + upload to PyPI |
-| Push tag `v*` (e.g. `v1.0.0`; last published `v0.4.1`) | Build + upload to PyPI |
+| Push tag `v*` (e.g. last published `v1.0.0`) | Build + upload to PyPI |
 | `workflow_dispatch` with dry-run | Build only |
 | `workflow_dispatch` with dry-run off | Build + upload |
 | Pull request (packaging paths) | Build only (no upload) |
@@ -52,7 +52,7 @@ If `https://pypi.org/project/artificial-emotions/` does not exist yet, the first
 ## Checklist before tagging
 
 - [ ] `version` in `pyproject.toml` and `__version__` in `src/artificial_emotions/__init__.py` match
-- [ ] Tag is `v` + that version (e.g. pending `v1.0.0`; last published `v0.4.1`)
+- [ ] Tag is `v` + that version (e.g. last published `v1.0.0`)
 - [ ] `pytest -q` green
 - [ ] `docs/LIMITS.md` / ROADMAP updated only after a successful publish
 

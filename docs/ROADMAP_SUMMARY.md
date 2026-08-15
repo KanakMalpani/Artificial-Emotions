@@ -1,6 +1,6 @@
 # Artificial Emotions — Roadmap Summary
 
-**Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `1.0.0` (last PyPI upload `0.4.1`; tag `v1.0.0` pending)
+**Full playbook:** [`ROADMAP.md`](ROADMAP.md) · **Honesty:** [`LIMITS.md`](LIMITS.md) · **Version today:** `1.0.0` (last PyPI upload `1.0.0`; tag `v1.0.0`)
 
 > Agents: when stuck, open the full roadmap **§0 → §3 → §2**. This page is the executive skim only.
 
@@ -22,7 +22,7 @@ This cut is **1.0.0** because roadmap **§7.4** is the trust bar and LIMITS is t
 
 Shipped leftovers (do not re-implement): ✅ **W-explore**, ✅ **W-rules**, ✅ **W-cal** scaffolding.
 
-P1 W1–W9 and P2 W10–W15 are ✅, including last PyPI upload (`artificial-emotions` **0.4.1**). Product on `main` is **1.0.0** pending tag. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP. Full queue: roadmap **§2**.
+P1 W1–W9 and P2 W10–W15 are ✅, including last PyPI upload (`artificial-emotions` **1.0.0**, tag `v1.0.0`). LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP. Full queue: roadmap **§2**.
 
 ## Agent ops (one-liners)
 
@@ -40,7 +40,7 @@ P1 W1–W9 and P2 W10–W15 are ✅, including last PyPI upload (`artificial-emo
 | Horizon | Versions | Intent |
 |---------|----------|--------|
 | **Near** | v0.2 | ✅ Embeddings optional, multi-provider notes, presets, UX honesty, packaging prep |
-| **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge + §7.4 trust bar — this cut is **1.0.0** (last PyPI upload 0.4.1) |
+| **Mid** | v0.3→v1.0 | ✅ Eval + multi-lit + dual-use + multi-judge + §7.4 trust bar — this cut is **1.0.0** (last PyPI upload 1.0.0) |
 | **Long** | v1.x→v2+ | **v1.1:** calibration proof + production HTTP; flywheel scaffolding shipped; enterprise local-v1 shipped (multi-tenant/SLOs remain §10) |
 | **Moonshots** | — | Approximate VOI honesty stub (`evsi: null` / `not_evsi`); lab closed-loop dry-run stub (`emotions loop --outcomes`; not experiment execution); surprise search and elicitation remain research — not default backlog |
 

@@ -83,7 +83,7 @@ Honest bounds for **v1.0.0** — do not overclaim.
 - Failure-mode suite: `tests/test_failure_modes.py` encodes F1–F15 from `docs/LIMITS.md` / failure-mode tests
 - Explicit ValueProfile on provoke/inject (F11); recency-aware likely-answered gate (F12)
 - Download-and-run: `pip install -e .` then `emotions serve` **or** `emotions-mcp` — no vendor lock-in for LLM hosts
-- Packaging: last PyPI upload is `artificial-emotions` **0.4.1** (`pip install artificial-emotions`); product on `main` is **1.0.0** pending tag `v1.0.0`; editable install still fine for contributors (see `docs/PUBLISHING.md`)
+- Packaging: last PyPI upload is `artificial-emotions` **1.0.0** (`pip install artificial-emotions`); tag `v1.0.0`; editable install still fine for contributors (see `docs/PUBLISHING.md`)
 - Alive continuity + imagination: CLI memory defaults, scars/costs/temperament/avoidance as biases, quarantined imagination, corpus-gated transfer (~5× lift), explicit dream reanalysis — see sections below and `CHANGELOG` `[0.4.0]` (serve/memory integrity hardening in `[0.4.1]`)
 
 ## Known limits

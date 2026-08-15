@@ -1,7 +1,7 @@
 # Artificial Emotions — Agent Playbook & Roadmap
 
 **Status:** Living operational plan (not a commitment ledger)  
-**Product version today:** `1.0.0` (last PyPI upload `0.4.1`; tag `v1.0.0` pending)  
+**Product version today:** `1.0.0` (last PyPI upload `1.0.0`; tag `v1.0.0`)  
 **Repo root:** this clone (relative paths below)  
 **Public repo:** https://github.com/KanakMalpani/Artificial-Emotions  
 **Companion:** [`ROADMAP_SUMMARY.md`](ROADMAP_SUMMARY.md) (1-page)  
@@ -80,7 +80,7 @@
 
 ## 1. Current truth — do not rebuild the pipeline
 
-Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is listed here, improve it or extend it — do not recreate from scratch.** Product version today is **1.0.0**, not v0.1. Last PyPI upload is **0.4.1** until DocsGuard tags `v1.0.0`.
+Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is listed here, improve it or extend it — do not recreate from scratch.** Product version today is **1.0.0**, not v0.1. Last PyPI upload is **1.0.0** (tag `v1.0.0`).
 
 ### Verified working (as of 2026-07-23)
 
@@ -126,7 +126,7 @@ ValueProfile + Domain/Topic
 | Dual-use residual risk | Weighted heuristic + review flag shipped (W14); not a trained oracle | Keep hard reject; LIMITS residual |
 | LLM paths often untested live | Smoke with mocked + optional live matrix; no secrets in repo |
 | MCP tools-only | Resources/prompts later if hosts need them |
-| PyPI | Last upload is `artificial-emotions` **0.4.1**; product on `main` is **1.0.0** pending tag `v1.0.0`. Next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) |
+| PyPI | Last upload is `artificial-emotions` **1.0.0** (tag `v1.0.0`). Next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) |
 | Public GitHub may lag local | Never force-push; never commit secrets |
 
 **Why this design?** Prefer LIMITS + DESIGN + this playbook.
@@ -157,7 +157,7 @@ When idle: stay on **P0** (honesty loop). Next product work is **v1.1** (calibra
 | **W5** | Expand F7 phrase-gaming + F13 paraphrase adversarial tests | `tests/test_failure_modes.py`, maybe `verify.py` / `diversity.py` | New cases fail-then-pass intentionally | ✅ Suite still encodes F1–F15 | F7, F13 |
 | **W6** | ~~Web: briefs primary~~ (`web/` **removed**) | — | Historical wedge; SPA deleted | ✅ Was shipped; surface retired | F8, F11 |
 | **W7** | MCP host recipes (Claude Code, VS Code Copilot, Continue, Windsurf) | `docs/PLUGINS.md` | Copy-paste recipe + `--list-tools` smoke note per host | ✅ PLUGINS lists host; no “works everywhere” without smoke | plugins |
-| **W8** | PyPI packaging (owner publishes) | `pyproject.toml`, CI if present | Build/sdist works locally | ✅ Last PyPI upload `artificial-emotions` **0.4.1**; product on `main` is **1.0.0** pending tag; next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) | dist |
+| **W8** | PyPI packaging (owner publishes) | `pyproject.toml`, CI if present | Build/sdist works locally | ✅ Last PyPI upload `artificial-emotions` **1.0.0** (tag `v1.0.0`); next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)) | dist |
 | **W9** | Seed contribution guide + domain pack format | `CONTRIBUTING.md`, `seeds.py` | Contributor can add a seed without breaking schema | ✅ Quality bar: operationalization + one primary unknown | F2, F9 |
 
 ### P2 — Credible mid-term (v0.3 → v1.0) — all ✅
@@ -482,7 +482,7 @@ flowchart LR
 Agent checklist before anyone says “v1.0”:
 
 - [x] Stable `/v1/...` API + semver changelog (version `0.3.0`; changelog via git / ROADMAP)  
-- [x] PyPI install without clone (`pip install artificial-emotions`; last upload **0.4.1**; product **1.0.0** pending tag `v1.0.0`)  
+- [x] PyPI install without clone (`pip install artificial-emotions`; last upload **1.0.0**; tag `v1.0.0`)  
 - [x] Eval harness + published **methodology** (no magic accuracy %)  
 - [x] Dual-use stronger than keywords **or** LIMITS explicit residual risk  
 - [x] Multi-literature **or** documented single-source limits  
@@ -494,7 +494,7 @@ Agent checklist before anyone says “v1.0”:
 
 Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding default-on.
 
-**This cut is 1.0.0** because §7.4 is the trust bar and [`LIMITS.md`](LIMITS.md) is the contract. It does **not** mean calibrated scores, dual-use solved, or production HTTP (TLS/WAF/SLOs) — those remain §10 / v1.1. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP, not phenomenal feeling, VOI `not_evsi`, outcome loop dry-run only. Last PyPI upload is **0.4.1** until DocsGuard tags `v1.0.0`. Next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)).
+**This cut is 1.0.0** because §7.4 is the trust bar and [`LIMITS.md`](LIMITS.md) is the contract. It does **not** mean calibrated scores, dual-use solved, or production HTTP (TLS/WAF/SLOs) — those remain §10 / v1.1. LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP, not phenomenal feeling, VOI `not_evsi`, outcome loop dry-run only. Last PyPI upload is **1.0.0** (tag `v1.0.0`). Next upload still needs Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)).
 
 ### 7.5 v1.x → v2+ — agent-sized themes
 
@@ -598,11 +598,11 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | “Production-ready enterprise” | TLS, WAF, shared rate limits, multi-tenant isolation, SLOs. Local-v1 (opt-in keys, in-process quota/audit, threat model) is **not** this claim. |
 | “Semantic diversity” | Embedding path tested; default vs optional labeled |
 | “Literature-grounded” | Show `gap.related_works` + status; no full-text claim if abstracts-only |
-| “PyPI one-liner install” | Public package version matching git tag (last upload **0.4.1**; **1.0.0** pending `v1.0.0`) |
+| “PyPI one-liner install” | Public package version matching git tag (last upload **1.0.0**; tag `v1.0.0`) |
 | “VOI / computed EVSI” | External PSA + utilities + ConVOI/ISPOR; worksheet `evsi: null` / `honesty: not_evsi` is **not** EVSI |
 | “Lab closed-loop” | Experiment execution that re-ranks from real results; `emotions loop --outcomes` is a dry-run stub |
 | “The system feels / phenomenal affect” | Never. Cues are `annotation_only`; mixes are `computational_affect` / `felt_simulation`. `mcp_lint` forbids “feels curiosity” and “the ai is curious”; affect-copy tests reject experiential first-person. |
-| “v1.0.0 / credible public curiosity layer” | Met this cut: §7.4 + [`LIMITS.md`](LIMITS.md) as the contract. Does **not** license “calibrated,” “dual-use solved,” or “production-ready enterprise” — those remain the rows above. Last PyPI upload **0.4.1** until tag `v1.0.0`. |
+| “v1.0.0 / credible public curiosity layer” | Met this cut: §7.4 + [`LIMITS.md`](LIMITS.md) as the contract. Does **not** license “calibrated,” “dual-use solved,” or “production-ready enterprise” — those remain the rows above. Last PyPI upload **1.0.0** (tag `v1.0.0`). |
 
 **When in doubt: update LIMITS first, market second.**
 

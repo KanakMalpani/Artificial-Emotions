@@ -716,7 +716,7 @@ ruff check src tests && ruff format --check src tests
 
 CI runs lint, tests, and the coverage gate on **Python 3.11, 3.12 and 3.13** — then builds the wheel, installs it into a clean environment, and exercises the data files and console scripts from *outside* the checkout. A package that only works inside its own source tree is a broken package.
 
-Install from a clone for **1.0.0** on `main` (tag `v1.0.0` pending). Last PyPI upload is **0.4.1**: `pip install artificial-emotions` (or editable `pip install -e ".[dev]"` from a clone).
+Last PyPI upload is **1.0.0** (tag `v1.0.0`): `pip install artificial-emotions` (or editable `pip install -e ".[dev]"` from a clone).
 
 ---
 
