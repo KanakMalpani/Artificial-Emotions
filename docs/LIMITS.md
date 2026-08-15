@@ -76,7 +76,7 @@ Honest bounds for **v1.0.0** — do not overclaim.
 - Ranked-unknowns export (`emotions export unknowns` / `POST /v1/export/unknowns` / MCP `export_unknowns`): JSON document of an already-ranked set (or CLI runs the pipeline). File / HTTP body is the v1 path. Arbitrary webhook URLs are **not** accepted (SSRF). Does not re-rank. HTTP does **not** write files (`out_path` rejected).
 - Outcome-loop dry-run (`emotions loop --outcomes PATH`): preference JSONL `event_type=outcome` → suggested re-rank + next explore step. Does **not** run experiments, does **not** call `explore`. Not a lab closed-loop. CLI only (path; no HTTP path injection)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1113 passed, 1 skipped)
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1114 passed)
 - Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions pack check`, `emotions export unknowns --no-literature --json`, `emotions loop --outcomes evals/fixtures/outcome_loop_smoke_v1.jsonl --json`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy

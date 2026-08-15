@@ -17,7 +17,6 @@ from dataclasses import replace
 from types import SimpleNamespace
 
 import pytest
-from tests.test_appraisal_coverage import _OFFLINE_EXPLORE_DOMAINS, FIRING_CONTEXTS
 
 from artificial_emotions.appraisal import (
     AppraisalContext,
@@ -28,6 +27,7 @@ from artificial_emotions.appraisal import (
 from artificial_emotions.emotions import emotion_catalog
 from artificial_emotions.models import CuriosityConfig
 from artificial_emotions.pipeline import CuriosityEngine
+from tests.test_appraisal_coverage import _OFFLINE_EXPLORE_DOMAINS, FIRING_CONTEXTS
 
 _MIN_SIGNAL = 0.04
 _TWELVE_LEFTOVERS = frozenset(
