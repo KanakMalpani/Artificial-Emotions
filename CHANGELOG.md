@@ -2,12 +2,19 @@
 
 ## [Unreleased]
 
+### Added
+- Calibration coverage counts on `emotions eval calibration`: unique
+  questions, repeat-outcome ids, distinct result labels, score-then-outcome
+  pairing. Counts and magnitudes only — **not** accuracy, ECE, Brier, or a
+  `proof_ready` latch. Bundled smoke JSONL still has zero repeat-outcome ids.
+  §10 proof remains unmet (no real longitudinal impact dataset).
+
 ### Changed
 - Honesty lockstep: advertised pytest counts, coverage snapshot, and hard
   non-claims stay aligned across LIMITS, PROOFS, ROADMAP §2, and README.
-  No product-behavior change. Calibration proof and production HTTP remain
-  **v1.1** and are not started. Scores still **not calibrated**. HTTP still
-  local-v1 (not TLS/WAF/SLOs). Dual-use still residual.
+  Calibration **proof** (§10) and production HTTP remain **v1.1**. Scores
+  still **not calibrated**. HTTP still local-v1 (not TLS/WAF/SLOs). Dual-use
+  still residual.
 
 ## [1.0.0] — 2026-08-15
 

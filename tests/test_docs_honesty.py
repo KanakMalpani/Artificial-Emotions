@@ -51,7 +51,7 @@ def test_readme_and_limits_passing_counts_agree():
     assert badge_n == verify_n == limits_n, (
         f"README badge {badge_n} vs verify {verify_n} vs LIMITS {limits_n}"
     )
-    assert badge_n >= 1120, "advertised suite shrank without a LIMITS rationale"
+    assert badge_n >= 1121, "advertised suite shrank without a LIMITS rationale"
 
 
 def test_coverage_badge_matches_readme_body_and_floor():

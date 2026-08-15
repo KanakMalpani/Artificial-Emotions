@@ -95,8 +95,8 @@ emotions eval elicit --responses examples/elicit_ab_sample_responses_climate.jso
 emotions eval gap-status --json
 emotions eval report --json
 emotions eval calibration --json
-# Preference/outcome telemetry: counts, outcome mix, hint magnitudes.
-# Not calibrated. Not a calibration certificate. No accuracy %.
+# Preference/outcome telemetry: counts, outcome mix, hint magnitudes, coverage.
+# Not calibrated. Not a calibration certificate. No accuracy %. Coverage is not §10 proof.
 # Hand-label metrics: status_accuracy, related_but_unanswered_recall, false_answered_rate
 # Composite report: gap_f1 + elicit means + risk probes (not a vanity %)
 pytest tests/test_mid_horizon.py -q

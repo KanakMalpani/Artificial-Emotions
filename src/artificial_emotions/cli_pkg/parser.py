@@ -460,7 +460,10 @@ def build_parser() -> argparse.ArgumentParser:
     eval_p.add_argument(
         "--path",
         default=None,
-        help="Preference JSONL for eval calibration (counts / outcome mix / hint magnitudes)",
+        help=(
+            "Preference JSONL for eval calibration "
+            "(counts / outcome mix / hint magnitudes / coverage — not calibrated)"
+        ),
     )
     eval_p.add_argument(
         "--responses",

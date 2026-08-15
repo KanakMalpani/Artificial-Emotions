@@ -24,8 +24,16 @@ DEFAULT_CALIBRATION_FIXTURE = "evals/fixtures/preference_calibration_smoke_v1.js
 _CALIBRATION_HONESTY = (
     "Preference/outcome telemetry only — not calibrated scores, "
     "not a ranking certificate, and not a published accuracy figure. "
-    "Counts, outcome mix, and hint magnitudes are flywheel scaffolding; "
-    "they do not prove the ValueProfile is correct."
+    "Counts, outcome mix, hint magnitudes, and coverage (unique questions, "
+    "repeat-outcome ids) are flywheel scaffolding; they do not prove the "
+    "ValueProfile is correct. Coverage is not ROADMAP §10 proof."
+)
+
+_COVERAGE_NOTE = (
+    "Coverage counts only. Repeat outcomes on one question_id over time "
+    "and a real impact dataset are required for v1.1-cal / ROADMAP §10. "
+    "This object does not compute accuracy, ECE, or Brier, and does not "
+    "set a proof_ready flag."
 )
 
 _OUTCOME_HINT_PASSTHROUGH = (
@@ -97,6 +105,45 @@ def _outcome_mix(events: Iterable[Any]) -> dict[str, Any]:
     }
 
 
+def _has_score_axes(ev: Any) -> bool:
+    axes = getattr(ev, "score_axes", None) or {}
+    return isinstance(axes, dict) and bool(axes)
+
+
+def _coverage(events: Iterable[Any], outcomes: dict[str, Any]) -> dict[str, Any]:
+    """JSONL shape counts — not a calibration certificate and not proof_ready."""
+    qids: set[str] = set()
+    qids_with_score: set[str] = set()
+    qids_with_outcome: set[str] = set()
+    outcome_n_by_qid: dict[str, int] = {}
+    n_outcome_with_axes = 0
+    for ev in events:
+        qid = str(getattr(ev, "question_id", "") or "").strip()
+        et = str(getattr(ev, "event_type", "") or "").lower()
+        if qid:
+            qids.add(qid)
+        if et == "outcome":
+            if qid:
+                qids_with_outcome.add(qid)
+                outcome_n_by_qid[qid] = outcome_n_by_qid.get(qid, 0) + 1
+            if _has_score_axes(ev):
+                n_outcome_with_axes += 1
+        elif qid and _has_score_axes(ev):
+            qids_with_score.add(qid)
+
+    by_result = outcomes.get("by_result") if isinstance(outcomes.get("by_result"), dict) else {}
+    n_repeat = sum(1 for n in outcome_n_by_qid.values() if n >= 2)
+    return {
+        "n_unique_question_ids": len(qids),
+        "n_question_ids_with_outcome": len(qids_with_outcome),
+        "n_question_ids_with_repeat_outcome": n_repeat,
+        "n_distinct_result_labels": len(by_result),
+        "n_outcome_with_score_axes": n_outcome_with_axes,
+        "n_question_ids_with_score_and_outcome": len(qids_with_score & qids_with_outcome),
+        "note": _COVERAGE_NOTE,
+    }
+
+
 def default_calibration_fixture() -> Path:
     return find_data_file(DEFAULT_CALIBRATION_FIXTURE)
 
@@ -107,11 +154,12 @@ def build_calibration_report(
     profile_name: str | None = "humanity_default",
 ) -> dict[str, Any]:
     """
-    Offline preference JSONL → counts, outcome mix, hint magnitudes.
+    Offline preference JSONL → counts, outcome mix, hint magnitudes, coverage.
 
     Calls ``learn_profile_weight_hints`` for prefer/reject (and outcome events
     if that helper already consumes them). Does not change hint semantics,
-    does not apply weights, and never reports an accuracy percentage.
+    does not apply weights, never reports an accuracy percentage, and never
+    sets a ``proof_ready`` flag.
     """
     from artificial_emotions.preferences import learn_profile_weight_hints
 
@@ -145,6 +193,8 @@ def build_calibration_report(
 
     hints = learn_profile_weight_hints(evs, profile_name=profile_name)
     outcomes = _outcome_mix(evs)
+    magnitudes = _hint_magnitudes(hints)
+    coverage = _coverage(evs, outcomes)
 
     if missing:
         reason = "missing_preference_jsonl"
@@ -162,12 +212,14 @@ def build_calibration_report(
         "source": source,
         "counts_by_type": dict(sorted(counts.items())),
         "outcomes": outcomes,
-        "hint_magnitudes": _hint_magnitudes(hints),
+        "hint_magnitudes": magnitudes,
+        "coverage": coverage,
         "honesty": _CALIBRATION_HONESTY,
         "docs": "evals/METHODOLOGY.md",
         "methodology": (
             "Offline preference JSONL telemetry: event counts, outcome mix, "
-            "and weight-hint magnitudes. Not calibrated. No accuracy %."
+            "weight-hint magnitudes, and coverage counts. Not calibrated. "
+            "No accuracy %. Coverage is not §10 proof."
         ),
     }
 

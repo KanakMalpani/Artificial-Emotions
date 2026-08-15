@@ -248,7 +248,7 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 1. Add a domain pack JSON under `artificial_emotions/packs/` (see CONTRIBUTING), then `emotions pack check`.
 2. Swap / merge literature backends (`literature_backend=openalex|semantic_scholar|both`).
 3. Optional embedding diversity: `pip install '.[embeddings]'`.
-4. Preference JSONL → thin re-rank / outcome-event weight hints / eval calibration telemetry (scaffolding shipped; still not calibrated). Outcome-loop dry-run (`emotions loop --outcomes`) suggests next explore without running experiments.
+4. Preference JSONL → thin re-rank / outcome-event weight hints / eval calibration telemetry + coverage counts (scaffolding shipped; still not calibrated; coverage is not §10 proof). Outcome-loop dry-run (`emotions loop --outcomes`) suggests next explore without running experiments.
 5. Keep tool schemas in sync via `agent_tools.py` (MCP, OpenAI JSON, HTTP).
 
 See also: [DESIGN.md](DESIGN.md) · [LIMITS.md](LIMITS.md) · [PLUGINS.md](PLUGINS.md).

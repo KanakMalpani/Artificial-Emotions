@@ -34,6 +34,10 @@ _FORBIDDEN_METRIC_KEYS = frozenset(
         "status_accuracy",
         "ece",
         "brier",
+        "proof_ready",
+        "calibrated",
+        "is_calibrated",
+        "calibration_accuracy",
     }
 )
 
@@ -44,6 +48,7 @@ def _assert_no_accuracy_metrics(payload: dict) -> None:
     assert not overlap, f"calibration telemetry must not report {sorted(overlap)}"
     honesty = str(payload.get("honesty") or "").lower()
     assert "not calibrated" in honesty
+    assert payload.get("proof_ready") is not True
 
 
 def test_default_smoke_fixture_exists():
@@ -79,6 +84,15 @@ def test_calibration_report_counts_outcomes_and_hint_magnitudes():
         assert isinstance(hm["n_outcome"], int)
         assert hm["n_outcome"] >= 0
     assert payload["docs"] == "evals/METHODOLOGY.md"
+    cov = payload["coverage"]
+    assert cov["n_unique_question_ids"] == 3
+    assert cov["n_question_ids_with_outcome"] == 2
+    assert cov["n_question_ids_with_repeat_outcome"] == 0
+    assert cov["n_distinct_result_labels"] == 2
+    assert cov["n_outcome_with_score_axes"] == 2
+    assert cov["n_question_ids_with_score_and_outcome"] == 2
+    assert "proof_ready" not in cov
+    assert "not" in (cov.get("note") or "").lower()
 
 
 def test_calibration_report_missing_file(tmp_path: Path):
@@ -89,6 +103,10 @@ def test_calibration_report_missing_file(tmp_path: Path):
     assert payload["n_events"] == 0
     assert payload["outcomes"]["n_outcome"] == 0
     assert payload["hint_magnitudes"]["l1"] == 0.0
+    cov = payload["coverage"]
+    assert cov["n_unique_question_ids"] == 0
+    assert cov["n_question_ids_with_repeat_outcome"] == 0
+    assert "proof_ready" not in payload
 
 
 def test_calibration_report_empty_jsonl(tmp_path: Path):
@@ -271,6 +289,31 @@ def test_eval_calibration_cli_human_text(capsys):
     out = capsys.readouterr().out.lower()
     assert "not calibrated" in out
     assert "accuracy %" not in out
+    assert "repeat_outcome=" in out
+    assert "proof_ready" not in out
+
+
+def test_coverage_counts_repeat_outcomes_on_existing_loop_fixture():
+    """Reuse the outcome-loop smoke log — do not invent a longitudinal dataset."""
+    from artificial_emotions.outcome_loop import default_outcome_loop_fixture
+
+    payload = build_calibration_report(default_outcome_loop_fixture())
+    _assert_no_accuracy_metrics(payload)
+    cov = payload["coverage"]
+    assert cov["n_question_ids_with_repeat_outcome"] == 1
+    assert cov["n_question_ids_with_outcome"] == 3
+    assert cov["n_distinct_result_labels"] >= 2
+    assert payload["outcomes"]["n_outcome"] >= 4
+    assert "proof_ready" not in payload
+
+
+def test_calibration_payload_forbids_claiming_calibrated():
+    payload = build_calibration_report()
+    _assert_no_accuracy_metrics(payload)
+    blob = json.dumps(payload).lower()
+    assert "scores are calibrated" not in blob
+    assert '"calibrated": true' not in blob
+    assert "proof_ready" not in payload
 
 
 def test_methodology_documents_calibration_telemetry():
@@ -282,3 +325,7 @@ def test_methodology_documents_calibration_telemetry():
     assert "hint magnitudes" in collapsed
     assert "not calibrated" in collapsed
     assert "does not publish an accuracy" in collapsed.replace("*", "")
+    assert "coverage" in collapsed
+    assert "repeat-outcome" in collapsed or "repeat outcome" in collapsed
+    assert "longitudinal dataset" in collapsed
+    assert "proof_ready" in collapsed or "proof-ready" in collapsed

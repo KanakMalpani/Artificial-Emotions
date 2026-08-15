@@ -56,15 +56,17 @@ pytest tests/test_mid_horizon.py::test_w10_spotcheck_harness_offline -q
 ## Preference / outcome calibration telemetry (W-cal)
 
 **Not a calibration certificate.** `emotions eval calibration` reads an offline
-preference JSONL and reports **counts**, **outcome mix**, and **hint magnitudes**
-only. It does **not** publish an accuracy %, Brier score, or ECE, and it does
-not apply weight hints.
+preference JSONL and reports **counts**, **outcome mix**, **hint magnitudes**,
+and **coverage** (unique questions, repeat-outcome ids) only. It does **not**
+publish an accuracy %, Brier score, or ECE, and it does not apply weight hints.
+It does not set a `proof_ready` flag.
 
 | Signal | Meaning |
 |--------|---------|
 | `counts_by_type` | `event_type` histogram (`prefer`, `reject`, `keep`, `outcome`, …) |
 | `outcomes.by_result` | Mix of `labels.result` on `event_type=outcome` (silent if none) |
 | `hint_magnitudes` | `l1` / `max_abs` of tiny `learn_profile_weight_hints` deltas |
+| `coverage` | Shape counts: unique `question_id`s, how many have an outcome, how many have **repeat** outcomes, distinct result labels, outcomes that carry `score_axes`, ids with a prior score snapshot **and** an outcome |
 
 Weight hints come from labeled prefer/reject **and** from `event_type=outcome`
 rows that carry `score_axes` plus a known `labels.result`. Outcome rows are
@@ -84,10 +86,27 @@ pytest tests/test_eval_calibration.py -q
 Default `--path` is the bundled smoke fixture
 `evals/fixtures/preference_calibration_smoke_v1.jsonl` (prefer/reject/keep plus
 two outcome breadcrumbs). Replace it with a real labeled log before treating
-the numbers as anything other than a wiring check.
+the numbers as anything other than a wiring check. On that smoke file,
+`coverage.n_question_ids_with_repeat_outcome` is **0**.
 
 Honesty field: **not calibrated**. v1 ships the flywheel scaffolding, not
 proof that scores track later impact.
+
+### What v1.1-cal / §10 still needs
+
+Coverage counts are **not** the calibration proof. ROADMAP §10 still requires:
+
+1. **Longitudinal dataset** — time-separated score snapshots vs later *real*
+   impact follow-up. The bundled smoke JSONL is five synthetic rows, not that
+   dataset. Do not invent dated “thin longitudinal” fixtures to look like proof.
+2. **Methodology for score-vs-outcome** — a protocol that compares prior scores
+   to later outcomes. This command reports counts and magnitudes only and must
+   **not** publish accuracy / Brier / ECE until such a dataset exists.
+3. **Multi-outcome analysis** — enough labeled results across outcome types to
+   inspect mix over time. `outcomes.by_result` is a histogram, not that analysis.
+
+`proof_ready` is intentionally absent: a boolean latch that never flips (or that
+flips on synthetic JSONL) is not a proof gate.
 
 ## Elicit A/B process eval (not EES)
 

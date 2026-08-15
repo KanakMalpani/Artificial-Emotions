@@ -100,10 +100,13 @@ def _eval(args: argparse.Namespace) -> int:
         cal = secs.get("calibration")
         if cal:
             hm = cal.get("hint_magnitudes") or {}
+            cov = cal.get("coverage") or {}
             print(
                 f"  calibration n_events={cal.get('n_events')}  "
                 f"outcomes={((cal.get('outcomes') or {}).get('n_outcome'))}  "
-                f"hint_l1={hm.get('l1')}  (not calibrated)"
+                f"hint_l1={hm.get('l1')}  "
+                f"repeat_outcome={cov.get('n_question_ids_with_repeat_outcome')}  "
+                f"(not calibrated)"
             )
         print(f"\n{payload.get('honesty')}")
         return 0
@@ -127,6 +130,7 @@ def _eval(args: argparse.Namespace) -> int:
             return 0
         hm = payload.get("hint_magnitudes") or {}
         outcomes = payload.get("outcomes") or {}
+        cov = payload.get("coverage") or {}
         print("Preference calibration telemetry (not calibrated)")
         print(
             f"  n_events={payload.get('n_events')}  profile={payload.get('profile_name')}  "
@@ -137,6 +141,13 @@ def _eval(args: argparse.Namespace) -> int:
         print(
             f"  hint magnitudes l1={hm.get('l1')}  max_abs={hm.get('max_abs')}  "
             f"n_nonzero={hm.get('n_nonzero')}  deltas={hm.get('deltas')}"
+        )
+        print(
+            f"  coverage questions={cov.get('n_unique_question_ids')}  "
+            f"with_outcome={cov.get('n_question_ids_with_outcome')}  "
+            f"repeat_outcome={cov.get('n_question_ids_with_repeat_outcome')}  "
+            f"distinct_results={cov.get('n_distinct_result_labels')}  "
+            f"(not calibrated; not §10 proof)"
         )
         print(f"\n{payload.get('honesty')}")
         return 0

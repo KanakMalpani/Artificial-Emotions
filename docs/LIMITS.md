@@ -32,7 +32,7 @@ Honest bounds for **v1.0.0** — do not overclaim.
 - Opt-in preference JSONL schema (`preference_log_path` / `--preference-log`) — no DB required (W13); **CLI/config only** (not HTTP body — path injection)
 - Thin preference re-rank (`preference_rerank_path` / `--preference-rerank`): prefer/reject → small profile-scoped score deltas + `preference_rerank` flag — **not** calibrated weight learning; CLI/config only
 - Preference weight hints (`preference_learn_path` / `--preference-learn` / `emotions preferences hints` / MCP `preference_weight_hints` / `POST /v1/preferences/hints`): tiny profile-scoped ValueProfile deltas from labeled prefer/reject **and** `event_type=outcome` rows with `score_axes` plus `labels.result` — **not** calibrated; silent without usable events; **preview by default** (`--apply` / `apply=true` returns a profile copy; named presets are never overwritten); API/MCP accept inline events only (no paths); `--preference-learn` on `run` is preview unless `--preference-learn-apply`; weights floored so hints cannot zero out a dimension
-- Preference calibration telemetry (`emotions eval calibration`): offline JSONL → counts, outcome mix, hint magnitudes — **no accuracy %**; not a calibration certificate; does not apply hints
+- Preference calibration telemetry (`emotions eval calibration`): offline JSONL → counts, outcome mix, hint magnitudes, coverage (unique questions / repeat-outcome ids) — **no accuracy %**; not a calibration certificate; does not apply hints; not §10 proof
 - Preference summarize (`emotions preferences summarize` / `POST /v1/preferences/summarize`): counts, pairwise wins from `preferred_over_ids`, top ids — Stage-1 flywheel, not Bradley–Terry
 - Profile compare (`emotions compare-profiles` / `POST /v1/profiles/compare` / MCP `compare_profiles` / web two-column panel): side-by-side offline ranks + Kendall τ + top-k Jaccard + veto tip — **no silent consensus merge**
 - Constitution compare + risk veto (`POST /v1/profiles/constitution-compare` / MCP `constitution_compare` / web Compare + veto): primary vs safety-veto + hard `max_risk` flag/drop — **not** a constitutional optimum
@@ -76,7 +76,7 @@ Honest bounds for **v1.0.0** — do not overclaim.
 - Ranked-unknowns export (`emotions export unknowns` / `POST /v1/export/unknowns` / MCP `export_unknowns`): JSON document of an already-ranked set (or CLI runs the pipeline). File / HTTP body is the v1 path. Arbitrary webhook URLs are **not** accepted (SSRF). Does not re-rank. HTTP does **not** write files (`out_path` rejected).
 - Outcome-loop dry-run (`emotions loop --outcomes PATH`): preference JSONL `event_type=outcome` → suggested re-rank + next explore step. Does **not** run experiments, does **not** call `explore`. Not a lab closed-loop. CLI only (path; no HTTP path injection)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1120 passed)
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1121 passed)
 - Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions pack check`, `emotions export unknowns --no-literature --json`, `emotions loop --outcomes evals/fixtures/outcome_loop_smoke_v1.jsonl --json`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
@@ -103,7 +103,7 @@ Honest bounds for **v1.0.0** — do not overclaim.
 | Multi-model / ensemble generation | Artificial Hivemind homogenization risk | Jaccard/embedding diversity + hivemind eval metric; disagreement ≠ value |
 | Affective surfaces (cues / mix / provoke) | Framing can manipulate priorities without biometric ERS | Annotation-only honesty; mix coercion warnings; optional `mix_intensity_cap`; agent safety blurb; no silent user-affect inference; **not phenomenal feeling** |
 | PAD mood carryover (4h half-life) | Continuity of stored P/A/D across sessions | Computational carryover, not a VAD experience claim |
-| No longitudinal outcome calibration yet | Need impact follow-up data | **W-cal** scaffolding shipped (outcome-event hints + eval calibration telemetry); still **not calibrated**; no accuracy %; bands provisional |
+| No longitudinal outcome calibration yet | Need impact follow-up data | **W-cal** scaffolding shipped (outcome-event hints + eval calibration telemetry + coverage counts); still **not calibrated**; no accuracy %; bundled smoke JSONL is not a longitudinal dataset; bands provisional |
 | Embedding diversity is optional extras | Avoid heavy deps by default | `pip install '.[embeddings]'` + `diversity_backend=embedding` |
 | Dual-use is weighted heuristic, not a trained classifier | Evadable phrasing remains; agentic scaffolding can uplift dual-use proxies (BioVeil MATRIX) | Human review hook + LIMITS residual; do not strip risk from inject/MCP; not BioVeil-certified |
 | Neglectedness/cost are lexicon/density proxies | No grant/spend APIs wired | Documented spike; optional funding adapters later |

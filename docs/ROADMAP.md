@@ -121,7 +121,7 @@ ValueProfile + Domain/Topic
 | OpenAlex neighborhoods noisy | Multi-source lit is mid-term; improve query notes now |
 | Seed set curated | Expand via packs + LLM forge — keep operationalization bar |
 | Default ValueProfile only | Presets library is a top v0.2 wedge |
-| No longitudinal calibration | **W-cal** scaffolding shipped (outcome hints + telemetry); still do not claim “calibrated” |
+| No longitudinal calibration | **W-cal** scaffolding shipped (outcome hints + telemetry + coverage counts); still do not claim “calibrated” |
 | No embedding diversity | Optional `.[embeddings]` — Jaccard stays default offline |
 | Dual-use residual risk | Weighted heuristic + review flag shipped (W14); not a trained oracle | Keep hard reject; LIMITS residual |
 | LLM paths often untested live | Smoke with mocked + optional live matrix; no secrets in repo |
@@ -176,7 +176,7 @@ When idle: stay on **P0** (honesty loop). Next product work is **v1.1** (calibra
 | ID | Wedge | Notes |
 |----|-------|-------|
 | **P0** | Honesty loop | Keep LIMITS/PROOFS true; green suite — always eligible |
-| **v1.1-cal** | Calibration **proof** | W-cal scaffolding shipped; scores still **not calibrated**. No accuracy %. Proof remains §10 (longitudinal dataset + methodology + multi-outcome analysis) |
+| **v1.1-cal** | Calibration **proof** | W-cal scaffolding shipped; `eval calibration` reports coverage counts (unique questions, repeat-outcome ids). Scores still **not calibrated**. No accuracy %. Proof remains §10 (longitudinal dataset + methodology + multi-outcome analysis) — coverage counts are not that proof |
 | **v1.1-http** | Production HTTP | Local-v1 shipped (opt-in keys, in-process rate limit, CORS deny, opt-in quota/audit). **Not** TLS, WAF, multi-tenant, or SLOs — those remain §10 “production-ready enterprise.” |
 
 ### Shipped leftovers (do not re-implement)
@@ -185,7 +185,7 @@ When idle: stay on **P0** (honesty loop). Next product work is **v1.1** (calibra
 |----|-------|-------|
 | **W-explore** | ✅ Enacted `drop_dual_use` / `forbid_similar_jump` in `explore.py` | Explore may omit `dual_use_high` on disgust; anger opt-in skips similar-domain jumps. Heuristic residual remains — not dual-use solved |
 | **W-rules** | ✅ Catalog-only appraisal dispatch | `RULES` deleted. Catalog `when` / `use_for` is the only spec; `appraise_run` walks catalog `when` only |
-| **W-cal** | ✅ Scaffolding shipped — outcome-event weight hints + `emotions eval calibration` + preview/apply | Flywheel wiring exists; scores still **not calibrated**. No accuracy %. Not an install gate. Calibration proof is **v1.1-cal** / §10 |
+| **W-cal** | ✅ Scaffolding shipped — outcome-event weight hints + `emotions eval calibration` + preview/apply + coverage counts | Flywheel wiring exists; scores still **not calibrated**. No accuracy %. Coverage is not §10 proof. Not an install gate. Calibration proof is **v1.1-cal** / §10 |
 
 LIMITS still: heuristic scores, phrase-level gaps, dual-use residual, local HTTP (not production), not phenomenal feeling, VOI `not_evsi`, outcome loop dry-run only.
 
@@ -592,7 +592,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | “Ranks by value to humanity” | Explicit ValueProfile on every surface; no “neutral” marketing |
 | “Works with any LLM” | Provider matrix notes ≥3 endpoints; offline path documented |
 | “MCP plugin for Cursor/Claude/…” | Recipe in PLUGINS.md + smoke per named host |
-| “Calibrated curiosity scores” | Longitudinal dataset + methodology + multi-outcome analysis. W-cal scaffolding is **not** this claim. |
+| “Calibrated curiosity scores” | Longitudinal dataset + methodology + multi-outcome analysis. W-cal scaffolding and coverage counts are **not** this claim. |
 | “Safe against dual-use” | Classifier eval + review path; LIMITS residual risk. Heuristic + fixtures are **not** dual-use solved. |
 | “Better than idea generators” | Comparative protocol vs baselines (human raters) |
 | “Production-ready enterprise” | TLS, WAF, shared rate limits, multi-tenant isolation, SLOs. Local-v1 (opt-in keys, in-process quota/audit, threat model) is **not** this claim. |
