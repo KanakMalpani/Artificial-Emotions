@@ -82,7 +82,7 @@
 
 Aligned with [`LIMITS.md`](LIMITS.md) and [LIMITS.md](LIMITS.md). **If it is listed here, improve it or extend it — do not recreate from scratch.** Product version today is **1.0.0**, not v0.1. Last PyPI upload is **1.0.0** (tag `v1.0.0`).
 
-### Verified working (as of 2026-07-23)
+### Verified working (as of 2026-08-15)
 
 | Area | What exists | Key paths |
 |------|-------------|-----------|

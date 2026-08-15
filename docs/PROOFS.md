@@ -94,9 +94,13 @@ emotions eval elicit --responses examples/elicit_ab_sample_responses_climate.jso
 # Lexical A/B smoke — not EES, not an elicitation league
 emotions eval gap-status --json
 emotions eval report --json
+emotions eval calibration --json
+# Preference/outcome telemetry: counts, outcome mix, hint magnitudes.
+# Not calibrated. Not a calibration certificate. No accuracy %.
 # Hand-label metrics: status_accuracy, related_but_unanswered_recall, false_answered_rate
 # Composite report: gap_f1 + elicit means + risk probes (not a vanity %)
 pytest tests/test_mid_horizon.py -q
+pytest tests/test_eval_calibration.py -q
 # Methodology: evals/METHODOLOGY.md — report case-level match + F1 miss rate; no vanity accuracy %
 ```
 
@@ -218,12 +222,13 @@ emotions loop --outcomes evals/fixtures/outcome_loop_smoke_v1.jsonl --json
 python examples/_run_compare.py
 ```
 
-## Packaging smoke (not PyPI publish)
+## Packaging smoke (local build; last PyPI upload is 1.0.0)
 
 ```bash
 pip install build
 python -m build
-# Artifacts under dist/; owner publishes to PyPI when ready
+# Artifacts under dist/. Last upload: artificial-emotions 1.0.0 (tag v1.0.0).
+# This command does not publish. Next upload: see docs/PUBLISHING.md.
 ```
 
 ## End-to-end surfaces (API + CLI)

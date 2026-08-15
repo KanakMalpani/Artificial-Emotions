@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- Honesty lockstep: advertised pytest counts, coverage snapshot, and hard
+  non-claims stay aligned across LIMITS, PROOFS, ROADMAP §2, and README.
+  No product-behavior change. Calibration proof and production HTTP remain
+  **v1.1** and are not started. Scores still **not calibrated**. HTTP still
+  local-v1 (not TLS/WAF/SLOs). Dual-use still residual.
+
 ## [1.0.0] — 2026-08-15
 
 1.0.0 is a curiosity layer that ranks unknowns as **decision aids** under an
