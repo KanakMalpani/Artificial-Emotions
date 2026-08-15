@@ -8,7 +8,7 @@
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](docs/ROADMAP.md)
-[![Tests](https://img.shields.io/badge/tests-1121%20passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1129%20passing-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -624,6 +624,7 @@ Host-by-host setup in [docs/PLUGINS.md](docs/PLUGINS.md). Persistence stays
 
 ```bash
 emotions serve      # 127.0.0.1:8000 — interactive docs at /docs
+# 0.0.0.0 is refused unless CURIOSITY_ALLOW_NONLOCAL_BIND=1 (still not TLS)
 ```
 
 | Route | Purpose |
@@ -643,6 +644,8 @@ Imagination / memory / dream / transfer HTTP routes mirror the CLI and land via
 `/v1` discovery as they ship — check `GET /v1/agent` rather than assuming a
 fixed path list. Auth is opt-in: set `CURIOSITY_API_KEY` and every route outside
 the open list requires a bearer token. Unset, it stays open for local demos.
+Non-loopback bind (`--host 0.0.0.0`) requires `CURIOSITY_ALLOW_NONLOCAL_BIND=1`
+on `emotions serve`. That opt-in is still **not** TLS, a WAF, or production HTTP.
 
 </details>
 
@@ -710,7 +713,7 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 1121 passed · 87% · floor enforced
+pytest -q --cov --cov-report=term-missing     # 1129 passed · 87% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 
@@ -742,7 +745,7 @@ Domain packs, seed questions, eval fixtures, and honesty patches are all welcome
 
 One rule above the rest: **don't add a claim the code can't back.** If a feature needs a caveat, the caveat ships inside the response payload — not in a footnote nobody reads.
 
-**Security.** Keep credentials in local env files; never commit `.env`, keys, or tokens. Before exposing HTTP beyond localhost set `CURIOSITY_API_KEY`, and don't bind `0.0.0.0` without auth. Optional name+status audit: `CURIOSITY_AUDIT_LOG=/path/to/audit.jsonl` (default off; never logs bodies or keys). Report vulnerabilities privately to the maintainer rather than in a public issue.
+**Security.** Keep credentials in local env files; never commit `.env`, keys, or tokens. `emotions serve` binds `127.0.0.1` by default and **refuses** `0.0.0.0` unless `CURIOSITY_ALLOW_NONLOCAL_BIND=1`. Before exposing HTTP beyond localhost set `CURIOSITY_API_KEY` as well — the bind opt-in is still plaintext local-v1, not TLS. Optional name+status audit: `CURIOSITY_AUDIT_LOG=/path/to/audit.jsonl` (default off; never logs bodies or keys). Report vulnerabilities privately to the maintainer rather than in a public issue.
 
 ---
 

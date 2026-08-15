@@ -8,6 +8,11 @@
   pairing. Counts and magnitudes only — **not** accuracy, ECE, Brier, or a
   `proof_ready` latch. Bundled smoke JSONL still has zero repeat-outcome ids.
   §10 proof remains unmet (no real longitudinal impact dataset).
+- **Non-loopback bind opt-in.** `emotions serve` still defaults to
+  `127.0.0.1`. `--host 0.0.0.0` / `CURIOSITY_HOST=0.0.0.0` / LAN binds
+  require `CURIOSITY_ALLOW_NONLOCAL_BIND=1` or the CLI exits `2` without
+  starting uvicorn. Direct `uvicorn --host 0.0.0.0` bypasses the guard.
+  Still not TLS, not a WAF, not multi-tenant, not production HTTP.
 
 ### Changed
 - Honesty lockstep: advertised pytest counts, coverage snapshot, and hard

@@ -68,6 +68,7 @@ Honest bounds for **v1.0.0** — do not overclaim.
 - Opt-in per-key HTTP quota (`CURIOSITY_API_QUOTA_REQUESTS` / `CURIOSITY_API_QUOTA_WINDOW_S`, default window 86400s) — unset/0 = no quota; in-process; not a billing meter
 - Opt-in JSONL audit (`CURIOSITY_AUDIT_LOG`) of HTTP method+path / MCP tool name + status — default off; never bodies or keys
 - CORS default deny (empty allow list); opt-in via `CURIOSITY_CORS_ORIGINS` (was `*` for the removed web demo)
+- `emotions serve` defaults to `127.0.0.1`; non-loopback (`0.0.0.0`) requires `CURIOSITY_ALLOW_NONLOCAL_BIND=1` — CLI refuse, not TLS; direct uvicorn bypasses the guard
 - Versioned domain packs (`artificial_emotions/packs/*.json`, `load_bundled_packs` / `domain_pack_paths`) including alignment, climate, affective science, aging biology, and materials catalysis packs
 - Domain pack lint (`emotions pack check`): CONTRIBUTING operationalization + why_it_matters bar on bundled (or `--path`) packs. Exit 1 on errors. Not a scientific review; not dual-use solved
 - Structured HTTP errors (`{"error":{"code","message","details?"}}`) + `/ready` readiness (**503** when not ready)
@@ -76,7 +77,7 @@ Honest bounds for **v1.0.0** — do not overclaim.
 - Ranked-unknowns export (`emotions export unknowns` / `POST /v1/export/unknowns` / MCP `export_unknowns`): JSON document of an already-ranked set (or CLI runs the pipeline). File / HTTP body is the v1 path. Arbitrary webhook URLs are **not** accepted (SSRF). Does not re-rank. HTTP does **not** write files (`out_path` rejected).
 - Outcome-loop dry-run (`emotions loop --outcomes PATH`): preference JSONL `event_type=outcome` → suggested re-rank + next explore step. Does **not** run experiments, does **not** call `explore`. Not a lab closed-loop. CLI only (path; no HTTP path injection)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1121 passed)
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1129 passed)
 - Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions pack check`, `emotions export unknowns --no-literature --json`, `emotions loop --outcomes evals/fixtures/outcome_loop_smoke_v1.jsonl --json`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
@@ -112,7 +113,8 @@ Honest bounds for **v1.0.0** — do not overclaim.
 | PyPI publish depends on Actions billing | Failed payment / spending limit aborts runners in ~2s | Fix Billing & plans; re-run `publish.yml` (see PUBLISHING) |
 | Absolute local paths may remain in older git commits | Working-tree scrub does not rewrite history | Accept residual username-in-history risk, or squash/filter before first public clone wave |
 | Moonshots (approx VOI, lab closed-loop) | Research tracks | Stubs only — v1 does **not** claim VOI, EVSI, or a lab loop. VOI worksheet is not EVSI; `emotions loop --outcomes` is a dry-run (JSONL → suggested re-rank / next explore), **not** experiment execution. Dual-use fixture expansion is not a league; residual stays residual. |
-| Unauthenticated local HTTP when API key unset | Demo DX by design | Documented; set key + avoid `0.0.0.0` for non-local |
+| Unauthenticated local HTTP when API key unset | Demo DX by design | Documented; set key + `CURIOSITY_ALLOW_NONLOCAL_BIND=1` before `0.0.0.0` |
+| Accidental all-interfaces bind | `--host 0.0.0.0` / `CURIOSITY_HOST` | `emotions serve` refuses unless `CURIOSITY_ALLOW_NONLOCAL_BIND=1`; still not TLS |
 | HTTP rate limit is per-process only | In-memory sliding window by client host | Soft guard for local serve; use a reverse proxy/WAF for multi-instance |
 | HTTP quota is per-process and per matched key | In-memory sliding window; no key → no quota bucket | Opt-in `CURIOSITY_API_QUOTA_*`; unset keeps local DX; not multi-tenant |
 | Audit JSONL is local names+status only | Opt-in file; not a SIEM | Set `CURIOSITY_AUDIT_LOG`; never logs bodies or keys; default off |
@@ -130,6 +132,7 @@ Detail: [`THREAT_MODEL.md`](THREAT_MODEL.md) (not a production SLO).
 - **Rate limiting:** in-process sliding window (default 60 req / 60s per client host). Not multi-instance safe; not a WAF.
 - **Quota:** opt-in per matched API key (`CURIOSITY_API_QUOTA_REQUESTS` / `CURIOSITY_API_QUOTA_WINDOW_S`). Unset or `0` = no quota. Open local serve (no keys) does not apply a quota. Not a billing meter.
 - **Auth:** required only when `CURIOSITY_API_KEY` / `CURIOSITY_API_KEYS` (or alias) is set. Unset keys → open routes (local CLI DX). Binding `0.0.0.0` without keys is operator risk.
+- **Bind:** default `127.0.0.1`. `emotions serve` refuses `0.0.0.0` / `::` / LAN unless `CURIOSITY_ALLOW_NONLOCAL_BIND=1`. Direct `uvicorn --host 0.0.0.0` bypasses that CLI guard. Not TLS.
 - **CORS:** default empty allow list (deny). Opt-in via `CURIOSITY_CORS_ORIGINS`. Previously defaulted to `*` for the removed web demo.
 - **Audit:** opt-in JSONL via `CURIOSITY_AUDIT_LOG` (HTTP method+path and MCP tool name + status). Default off. Never request/response bodies, headers, query strings, or API keys. Local operator log, not a SIEM.
 - **No production hardening claim** — put a reverse proxy, TLS, and shared rate limits in front if you expose the API.

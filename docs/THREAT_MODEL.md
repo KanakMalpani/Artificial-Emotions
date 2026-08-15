@@ -20,7 +20,10 @@ Read with [`LIMITS.md`](LIMITS.md) (product honesty) and
 | Local-v1 baseline for ROADMAP §7.5 “enterprise” | Proof gate “production-ready enterprise” (ROADMAP §10) |
 
 Default bind is `127.0.0.1:8000` (`--host` / `CURIOSITY_HOST`). Binding
-`0.0.0.0` without `CURIOSITY_API_KEY` is operator risk.
+`0.0.0.0` (or another non-loopback address) requires
+`CURIOSITY_ALLOW_NONLOCAL_BIND=1`. Without that opt-in, `emotions serve`
+refuses to start. Binding `0.0.0.0` without `CURIOSITY_API_KEY` remains
+operator risk even after the opt-in. This is still not TLS.
 
 ## Assets
 
@@ -65,8 +68,14 @@ biosafety; phenomenal affect.
 
 ### Bind default
 
-`emotions serve` defaults `--host 127.0.0.1`. Loopback is the intended demo.
-Non-local bind is an operator choice, not a hardened mode.
+`emotions serve` defaults `--host 127.0.0.1` (or `CURIOSITY_HOST` if set).
+Loopback is the intended demo. Non-loopback bind (`0.0.0.0`, `::`, LAN IP)
+requires **`CURIOSITY_ALLOW_NONLOCAL_BIND=1`**. Without it the CLI prints a
+refusal and exits `2` — uvicorn is not started. That opt-in is **not** a
+hardened mode, not TLS, and not production.
+
+Direct `uvicorn artificial_emotions.api:app --host 0.0.0.0` bypasses the CLI
+guard. Residual operator risk.
 
 ### Auth — opt-in
 
@@ -147,6 +156,7 @@ SSO, TLS, a WAF, or an SLO.
 |---------|----------------|--------|
 | **Quota** | Per-key budget (`CURIOSITY_API_QUOTA_*`); **429** `quota_exceeded` when exceeded | **Shipped, opt-in.** Unset/0 = no quota. |
 | **Audit JSONL** | Opt-in log of HTTP/MCP **tool names + status**; never secret bodies; default off | **Shipped, opt-in.** Unset = off. |
+| **Non-loopback bind** | `emotions serve` refuses `0.0.0.0` / LAN unless `CURIOSITY_ALLOW_NONLOCAL_BIND=1` | **Shipped.** CLI guard only; not TLS. Direct uvicorn bypasses it. |
 
 Do not treat this file as a production SLO or a multi-tenant design.
 
@@ -155,6 +165,8 @@ Do not treat this file as a production SLO or a multi-tenant design.
 | Risk | Why it remains | Operator move |
 |------|----------------|---------------|
 | Open API when keys unset | Demo DX | Set a key before any non-local bind |
+| Accidental `0.0.0.0` on `emotions serve` | Docker/copy-paste `--host 0.0.0.0` | CLI refuses unless `CURIOSITY_ALLOW_NONLOCAL_BIND=1` |
+| Direct uvicorn bypasses the CLI bind guard | `uvicorn … --host 0.0.0.0` does not run `_serve` | Use `emotions serve`; do not treat uvicorn as a hardened path |
 | Rate limit is per process / per host | In-memory sliding window | Reverse proxy / WAF if you expose the port |
 | Quota is per process / per matched key | In-memory window; no key → no bucket | Opt-in only; not a shared billing meter |
 | Audit JSONL is local names+status | Opt-in file; not a SIEM; default off | Set `CURIOSITY_AUDIT_LOG` if you want a log |
@@ -170,8 +182,9 @@ Do not treat this file as a production SLO or a multi-tenant design.
 ## Operator checklist (local)
 
 1. Leave the default bind (`127.0.0.1`) unless you know you need otherwise.
-2. Before `--host 0.0.0.0` or a LAN bind: set `CURIOSITY_API_KEY` (or
-   `CURIOSITY_API_KEYS`).
+2. `--host 0.0.0.0` or a LAN bind also needs `CURIOSITY_ALLOW_NONLOCAL_BIND=1`
+   (`emotions serve` refuses without it). Then set `CURIOSITY_API_KEY` (or
+   `CURIOSITY_API_KEYS`). This is still not TLS.
 3. Keep CORS empty unless a **specific** browser origin needs it.
 4. Keep `CURIOSITY_API_RATE_LIMIT_PER_MINUTE` at the default unless you are
    debugging; `0` disables the soft guard.

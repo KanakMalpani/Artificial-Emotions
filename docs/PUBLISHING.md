@@ -4,7 +4,7 @@ Package name: **`artificial-emotions`** · Product version today: **`1.0.0`**. L
 
 **Status:** published at [pypi.org/project/artificial-emotions](https://pypi.org/project/artificial-emotions/). Install with `pip install artificial-emotions`.
 
-Never store PyPI tokens in the repo or commit `.env` / credentials. For HTTP demos, unset `CURIOSITY_API_KEY` is fine on localhost only — set a key before any non-local bind.
+Never store PyPI tokens in the repo or commit `.env` / credentials. For HTTP demos, unset `CURIOSITY_API_KEY` is fine on localhost only — set a key and `CURIOSITY_ALLOW_NONLOCAL_BIND=1` before any non-local bind (`emotions serve` refuses `0.0.0.0` without the opt-in). Still not TLS.
 
 ## Preferred: Trusted Publishing (OIDC)
 

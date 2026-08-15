@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 
 from artificial_emotions.models import (
     CuriosityConfig,
@@ -58,10 +59,30 @@ def _run_engine(args: argparse.Namespace) -> int:
 
 
 def _serve(args: argparse.Namespace) -> int:
+    from artificial_emotions.config import (
+        bind_is_loopback,
+        configured_api_keys,
+        refuse_nonlocal_bind_reason,
+        resolve_serve_bind,
+    )
+
+    host, port = resolve_serve_bind(getattr(args, "host", None), getattr(args, "port", None))
+    reason = refuse_nonlocal_bind_reason(host)
+    if reason:
+        print(reason, file=sys.stderr)
+        return 2
+    if not bind_is_loopback(host) and not configured_api_keys():
+        print(
+            "Warning: non-loopback bind with no CURIOSITY_API_KEY "
+            "(open local-v1 API). Set a key before exposing the port. "
+            "Still not TLS / not production. See docs/THREAT_MODEL.md.",
+            file=sys.stderr,
+        )
+
     import uvicorn
 
     print(
-        f"Artificial Emotions API → http://{args.host}:{args.port}\n"
+        f"Artificial Emotions API → http://{host}:{port}\n"
         f"  Instant spark: GET /v1/curiosity/provoke?domain=ai&n=5\n"
         f"  Emotions:      GET /v1/emotions/catalog  POST /v1/emotions/mix\n"
         f"                 GET /v1/emotions/cues  POST /v1/emotions/annotate\n"
@@ -69,13 +90,13 @@ def _serve(args: argparse.Namespace) -> int:
         f"  Agent guide:   GET /v1/agent\n"
         f"  Agent tools:   GET /v1/agent/tools\n"
         f"  Profiles:      GET /v1/profiles\n"
-        f"  OpenAPI:       http://{args.host}:{args.port}/docs\n"
+        f"  OpenAPI:       http://{host}:{port}/docs\n"
         f"  MCP (stdio):   curiosity-mcp\n"
     )
     uvicorn.run(
         "artificial_emotions.api:app",
-        host=args.host,
-        port=args.port,
+        host=host,
+        port=port,
         reload=args.reload,
     )
     return 0

@@ -177,7 +177,7 @@ When idle: stay on **P0** (honesty loop). Next product work is **v1.1** (calibra
 |----|-------|-------|
 | **P0** | Honesty loop | Keep LIMITS/PROOFS true; green suite — always eligible |
 | **v1.1-cal** | Calibration **proof** | W-cal scaffolding shipped; `eval calibration` reports coverage counts (unique questions, repeat-outcome ids). Scores still **not calibrated**. No accuracy %. Proof remains §10 (longitudinal dataset + methodology + multi-outcome analysis) — coverage counts are not that proof |
-| **v1.1-http** | Production HTTP | Local-v1 shipped (opt-in keys, in-process rate limit, CORS deny, opt-in quota/audit). **Not** TLS, WAF, multi-tenant, or SLOs — those remain §10 “production-ready enterprise.” |
+| **v1.1-http** | Production HTTP | Local-v1 shipped (opt-in keys, in-process rate limit, CORS deny, opt-in quota/audit, `CURIOSITY_ALLOW_NONLOCAL_BIND` for `0.0.0.0`). **Not** TLS, WAF, multi-tenant, or SLOs — those remain §10 “production-ready enterprise.” |
 
 ### Shipped leftovers (do not re-implement)
 
@@ -503,7 +503,7 @@ Nice-to-have (can slip to v1.1): preference learning, multi-tenant, embedding de
 | Data flywheel | Schema for ranked-Q → outcomes; multi-outcome; never citations-only |
 | Preference learning | Learn weights **within** a profile — never universal rank |
 | Domain packs | Versioned packs + `emotions pack check` against the CONTRIBUTING bar. Not a scientific review. |
-| Enterprise/API | **Local-v1 shipped** (1.0.0): opt-in keys, in-process rate limit, CORS deny, opt-in per-key quota (`CURIOSITY_API_QUOTA_*`), opt-in audit JSONL (`CURIOSITY_AUDIT_LOG`). Unset keeps offline/local DX. **Not** multi-tenant, SSO, TLS, WAF, or SLOs — those remain §10 “production-ready enterprise” / **v1.1-http**. |
+| Enterprise/API | **Local-v1 shipped** (1.0.0): opt-in keys, in-process rate limit, CORS deny, opt-in per-key quota (`CURIOSITY_API_QUOTA_*`), opt-in audit JSONL (`CURIOSITY_AUDIT_LOG`), non-loopback bind opt-in (`CURIOSITY_ALLOW_NONLOCAL_BIND`). Unset keeps offline/local DX. **Not** multi-tenant, SSO, TLS, WAF, or SLOs — those remain §10 “production-ready enterprise” / **v1.1-http**. |
 | Agent ecosystems | Copy-paste LangGraph recipe in [`PLUGINS.md`](PLUGINS.md) via `GET /v1/agent/tools`. `langgraph` is not a package extra. Further hosts still need their own recipe + smoke note. |
 | Interop | **File export shipped** (`emotions export unknowns`, `POST /v1/export/unknowns`). Arbitrary webhook URLs are **not** accepted (SSRF). |
 | v2 bar | Calibration reports; profile sharing; Curiosity Layer API for AI Scientists; production threat model + SLOs (local-v1 threat model already ships) |
@@ -578,7 +578,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | W8 Domains | Seeds | `seeds.py`, `CONTRIBUTING.md` | Packs + quality bar |
 | W9 Packaging | Distro | `pyproject.toml` | Next upload: Actions billing healthy ([`PUBLISHING.md`](PUBLISHING.md)); extras; no secrets |
 | W10 Community | Process | GitHub Issues, CONTRIBUTING | Good-first-issues ↔ F-modes |
-| W11 Enterprise | API ops | `api.py`, `api_pkg/` | Local-v1 shipped: optional auth, rate limit, opt-in quota/audit; don't break local demos. Not multi-tenant. |
+| W11 Enterprise | API ops | `api.py`, `api_pkg/` | Local-v1 shipped: optional auth, rate limit, opt-in quota/audit, bind opt-in; don't break local demos. Not multi-tenant. |
 | W12 Flywheel | Outcomes | future store/schema | Multi-outcome; anti-McNamara |
 | W13 Docs loop | Docs | `docs/LIMITS.md` ↔ README claims | Tag open Qs to milestones |
 
@@ -595,7 +595,7 @@ Use when a wedge spans versions. **Key files** are under `src/artificial_emotion
 | “Calibrated curiosity scores” | Longitudinal dataset + methodology + multi-outcome analysis. W-cal scaffolding and coverage counts are **not** this claim. |
 | “Safe against dual-use” | Classifier eval + review path; LIMITS residual risk. Heuristic + fixtures are **not** dual-use solved. |
 | “Better than idea generators” | Comparative protocol vs baselines (human raters) |
-| “Production-ready enterprise” | TLS, WAF, shared rate limits, multi-tenant isolation, SLOs. Local-v1 (opt-in keys, in-process quota/audit, threat model) is **not** this claim. |
+| “Production-ready enterprise” | TLS, WAF, shared rate limits, multi-tenant isolation, SLOs. Local-v1 (opt-in keys, in-process quota/audit, bind opt-in, threat model) is **not** this claim. |
 | “Semantic diversity” | Embedding path tested; default vs optional labeled |
 | “Literature-grounded” | Show `gap.related_works` + status; no full-text claim if abstracts-only |
 | “PyPI one-liner install” | Public package version matching git tag (last upload **1.0.0**; tag `v1.0.0`) |

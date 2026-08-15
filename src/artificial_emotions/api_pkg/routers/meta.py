@@ -160,6 +160,7 @@ def agent_manifest() -> dict[str, Any]:
             "Provoke: investigation framing for agents/humans — not persuasion toolkit",
             "Read curiosity://limits / docs/LIMITS.md before treating ranks as truth",
             "Local HTTP serve: in-process rate limit, CORS deny-by-default, auth opt-in, opt-in per-key quota (unset CURIOSITY_API_QUOTA_REQUESTS = no quota) — not a production SLO (docs/THREAT_MODEL.md)",
+            "emotions serve defaults to 127.0.0.1; 0.0.0.0 / non-loopback requires CURIOSITY_ALLOW_NONLOCAL_BIND=1 — still not TLS",
             "Opt-in audit JSONL (CURIOSITY_AUDIT_LOG): HTTP/MCP names + status only — never bodies or keys; default off",
             "Ranked-unknowns export is a JSON document (CLI --out / HTTP body). Arbitrary webhook URLs are not accepted (SSRF)",
         ],

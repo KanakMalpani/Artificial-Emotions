@@ -7,13 +7,20 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from artificial_emotions.api import create_app
+from artificial_emotions.cli import main
 from artificial_emotions.config import (
+    allow_nonlocal_bind,
     api_quota_requests,
     api_quota_window_s,
     api_rate_limit_per_minute,
+    bind_is_loopback,
     clear_config_cache,
     cors_origins,
     get_config,
+    refuse_nonlocal_bind_reason,
+    resolve_serve_bind,
+    serve_host,
+    serve_port,
 )
 from artificial_emotions.errors import ERR_QUOTA_EXCEEDED, ERR_RATE_LIMITED
 
@@ -83,6 +90,7 @@ def test_agent_card_points_at_local_threat_model():
     assert "THREAT_MODEL" in honesty
     assert "production SLO" in honesty
     assert "CURIOSITY_API_QUOTA_REQUESTS" in honesty
+    assert "CURIOSITY_ALLOW_NONLOCAL_BIND" in honesty
     assert "quota not shipped" not in honesty
     assert data.get("threat_model") == "docs/THREAT_MODEL.md"
 
@@ -97,8 +105,10 @@ def test_threat_model_doc_lists_quota_and_audit_as_shipped():
     assert "future knobs" not in lowered
     assert "CURIOSITY_API_QUOTA" in text
     assert "CURIOSITY_AUDIT_LOG" in text
+    assert "CURIOSITY_ALLOW_NONLOCAL_BIND" in text
     assert "local-v1" in lowered
     assert "not a production slo" in lowered
+    assert "0.0.0.0" in text
 
 
 def test_rate_limit_zero_disables(monkeypatch):
@@ -240,3 +250,118 @@ def test_quota_does_not_bucket_unknown_keys(monkeypatch):
     monkeypatch.delenv("CURIOSITY_API_QUOTA_WINDOW_S", raising=False)
     monkeypatch.delenv("CURIOSITY_API_RATE_LIMIT_PER_MINUTE", raising=False)
     clear_config_cache()
+
+
+def test_bind_is_loopback_accepts_localhost_variants():
+    assert bind_is_loopback("127.0.0.1")
+    assert bind_is_loopback("localhost")
+    assert bind_is_loopback("LocalHost.")
+    assert bind_is_loopback("::1")
+    assert bind_is_loopback("[::1]")
+    assert bind_is_loopback("127.0.0.2")
+
+
+def test_bind_is_loopback_rejects_all_interfaces_and_lan():
+    assert not bind_is_loopback("0.0.0.0")
+    assert not bind_is_loopback("::")
+    assert not bind_is_loopback("[::]")
+    assert not bind_is_loopback("192.168.1.10")
+    assert not bind_is_loopback("example.local")
+    assert not bind_is_loopback("")
+
+
+def test_zero_zero_zero_zero_requires_explicit_opt_in(monkeypatch):
+    monkeypatch.delenv("CURIOSITY_ALLOW_NONLOCAL_BIND", raising=False)
+    assert allow_nonlocal_bind() is False
+    reason = refuse_nonlocal_bind_reason("0.0.0.0")
+    assert reason is not None
+    assert "CURIOSITY_ALLOW_NONLOCAL_BIND" in reason
+    assert "not TLS" in reason
+    assert refuse_nonlocal_bind_reason("127.0.0.1") is None
+    monkeypatch.setenv("CURIOSITY_ALLOW_NONLOCAL_BIND", "1")
+    assert allow_nonlocal_bind() is True
+    assert refuse_nonlocal_bind_reason("0.0.0.0") is None
+    monkeypatch.setenv("CURIOSITY_ALLOW_NONLOCAL_BIND", "0")
+    assert refuse_nonlocal_bind_reason("0.0.0.0") is not None
+
+
+def test_resolve_serve_bind_defaults_to_loopback(monkeypatch):
+    monkeypatch.delenv("CURIOSITY_HOST", raising=False)
+    monkeypatch.delenv("CURIOSITY_PORT", raising=False)
+    assert serve_host() == "127.0.0.1"
+    assert serve_port() == 8000
+    assert resolve_serve_bind(None, None) == ("127.0.0.1", 8000)
+    assert resolve_serve_bind("0.0.0.0", 9000) == ("0.0.0.0", 9000)
+    monkeypatch.setenv("CURIOSITY_HOST", "0.0.0.0")
+    monkeypatch.setenv("CURIOSITY_PORT", "8123")
+    assert resolve_serve_bind(None, None) == ("0.0.0.0", 8123)
+    assert resolve_serve_bind("127.0.0.1", None) == ("127.0.0.1", 8123)
+
+
+def test_serve_cli_refuses_0_0_0_0_without_opt_in(monkeypatch, capsys):
+    monkeypatch.delenv("CURIOSITY_ALLOW_NONLOCAL_BIND", raising=False)
+    started = {"n": 0}
+
+    def _boom(*_a, **_k):
+        started["n"] += 1
+        raise AssertionError("uvicorn must not start")
+
+    monkeypatch.setattr("uvicorn.run", _boom)
+    rc = main(["serve", "--host", "0.0.0.0", "--port", "8000"])
+    assert rc == 2
+    assert started["n"] == 0
+    err = capsys.readouterr().err
+    assert "CURIOSITY_ALLOW_NONLOCAL_BIND" in err
+    assert "0.0.0.0" in err
+
+
+def test_serve_cli_refuses_curiosity_host_all_interfaces(monkeypatch, capsys):
+    monkeypatch.delenv("CURIOSITY_ALLOW_NONLOCAL_BIND", raising=False)
+    monkeypatch.setenv("CURIOSITY_HOST", "0.0.0.0")
+    started = {"n": 0}
+
+    def _boom(*_a, **_k):
+        started["n"] += 1
+        raise AssertionError("uvicorn must not start")
+
+    monkeypatch.setattr("uvicorn.run", _boom)
+    rc = main(["serve"])
+    assert rc == 2
+    assert started["n"] == 0
+    assert "CURIOSITY_ALLOW_NONLOCAL_BIND" in capsys.readouterr().err
+
+
+def test_serve_cli_loopback_reaches_uvicorn(monkeypatch, capsys):
+    monkeypatch.delenv("CURIOSITY_ALLOW_NONLOCAL_BIND", raising=False)
+    monkeypatch.delenv("CURIOSITY_HOST", raising=False)
+    seen: dict[str, object] = {}
+
+    def _fake_run(*_a, **kwargs):
+        seen.update(kwargs)
+
+    monkeypatch.setattr("uvicorn.run", _fake_run)
+    rc = main(["serve", "--host", "127.0.0.1", "--port", "8765"])
+    assert rc == 0
+    assert seen.get("host") == "127.0.0.1"
+    assert seen.get("port") == 8765
+    assert "uvicorn must not" not in capsys.readouterr().err
+
+
+def test_serve_cli_0_0_0_0_with_opt_in_reaches_uvicorn(monkeypatch, capsys):
+    monkeypatch.setenv("CURIOSITY_ALLOW_NONLOCAL_BIND", "1")
+    monkeypatch.delenv("CURIOSITY_API_KEY", raising=False)
+    monkeypatch.delenv("CURIOSITY_API_KEYS", raising=False)
+    monkeypatch.delenv("ARTIFICIAL_CURIOSITY_API_KEY", raising=False)
+    seen: dict[str, object] = {}
+
+    def _fake_run(*_a, **kwargs):
+        seen.update(kwargs)
+
+    monkeypatch.setattr("uvicorn.run", _fake_run)
+    rc = main(["serve", "--host", "0.0.0.0", "--port", "8123"])
+    assert rc == 0
+    assert seen.get("host") == "0.0.0.0"
+    assert seen.get("port") == 8123
+    err = capsys.readouterr().err
+    assert "CURIOSITY_API_KEY" in err
+    assert "not TLS" in err or "not production" in err

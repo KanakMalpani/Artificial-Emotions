@@ -234,7 +234,7 @@ clearing the validate lift gate (~5× on the bundled timesplit corpus).
 - No secrets in repo; API keys via environment only (`.env.example`).
 - HTTP does **not** accept `literature_cache_dir` or `llm_base_url` (CLI/env only — path / SSRF hygiene).
 - HTTP `POST /v1/export/unknowns` does **not** accept webhook/callback URLs (SSRF); file / JSON body is the v1 path, and `out_path` is rejected (path injection).
-- Local `emotions serve` threat model (rate limit, CORS deny, auth opt-in, opt-in per-key quota and audit JSONL; not an SLO): [THREAT_MODEL.md](THREAT_MODEL.md).
+- Local `emotions serve` threat model (rate limit, CORS deny, auth opt-in, opt-in per-key quota and audit JSONL, `CURIOSITY_ALLOW_NONLOCAL_BIND` for `0.0.0.0`; not an SLO): [THREAT_MODEL.md](THREAT_MODEL.md).
 - Literature classifier is heuristic — confidence reflected in output.
 - Rankings require an explicit `ValueProfile` (defaults provided, not hidden).
 - Emotion cues are `annotation_only`; mixes emit `computational_affect` /

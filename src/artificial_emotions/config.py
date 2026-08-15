@@ -17,7 +17,8 @@ Env reference (see also ``.env.example``)::
     CURIOSITY_API_QUOTA_REQUESTS — per-key HTTP budget (unset/0 = no quota, local DX)
     CURIOSITY_API_QUOTA_WINDOW_S — quota sliding window seconds (default 86400; ignored when quota off)
     CURIOSITY_AUDIT_LOG — opt-in JSONL path (HTTP/MCP names + status; default off; never bodies)
-    CURIOSITY_HOST / CURIOSITY_PORT — serve defaults
+    CURIOSITY_HOST / CURIOSITY_PORT — serve defaults (loopback)
+    CURIOSITY_ALLOW_NONLOCAL_BIND — 1/true/yes/on to allow 0.0.0.0 / non-loopback
     CURIOSITY_MCP_TIER     — MCP tool tier (core|investigate|affect|research|full)
     CURIOSITY_NO_MEMORY    — set to 1 to disable PersistentMemory read/write
     CURIOSITY_MEMORY_PATH  — optional override for ~/.artificial_emotions/memory.json
@@ -29,6 +30,7 @@ Env reference (see also ``.env.example``)::
 
 from __future__ import annotations
 
+import ipaddress
 import os
 from dataclasses import dataclass
 from functools import lru_cache
@@ -106,6 +108,68 @@ def api_quota_window_s() -> int:
     return raw if raw > 0 else 86400
 
 
+def _env_truthy(name: str) -> bool:
+    return _env(name).lower() in {"1", "true", "yes", "on"}
+
+
+def serve_host() -> str:
+    """Bind host for ``emotions serve``. Default ``127.0.0.1``."""
+    return _env("CURIOSITY_HOST", "127.0.0.1") or "127.0.0.1"
+
+
+def serve_port() -> int:
+    """Bind port for ``emotions serve``. Default 8000. Out-of-range → 8000."""
+    raw = int(_env_float("CURIOSITY_PORT", 8000))
+    if raw <= 0 or raw > 65535:
+        return 8000
+    return raw
+
+
+def resolve_serve_bind(host: str | None, port: int | None) -> tuple[str, int]:
+    """CLI ``--host`` / ``--port`` override env; empty host falls back to env."""
+    resolved_host = (host or "").strip() or serve_host()
+    resolved_port = port if port is not None else serve_port()
+    return resolved_host, resolved_port
+
+
+def allow_nonlocal_bind() -> bool:
+    """Opt-in for non-loopback binds (``0.0.0.0``, ``::``, LAN). Default off."""
+    return _env_truthy("CURIOSITY_ALLOW_NONLOCAL_BIND")
+
+
+def bind_is_loopback(host: str) -> bool:
+    """True for loopback IPs and ``localhost``. ``0.0.0.0`` / ``::`` are not."""
+    raw = (host or "").strip().strip("[]")
+    if not raw:
+        return False
+    if raw.lower().rstrip(".") == "localhost":
+        return True
+    try:
+        ip = ipaddress.ip_address(raw)
+    except ValueError:
+        return False
+    return bool(ip.is_loopback)
+
+
+def refuse_nonlocal_bind_reason(host: str) -> str | None:
+    """Refusal text when ``emotions serve`` would bind beyond loopback without opt-in.
+
+    Direct ``uvicorn --host 0.0.0.0`` bypasses this CLI guard — that is residual
+    operator risk, not TLS or a WAF.
+    """
+    if bind_is_loopback(host) or allow_nonlocal_bind():
+        return None
+    return (
+        f"Refusing non-loopback bind {host!r}. `emotions serve` defaults to "
+        "127.0.0.1. To bind 0.0.0.0 or another non-local address, set "
+        "CURIOSITY_ALLOW_NONLOCAL_BIND=1 and set CURIOSITY_API_KEY before "
+        "exposing the port. This is still plaintext local-v1 HTTP — not TLS, "
+        "not a WAF, not multi-tenant, and not production. See "
+        "docs/THREAT_MODEL.md. Direct `uvicorn --host 0.0.0.0` bypasses this "
+        "CLI guard."
+    )
+
+
 @dataclass(frozen=True)
 class AppConfig:
     """Resolved runtime settings (non-secret summary safe to expose in /health)."""
@@ -142,8 +206,8 @@ def get_config() -> AppConfig:
         api_quota_requests=api_quota_requests(),
         api_quota_window_s=api_quota_window_s(),
         audit_log_enabled=bool(audit_log_path()),
-        host=_env("CURIOSITY_HOST", "127.0.0.1") or "127.0.0.1",
-        port=int(_env_float("CURIOSITY_PORT", 8000)),
+        host=serve_host(),
+        port=serve_port(),
         llm_timeout_s=_env_float("LLM_TIMEOUT_S", 90.0),
         literature_timeout_s=_env_float("LITERATURE_TIMEOUT_S", 12.0),
         openalex_mailto=_env("OPENALEX_MAILTO", "curiosity@localhost") or "curiosity@localhost",
@@ -167,14 +231,20 @@ def literature_timeout_s() -> float:
 
 __all__ = [
     "AppConfig",
+    "allow_nonlocal_bind",
     "api_quota_requests",
     "api_quota_window_s",
     "api_rate_limit_per_minute",
     "audit_log_path",
+    "bind_is_loopback",
     "clear_config_cache",
     "configured_api_keys",
     "cors_origins",
     "get_config",
     "llm_timeout_s",
     "literature_timeout_s",
+    "refuse_nonlocal_bind_reason",
+    "resolve_serve_bind",
+    "serve_host",
+    "serve_port",
 ]

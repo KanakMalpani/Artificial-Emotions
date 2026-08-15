@@ -246,7 +246,7 @@ Errors use a stable shape: `{"error":{"code":"unknown_emotion","message":"…"}}
 
 ### Optional API key (WO-0.4.6)
 
-Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health`, `/ready`, and `/` stay open; health reports `api_auth_required`. Do not bind `0.0.0.0` without a key.
+Unset by default so local demos stay open. Set `CURIOSITY_API_KEY` (or comma-separated `CURIOSITY_API_KEYS`) to require `Authorization: Bearer <key>` or `X-API-Key` on `/v1/...` routes. `/health`, `/ready`, and `/` stay open; health reports `api_auth_required`. `emotions serve` refuses `0.0.0.0` unless `CURIOSITY_ALLOW_NONLOCAL_BIND=1`. Do not bind `0.0.0.0` without a key. Still not TLS.
 
 Opt-in per-key request budget: set `CURIOSITY_API_QUOTA_REQUESTS` (and optionally `CURIOSITY_API_QUOTA_WINDOW_S`, default 86400). Unset = no quota. Exceeding the budget returns HTTP 429 with `error.code=quota_exceeded`. In-process only — not a billing meter.
 

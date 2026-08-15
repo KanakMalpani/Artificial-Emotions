@@ -111,11 +111,24 @@ def build_parser() -> argparse.ArgumentParser:
             "Start the HTTP API (CORS deny-by-default; auth opt-in via "
             "CURIOSITY_API_KEY; rate limit via CURIOSITY_API_RATE_LIMIT_PER_MINUTE; "
             "opt-in per-key quota via CURIOSITY_API_QUOTA_REQUESTS; "
-            "opt-in audit JSONL via CURIOSITY_AUDIT_LOG)"
+            "opt-in audit JSONL via CURIOSITY_AUDIT_LOG; "
+            "non-loopback bind requires CURIOSITY_ALLOW_NONLOCAL_BIND=1)"
         ),
     )
-    serve_p.add_argument("--host", default="127.0.0.1")
-    serve_p.add_argument("--port", type=int, default=8000)
+    serve_p.add_argument(
+        "--host",
+        default=None,
+        help=(
+            "Bind address (default: CURIOSITY_HOST or 127.0.0.1). "
+            "Non-loopback (0.0.0.0) requires CURIOSITY_ALLOW_NONLOCAL_BIND=1."
+        ),
+    )
+    serve_p.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Port (default: CURIOSITY_PORT or 8000)",
+    )
     serve_p.add_argument("--reload", action="store_true")
 
     spark_p = sub.add_parser("spark", help="Instant curiosity pack (inject into any model)")

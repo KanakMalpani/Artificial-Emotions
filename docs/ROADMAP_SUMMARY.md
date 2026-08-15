@@ -18,7 +18,7 @@ This cut is **1.0.0** because roadmap **§7.4** is the trust bar and LIMITS is t
 
 1. **P0 honesty loop** — keep LIMITS/PROOFS true; green suite (roadmap §2 W-P0a / W-P0b)  
 2. **v1.1 calibration proof** — W-cal scaffolding shipped; coverage counts exist; scores still **not calibrated**. No accuracy %. Proof remains §10.  
-3. **v1.1 production HTTP** — local-v1 shipped; **not** TLS, WAF, multi-tenant, or SLOs.  
+3. **v1.1 production HTTP** — local-v1 shipped (incl. `CURIOSITY_ALLOW_NONLOCAL_BIND` for `0.0.0.0`); **not** TLS, WAF, multi-tenant, or SLOs.  
 
 Shipped leftovers (do not re-implement): ✅ **W-explore**, ✅ **W-rules**, ✅ **W-cal** scaffolding.
 
