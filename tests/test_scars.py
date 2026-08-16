@@ -19,6 +19,7 @@ from artificial_emotions.scars import (
     MIN_HITS_FOR_SCAR,
     SCAR_HALF_LIFE_HOURS,
     apply_history_biases,
+    decay_factor,
     decayed_strength,
     disclosure_payload,
     next_domain_biased,
@@ -143,6 +144,13 @@ def test_a_scar_decays_and_eventually_stops_mattering() -> None:
     )
     assert nxt == "biology"  # default jump restored
     assert bias is None
+
+
+def test_scar_decay_treats_naive_now_as_utc() -> None:
+    stamped = "2026-07-30T00:00:00+00:00"
+    naive = datetime(2026, 7, 30, 0, 0)
+    aware = datetime(2026, 7, 30, 0, 0, tzinfo=UTC)
+    assert decay_factor(stamped, now=naive) == pytest.approx(decay_factor(stamped, now=aware))
 
 
 def test_scar_influence_is_bounded_and_always_disclosed(mem_path: Path) -> None:

@@ -18,7 +18,7 @@
 
 | Module | Path | Role |
 |--------|------|------|
-| models | `models.py` | Schema + ValueProfile presets |
+| models | `models.py` | Schema + ValueProfile presets. `RankedQuestion.flag_set` / `score_band_width` are methods (not serialized). |
 | seeds | `seeds.py` | Curated offline unknowns (multi-domain) |
 | packs | `packs.py` | Versioned JSON domain packs |
 | generate | `generate.py` | Seed + packs + optional LLM forge |
@@ -29,30 +29,43 @@
 | diversity | `diversity.py` | Near-dup suppression |
 | brief | `brief.py` | Investigation briefs |
 | decompose | `decompose.py` | Curiosity depth: sub-questions, first step, falsifiers, stop rules |
-| appraisal | `appraisal.py` | Derives affect *from* a run — emotion as output, with evidence. Catalog `when` / `use_for` is the only spec; the former `RULES` golden is deleted |
+| appraisal | `appraisal.py` | Derives affect *from* a run — emotion as output, with evidence. Catalog `when` / `use_for` is the only spec; the former `RULES` golden is deleted. `APPRAISAL_USE_FOR` is the catalog `use_for` map (strings, not rule lambdas). Stable import path. |
+| appraisal interpreter | `appraisal_interpreter.py` | Catalog `when` language, `AppraisalContext`, and schema validation. Callers still import from `appraisal`. |
 | trajectory | `trajectory.py` | Session memory: seen ids, mined terms, dead ends, surprises |
-| modulate | `modulate.py` | Bounded, logged config changes driven by affect |
-| explore | `explore.py` | The loop: appraise → feel → modulate → remember |
+| modulate | `modulate.py` | Bounded, logged config changes driven by affect. Stable import; plan assembly (`modulate_config`). |
+| modulate effects | `modulate_effects.py` | Catalog `apply_effects` applicators. Frozen effect ids. Callers still import from `modulate`. |
+| explore | `explore.py` | The loop: appraise → feel → modulate → remember. Stable import (`explore`). |
+| explore domains | `explore_domains.py` | Jump order, similarity clusters, next-domain / resolve_jump. Callers still import from `explore`. |
+| explore drop | `explore_drop.py` | Step helper: omit `dual_use_high` when `drop_dual_use` fires. Residual stays residual. |
 | stances | `stances.py` | Seven non-curiosity questions over one ranked set — views, never re-rankings |
 | memory | `memory.py` | Cross-process CLI persistence (`~/.artificial_emotions/memory.json`); MCP/HTTP/library off by default |
 | costs | `costs.py` | Disclosed downside twins of helpful modulation — affect that can make a run worse |
-| scars | `scars.py` | History scars / affinities — capped, disclosed **behavioral biases**, not motives |
+| scars | `scars.py` | History scars / affinities — capped, disclosed **behavioral biases**, not motives. Jump order is `explore_domains._JUMP_ORDER` (do not import `explore`). |
 | temperament | `temperament.py` | Instance `.toml` personality biasing search / appraisal knobs |
 | avoidance | `avoidance.py` | Persistent non-selection patterns (`pattern_not_motive`) |
-| imagine | `imagine.py` | Imagination quarantine + stance-twin generators (wired: premortem, reformulation, counterfactual) |
+| imagine | `imagine.py` | Imagination quarantine + stance-twin registry + `apply_imagination`. Stable public import. |
+| imagine quarantine | `imagine_quarantine.py` | Container: `ImaginedContent`, payload key, ranking valve. Callers still import from `imagine`. |
+| imagine lenses | `imagine_lenses.py` | Stable re-export of ranked generators. |
+| imagine twins | `imagine_twins.py` | Ranked twins: premortem, harm_scenario, rehearsal, eulogy, reformulation. |
+| imagine counterfactual | `imagine_counterfactual.py` | Counterfactual generator + literature-contradiction checks. |
 | transfer | `transfer.py` | Corpus-gated structural analogy; ship gate ≈5× lift; never via ranked `apply_imagination` |
 | dream | `dream.py` | Explicit offline reanalysis of stored history — never automatic |
 | discover | `discover.py` | Swanson ABC linking — generates questions from a corpus |
-| validate | `validate.py` | Time-split retrospective validation with a random baseline (also gates transfer) |
+| validate | `validate.py` | Time-split retrospective validation with a random baseline (also gates transfer). `concept_pool` is the shared corpus-term helper. |
+| timeutil | `timeutil.py` | UTC now + ISO-8601 parse for mood/scar/memory decay and preference-event stamps |
 | affect | `affect.py` | PAD mood, felt simulation, blends and tension |
 | pipeline | `pipeline.py` | Orchestration (`CuriosityEngine`) |
 | export_unknowns | `export_unknowns.py` | Ranked-set JSON document (file / HTTP body; no webhooks) |
 | voi | `voi.py` | VOI worksheet fill (`evsi: null`, `honesty: not_evsi`); formula hook returns None without data — not EVSI |
 | outcome_loop | `outcome_loop.py` | Dry-run: outcome JSONL → suggested re-rank / next explore (not experiment execution) |
 | provoke | `provoke.py` | Instant spark + inject pack |
-| emotions | `emotions.py` | Catalog / mix / cues (`annotation_only` + `computational_affect`) |
+| emotions | `emotions.py` | Public import: cues, pack, catalog, mix (`annotation_only` + `computational_affect`) |
+| emotions catalog | `emotions_catalog.py` | JSON catalog load + `emotion_catalog()` payload. Callers still import from `emotions`. |
+| emotions mix | `emotions_mix.py` | `mix_emotions` / `feel` blend math. Callers still import from `emotions`. |
 | resources | `resources.py` | Packaged data paths for worksheets / eval fixtures |
-| preferences | `preferences.py` | Opt-in preference JSONL + thin hints |
+| preferences | `preferences.py` | Stable import for opt-in preference JSONL + thin hints. Re-exports the parse seam and weight-hint math. Flywheel composition (`summarize_preferences`, `suggest_next_pair`, `fit_bt_offline`, thin re-rank) stays here. Preview default; `--apply` / `apply=true` returns a copy — named presets are never overwritten. Not calibrated. |
+| preference events | `preference_events.py` | JSONL I/O, `PreferenceEvent`, `normalize_preference_events` / `coerce_preference_event`. Corrupt rows skip (WARNING). Callers still import from `preferences`. |
+| preference hints | `preference_hints.py` | Weight-hint math: `learn_profile_weight_hints`, `apply_weight_hints_to_profile`, `preview_or_apply_weight_hints`. Callers still import from `preferences`. |
 | agent_tools | `agent_tools.py` → `agent_tools_pkg/` | Shared MCP / OpenAI / HTTP tool schemas |
 | mcp_server | `mcp_server.py` | Stdio MCP (stdlib JSON-RPC) |
 | api | `api.py` → `api_pkg/` | FastAPI (see below) |
@@ -102,8 +115,10 @@ not a production SLO.
 | Module | Holds |
 |--------|-------|
 | `cli_pkg/__init__.py` | `main()` and the subcommand dispatch table |
-| `cli_pkg/parser.py` | Every argparse definition, in one readable place |
-| `cli_pkg/commands/ranking.py` | `run`, `spark`, `serve` |
+| `cli_pkg/parser/` | Argparse groups (`core`, `evaluation`, `alive`, `worksheets`). `build_parser` is the stable facade; flag names/defaults/help unchanged. |
+| `cli_pkg/commands/ranking.py` | `run`, `spark`, `serve`. Re-exports lens handlers and `_explore` so dispatch does not churn. |
+| `cli_pkg/commands/explore.py` | `explore` CLI handler |
+| `cli_pkg/commands/lenses.py` | `discover`, `stance`, `imagine` (including corpus-gated transfer) |
 | `cli_pkg/commands/profiles.py` | `profiles`, `compare-profiles` |
 | `cli_pkg/commands/worksheets.py` | `critique-brief`, `voi-worksheet`, `surprise-worksheet`, `decompose` |
 | `cli_pkg/commands/preferences.py` | `preferences hints \| summarize \| suggest-pair` |
@@ -112,7 +127,6 @@ not a production SLO.
 | `cli_pkg/commands/emotions.py` | `emotions` / `epistemic` subcommands |
 | `cli_pkg/commands/memory.py` | `memory show\|forget\|reset\|avoiding` |
 | `cli_pkg/commands/dream.py` | `dream` — explicit offline reanalysis |
-| `cli_pkg/commands/ranking.py` | also dispatches `imagine` / transfer corpus path |
 
 The bare-flag fallback (`emotions --domain ai` → `run`) reads subcommand names
 off the parser rather than a hardcoded list, so the two cannot drift apart.
@@ -126,10 +140,18 @@ strictly one way — nothing imports backwards:
 schemas.py → handlers.py → registry.py → mcp_resources.py
 ```
 
+Implementations are split by tool family under `handler_families/`.
+`handlers.py` is the stable re-export — registry / MCP / HTTP callers import
+there, not from family modules. JSON Schema fragments are split the same way
+under `schema_families/`; `schemas.py` is the stable re-export. Tool schemas,
+mcp_lint phrases, and `/v1` contracts are unchanged.
+
 | Module | Holds |
 |--------|-------|
-| `agent_tools_pkg/schemas.py` | JSON Schema fragments (MCP `inputSchema` / OpenAI `parameters`) |
-| `agent_tools_pkg/handlers.py` | Tool implementations |
+| `agent_tools_pkg/schemas.py` | Stable re-export of JSON Schema fragments (MCP `inputSchema` / OpenAI `parameters`) |
+| `agent_tools_pkg/schema_families/` | Schemas by family (curiosity, investigate, emotions, eval, stances, imagine, memory) |
+| `agent_tools_pkg/handlers.py` | Stable re-export of tool implementations |
+| `agent_tools_pkg/handler_families/` | Implementations by family (curiosity, investigate, emotions, eval, stances, imagine, memory) |
 | `agent_tools_pkg/registry.py` | `TOOL_SPECS`, tier filtering, `dispatch_tool` |
 | `agent_tools_pkg/mcp_resources.py` | `curiosity://` resource list and read |
 
@@ -146,9 +168,9 @@ rank → appraise → feel → modulate → remember → rank
 
 | Stage | Module | Contract |
 |-------|--------|----------|
-| Appraise | `appraisal.py` | Catalog `when` / `use_for` is the only spec (`RULES` deleted). Every signal carries `because` + `evidence`. Deterministic. |
+| Appraise | `appraisal.py` | Catalog `when` / `use_for` is the only spec (`RULES` deleted). `APPRAISAL_USE_FOR` is catalog `use_for` text, not lambdas. Every signal carries `because` + `evidence`. Deterministic. |
 | Feel | `emotions.py` / `affect.py` | Signals become a mix with PAD, triads, ambivalence. |
-| Modulate | `modulate.py` | Changes **search behaviour**. ValueProfile weights untouched unless `allow_weight_deltas`, then capped at `MAX_WEIGHT_DELTA` and listed. |
+| Modulate | `modulate.py` | Changes **search behaviour**. ValueProfile weights untouched unless `allow_weight_deltas`, then capped at `MAX_WEIGHT_DELTA` and listed. Applicators in `modulate_effects.py`. |
 | Remember | `trajectory.py` | Boredom needs a past; this is that past. |
 
 **Trust boundary.** Ranking must stay a function of the stated `ValueProfile`.
@@ -213,10 +235,10 @@ ranked items ──▶ apply_imagination(kind) ──▶ { imagined: [...], hone
 corpus + seed ──▶ transfer.imagine_transfer ──▶ same quarantine (corpus_gated)
 ```
 
-Wired generators today: `premortem`, `reformulation`, `counterfactual`.
-`harm_scenario`, `rehearsal`, `eulogy` are registered stubs until generators land.
-`transfer` keeps `generate=None` on purpose — only the corpus path ships, after
-clearing the validate lift gate (~5× on the bundled timesplit corpus).
+Wired ranked-applicable generators: `premortem`, `harm_scenario`, `rehearsal`,
+`eulogy`, `reformulation`, `counterfactual`. `transfer` keeps `generate=None`
+on purpose — only the corpus path ships, after clearing the validate lift
+gate (~5× on the bundled timesplit corpus).
 
 ## Product surfaces
 

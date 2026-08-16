@@ -33,6 +33,7 @@ from artificial_emotions.discover import LocalCorpusClient, _norm, discover_link
 
 __all__ = [
     "ValidationReport",
+    "concept_pool",
     "split_by_year",
     "validate_retrospective",
 ]
@@ -152,7 +153,8 @@ def split_by_year(
     return past, future
 
 
-def _concept_pool(documents: list[dict[str, Any]]) -> list[str]:
+def concept_pool(documents: list[dict[str, Any]]) -> list[str]:
+    """Unique stripped concept names from corpus documents, sorted."""
     pool: dict[str, None] = {}
     for doc in documents:
         for concept in doc.get("concepts") or []:
@@ -198,7 +200,7 @@ def validate_retrospective(
         n_past_docs=len(past),
         n_future_docs=len(future),
     )
-    pool = _concept_pool(past)
+    pool = concept_pool(past)
     rng = random.Random(seed)
 
     for a in seeds:

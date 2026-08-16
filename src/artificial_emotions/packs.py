@@ -12,7 +12,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from artificial_emotions.logutil import get_logger, soft_fail
 from artificial_emotions.models import Domain, UnansweredQuestion
+
+logger = get_logger("packs")
 
 PACK_SCHEMA_VERSION = "domain_pack.v1"
 # CONTRIBUTING JSON example / loader floor.
@@ -137,7 +140,8 @@ def load_domain_packs(
             continue
         try:
             data = load_pack_file(f)
-        except Exception:  # noqa: BLE001
+        except (OSError, ValueError) as exc:
+            soft_fail(logger, "Skipping unreadable domain pack %s", f, exc=exc)
             continue
         schema = str(data.get("schema_version") or "")
         if schema and not schema.startswith("domain_pack"):
@@ -438,7 +442,8 @@ def check_packs(
             try:
                 data = load_pack_file(p)
                 pack_name = str(data.get("name") or "") or None
-            except Exception:  # noqa: BLE001
+            except (OSError, ValueError) as exc:
+                soft_fail(logger, "Skipping unreadable pack name lookup %s", p, exc=exc)
                 pack_name = None
             if _name_matches_pack(p, name, pack_name):
                 files.append(p)

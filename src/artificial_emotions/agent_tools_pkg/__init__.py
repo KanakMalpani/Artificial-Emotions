@@ -3,13 +3,16 @@
 Public surface stays ``artificial_emotions.agent_tools`` — this package is the
 implementation behind it, layered so each file has one job:
 
-    schemas.py        JSON Schema fragments (MCP inputSchema / OpenAI parameters)
-    handlers.py       tool implementations
-    registry.py       TOOL_SPECS, tier filtering, dispatch
-    mcp_resources.py  curiosity:// resource list and read
+    schemas.py            stable re-export of JSON Schema fragments
+    schema_families/      schemas split by tool family (mirrors handler_families)
+    handlers.py           stable re-export of tool implementations
+    handler_families/     implementations split by tool family
+    registry.py           TOOL_SPECS, tier filtering, dispatch
+    mcp_resources.py      curiosity:// resource list and read
 
 The dependency direction is strictly schemas → handlers → registry →
-mcp_resources; nothing imports backwards.
+mcp_resources; nothing imports backwards. Callers import handlers from
+``handlers.py``, not from family modules.
 """
 
 from __future__ import annotations

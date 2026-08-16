@@ -1,8 +1,8 @@
 """CLI entry point and command dispatch.
 
 Public surface stays ``artificial_emotions.cli`` — this package is the
-implementation behind it. Parser definitions live in ``parser.py``, handlers in
-``commands/``.
+implementation behind it. Parser definitions live in ``parser/`` (stable
+``build_parser`` facade), handlers in ``commands/``.
 """
 
 from __future__ import annotations

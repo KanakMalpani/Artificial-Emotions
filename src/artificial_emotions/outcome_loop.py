@@ -14,7 +14,11 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from artificial_emotions.preferences import PreferenceEvent, load_preference_events
+from artificial_emotions.preferences import (
+    PreferenceEvent,
+    load_preference_events,
+    normalize_preference_events,
+)
 from artificial_emotions.resources import find_data_file
 
 __all__ = [
@@ -58,16 +62,7 @@ def _normalize_events(
         if not path.is_file():
             return [], str(path), "not_a_file"
         return load_preference_events(path), str(path), "ok"
-    out: list[PreferenceEvent] = []
-    for raw in events:
-        if isinstance(raw, PreferenceEvent):
-            out.append(raw)
-            continue
-        try:
-            out.append(PreferenceEvent.model_validate(raw))
-        except Exception:  # noqa: BLE001
-            continue
-    return out, None, "ok"
+    return normalize_preference_events(events), None, "ok"
 
 
 def _result_of(ev: PreferenceEvent) -> str:

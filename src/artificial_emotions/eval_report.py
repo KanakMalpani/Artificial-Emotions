@@ -43,25 +43,6 @@ _OUTCOME_HINT_PASSTHROUGH = (
 )
 
 
-def _normalize_preference_events(
-    events: Iterable[Any] | str | Path,
-) -> list[Any]:
-    from artificial_emotions.preferences import PreferenceEvent, load_preference_events
-
-    if isinstance(events, (str, Path)):
-        return load_preference_events(events)
-    out = []
-    for e in events:
-        if isinstance(e, PreferenceEvent):
-            out.append(e)
-        else:
-            try:
-                out.append(PreferenceEvent.model_validate(e))
-            except Exception:  # noqa: BLE001
-                continue
-    return out
-
-
 def _hint_magnitudes(hints: dict[str, Any]) -> dict[str, Any]:
     """Summarize weight-hint deltas without exposing a suggested profile apply path."""
     raw = hints.get("deltas") or {}
@@ -161,7 +142,10 @@ def build_calibration_report(
     does not apply weights, never reports an accuracy percentage, and never
     sets a ``proof_ready`` flag.
     """
-    from artificial_emotions.preferences import learn_profile_weight_hints
+    from artificial_emotions.preferences import (
+        learn_profile_weight_hints,
+        normalize_preference_events,
+    )
 
     source: str | None
     if events is None:
@@ -179,9 +163,9 @@ def build_calibration_report(
             missing = True
             evs: list[Any] = []
         else:
-            evs = _normalize_preference_events(path)
+            evs = normalize_preference_events(path)
     else:
-        evs = _normalize_preference_events(events)
+        evs = normalize_preference_events(events)
 
     if profile_name:
         evs = [e for e in evs if (getattr(e, "profile_name", None) or "") in (profile_name, "")]

@@ -1,11 +1,11 @@
 """Jump helper: `_next_domain` with optional similar-domain forbid.
 
-Calls the helper directly — the explore loop is wired in a later wave.
+Helpers live in ``explore_domains``; this file still imports from ``explore``.
 """
 
 from __future__ import annotations
 
-from artificial_emotions.explore import _domain_cluster, _next_domain
+from artificial_emotions.explore import _domain_cluster, _next_domain, _resolve_jump
 
 # Walk from ai until social would be the first unvisited hop.
 _AI_UNTIL_SOCIAL = [
@@ -59,3 +59,30 @@ def test_energy_cluster_covers_physical_and_earth():
     assert cluster == frozenset({"physics", "materials", "energy", "climate"})
     assert _next_domain("energy", []) == "physics"
     assert _next_domain("energy", [], forbid_similar=True) == "medicine"
+
+
+def test_resolve_jump_without_forbid_lands_on_social():
+    nxt, bias, skipped = _resolve_jump(
+        "ai",
+        _AI_UNTIL_SOCIAL,
+        forbid_similar=False,
+        mem_scars=[],
+        mem_affinities=[],
+    )
+    assert nxt == "social"
+    assert bias is None
+    assert skipped is False
+
+
+def test_resolve_jump_forbid_skips_similar_and_stays():
+    nxt, bias, skipped = _resolve_jump(
+        "ai",
+        _AI_UNTIL_SOCIAL,
+        forbid_similar=True,
+        mem_scars=[],
+        mem_affinities=[],
+    )
+    assert nxt == "ai"
+    assert nxt != "social"
+    assert bias is None
+    assert skipped is True

@@ -6,11 +6,11 @@ Not EVSI and not AutoDiscovery Bayesian surprise. See research/BAYESIAN_SURPRISE
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from artificial_emotions.resources import find_data_file
+from artificial_emotions.timeutil import utc_now_iso
 
 
 def default_surprise_worksheet_path() -> Path:
@@ -40,7 +40,7 @@ def fill_surprise_worksheet(
     fields["pilot_result"] = pilot_result or fields.get("pilot_result") or ""
     fields["belief_shift_1_to_5"] = belief_shift_1_to_5
     fields["crude_update_note"] = crude_update_note or fields.get("crude_update_note") or ""
-    fields["logged_at"] = datetime.now(UTC).isoformat()
+    fields["logged_at"] = utc_now_iso()
     sheet["fields"] = fields
     sheet["filled_by"] = "artificial_emotions.fill_surprise_worksheet"
     sheet["honesty"] = sheet.get("honesty") or (

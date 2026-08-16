@@ -227,6 +227,28 @@ def test_run_preference_learn_preview_vs_apply(tmp_path: Path):
     assert apply_meta["applied"] is True
 
 
+def test_preferences_reexports_hint_math():
+    """Stable import is the same objects; flywheel composition stays on preferences."""
+    import inspect
+
+    from artificial_emotions import preference_hints, preferences
+
+    assert preferences.learn_profile_weight_hints is preference_hints.learn_profile_weight_hints
+    assert (
+        preferences.apply_weight_hints_to_profile is preference_hints.apply_weight_hints_to_profile
+    )
+    assert (
+        preferences.preview_or_apply_weight_hints is preference_hints.preview_or_apply_weight_hints
+    )
+    assert inspect.getmodule(preferences.summarize_preferences) is preferences
+    assert inspect.getmodule(preferences.suggest_next_pair) is preferences
+    assert inspect.getmodule(preferences.fit_bt_offline) is preferences
+    assert inspect.getmodule(preferences.preference_score_adjustments) is preferences
+    assert inspect.getmodule(preferences.apply_preference_rerank) is preferences
+    src = inspect.getsource(preferences.preview_or_apply_weight_hints)
+    assert "apply: bool = False" in src
+
+
 def test_agent_tools_http_fallback_for_hints():
     client = TestClient(app)
     tools = client.get("/v1/agent/tools").json()

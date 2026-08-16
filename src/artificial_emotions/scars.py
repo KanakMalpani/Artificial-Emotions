@@ -17,8 +17,10 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from artificial_emotions.explore_domains import _JUMP_ORDER, _next_domain
 from artificial_emotions.models import CuriosityConfig
 from artificial_emotions.modulate import MAX_WEIGHT_DELTA
+from artificial_emotions.timeutil import parse_iso, utc_now
 
 __all__ = [
     "MAX_AFFINITY_BIAS",
@@ -56,33 +58,8 @@ MIN_HITS_FOR_AFFINITY = 2
 
 _LOW_SCORE = 0.40
 _HIGH_SCORE = 0.70
-_JUMP_ORDER: dict[str, str] = {
-    "ai": "biology",
-    "biology": "materials",
-    "materials": "climate",
-    "climate": "energy",
-    "energy": "physics",
-    "physics": "medicine",
-    "medicine": "social",
-    "social": "ai",
-    "general": "ai",
-}
-
-
-def _utc_now() -> datetime:
-    return datetime.now(UTC)
-
-
-def _parse_iso(stamp: str | None) -> datetime | None:
-    if not stamp:
-        return None
-    try:
-        dt = datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=UTC)
-    return dt
+# Jump order lives in explore_domains (single source). Do not import explore.py
+# from this module — explore imports scars lazily and that would cycle.
 
 
 def decay_factor(
@@ -92,11 +69,13 @@ def decay_factor(
     half_life_hours: float = SCAR_HALF_LIFE_HOURS,
 ) -> float:
     """Exponential decay factor toward zero (1.0 = fresh, →0 over half-lives)."""
-    stamped = _parse_iso(updated_at)
+    stamped = parse_iso(updated_at)
     if stamped is None:
         return 1.0
-    at = now or _utc_now()
-    elapsed_h = max(0.0, (at - stamped).total_seconds() / 3600.0)
+    at = now or utc_now()
+    if at.tzinfo is None:
+        at = at.replace(tzinfo=UTC)
+    elapsed_h = max(0.0, (at.astimezone(UTC) - stamped).total_seconds() / 3600.0)
     half = max(1e-6, float(half_life_hours))
     return float(math.pow(0.5, elapsed_h / half))
 
@@ -331,15 +310,7 @@ def next_domain_biased(
         if str(e.get("kind") or "domain") == "domain"
     }
 
-    def _default_next(cur: str, seen: list[str]) -> str:
-        candidate = _JUMP_ORDER.get(str(cur).lower(), "general")
-        for _ in range(len(_JUMP_ORDER)):
-            if candidate not in seen:
-                return candidate
-            candidate = _JUMP_ORDER.get(candidate, "general")
-        return candidate
-
-    default = _default_next(current, visited)
+    default = _next_domain(current, visited, forbid_similar=False)
 
     # Affinity pull: first unvisited preferred domain in jump order from current.
     if preferred:
@@ -528,7 +499,7 @@ def update_from_explore_result(
     half_life_hours: float = SCAR_HALF_LIFE_HOURS,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Fold one explore result into scar/affinity lists (domain-level)."""
-    at = now or _utc_now()
+    at = now or utc_now()
     now_iso = at.isoformat()
     domain, _score, went_nowhere = _session_quality(result)
 

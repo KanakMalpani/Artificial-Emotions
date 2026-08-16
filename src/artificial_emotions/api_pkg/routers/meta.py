@@ -244,9 +244,9 @@ def agent_manifest() -> dict[str, Any]:
             "transfer": "POST /v1/imagination/transfer",
             "note": (
                 "Stance-twin generators over a ranked set under quarantine "
-                "(honesty=imagined_not_retrieved, confidence=null). Stubs and "
-                "transfer return 400 on GET /{kind}; transfer is corpus-gated via POST. "
-                "Never injects into ranked keys."
+                "(honesty=imagined_not_retrieved, confidence=null). Six ranked-applicable "
+                "kinds are wired; unknown kinds and transfer return 400 on GET /{kind}. "
+                "Transfer is corpus-gated via POST. Never injects into ranked keys."
             ),
         },
         "memory": {

@@ -155,14 +155,16 @@ def test_a_failing_cooccurrence_check_skips_only_that_candidate():
     assert "Raynaud disease" not in {link.c for link in links}
 
 
-def test_evidence_failure_degrades_to_no_titles():
+def test_evidence_failure_degrades_to_no_titles(caplog: pytest.LogCaptureFixture):
     class NoSearch(StubClient):
         def search_works(self, query, per_page=8):
             raise RuntimeError("down")
 
-    links = discover_links("fish oil", client=NoSearch())
+    with caplog.at_level("WARNING", logger="artificial_emotions.discover"):
+        links = discover_links("fish oil", client=NoSearch())
     assert links
     assert links[0].evidence_ab == []
+    assert any("discovery evidence titles" in rec.message for rec in caplog.records)
 
 
 def test_discovery_is_deterministic():

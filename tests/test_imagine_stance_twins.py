@@ -201,3 +201,26 @@ def test_empty_ranking_yields_empty_imagined_list():
         assert payload[IMAGINED_PAYLOAD_KEY] == []
         assert payload["honesty"] == HONESTY_IMAGINED
         assert payload["confidence"] is None
+
+
+def test_imagine_lenses_reexports_wired_generators():
+    """``imagine_lenses`` stays the generator import path; registry wires those callables."""
+    from artificial_emotions import imagine_lenses
+
+    exported = set(imagine_lenses.__all__)
+    expected = {f"_generate_{name}" for name in IMPLEMENTED_IMAGINATION_KINDS}
+    assert exported == expected
+    for name in sorted(IMPLEMENTED_IMAGINATION_KINDS):
+        gen = getattr(imagine_lenses, f"_generate_{name}")
+        assert IMAGINATION_KINDS[name].generate is gen
+    assert "transfer" not in IMPLEMENTED_IMAGINATION_KINDS
+    assert not hasattr(imagine_lenses, "_generate_transfer")
+
+
+def test_apply_imagination_schema_enum_matches_wired_kinds():
+    """MCP/OpenAI enum is additive over wired ranked kinds — transfer stays off this tool."""
+    from artificial_emotions.agent_tools_pkg.schemas import APPLY_IMAGINATION_SCHEMA
+
+    enum = APPLY_IMAGINATION_SCHEMA["properties"]["kind"]["enum"]
+    assert set(enum) == set(IMPLEMENTED_IMAGINATION_KINDS)
+    assert "transfer" not in enum

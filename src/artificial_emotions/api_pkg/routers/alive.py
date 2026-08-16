@@ -83,7 +83,7 @@ def apply_imagination_route(
 ) -> dict[str, Any]:
     """Rank once, then run a wired imagination generator over the result.
 
-    Stubs and ``transfer`` return 400 — transfer is POST /v1/imagination/transfer.
+    Unknown kinds and ``transfer`` return 400 — transfer is POST /v1/imagination/transfer.
     """
     key = (kind or "").strip().lower()
     if key == "transfer":

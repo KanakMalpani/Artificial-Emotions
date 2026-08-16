@@ -5,7 +5,7 @@ console script). This module is a thin re-export; the implementation lives in
 ``artificial_emotions.cli_pkg``:
 
     cli_pkg/__init__.py        main() and the subcommand dispatch table
-    cli_pkg/parser.py          every argparse definition
+    cli_pkg/parser/            argparse groups; build_parser is the facade
     cli_pkg/commands/          handlers, grouped by subcommand
 """
 

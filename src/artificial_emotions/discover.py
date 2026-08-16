@@ -38,7 +38,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from artificial_emotions.cooccur_study import gap_score
-from artificial_emotions.logutil import get_logger
+from artificial_emotions.logutil import get_logger, soft_fail
 from artificial_emotions.models import Domain, UnansweredQuestion
 
 logger = get_logger("discover")
@@ -187,12 +187,11 @@ def _is_useful_concept(name: str, *, exclude: set[str]) -> bool:
 
 def _titles(client: DiscoveryClient, query: str, limit: int) -> list[str]:
     try:
-        return [getattr(h, "title", "") or "" for h in client.search_works(query, per_page=limit)][
-            :limit
-        ]
+        hits = client.search_works(query, per_page=limit)
     except Exception as exc:  # noqa: BLE001 — evidence is a nicety, not required
-        logger.warning("evidence fetch failed for %r: %s", query, exc)
+        soft_fail(logger, "Skipping optional discovery evidence titles for %r", query, exc=exc)
         return []
+    return [getattr(h, "title", "") or "" for h in hits][:limit]
 
 
 def discover_links(

@@ -51,7 +51,7 @@ def test_readme_and_limits_passing_counts_agree():
     assert badge_n == verify_n == limits_n, (
         f"README badge {badge_n} vs verify {verify_n} vs LIMITS {limits_n}"
     )
-    assert badge_n >= 1129, "advertised suite shrank without a LIMITS rationale"
+    assert badge_n >= 1200, "advertised suite shrank without a LIMITS rationale"
 
 
 def test_coverage_badge_matches_readme_body_and_floor():
@@ -70,6 +70,26 @@ def test_coverage_badge_matches_readme_body_and_floor():
     assert badge_pct == verify_pct, f"README badge {badge_pct}% vs verify {verify_pct}%"
     assert badge_pct >= floor, f"advertised {badge_pct}% is below fail_under={floor}"
     assert "floor" in readme.lower()
+
+
+def test_wired_imagination_kinds_are_not_documented_as_stubs():
+    """harm_scenario / rehearsal / eulogy generators shipped; product docs must not call them stubs.
+
+    Tagged CHANGELOG ``[1.0.0]`` may keep historical stub language. README,
+    LIMITS, and ARCHITECTURE describe current code.
+    """
+    architecture = (_ROOT / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8")
+    for blob in (_readme(), _limits(), architecture):
+        lowered = blob.lower()
+        assert "stubs until generators land" not in lowered
+        assert "registered stubs" not in lowered
+        assert "generators next" not in lowered
+    for rel in (
+        "src/artificial_emotions/api_pkg/routers/meta.py",
+        "src/artificial_emotions/api_pkg/routers/alive.py",
+    ):
+        surface = (_ROOT / rel).read_text(encoding="utf-8")
+        assert "Stubs and" not in surface
 
 
 def test_limits_proofs_roadmap_keep_hard_non_claims():

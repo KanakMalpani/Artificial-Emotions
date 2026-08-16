@@ -290,3 +290,14 @@ def test_six_step_five_domain_evaluate_when_matches_appraise_run(
         )
     assert compared >= 5 * 1, f"expected a 6-step x 5-domain suite, compared {compared} steps"
     assert not mismatches, "evaluate_when vs appraise_run mismatches:\n" + "\n".join(mismatches)
+
+
+def test_public_appraisal_reexports_interpreter():
+    """Stable import path must be the same objects as the interpreter module."""
+    from artificial_emotions import appraisal, appraisal_interpreter
+
+    assert appraisal.evaluate_when is appraisal_interpreter.evaluate_when
+    assert appraisal.AppraisalContext is appraisal_interpreter.AppraisalContext
+    assert appraisal.validate_catalog_entry is appraisal_interpreter.validate_catalog_entry
+    assert appraisal.WEIGHT_EXPR_OPS is appraisal_interpreter.WEIGHT_EXPR_OPS
+    assert appraisal.WHEN_OPS is appraisal_interpreter.WHEN_OPS

@@ -251,6 +251,19 @@ class RankedQuestion(BaseModel):
     score_low: float | None = None
     score_high: float | None = None
 
+    def flag_set(self) -> set[str]:
+        """Flags as a set (empty if unset). Not part of serialized output."""
+        return set(self.flags or [])
+
+    def score_band_width(self) -> float:
+        """``score_high - score_low``, or ``0.0`` if either bound is missing.
+
+        Not part of serialized output — helpers must not appear on ``/v1``.
+        """
+        if self.score_high is None or self.score_low is None:
+            return 0.0
+        return float(self.score_high - self.score_low)
+
 
 class CuriosityConfig(BaseModel):
     domain: Domain | str = Domain.GENERAL

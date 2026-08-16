@@ -8,7 +8,7 @@
 
 [![CI](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml/badge.svg)](https://github.com/KanakMalpani/Artificial-Emotions/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](docs/ROADMAP.md)
-[![Tests](https://img.shields.io/badge/tests-1129%20passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1219%20passing-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -380,8 +380,8 @@ emotions imagine transfer --seed "Fish oil" --corpus examples/discovery_corpus_t
 
 Imagined material travels only under the `imagined` key with
 `honesty: "imagined_not_retrieved"` and never shares a list with ranked
-unknowns. **Wired today:** `premortem`, `reformulation`, `counterfactual`.
-**Registered stubs** (generators next): `harm_scenario`, `rehearsal`, `eulogy`.
+unknowns. **Wired today** (ranked-applicable): `premortem`, `harm_scenario`,
+`rehearsal`, `eulogy`, `reformulation`, `counterfactual`.
 **Transfer** is corpus-gated on purpose (not `apply_imagination` over a ranking)
 and cleared the same validate lift bar as discovery — **≈5×** over random
 pairing on the bundled timesplit corpus; a dense-corpus control collapses lift
@@ -713,7 +713,7 @@ Scores are **decision aids, not oracles**. The `[low–high]` band is an evidenc
 
 ```bash
 pip install -e ".[dev]"
-pytest -q --cov --cov-report=term-missing     # 1129 passed · 87% · floor enforced
+pytest -q --cov --cov-report=term-missing     # 1219 passed · 87% · floor enforced
 ruff check src tests && ruff format --check src tests
 ```
 

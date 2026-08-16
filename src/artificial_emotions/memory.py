@@ -18,9 +18,11 @@ import os
 import sys
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from artificial_emotions.timeutil import utc_now_iso
 
 __all__ = [
     "DEFAULT_MEMORY_DIR",
@@ -67,10 +69,6 @@ def default_memory_path() -> Path:
     if override:
         return Path(override).expanduser()
     return DEFAULT_MEMORY_PATH
-
-
-def _utc_now() -> str:
-    return datetime.now(UTC).isoformat()
 
 
 @dataclass
@@ -376,7 +374,7 @@ class PersistentMemory:
         qids = [str(q) for q in (question_ids or []) if q]
         record = SessionRecord(
             session_id=session_id or uuid.uuid4().hex[:12],
-            started_at=started_at or _utc_now(),
+            started_at=started_at or utc_now_iso(),
             domain=str(domain),
             topic=str(topic or ""),
             steps_taken=int(steps_taken),
@@ -442,7 +440,7 @@ class PersistentMemory:
         elif isinstance(felt, dict) and isinstance(felt.get("mood"), dict):
             pad_src = felt["mood"]
         if pad_src is not None:
-            self.mood_carryover = MoodState.from_pad(pad_src, updated_at=_utc_now())
+            self.mood_carryover = MoodState.from_pad(pad_src, updated_at=utc_now_iso())
         # A4: fold session outcome into scars / affinities (domain-level).
         from artificial_emotions.scars import update_from_explore_result
 

@@ -25,7 +25,10 @@ from typing import Any
 from artificial_emotions.cooccur_study import gap_score
 from artificial_emotions.discover import LocalCorpusClient, _is_useful_concept, _norm
 from artificial_emotions.imagine import ImaginedContent, imagined_payload
-from artificial_emotions.validate import ValidationReport, split_by_year
+from artificial_emotions.logutil import get_logger, soft_fail
+from artificial_emotions.validate import ValidationReport, concept_pool, split_by_year
+
+logger = get_logger("transfer")
 
 __all__ = [
     "TRANSFER_SHIP_STATUS",
@@ -139,11 +142,11 @@ def _jaccard(a: set[str], b: set[str]) -> float:
 
 def _titles(client: LocalCorpusClient, query: str, limit: int) -> list[str]:
     try:
-        return [getattr(h, "title", "") or "" for h in client.search_works(query, per_page=limit)][
-            :limit
-        ]
-    except Exception:  # noqa: BLE001 — evidence is optional
+        hits = client.search_works(query, per_page=limit)
+    except Exception as exc:  # noqa: BLE001 — evidence is optional
+        soft_fail(logger, "Skipping optional transfer evidence titles for %r", query, exc=exc)
         return []
+    return [getattr(h, "title", "") or "" for h in hits][:limit]
 
 
 def discover_transfers(
@@ -336,16 +339,6 @@ def imagine_transfer(
     )
 
 
-def _concept_pool(documents: list[dict[str, Any]]) -> list[str]:
-    pool: dict[str, None] = {}
-    for doc in documents:
-        for concept in doc.get("concepts") or []:
-            name = str(concept).strip()
-            if name:
-                pool[name] = None
-    return sorted(pool)
-
-
 def validate_transfer_retrospective(
     corpus: str | Path | list[dict[str, Any]],
     *,
@@ -376,7 +369,7 @@ def validate_transfer_retrospective(
         n_past_docs=len(past),
         n_future_docs=len(future),
     )
-    pool = _concept_pool(past)
+    pool = concept_pool(past)
     rng = random.Random(seed)
 
     for a in seeds:

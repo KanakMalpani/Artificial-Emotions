@@ -20,6 +20,58 @@
   Calibration **proof** (§10) and production HTTP remain **v1.1**. Scores
   still **not calibrated**. HTTP still local-v1 (not TLS/WAF/SLOs). Dual-use
   still residual.
+- Internal architecture (no `/v1` change): catalog `when` evaluation lives in
+  `appraisal_interpreter.py`; `appraisal.py` remains the stable import and
+  run-dispatch path. Preference JSONL / in-memory event parsing is one seam
+  (`normalize_preference_events`); corrupt rows still skip, now logged at
+  WARNING via `soft_fail`. `coerce_preference_event` skips only
+  `ValidationError` and `JSONDecodeError` — other exceptions propagate.
+  Shared helpers: `RankedQuestion.flag_set` / `score_band_width`,
+  `validate.concept_pool`, `timeutil.parse_iso` / `utc_now` /
+  `utc_now_iso` (PreferenceEvent stamps; surprise-worksheet `logged_at`).
+  Catalog `APPRAISAL_USE_FOR` is the `use_for` text map (not RULES
+  lambdas); empty-run confusion still reads that map. Optional swallows
+  in domain-pack load, transfer/discovery evidence titles, and mix-cap
+  profile lookup log via `soft_fail` — corrupt JSON / unknown preset /
+  missing optional files still skip; unexpected exceptions still raise.
+  Catalog effect applicators live in `modulate_effects.py`; `modulate.py`
+  remains the stable import and plan assembly path. Frozen effect ids
+  unchanged. MCP tool implementations live in `handler_families/` with
+  `handlers.py` as the stable re-export — no schema, mcp_lint, or `/v1`
+  change. Preference JSONL I/O lives in `preference_events.py`; weight-hint
+  math lives in `preference_hints.py`; `preferences.py` remains the stable
+  import (preview default, `--apply` / `apply=true` copy, named presets
+  never overwritten).   Ranked imagination generators live in
+  `imagine_twins.py` and `imagine_counterfactual.py`; `imagine_lenses.py`
+  re-exports them; `imagine.py` remains the public registry /
+  `apply_imagination` import. Six ranked-applicable kinds are wired
+  (`premortem`, `harm_scenario`, `rehearsal`, `eulogy`, `reformulation`,
+  `counterfactual`); transfer stays corpus-gated. `apply_imagination`
+  MCP/OpenAI kind enum is additive (the six wired ranked kinds; transfer
+  stays on `imagine_transfer`). `/v1` imagination notes no longer call
+  ranked kinds stubs. Quarantine and driving-emotion wiring unchanged.
+  No new lenses. CLI `discover` / `stance` / `imagine` live in
+  `cli_pkg/commands/lenses.py`; CLI `explore` lives in
+  `cli_pkg/commands/explore.py`; `ranking.py` keeps `run` / `spark` /
+  `serve` and re-exports the lens handlers and `_explore`. Domain jump
+  helpers live in `explore_domains.py`; dual-use omission in
+  `explore_drop.py`; `explore.py` remains the stable loop import.
+  CLI argparse lives in `cli_pkg/parser/` groups (`core` /
+  `evaluation` / `alive` / `worksheets`); `build_parser` /
+  `cli_pkg.parser` remain the facade. Flag names, defaults, and help
+  semantics unchanged, including serve help for
+  `CURIOSITY_ALLOW_NONLOCAL_BIND` (bind refuse still in the serve
+  handler). Scars jump-order dict is the `explore_domains` source (no
+  `explore.py` import — that would cycle). MCP/OpenAI JSON Schema fragments
+  live in `schema_families/` with `schemas.py` as the stable re-export —
+  same family cut as handlers, no schema or mcp_lint change. Catalog load
+  lives in `emotions_catalog.py`; mix math in `emotions_mix.py`;
+  `emotions.py` remains the public import (cues, pack, catalog, mix).
+  Catalog `when` / `use_for` / honesty payload unchanged. `memory.py` and
+  `dream.py` stay one module each (persistence unit; reanalysis + honesty
+  guards have no second caller). Not calibrated. Not EVSI.
+  Loop remains dry-run. Audit `ts` remains Z-strftime. HTTP is not
+  production. Dual-use residual. Not phenomenal.
 
 ## [1.0.0] — 2026-08-15
 

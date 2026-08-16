@@ -20,7 +20,7 @@ from fastapi.testclient import TestClient
 
 from artificial_emotions.api import app
 from artificial_emotions.appraisal import (
-    APPRAISAL_RULES,
+    APPRAISAL_USE_FOR,
     AppraisalSignal,
     appraise_run,
     signals_to_weights,
@@ -45,7 +45,7 @@ def ranked():
 def test_appraisal_derives_affect_from_the_run_not_the_caller(ranked):
     signals = appraise_run(ranked)
     assert signals
-    assert {s.emotion for s in signals} <= set(APPRAISAL_RULES) | {"disorientation"}
+    assert {s.emotion for s in signals} <= set(APPRAISAL_USE_FOR) | {"disorientation"}
 
 
 def test_every_signal_carries_its_evidence(ranked):
@@ -66,6 +66,24 @@ def test_an_offline_heuristic_run_appraises_itself_as_humble(ranked):
 def test_empty_run_reads_as_disorientation():
     signals = appraise_run([])
     assert {s.emotion for s in signals} == {"disorientation", "confusion"}
+    confusion = next(s for s in signals if s.emotion == "confusion")
+    assert confusion.because == APPRAISAL_USE_FOR["confusion"]
+    assert confusion.evidence == {"n_items": 0}
+
+
+def test_appraisal_use_for_is_catalog_text_not_rule_lambdas():
+    """Leftover name was RULES; the map is catalog ``use_for`` strings."""
+    import artificial_emotions.appraisal as appraisal_mod
+    from artificial_emotions.emotions import emotion_catalog
+
+    assert not hasattr(appraisal_mod, "APPRAISAL_RULES")
+    assert "APPRAISAL_RULES" not in appraisal_mod.__all__
+    by_id = {str(e["id"]): e for e in emotion_catalog()["emotions"]}
+    assert APPRAISAL_USE_FOR
+    for eid, text in APPRAISAL_USE_FOR.items():
+        assert isinstance(text, str)
+        assert not callable(text)
+        assert text == str(by_id[eid].get("use_for") or "").strip()
 
 
 def test_seen_questions_produce_boredom(ranked):

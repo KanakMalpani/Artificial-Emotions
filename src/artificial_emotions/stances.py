@@ -61,16 +61,6 @@ class Stance:
         }
 
 
-def _flags(item: RankedQuestion) -> set[str]:
-    return set(item.flags or [])
-
-
-def _band(item: RankedQuestion) -> float:
-    if item.score_high is None or item.score_low is None:
-        return 0.0
-    return float(item.score_high - item.score_low)
-
-
 # --- doubt ----------------------------------------------------------------------------
 
 
@@ -78,7 +68,7 @@ def _lens_doubt(items: Sequence[RankedQuestion]) -> dict[str, Any]:
     """Rank by how likely each item is to be *wrong*, not how attractive it is."""
     reviewed = []
     for item in items:
-        flags = _flags(item)
+        flags = item.flag_set()
         reasons: list[str] = []
         if "heuristic_scoring" in flags:
             reasons.append("scored heuristically — no judge looked at it")
@@ -88,8 +78,9 @@ def _lens_doubt(items: Sequence[RankedQuestion]) -> dict[str, Any]:
             reasons.append("an LLM reader cited work that was not retrieved")
         if item.confidence < 0.4:
             reasons.append(f"confidence is low ({item.confidence:.2f})")
-        if _band(item) >= 0.5:
-            reasons.append(f"score band is wide ({_band(item):.2f}) — weakly pinned")
+        width = item.score_band_width()
+        if width >= 0.5:
+            reasons.append(f"score band is wide ({width:.2f}) — weakly pinned")
         if item.scores.answerability < 0.5:
             reasons.append("answerability is low — it may not be settleable as posed")
         if item.gap.status == GapStatus.UNKNOWN_WITH_CAVEAT:
@@ -131,7 +122,7 @@ def _lens_safety(items: Sequence[RankedQuestion]) -> dict[str, Any]:
     """Surface what could cause harm, ordered by risk rather than value."""
     flagged = []
     for item in items:
-        flags = _flags(item)
+        flags = item.flag_set()
         dual_use = sorted(f for f in flags if "dual_use" in f or "risk" in f or "review" in f)
         needs_review = bool(dual_use) or item.scores.risk >= 0.5
         flagged.append(
@@ -200,7 +191,7 @@ def _lens_close(items: Sequence[RankedQuestion]) -> dict[str, Any]:
     """Decide what to stop doing, and what to write down about it."""
     abandon = []
     for item in items:
-        flags = _flags(item)
+        flags = item.flag_set()
         reason = None
         if item.gap.status == GapStatus.LIKELY_ANSWERED:
             reason = "the literature appears to have answered this already"

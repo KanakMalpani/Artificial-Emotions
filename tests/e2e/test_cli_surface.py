@@ -40,6 +40,48 @@ def test_spark_json_shape(capsys):
     assert pack["domain"] == "ai"
 
 
+def test_stance_list_json_catalog(capsys):
+    payload = _json_out(capsys, ["stance", "list", "--json"])
+    names = {row["stance"] for row in payload["stances"]}
+    assert {"doubt", "safety", "focus", "close", "taste", "survey", "wonder"} <= names
+    assert payload.get("note")
+
+
+def test_imagine_list_json_catalog(capsys):
+    payload = _json_out(capsys, ["imagine", "list", "--json"])
+    kinds = {row["kind"] for row in payload["kinds"]}
+    assert {"premortem", "reformulation", "counterfactual", "transfer"} <= kinds
+    assert payload["honesty"] == "imagined_not_retrieved"
+
+
+def test_stance_doubt_offline_json_does_not_rerank(capsys):
+    payload = _json_out(capsys, ["stance", "doubt", "--domain", "ai", "--n", "3", "--json"])
+    assert payload["stance"] == "doubt"
+    assert payload["claims_not"]
+    assert "view" in payload
+
+
+def test_imagine_premortem_offline_json_is_quarantined(capsys):
+    payload = _json_out(capsys, ["imagine", "premortem", "--domain", "ai", "--n", "3", "--json"])
+    assert payload["kind"] == "premortem"
+    assert payload["honesty"] == "imagined_not_retrieved"
+    assert payload["confidence"] is None
+    assert payload.get("imagined") or payload.get("n_imagined") is not None
+
+
+def test_discover_local_corpus_json(capsys):
+    from artificial_emotions.resources import find_data_file
+
+    corpus = find_data_file("examples/discovery_corpus_demo.json")
+    payload = _json_out(
+        capsys,
+        ["discover", "Fish oil", "--corpus", str(corpus), "--json"],
+    )
+    assert payload["ok"] is True
+    assert payload["source"] == "local_corpus"
+    assert payload["claims_not"]
+
+
 def test_export_unknowns_json_shape(capsys):
     payload = _json_out(
         capsys, ["export", "unknowns", "--domain", "ai", "--n", "2", "--no-literature", "--json"]
@@ -293,9 +335,22 @@ def test_every_subcommand_is_wired_into_main():
         "emotions",
         "epistemic",
         "loop",
+        "discover",
+        "stance",
+        "imagine",
     } <= names
 
 
 def test_invalid_domain_is_rejected_by_the_parser():
     with pytest.raises(SystemExit):
         main(["spark", "--domain", "not-a-domain"])
+
+
+def test_serve_help_names_nonlocal_bind_guard(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["serve", "--help"])
+    assert exc.value.code == 0
+    captured = capsys.readouterr()
+    text = captured.out + captured.err
+    assert "CURIOSITY_ALLOW_NONLOCAL_BIND" in text
+    assert "CURIOSITY_HOST" in text

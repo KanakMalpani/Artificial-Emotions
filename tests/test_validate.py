@@ -19,6 +19,7 @@ import pytest
 from artificial_emotions.resources import find_data_file
 from artificial_emotions.validate import (
     ValidationReport,
+    concept_pool,
     split_by_year,
     validate_retrospective,
 )
@@ -215,3 +216,14 @@ def test_cli_validate_json_and_text(capsys):
     assert "CONFIRMED" in text
     assert "baseline" in text
     assert "Not claimed" in text
+
+
+def test_concept_pool_dedupes_strips_and_sorts():
+    docs = [
+        {"concepts": ["Fish oil", " Blood viscosity ", "Fish oil", ""]},
+        {"concepts": ["Raynaud disease", "Blood viscosity"]},
+        {"title": "no concepts key"},
+        {"concepts": None},
+    ]
+    assert concept_pool(docs) == ["Blood viscosity", "Fish oil", "Raynaud disease"]
+    assert concept_pool([]) == []

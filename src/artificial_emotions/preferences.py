@@ -8,21 +8,37 @@ Beyond thin per-question re-rank, ``learn_profile_weight_hints`` suggests
 prefer/reject events that carry score axes, and from ``event_type=outcome``
 rows that carry ``score_axes`` plus ``labels.result`` — never a universal
 rank oracle. Hints are not applied until ``apply_weight_hints_to_profile``.
+
+JSONL I/O and event normalize live in ``preference_events``; weight-hint math
+lives in ``preference_hints``. This module is the stable import path
+(CLI / HTTP / MCP / tests). Preview remains the default; ``--apply`` /
+``apply=true`` returns a profile copy and never overwrites named presets.
+Not calibrated.
 """
 
 from __future__ import annotations
 
-import json
-from collections.abc import Iterable, Iterator
-from datetime import UTC, datetime
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
-
-from artificial_emotions.models import ValueProfile, resolve_value_profile
-
-SCHEMA_VERSION = "preference_event.v1"
+from artificial_emotions.preference_events import (
+    SCHEMA_VERSION,
+    PreferenceEvent,
+    append_preference_event,
+    coerce_preference_event,
+    events_from_ranked,
+    load_preference_events,
+    normalize_preference_events,
+    outcome_for_appraisal,
+    read_preference_events,
+)
+from artificial_emotions.preference_hints import (
+    _HINT_HONESTY,
+    apply_weight_hints_to_profile,
+    learn_profile_weight_hints,
+    preview_or_apply_weight_hints,
+)
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -30,186 +46,19 @@ __all__ = [
     "append_preference_event",
     "apply_preference_rerank",
     "apply_weight_hints_to_profile",
+    "coerce_preference_event",
     "events_from_ranked",
     "fit_bt_offline",
     "learn_profile_weight_hints",
-    "preview_or_apply_weight_hints",
     "load_preference_events",
+    "normalize_preference_events",
     "outcome_for_appraisal",
     "preference_score_adjustments",
+    "preview_or_apply_weight_hints",
     "read_preference_events",
     "suggest_next_pair",
     "summarize_preferences",
 ]
-
-_AXIS_TO_WEIGHT = {
-    "impact": "weight_impact",
-    "neglectedness": "weight_neglectedness",
-    "tractability": "weight_tractability",
-    "surprise": "weight_surprise",
-}
-
-_HINT_HONESTY = (
-    "Weight hints are tiny profile-scoped deltas from labeled prefer/reject "
-    "events with score axes, and from outcome events that carry score_axes "
-    "plus labels.result — not calibrated learning, not universal ranking, "
-    "and not proof the profile is 'correct'."
-)
-
-# Outcome labels.result → prefer-like vs reject-like for axis means.
-# Progress outcomes nudge toward those axes; misses / dead-ends /
-# false-unknowns / logged nulls nudge away. Unknown tokens are skipped.
-_OUTCOME_PREFER_RESULTS = frozenset({"partial_progress", "answered"})
-_OUTCOME_REJECT_RESULTS = frozenset(
-    {
-        "contradicted",
-        "already_answered",
-        "answered_elsewhere",
-        "abandoned",
-        "null",
-    }
-)
-_WEIGHT_FLOOR = 0.15
-
-
-class PreferenceEvent(BaseModel):
-    """One preference / spot-check / outcome breadcrumb."""
-
-    schema_version: str = SCHEMA_VERSION
-    ts: str = Field(
-        default_factory=lambda: datetime.now(UTC).isoformat(),
-        description="ISO-8601 UTC timestamp",
-    )
-    event_type: str = Field(
-        ...,
-        description="prefer | reject | already_answered | keep | tie | both_keep | outcome | note",
-    )
-    profile_name: str = "humanity_default"
-    domain: str | None = None
-    question_id: str | None = None
-    question_text: str | None = None
-    rank: int | None = None
-    curiosity_score: float | None = None
-    # Optional axis snapshot at feedback time (enables weight hints).
-    score_axes: dict[str, float] = Field(default_factory=dict)
-    preferred_over_ids: list[str] = Field(default_factory=list)
-    labels: dict[str, str] = Field(default_factory=dict)
-    notes: str = ""
-    run_id: str | None = None
-    metadata: dict[str, Any] = Field(default_factory=dict)
-
-
-def append_preference_event(
-    path: str | Path,
-    event: PreferenceEvent | dict[str, Any],
-) -> PreferenceEvent:
-    """Append one JSONL line. Creates parent dirs as needed."""
-    if isinstance(event, dict):
-        event = PreferenceEvent.model_validate(event)
-    p = Path(path)
-    p.parent.mkdir(parents=True, exist_ok=True)
-    with p.open("a", encoding="utf-8") as f:
-        f.write(event.model_dump_json() + "\n")
-    return event
-
-
-def read_preference_events(path: str | Path) -> Iterator[PreferenceEvent]:
-    """Yield PreferenceEvent rows from a JSONL file (skips blank/corrupt lines)."""
-    p = Path(path)
-    if not p.exists():
-        return
-        yield  # pragma: no cover — makes this a generator
-    with p.open("r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                yield PreferenceEvent.model_validate(json.loads(line))
-            except Exception:  # noqa: BLE001
-                continue
-
-
-def load_preference_events(path: str | Path) -> list[PreferenceEvent]:
-    return list(read_preference_events(path))
-
-
-def outcome_for_appraisal(
-    path: str | Path | None,
-    *,
-    question_ids: Iterable[str] | None = None,
-) -> tuple[str, str]:
-    """Latest matching outcome event as ``(result, question_id)``.
-
-    Returns ``("", "")`` when ``path`` is missing, empty, or has no ``outcome``
-    event with a question id. Does not invent results. When ``question_ids`` is
-    given, only events whose ``question_id`` is in that set match — pride/shame
-    stay silent without a matching logged outcome.
-    """
-    if not path:
-        return "", ""
-    allowed: set[str] | None = None
-    if question_ids is not None:
-        allowed = {str(q).strip() for q in question_ids if str(q).strip()}
-    latest: PreferenceEvent | None = None
-    for ev in load_preference_events(path):
-        if (ev.event_type or "").lower() != "outcome":
-            continue
-        qid = (ev.question_id or "").strip()
-        if not qid:
-            continue
-        if allowed is not None and qid not in allowed:
-            continue
-        latest = ev
-    if latest is None:
-        return "", ""
-    result = str((latest.labels or {}).get("result") or "").strip().lower()
-    return result, (latest.question_id or "").strip()
-
-
-def events_from_ranked(
-    ranked: Iterable[Any],
-    *,
-    event_type: str = "note",
-    profile_name: str = "humanity_default",
-    run_id: str | None = None,
-    notes: str = "",
-) -> list[PreferenceEvent]:
-    """Helper: snapshot ranked questions into PreferenceEvent shells (caller labels later)."""
-    out: list[PreferenceEvent] = []
-    for item in ranked:
-        q = getattr(item, "question", None)
-        axes_obj = getattr(item, "scores", None)
-        axes: dict[str, float] = {}
-        if axes_obj is not None:
-            if hasattr(axes_obj, "model_dump"):
-                dumped = axes_obj.model_dump(mode="json")
-                axes = {
-                    k: float(dumped[k])
-                    for k in _AXIS_TO_WEIGHT
-                    if k in dumped and dumped[k] is not None
-                }
-            elif isinstance(axes_obj, dict):
-                axes = {
-                    k: float(axes_obj[k])
-                    for k in _AXIS_TO_WEIGHT
-                    if k in axes_obj and axes_obj[k] is not None
-                }
-        out.append(
-            PreferenceEvent(
-                event_type=event_type,
-                profile_name=profile_name,
-                domain=str(getattr(q, "domain", None) or ""),
-                question_id=getattr(q, "id", None),
-                question_text=getattr(q, "question", None),
-                rank=getattr(item, "rank", None),
-                curiosity_score=getattr(item, "curiosity_score", None),
-                score_axes=axes,
-                run_id=run_id,
-                notes=notes,
-            )
-        )
-    return out
 
 
 def preference_score_adjustments(
@@ -280,234 +129,6 @@ def apply_preference_rerank(
     return ranked
 
 
-def _axes_from_event(ev: PreferenceEvent) -> dict[str, float] | None:
-    if ev.score_axes:
-        out = {
-            k: float(ev.score_axes[k])
-            for k in _AXIS_TO_WEIGHT
-            if k in ev.score_axes and ev.score_axes[k] is not None
-        }
-        if len(out) >= 2:
-            return out
-    meta = ev.metadata or {}
-    raw = meta.get("score_axes") or meta.get("scores")
-    if isinstance(raw, dict):
-        out = {k: float(raw[k]) for k in _AXIS_TO_WEIGHT if k in raw and raw[k] is not None}
-        if len(out) >= 2:
-            return out
-    return None
-
-
-def _mean_axes(rows: list[dict[str, float]]) -> dict[str, float]:
-    if not rows:
-        return {}
-    keys: set[str] = set()
-    for r in rows:
-        keys.update(r.keys())
-    means: dict[str, float] = {}
-    for k in keys:
-        vals = [r[k] for r in rows if k in r]
-        if vals:
-            means[k] = sum(vals) / len(vals)
-    return means
-
-
-def _event_result_label(ev: PreferenceEvent) -> str:
-    return str((ev.labels or {}).get("result") or "").strip().lower()
-
-
-def _outcome_result_bucket(result: str) -> str | None:
-    """Map labels.result to prefer-like / reject-like, or None if unknown."""
-    r = (result or "").strip().lower()
-    if r in _OUTCOME_PREFER_RESULTS:
-        return "prefer"
-    if r in _OUTCOME_REJECT_RESULTS:
-        return "reject"
-    return None
-
-
-def learn_profile_weight_hints(
-    events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
-    *,
-    profile_name: str | None = None,
-    base_profile: ValueProfile | None = None,
-    max_delta: float = 0.08,
-    min_labeled: int = 2,
-) -> dict[str, Any]:
-    """
-    Suggest small ValueProfile weight deltas from labeled events with axes.
-
-    Prefer/keep vs reject/already_answered: axes that are higher on preferred
-    items get a tiny positive weight nudge (and vice versa). ``event_type=outcome``
-    rows with ``score_axes`` and a known ``labels.result`` join the same buckets
-    (progress → prefer-like; contradicted / already_answered / answered_elsewhere
-    / abandoned / null → reject-like). Caps keep this a *hint*, not calibrated
-    learning. Profile-scoped only. Does not mutate ``base_profile`` — callers
-    apply via ``apply_weight_hints_to_profile``.
-    """
-    if isinstance(events, (str, Path)):
-        evs = load_preference_events(events)
-    else:
-        evs = []
-        for e in events:
-            if isinstance(e, PreferenceEvent):
-                evs.append(e)
-            else:
-                try:
-                    evs.append(PreferenceEvent.model_validate(e))
-                except Exception:  # noqa: BLE001
-                    continue
-
-    prefer_axes: list[dict[str, float]] = []
-    reject_axes: list[dict[str, float]] = []
-    n_outcome = 0
-    for ev in evs:
-        if profile_name and ev.profile_name and ev.profile_name != profile_name:
-            continue
-        axes = _axes_from_event(ev)
-        if not axes:
-            continue
-        et = (ev.event_type or "").lower()
-        if et in ("prefer", "keep"):
-            prefer_axes.append(axes)
-        elif et in ("reject", "already_answered"):
-            reject_axes.append(axes)
-        elif et == "outcome":
-            bucket = _outcome_result_bucket(_event_result_label(ev))
-            if bucket == "prefer":
-                prefer_axes.append(axes)
-                n_outcome += 1
-            elif bucket == "reject":
-                reject_axes.append(axes)
-                n_outcome += 1
-
-    base = base_profile or resolve_value_profile(profile_name=profile_name or "humanity_default")
-    n_pref = len(prefer_axes)
-    n_rej = len(reject_axes)
-    labeled = n_pref + n_rej
-    if labeled < min_labeled or n_pref < 1:
-        return {
-            "ok": False,
-            "reason": "need_more_labeled_events_with_score_axes",
-            "n_prefer": n_pref,
-            "n_reject": n_rej,
-            "n_outcome": n_outcome,
-            "deltas": {},
-            "suggested_profile": base.model_dump(mode="json"),
-            "honesty": _HINT_HONESTY,
-        }
-
-    mean_p = _mean_axes(prefer_axes)
-    mean_r = _mean_axes(reject_axes) if reject_axes else {k: 0.5 for k in mean_p}
-    deltas: dict[str, float] = {}
-    for axis, weight_key in _AXIS_TO_WEIGHT.items():
-        diff = float(mean_p.get(axis, 0.5) - mean_r.get(axis, 0.5))
-        # Scale: full 1.0 axis gap → max_delta weight nudge.
-        nudge = max(-max_delta, min(max_delta, diff * max_delta * 2.0))
-        if abs(nudge) < 0.005:
-            continue
-        deltas[weight_key] = round(nudge, 4)
-
-    suggested = base.model_copy(deep=True)
-    clamped: list[str] = []
-    for weight_key, nudge in list(deltas.items()):
-        cur = float(getattr(suggested, weight_key))
-        # Guardrail: never drive a weight to 0 or below a floor (profile intent).
-        floor = _WEIGHT_FLOOR
-        new = float(max(floor, min(3.0, cur + nudge)))
-        if new == floor and cur + nudge < floor:
-            clamped.append(weight_key)
-            # Shrink delta to what was actually applied.
-            deltas[weight_key] = round(new - cur, 4)
-        setattr(suggested, weight_key, new)
-    # Drop zero deltas after clamp.
-    deltas = {k: v for k, v in deltas.items() if abs(v) >= 0.005}
-    if profile_name or base.name:
-        suggested.name = f"{base.name}+pref_hints"
-        suggested.description = (
-            f"{base.description} [preference weight hints applied — see honesty]"
-        )
-
-    return {
-        "ok": bool(deltas),
-        "reason": "ok" if deltas else ("clamped_to_empty" if clamped else "axes_too_similar"),
-        "n_prefer": n_pref,
-        "n_reject": n_rej,
-        "n_outcome": n_outcome,
-        "deltas": deltas,
-        "clamped_weights": clamped,
-        "mean_prefer_axes": mean_p,
-        "mean_reject_axes": mean_r if reject_axes else {},
-        "suggested_profile": suggested.model_dump(mode="json"),
-        "honesty": _HINT_HONESTY,
-    }
-
-
-def apply_weight_hints_to_profile(
-    profile: ValueProfile,
-    hints: dict[str, Any],
-) -> ValueProfile:
-    """Apply ``learn_profile_weight_hints`` deltas onto a profile copy."""
-    if not hints or not hints.get("ok"):
-        return profile
-    suggested = hints.get("suggested_profile")
-    if isinstance(suggested, dict):
-        return ValueProfile.model_validate(suggested)
-    return profile
-
-
-def preview_or_apply_weight_hints(
-    events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
-    *,
-    profile_name: str | None = None,
-    base_profile: ValueProfile | None = None,
-    max_delta: float = 0.08,
-    min_labeled: int = 2,
-    apply: bool = False,
-) -> dict[str, Any]:
-    """Preview (default) or apply tiny weight hints onto a profile copy.
-
-    Uses ``learn_profile_weight_hints`` then, only when ``apply=True``,
-    ``apply_weight_hints_to_profile``. Named presets are never overwritten
-    in place. Not calibrated learning.
-    """
-    hints = learn_profile_weight_hints(
-        events,
-        profile_name=profile_name,
-        base_profile=base_profile,
-        max_delta=max_delta,
-        min_labeled=min_labeled,
-    )
-    payload = dict(hints)
-    payload["mode"] = "apply" if apply else "preview"
-    payload["applied"] = False
-    if apply:
-        base = base_profile or resolve_value_profile(
-            profile_name=profile_name or "humanity_default"
-        )
-        applied_profile = apply_weight_hints_to_profile(base, hints)
-        payload["applied"] = bool(hints.get("ok"))
-        payload["applied_profile"] = applied_profile.model_dump(mode="json")
-    return payload
-
-
-def _normalize_events(
-    events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
-) -> list[PreferenceEvent]:
-    if isinstance(events, (str, Path)):
-        return load_preference_events(events)
-    out: list[PreferenceEvent] = []
-    for e in events:
-        if isinstance(e, PreferenceEvent):
-            out.append(e)
-        else:
-            try:
-                out.append(PreferenceEvent.model_validate(e))
-            except Exception:  # noqa: BLE001
-                continue
-    return out
-
-
 def summarize_preferences(
     events: Iterable[PreferenceEvent | dict[str, Any]] | str | Path,
     *,
@@ -520,7 +141,7 @@ def summarize_preferences(
     Counts by event_type, pairwise win rates from preferred_over_ids, top ids
     by Borda-ish score, plus weight hints. Profile-scoped when profile_name set.
     """
-    evs = _normalize_events(events)
+    evs = normalize_preference_events(events)
     if profile_name:
         evs = [e for e in evs if (e.profile_name or "") == profile_name or not e.profile_name]
 
@@ -670,7 +291,7 @@ def suggest_next_pair(
 
     compared: dict[tuple[str, str], int] = {}
     if events is not None:
-        for ev in _normalize_events(events):
+        for ev in normalize_preference_events(events):
             if profile_name and (ev.profile_name or "") not in (profile_name, ""):
                 continue
             qid = (ev.question_id or "").strip()
@@ -731,7 +352,7 @@ def fit_bt_offline(
 
     Does **not** fit skills until pair count ≥ min_pairs; never rewrites weights.
     """
-    evs = _normalize_events(events)
+    evs = normalize_preference_events(events)
     if profile_name:
         evs = [e for e in evs if (e.profile_name or "") == profile_name or not e.profile_name]
     pairs = 0

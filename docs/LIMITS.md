@@ -77,7 +77,7 @@ Honest bounds for **v1.0.0** — do not overclaim.
 - Ranked-unknowns export (`emotions export unknowns` / `POST /v1/export/unknowns` / MCP `export_unknowns`): JSON document of an already-ranked set (or CLI runs the pipeline). File / HTTP body is the v1 path. Arbitrary webhook URLs are **not** accepted (SSRF). Does not re-rank. HTTP does **not** write files (`out_path` rejected).
 - Outcome-loop dry-run (`emotions loop --outcomes PATH`): preference JSONL `event_type=outcome` → suggested re-rank + next explore step. Does **not** run experiments, does **not** call `explore`. Not a lab closed-loop. CLI only (path; no HTTP path injection)
 - CI: `.github/workflows/ci.yml` runs ruff + pytest on push/PR (independent of publish billing)
-- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1129 passed)
+- Automated tests: core, failure-mode, provoke/API, MCP, emotions, mid-horizon, Alive, e2e — run `pytest -q` (1219 passed)
 - Smoke: `emotions spark`, `emotions profiles`, `emotions eval`, `emotions pack check`, `emotions export unknowns --no-literature --json`, `emotions loop --outcomes evals/fixtures/outcome_loop_smoke_v1.jsonl --json`, `emotions-mcp --list-tools`, `--list-resources`
 - Offline vs literature artifacts under `examples/run_ai_*_final.json`
 - Multi-domain seeds: biology, physics, ai, climate, medicine, materials, social, energy
@@ -160,11 +160,12 @@ the same file — never automatic, never “dream evidence.”
 - Outputs travel only under the `imagined` payload key with
   `honesty: "imagined_not_retrieved"` and `confidence: null`.
 - Never merged into ranked unknowns; never claimed as retrieved literature.
-- Wired generators: `premortem`, `reformulation`, `counterfactual`.
-  Stubs until generators land: `harm_scenario`, `rehearsal`, `eulogy`.
-- **Transfer** is corpus-gated (`emotions imagine transfer --seed … --corpus …`),
-  not applied over a ranking. Ship gate: ≈5× lift vs random pairing on the
-  bundled timesplit corpus; dense-corpus control collapses to chance.
+- Wired ranked-applicable generators: `premortem`, `harm_scenario`,
+  `rehearsal`, `eulogy`, `reformulation`, `counterfactual`.
+- **Transfer** is corpus-gated (`emotions imagine transfer --seed … --corpus …`;
+  `generate is None` on the ranked path — not `apply_imagination` over a ranking).
+  Ship gate: ≈5× lift vs random pairing on the bundled timesplit corpus;
+  dense-corpus control collapses to chance.
 
 
 ## Confidence interpretation

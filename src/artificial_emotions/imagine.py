@@ -24,8 +24,10 @@ Rules, enforced by tests:
 
 Registry shape mirrors ``stances.py``.
 
-Split: quarantine container in ``imagine_quarantine``; generators in
-``imagine_lenses``; this module is the registry + public re-export surface.
+Split: quarantine container in ``imagine_quarantine``; ranked twins in
+``imagine_twins``; counterfactual in ``imagine_counterfactual``;
+``imagine_lenses`` re-exports generators. This module is the registry,
+``apply_imagination``, and public import path.
 """
 
 from __future__ import annotations

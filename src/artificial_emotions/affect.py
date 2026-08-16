@@ -18,6 +18,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from artificial_emotions.timeutil import parse_iso, utc_now
+
 __all__ = [
     "DEFAULT_MIN_SIGNAL",
     "MAX_MIN_SIGNAL_DELTA",
@@ -44,21 +46,6 @@ DEFAULT_MIN_SIGNAL = 0.04
 MAX_MIN_SIGNAL_DELTA = 0.015
 
 
-def _parse_iso(ts: str | None) -> datetime | None:
-    if not ts:
-        return None
-    text = str(ts).strip()
-    if text.endswith("Z"):
-        text = text[:-1] + "+00:00"
-    try:
-        dt = datetime.fromisoformat(text)
-    except ValueError:
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=UTC)
-    return dt.astimezone(UTC)
-
-
 def decay_factor(
     updated_at: str | None,
     *,
@@ -71,10 +58,10 @@ def decay_factor(
     without a clock is treated as fresh). Negative elapsed clamps to ``1.0``.
     """
     half = max(1e-6, float(half_life_hours))
-    then = _parse_iso(updated_at)
+    then = parse_iso(updated_at)
     if then is None:
         return 1.0
-    when = now if now is not None else datetime.now(UTC)
+    when = now if now is not None else utc_now()
     if when.tzinfo is None:
         when = when.replace(tzinfo=UTC)
     elapsed_h = (when.astimezone(UTC) - then).total_seconds() / 3600.0

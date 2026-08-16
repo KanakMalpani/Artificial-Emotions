@@ -227,7 +227,8 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "name": "list_imagination_kinds",
         "description": (
             "List imagination kinds — generative twins of stances (premortem, "
-            "reformulation, counterfactual, …). Transfer is corpus_gated "
+            "harm_scenario, rehearsal, eulogy, reformulation, counterfactual). "
+            "Transfer is corpus_gated "
             "(imagine_transfer tool; not apply_imagination). Outputs are "
             "quarantined imagined content with honesty imagined_not_retrieved; "
             "never ranked findings, never a confidence score. Decision aids "
@@ -241,14 +242,13 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "name": "apply_imagination",
         "description": (
             "Rank unknowns once, then generate quarantined imagined content via a "
-            "stance twin (premortem = imagine this failed; reformulation = imagine "
-            "a better-posed question; counterfactual = posit an answer and derive "
-            "consequences). Offline generators; outputs travel only under the "
-            "imagined payload key with honesty imagined_not_retrieved and "
-            "confidence=null. Never injects into ranked lists. Transfer is "
-            "corpus_gated — use imagine_transfer instead. Decision aid under "
-            "an explicit ValueProfile — does not feel; not retrieved literature; "
-            "related ≠ answered."
+            "ranked-applicable stance twin (premortem, harm_scenario, rehearsal, "
+            "eulogy, reformulation, counterfactual). Offline generators; outputs "
+            "travel only under the imagined payload key with honesty "
+            "imagined_not_retrieved and confidence=null. Never injects into ranked "
+            "lists. Transfer is corpus_gated — use imagine_transfer instead. "
+            "Decision aid under an explicit ValueProfile — does not feel; not "
+            "retrieved literature; related ≠ answered."
         ),
         "input_schema": APPLY_IMAGINATION_SCHEMA,
         "handler": handle_apply_imagination,
