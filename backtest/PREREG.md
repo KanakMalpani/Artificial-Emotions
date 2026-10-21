@@ -107,13 +107,11 @@ docs from year y that match X (same matching rule). The pair score is sqrt(growt
 growth uses each concept's own volume. The top 20 unknowns by score are taken, with ties broken by (A, C) lexically. The window is 2013-2015 only.
 
 4.3 **LLM-picked.**
-- Model: `gpt-4o-2024-08-06` (dated snapshot id; no alias), via the OpenAI Chat Completions API.
-- Settings: `temperature = 0`, `top_p = 1`, and `seed` ∈ LLM_SEEDS (§7.1, 5 calls per domain). The baseline score is the **median** hit rate over the 5 seeds.
-- Input: the prompt in Appendix A, with the domain name and the full list of unknowns in P_d, as `A | C` lines in lexical order. The model sees only the pair names drawn from pre-2016 data. No years, counts or future data are given.
-- Parsing: the first 20 valid, distinct lines that exactly match a listed pair. Invalid lines are skipped. If fewer than 20 are valid, the missing slots count as misses. Every raw reply is stored.
-- Knowledge-cutoff leak: the model was trained on 2016-2024 literature, so it can "remember" what was pursued. This **can't be removed**, only reported.
-  This leak favors the baseline, so it makes the test harder for the engine, not easier. Reporting: the LLM result is labelled
-  "contaminated upper-bound baseline". The pass rule (§5) is also reported with and without the LLM baseline. Only the with-LLM version counts as PASS.
+- Runner: the repo's sandboxed cursor-agent shim (the bubblewrap sandbox used by LoopBench), **cursor-agent `2026.10.19-6bbf2c4`** (from `cursor-agent --version` on 2026-10-21), model **`grok-4.7-high`** pinned (non-fast; no alias). No paid API; no OpenAI.
+- Temperature: **cannot be set** through cursor-agent and is not applied (logged as `temperature_applied=false`). Variance comes only from 5 independent calls, labelled LLM_SEEDS 101-105 (the seed is recorded with each call, not passed to the model). Score = **median** hit rate over the 5 calls; tie → lowest seed.
+- Input: Appendix A prompt with the domain name and the full list of unknowns in P_d as `A | C` lines, lexical order. Only pre-2016 inputs: pair names drawn from the past corpus; no years, counts, citations or future data. The agent runs with no tools/web (sandboxed, no network beyond the model endpoint, empty workspace).
+- Parsing: first 20 valid, distinct lines exactly matching a listed pair; invalid lines skipped; < 20 valid → missing slots are misses. Every raw reply stored.
+- Knowledge-cutoff leak: the model was trained on 2016-2024 literature and may "remember" what was pursued. This **cannot be removed**, only reported. It favours the baseline (makes the test harder for the engine). The LLM result is labelled **"contaminated upper-bound baseline"**; the pass rule (§5) is also reported with and without the LLM baseline, but only the with-LLM version counts as PASS.
 
 ## 5. Pass threshold (one rule, relative to all three baselines)
 
@@ -128,7 +126,11 @@ For each domain d and baseline b, the engine **beats** b when both of these hold
 A tie (difference < 0.10, or p ≥ 0.05) means **not beaten**. There is no multiple-comparison correction (9 comparisons). This is stated up front and is a known threat.
 
 **PASS** = the engine beats **all three** baselines in **at least 2 of 3** domains (a majority, not all), **and** the Swanson test (§6) passes.
-Anything else is **FAIL**. Seed variance: random and LLM use the distributions or medians above. The engine and citation-trend are deterministic, which is checked by running each twice and requiring identical output (otherwise INFRA-FAIL).
+Anything else is **FAIL**.
+
+Secondary metric (reported only, never used for pass): **lift over random** = engine hit rate / mean random hit rate (RANDOM_SEEDS), per domain; reported as "undefined" if the mean random hit rate is 0.
+
+Context for the bar (from `prior-art.md`, 2026-10-21; not a target and not used for pass): LitLinker (Yetisgen-Yildiz & Pratt, J Biomed Inform 2009, https://doi.org/10.1016/j.jbi.2008.12.001) set the time-sliced protocol with P@k and MAP; Tshitoyan et al. (Nature 2019, https://www.nature.com/articles/s41586-019-1335-8) report top-50 predictions ~8x more likely than random to be confirmed within 5 years; AGATHA (Sybrandt et al., CIKM 2020, https://arxiv.org/abs/2002.05635) ROC AUC 0.901 on a post-2015 holdout; Science4Cast (Krenn et al., Nat Mach Intell 2023, https://www.nature.com/articles/s42256-023-00735-0) best AUC 0.917 three years ahead. These use different corpora, metrics and pool sizes, so they are not directly comparable to hit-rate@20; the pass rule above is unchanged. Seed variance: random and LLM use the distributions or medians above. The engine and citation-trend are deterministic, which is checked by running each twice and requiring identical output (otherwise INFRA-FAIL).
 
 ## 6. Swanson rediscovery test (fish oil → Raynaud's), pre-1986 only
 
@@ -151,7 +153,7 @@ Anything else is **FAIL**. Seed variance: random and LLM use the distributions o
 
 7.2 Outcomes:
 - **FAIL:** the pass rule in §5 or §6 isn't met. It is reported as-is and isn't re-run.
-- **INFRA-FAIL:** S3 read errors, hash mismatch against `SNAPSHOT.sha256`, LLM API errors after the retry policy (3 retries, exponential backoff 2/4/8 s, all logged in `backtest/run.log`), or non-deterministic output.
+- **INFRA-FAIL:** S3 read errors, hash mismatch against `SNAPSHOT.sha256`, LLM/cursor-agent errors or timeouts after the retry policy (3 retries, exponential backoff 2/4/8 s, all logged in `backtest/run.log`), or non-deterministic output.
   An INFRA-FAIL is fixed and the run is redone **without any change to parameters, data or prompt**. Every INFRA-FAIL and retry is logged with a timestamp in `run.log` and listed in the report.
 - **ABORT** (no result; it needs a deviation entry and a re-freeze before any rerun):
   - a seed concept or level-0 ID doesn't resolve;
@@ -176,6 +178,8 @@ Repo history check (2026-10-21): `git ls-files` and `git log --all` show **no ca
 
 - **Concept tagger leakage:** OpenAlex concepts are assigned by a modern classifier, which may encode post-2015 associations. This affects all methods equally except the LLM.
 - **LLM contamination:** see §4.3.
+- **Training-cutoff check:** `grok-4.7-high`'s training data postdates 2024, so it has likely seen the outcomes. Before the run (no model call before the freeze), the documented training cutoff is recorded in `SNAPSHOT.md` if published, else "unknown". After the run, the share of LLM picks that are hits is compared with the engine's and random's; an LLM hit rate far above both is reported as probable recall, not foresight. No mitigation beyond labelling.
+- **Temperature not settable:** LLM variance across 5 calls is uncontrolled sampling, not a fixed temperature.
 - **Retrofitted metadata:** citation counts and titles come from the current snapshot. Highly-cited counts favor earlier future years, which the per-year percentile partly offsets.
 - **Engine shortcuts:** `concept_counts` reads only the first 50 matching docs (ID order), and the `/10` similarity scaling is arbitrary. The engine is tested as-is.
 - **Matching:** title-substring matching is noisy for short terms (e.g. "MOF"), and the absence of an abstract undercounts co-mentions. The same noise applies to every method.
@@ -190,7 +194,7 @@ Repo history check (2026-10-21): `git ls-files` and `git log --all` show **no ca
 2. The release is pinned by rule (§1.2), not by a named date, because naming one would need a call. The actual date is recorded in `SNAPSHOT.md` before the pull. QA to accept.
 3. Concept IDs: the level-0 IDs are standard, but the seed concept display names are resolved by exact match at snapshot time (abort if missing). Specific seed IDs were not looked up, because looking them up needs a call.
 4. The default `max_links=8` makes "top 20" impossible, so it's set to 1000 (§0). This is the only parameter change.
-5. The LLM model choice (`gpt-4o-2024-08-06`) needs an approved, possibly paid API key. This needs Kanak's approval.
+5. The LLM baseline runs through the cursor-agent shim with `grok-4.7-high`; the shim lives in Loop-Engineering, so the backtest run script needs a copy or reference to it (decided at commit 3, before any run).
 
 ## Appendix A: LLM prompt (exact text)
 
