@@ -1,0 +1,9 @@
+# gate 20261021-123138 IST (Asia/Kolkata); venv /workspace/ae-venv; pydantic 2.14.1; ruff 0.15.22
+## backtest tests
+22 passed in 0.83s
+## full repo suite
+1241 passed, 1 warning in 11.81s
+## ruff check
+[1;32mAll checks passed![0m
+## ruff format --check
+218 files already formatted
