@@ -37,7 +37,7 @@ The release date and `manifest` sha256 are written to `backtest/SNAPSHOT.md` bef
 lacks the legacy `concepts` field on works, abort (§7.3). Pinning by rule, not by date, is an open question for QA (see the end of this file).
 
 1.3 Filters applied to the pulled works, in this order:
-- Main corpus: `publication_date <= 2015-12-31`. Future corpus: `2016-01-01 <= publication_date <= 2024-12-31`.
+- Main corpus: `publication_date <= 2015-12-31`. Future corpus: the **union of the 3 domain filters** (D1 ∪ D2 ∪ D3), `2016-01-01 <= publication_date <= 2024-12-31`, from the **same pinned snapshot**, hashed in `SNAPSHOT.sha256` like every other derived file.
   Swanson corpus: `publication_date <= 1985-12-31`.
 - `publication_date` is authoritative. If it is missing, fall back to `publication_year` (≤2015 → past, 2016-2024 → future).
   If both are missing, the work is excluded. Excluded counts are reported per corpus.
@@ -82,16 +82,17 @@ and C is not a level-0 concept.
 past domain corpus. Each method may rank only unknowns in P_d. Engine links that are not unknowns, or not in P_d, are dropped
 **before** taking its top 20. Duplicate (A, C) pairs from different bridges keep their highest rank.
 
-3.3 Top 20: each method's first 20 unknowns per domain. If a method returns fewer than 20, the missing slots count as misses
+3.3 Seed merge and top 20. The engine runs once per seed concept A (5 runs per domain). The 5 runs are **pooled**; each **unordered (A, C) pair is deduped, keeping its max `gap`**; the pooled list is **sorted globally by `gap` descending**, ties broken by **seed-concept pack order** (the order of seeds in §2's table), then **lexical (A, C)**; the **top 20** are taken. Baselines produce their 20 per domain as in §4. Each method's top 20 consists of unknowns only (§3.2). If a method returns fewer than 20, the missing slots count as misses
 (and are reported).
 
 3.4 Later check (deterministic code only; no human judgment). A future work **co-mentions** (A, C) when, in the future corpus
-for **all domains combined** (not just d), A and C each match the doc by the same rule as `cooccurrence_count`
+(union of the 3 domain filters, 2016-01-01..2024-12-31, same pinned snapshot, hashed; §1.3), A and C each match the doc by the same rule as `cooccurrence_count`
 (normalized concept name, or a substring of the normalized title).
 - **Pursued:** at least **5** co-mentioning works published from 2016-01-01 to 2024-12-31.
-- **Highly cited:** at least **1** co-mentioning work whose `cited_by_count` (as of the snapshot) is at or above the **90th percentile** of
-  `cited_by_count` among all future-corpus works with the same `primary_l0` concept **and** the same `publication_year`.
-  This normalizes for field and year.
+- **Highly cited:** at least **1** co-mentioning work that is in the top 10% for its field and year. **Primary rule:** OpenAlex
+  `citation_normalized_percentile.value >= 0.90` (equivalently `citation_normalized_percentile.is_in_top_10_percent = true`) in the pinned snapshot.
+  **Fallback** (only for works where that field is missing): `cited_by_count` at or above the 90th percentile among all works in the **full pinned
+  snapshot** with the same `primary_topic.field` **and** the same `publication_year`. The number of works judged by each rule is reported.
 - **Hit** = pursued OR highly cited.
 
 3.5 Metric: per method and domain, **hit rate = hits / 20**. Secondary (reported, not used for pass): pursued-only rate, highly-cited-only rate,
@@ -99,7 +100,7 @@ and the base rate of hits across all of P_d.
 
 ## 4. Baselines (each gives 20 unknowns per domain from P_d)
 
-4.1 **Random.** Uniform sample without replacement of 20 unknowns from P_d, sorted lexically first, using `random.Random(s).sample`,
+4.1 **Random.** The unknowns in P_d are **sorted lexically by (A, C) BEFORE seeded sampling**; then a uniform sample without replacement of 20 is drawn with `random.Random(s).sample(sorted_unknowns, 20)`,
 for each s in RANDOM_SEEDS (§7.1, 100 seeds). The baseline score is the mean hit rate over the seeds, and the distribution is kept for §5.
 
 4.2 **Citation-trend.** For a concept X in domain d, growth(X) = (n_2015(X) + 1) / (n_2013(X) + 1), where n_y = the number of past-corpus
@@ -107,7 +108,7 @@ docs from year y that match X (same matching rule). The pair score is sqrt(growt
 growth uses each concept's own volume. The top 20 unknowns by score are taken, with ties broken by (A, C) lexically. The window is 2013-2015 only.
 
 4.3 **LLM-picked.**
-- Runner: the repo's sandboxed cursor-agent shim (the bubblewrap sandbox used by LoopBench), **cursor-agent `2026.10.19-6bbf2c4`** (from `cursor-agent --version` on 2026-10-21), model **`grok-4.7-high`** pinned (non-fast; no alias). No paid API; no OpenAI.
+- Runner: **Loop-Engineering's** sandboxed cursor-agent shim, `KanakMalpani/Loop-Engineering: benchmarks/loopbench-validity/cursor_llm.py` (bubblewrap sandbox; not part of this repo), **cursor-agent `2026.10.19-6bbf2c4`** (from `cursor-agent --version` on 2026-10-21), model **`grok-4.7-high`** pinned (non-fast; no alias). No paid API; no OpenAI.
 - Temperature: **cannot be set** through cursor-agent and is not applied (logged as `temperature_applied=false`). Variance comes only from 5 independent calls, labelled LLM_SEEDS 101-105 (the seed is recorded with each call, not passed to the model). Score = **median** hit rate over the 5 calls; tie → lowest seed.
 - Input: Appendix A prompt with the domain name and the full list of unknowns in P_d as `A | C` lines, lexical order. Only pre-2016 inputs: pair names drawn from the past corpus; no years, counts, citations or future data. The agent runs with no tools/web (sandboxed, no network beyond the model endpoint, empty workspace).
 - Parsing: first 20 valid, distinct lines exactly matching a listed pair; invalid lines skipped; < 20 valid → missing slots are misses. Every raw reply stored.
@@ -187,6 +188,10 @@ Repo history check (2026-10-21): `git ls-files` and `git log --all` show **no ca
 - **Small samples:** 20 items per domain gives low power, and there's no multiple-comparison correction.
 - **Pool choice:** the 300-concept cap and the domain filter shape what can be found. Both were fixed before data.
 - **Generalization:** one Swanson case shows only that a known discovery can be recovered.
+
+## Amendment 1 (2026-10-21, IST; before any data pull or run)
+
+Doc-only clarifications for QA gaps, no results seen: §3.3 seed merge (pool 5 runs, dedupe unordered (A,C) keeping max gap, global sort by gap desc, ties by seed pack order then lexical (A,C), top 20); §1.3/§3.4 future corpus = union of the 3 domain filters, 2016-01-01..2024-12-31, same pinned snapshot, hashed; highly cited = `citation_normalized_percentile >= 0.90` / `is_in_top_10_percent`, fallback 90th percentile within primary field × year over the full snapshot; §4.1 lexical sort of P_d before seeded sampling; §4.3 shim is Loop-Engineering's `benchmarks/loopbench-validity/cursor_llm.py`.
 
 ## Open questions (repo/brief ambiguous)
 
