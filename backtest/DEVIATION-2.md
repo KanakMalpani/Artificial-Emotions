@@ -22,9 +22,23 @@ this deviation: it is pending Kanak. If it is not decided by the SNAPSHOT freeze
    `cooccurrence_count` is checked by `tests/backtest/test_run_backtest.py::test_fast_index_equals_cooccurrence_count`.
    The engine itself (`discover_links`) still runs unchanged on `LocalCorpusClient`.
 
-**Timing check, 2026-10-21 ~12:23 IST — timing-only, no outputs inspected.** The fast version (load, pool, unknowns, index) was run
-once at nice 19 on one real derived part file (`/workspace/oa/pull/out/2025-10-10_part_*`, the largest present). Only the elapsed time and the
+**Timing check, 2026-10-21 (time corrected below) — timing-only, no outputs inspected.** The fast version (load, pool, unknowns, index) was run
+once at nice 19 on one real derived part file (`/workspace/oa/pull/out/2025-10-10_part_0007.gz.jsonl.gz`, the largest present). Only the elapsed time and the
 record count were printed: **2.4 s, 39,458 records**. Nothing else was printed or saved.
 
 Gate run (pinned deps, real pydantic, stand-in inactive): `backtest/logs/gate-20261021-122159-IST.log` (backtest tests 20 passed;
 full suite 1239 passed; ruff 0.15.22 check and format clean).
+
+## Amendment to Deviation 2 (2026-10-21, IST; before the SNAPSHOT freeze and before any ranking run)
+
+8. **Swanson target matching ignores hyphens (decided by Kanak).** In PREREG §6 target matching, '-' is treated the same as a
+   space on both sides (target string and link C name). This is a spelling fix, the same kind as the Calorie restriction one
+   (Deviation 1). It applies to all four target strings ("fish oil", "eicosapentaenoic", "omega-3", "fatty acids, omega-3") and
+   only to target matching; the `cooccurrence_count` matching used in §3.4 (and everywhere else) does not change. The concept name
+   "Omega 3 fatty acid" (`C3017514745`) came from the concepts entity file; no pre-1986 works were looked at.
+   Tests: `test_swanson_target_ignores_hyphens`, `test_section_3_4_matching_keeps_hyphens`.
+
+9. **Timing-entry corrections.** The file was `2025-10-10_part_0007.gz.jsonl.gz` (the earlier text gave a wildcard; fixed above).
+   The entry said "~12:23 IST"; that was wrong. The timing check ran after the gate run started (12:21:59 IST; gate log written
+   12:22:16 IST) and **before** commit `1c74b45` (12:22:41 IST), i.e. roughly 25-40 s before that commit, not after it.
+   It was timing only: just the elapsed time and the record count were printed; nothing was inspected or saved.
