@@ -1,0 +1,66 @@
+2016-07-22_part_0000.gz filter
+2016-06-24_part_0000.gz filter
+2016-08-23_part_0000.gz filter
+2016-09-16_part_0000.gz filter
+2016-09-30_part_0000.gz filter
+2016-10-07_part_0000.gz filter
+2016-11-04_part_0000.gz filter
+2016-12-08_part_0000.gz filter
+2017-01-06_part_0000.gz filter
+2017-02-24_part_0000.gz filter
+2017-02-10_part_0000.gz filter
+2017-04-07_part_0000.gz filter
+2017-04-28_part_0000.gz filter
+2017-06-09_part_0000.gz filter
+2017-06-30_part_0000.gz filter
+2017-08-08_part_0000.gz filter
+2017-08-17_part_0000.gz filter
+2017-11-10_part_0000.gz filter
+2018-05-07_part_0000.gz filter
+2018-01-05_part_0000.gz filter
+2018-05-17_part_0000.gz filter
+2018-08-22_part_0000.gz filter
+2019-03-02_part_0000.gz filter
+2018-09-27_part_0000.gz filter
+2019-10-10_part_0000.gz filter
+2019-11-22_part_0000.gz filter
+2019-12-13_part_0000.gz filter
+2020-02-07_part_0000.gz filter
+2020-03-27_part_0000.gz filter
+2020-04-03_part_0000.gz filter
+2020-05-01_part_0000.gz filter
+2021-07-19_part_0000.gz filter
+2020-11-09_part_0000.gz filter
+2021-08-16_part_0000.gz filter
+2021-08-02_part_0000.gz filter
+2021-10-11_part_0000.gz filter
+2021-11-04_part_0000.gz filter
+2021-12-23_part_0000.gz filter
+2022-03-09_part_0000.gz filter
+2025-07-22_part_0000.gz filter
+2025-07-23_part_0000.gz filter
+2025-07-24_part_0000.gz filter
+2025-07-25_part_0000.gz filter
+2025-07-26_part_0000.gz filter
+2025-07-27_part_0000.gz filter
+2025-07-28_part_0000.gz filter
+2025-07-29_part_0000.gz filter
+2025-07-31_part_0000.gz filter
+2025-07-30_part_0000.gz filter
+2025-09-08_part_0000.gz filter
+2025-10-08_part_0000.gz filter
+2025-10-10_part_0000.gz filter
+2025-10-10_part_0001.gz filter
+# 2026-10-21 17:25:36 IST entries above: venv missing after reboot; retried in relaunch
+2025-10-10_part_0036.gz filter
+2025-10-10_part_0037.gz filter
+# 2026-10-21 18:18:13 IST part_0036/0037 filter entries: killed deliberately at v1->v2 switch; re-pulled
+2025-11-06_part_0059.gz filter
+2025-11-06_part_0054.gz filter
+2025-11-06_part_0056.gz filter
+# 2026-10-21 18:28:37 IST 2025-11-06_part_0054.gz: killed deliberately at v2->v3 switch; re-pulled
+# 2026-10-21 18:28:37 IST 2025-11-06_part_0056.gz: killed deliberately at v2->v3 switch; re-pulled
+# 2026-10-21 18:28:37 IST 2025-11-06_part_0058.gz: killed deliberately at v2->v3 switch; re-pulled
+# 2026-10-21 18:28:37 IST 2025-11-06_part_0059.gz: killed deliberately at v2->v3 switch; re-pulled
+2025-11-06_part_0058.gz filter
+# 2026-10-22 04:06:11 IST 2025-11-06_part_0058.gz: QA FAIL (ok 18:29:27 then INFRA-FAIL filter 18:29:31; out/hist written after done/). out/hist/done moved to .quarantine/2025-11-06_part_0058.gz-20261022-040611-IST (not deleted); original raw.sha256 line kept; to be re-pulled alone with pull.sh.v7 work() after c8-f5 completes
