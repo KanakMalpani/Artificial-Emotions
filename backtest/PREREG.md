@@ -109,7 +109,7 @@ growth uses each concept's own volume. The top 20 unknowns by score are taken, w
 
 4.3 **LLM-picked.**
 - Runner: **Loop-Engineering's** sandboxed cursor-agent shim, `KanakMalpani/Loop-Engineering: benchmarks/loopbench-validity/cursor_llm.py` (bubblewrap sandbox; not part of this repo), **cursor-agent `2026.10.19-6bbf2c4`** (from `cursor-agent --version` on 2026-10-21), model **`grok-4.7-high`** pinned (non-fast; no alias). No paid API; no OpenAI.
-- Temperature: **cannot be set** through cursor-agent and is not applied (logged as `temperature_applied=false`). Variance comes only from 5 independent calls, labelled LLM_SEEDS 101-105 (the seed is recorded with each call, not passed to the model). Score = **median** hit rate over the 5 calls; tie → lowest seed.
+- Temperature: **cannot be set** through cursor-agent and is not applied (logged as `temperature_applied=false`). Variance comes only from runs 101-105, which are **5 independent repeat calls**, labelled LLM_SEEDS 101-105 (the seed is recorded with each call, not passed to the model). Score = **median** hit rate over the 5 calls; tie → lowest seed.
 - Input: Appendix A prompt with the domain name and the full list of unknowns in P_d as `A | C` lines, lexical order. Only pre-2016 inputs: pair names drawn from the past corpus; no years, counts, citations or future data. The agent runs with no tools/web (sandboxed, no network beyond the model endpoint, empty workspace).
 - Parsing: first 20 valid, distinct lines exactly matching a listed pair; invalid lines skipped; < 20 valid → missing slots are misses. Every raw reply stored.
 - Knowledge-cutoff leak: the model was trained on 2016-2024 literature and may "remember" what was pursued. This **cannot be removed**, only reported. It favours the baseline (makes the test harder for the engine). The LLM result is labelled **"contaminated upper-bound baseline"**; the pass rule (§5) is also reported with and without the LLM baseline, but only the with-LLM version counts as PASS.
@@ -193,13 +193,22 @@ Repo history check (2026-10-21): `git ls-files` and `git log --all` show **no ca
 
 Doc-only clarifications for QA gaps, no results seen: §3.3 seed merge (pool 5 runs, dedupe unordered (A,C) keeping max gap, global sort by gap desc, ties by seed pack order then lexical (A,C), top 20); §1.3/§3.4 future corpus = union of the 3 domain filters, 2016-01-01..2024-12-31, same pinned snapshot, hashed; highly cited = `citation_normalized_percentile >= 0.90` / `is_in_top_10_percent`, fallback 90th percentile within primary field × year over the full snapshot; §4.1 lexical sort of P_d before seeded sampling; §4.3 shim is Loop-Engineering's `benchmarks/loopbench-validity/cursor_llm.py`.
 
+## Amendment 2 (2026-10-21, IST; before any data pull or run)
+
+Doc-only; no results seen. Supersedes any conflicting text above.
+
+1. **Shim copy and pin.** In the run-script commit (§7.4 step 3), Loop-Engineering's `benchmarks/loopbench-validity/cursor_llm.py` is **copied** into this repo as `backtest/cursor_llm.py`. The run manifest records the **source Loop-Engineering commit hash** and the copy's **sha256**. As read on 2026-10-21, those are source commit `8b1bfc1` and sha256 `1ea827efb925ac251ae93fd082b7257143056521685c4e89b936058ac1c9c999`. If the copied file differs, its own sha256 is recorded at that commit. Nothing in the backtest imports or calls across repos. A sha256 mismatch at run time is ABORT.
+2. **Pre-run no-network probe.** After the freeze and **before the first LLM call**, a **logged probe** (in `backtest/run.log`, stored with its raw output) confirms that the sandboxed agent **cannot reach the network beyond the model endpoint, and cannot read the snapshot files or the future corpus**. If the probe fails, the run is **ABORT**: no LLM calls are made, and a dated DEVIATION entry plus a re-freeze are required before a retry.
+3. **LLM runs 101-105** are **5 independent repeat calls** of the same prompt per domain, scored by the median (§4.3).
+4. Open question 5 is closed.
+
 ## Open questions (repo/brief ambiguous)
 
 1. The engine has no date filter on the live `OpenAlexClient` (`openalex.py`). The backtest therefore uses `LocalCorpusClient` on a snapshot, not the live client. Confirm.
 2. The release is pinned by rule (§1.2), not by a named date, because naming one would need a call. The actual date is recorded in `SNAPSHOT.md` before the pull. QA to accept.
 3. Concept IDs: the level-0 IDs are standard, but the seed concept display names are resolved by exact match at snapshot time (abort if missing). Specific seed IDs were not looked up, because looking them up needs a call.
 4. The default `max_links=8` makes "top 20" impossible, so it's set to 1000 (§0). This is the only parameter change.
-5. The LLM baseline runs through the cursor-agent shim with `grok-4.7-high`; the shim lives in Loop-Engineering, so the backtest run script needs a copy or reference to it (decided at commit 3, before any run).
+5. CLOSED by Amendment 2: the shim is copied into this repo and pinned by its source commit and sha256; it does not point across repos.
 
 ## Appendix A: LLM prompt (exact text)
 
