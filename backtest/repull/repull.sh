@@ -16,6 +16,30 @@ set -uo pipefail
 : "${OUTSHA_SHA:=699fbe6a7d70dfef173df9c31f7545518f2bd545c8a544bfd484285ea91a1c66}"
 : "${SIMULATE_CRASH_AFTER:=}"
 export SIMULATE_CRASH_AFTER
+: "${MEMINFO:=/proc/meminfo}"
+: "${MEM_MIN_MB:=2048}"
+: "${MEM_SLEEP:=60}"
+
+mem_guard(){
+  local b=$1 min=$MEM_MIN_MB paused=0 mb kb logged=0
+  while :; do
+    kb=$(awk '/^MemAvailable:/ {print $2; exit}' "$MEMINFO" 2>/dev/null || true)
+    if [ -z "$kb" ]; then
+      log "MEM-UNREADABLE"
+      sleep "$MEM_SLEEP"
+      continue
+    fi
+    mb=$((kb / 1024))
+    [ "$logged" = 0 ] && { log "MEM batch=$b MemAvailable=${mb} MB min=${min}"; logged=1; }
+    if [ "$mb" -ge "$min" ]; then
+      [ "$paused" = 1 ] && log "MEM-RESUME batch=$b MemAvailable=${mb} MB"
+      return 0
+    fi
+    log "MEM-PAUSE batch=$b MemAvailable=${mb} MB < ${min} MB; sleeping ${MEM_SLEEP}s"
+    paused=1
+    sleep "$MEM_SLEEP"
+  done
+}
 : "${CURL_RATE:=15M}"
 export BASE PY URL_PREFIX CURL_RATE
 
@@ -285,6 +309,7 @@ trap '[ -n "$CHILD_PGID" ] && kill -- -"$CHILD_PGID" 2>/dev/null' EXIT
 finalize recover
 nb=$(( (EXPECT_PARTS + BATCH_SIZE - 1) / BATCH_SIZE )); processed=0
 for ((b=0; b<nb; b++)); do
+  mem_guard "$b"
   todo=$BASE/raw/.todo.$b; : > "$todo"
   while IFS=$'\t' read -r url size recs; do id=$(idof "$url")
     if verified "$id" "$size" "$recs"; then echo "$(ts) $id SKIP-VERIFIED" >> "$LOG"; continue; fi

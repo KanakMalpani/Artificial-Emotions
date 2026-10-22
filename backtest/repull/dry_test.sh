@@ -103,5 +103,70 @@ cp -p "$BASE/progress/progress.tsv" "$D/progress.tsv.pre-tamper"; sed -i '1s/^2/
 "$R" > "$D/t4.out" 2>&1; e=$?; [ $e = 5 ] && ok "T4 tampered manifest refused" || bad "T4 e=$e"
 # T8 BASE in /workspace
 BASE=/workspace/x "$R" > "$D/t8.out" 2>&1; e=$?; [ $e = 1 ] && [ ! -e /workspace/x ] && ok "T8 BASE=/workspace refused" || bad "T8 e=$e"
+# T11 content-sha re-hash on resume: file-sha match does not imply content match; realistic failure is a
+# half-rewritten out file plus a manifest whose file-sha (col 6) was rewritten to match it (e.g. both
+# restored inconsistently after restart) while content-sha (col 7) still holds the true content hash—only
+# re-hashing decompressed content catches this.
+cp -p "$D/progress.tsv.pre-tamper" "$BASE/progress/progress.tsv"
+echo "$(stat -c %s "$BASE/progress/progress.tsv") $(sha "$BASE/progress/progress.tsv")" > "$BASE/progress/.prefix"
+t11_id=2020-07-03_part_0000.gz
+true_csha=$(awk -F'\t' -v i="$t11_id" '$1==i' "$BASE/progress/progress.tsv" | tail -1 | cut -f7)
+zcat "$BASE/out/$t11_id.jsonl.gz" | head -n -1 | gzip -c > "$D/$t11_id.stale.jsonl.gz"
+cp -f "$D/$t11_id.stale.jsonl.gz" "$BASE/out/$t11_id.jsonl.gz"
+gzip -t "$BASE/out/$t11_id.jsonl.gz" && ok "T11 stale gz valid" || bad "T11 gzip -t"
+stale_fsha=$(sha "$BASE/out/$t11_id.jsonl.gz")
+cp -p "$BASE/progress/progress.tsv" "$D/progress.tsv.pre-t11"
+"$PYX" - "$BASE/progress/progress.tsv" "$t11_id" "$stale_fsha" <<'PY'
+import sys
+path, pid, new_o = sys.argv[1], sys.argv[2], sys.argv[3]
+lines = open(path).read().splitlines()
+idx = max(i for i, l in enumerate(lines) if l.split("\t", 1)[0] == pid)
+parts = lines[idx].split("\t")
+parts[5] = new_o
+lines[idx] = "\t".join(parts)
+open(path, "w").write("\n".join(lines) + "\n")
+PY
+"$R" > "$D/t11a.out" 2>&1; e=$?
+[ $e = 5 ] && ok "T11a manifest file-sha rewritten without .prefix -> exit 5 append-only guard" || bad "T11a e=$e"
+cp -p "$D/progress.tsv.pre-t11" "$BASE/progress/progress.tsv"
+cp -f "$D/$t11_id.stale.jsonl.gz" "$BASE/out/$t11_id.jsonl.gz"
+"$PYX" - "$BASE/progress/progress.tsv" "$t11_id" "$stale_fsha" <<'PY'
+import sys
+path, pid, new_o = sys.argv[1], sys.argv[2], sys.argv[3]
+lines = open(path).read().splitlines()
+idx = max(i for i, l in enumerate(lines) if l.split("\t", 1)[0] == pid)
+parts = lines[idx].split("\t")
+parts[5] = new_o
+lines[idx] = "\t".join(parts)
+open(path, "w").write("\n".join(lines) + "\n")
+PY
+echo "$(stat -c %s "$BASE/progress/progress.tsv") $(sha "$BASE/progress/progress.tsv")" > "$BASE/progress/.prefix"
+d11=$(grep -c "$t11_id DOWNLOAD" "$BASE/logs/repull.log"); "$R" > "$D/t11b.out" 2>&1; e=$?
+qfile=$(find "$BASE/.quarantine" -name "$t11_id.jsonl.gz" -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-)
+new_csha=$(awk -F'\t' -v i="$t11_id" '$1==i' "$BASE/progress/progress.tsv" | tail -1 | cut -f7)
+disk_csha=$(zcat "$BASE/out/$t11_id.jsonl.gz" | sha256sum | cut -d' ' -f1)
+t11_ok=1
+grep -q "$t11_id REVERIFY-FAIL" "$BASE/logs/repull.log" || t11_ok=0
+[ -n "$qfile" ] && [ "$(sha "$qfile")" = "$stale_fsha" ] || t11_ok=0
+[ $(( $(grep -c "$t11_id DOWNLOAD" "$BASE/logs/repull.log") - d11 )) = 1 ] || t11_ok=0
+[ "$new_csha" = "$true_csha" ] && [ "$disk_csha" = "$true_csha" ] || t11_ok=0
+{ [ "$e" = 0 ] || [ "$e" = 20 ]; } || t11_ok=0
+[ $t11_ok = 1 ] && ok "T11b stale file-sha + matching .prefix: REVERIFY-FAIL, quarantine, 1 download, content-sha restored" || bad "T11b e=$e t11_ok=$t11_ok q=$qfile"
+# T12 memory pause (fake meminfo recovers after 3s)
+grep "MEM batch=0 MemAvailable=" "$BASE/logs/repull.log" | grep -v "MemAvailable=500 MB" | grep -q . \
+  && ok "T12 default MEMINFO (/proc/meminfo) logged in earlier runs" || bad "T12 default MEMINFO missing"
+FAKE_MEM=$D/fake-meminfo; echo "MemAvailable:     512000 kB" > "$FAKE_MEM"
+( sleep 3; echo "MemAvailable:    8000000 kB" > "$FAKE_MEM" ) &
+MEMINFO=$FAKE_MEM MEM_SLEEP=1 "$R" > "$D/t12.out" 2>&1; e=$?
+t12_ok=1
+grep -q "MEM-PAUSE batch=.*MemAvailable=500 MB < 2048 MB" "$BASE/logs/repull.log" || t12_ok=0
+grep -q "MEM-RESUME batch=" "$BASE/logs/repull.log" || t12_ok=0
+awk 'BEGIN{p=0;r=0} /MEM-PAUSE/{p=NR} /MEM-RESUME/{r=NR} END{exit !(p>0 && r>p)}' "$BASE/logs/repull.log" || t12_ok=0
+grep -q "MEM batch=0 MemAvailable=" "$BASE/logs/repull.log" || t12_ok=0
+grep -q "MEM batch=1 MemAvailable=" "$BASE/logs/repull.log" || t12_ok=0
+ids12=$(cut -f1 "$BASE/progress/progress.tsv" | sort -u | wc -l)
+{ [ "$e" = 0 ] || [ "$e" = 20 ]; } || t12_ok=0
+[ "$ids12" = 3 ] || t12_ok=0
+[ $t12_ok = 1 ] && ok "T12 mem_guard pause/resume on fake meminfo; MEM batch lines for batches 0+1; exit $e" || bad "T12 e=$e t12_ok=$t12_ok ids=$ids12"
 after=$(sha256sum "$REAL_OUT" "$REAL_F"); [ "$before" = "$after" ] && ok "real out.sha256 + filter_part.py unchanged" || bad "real files changed"
 echo "dry dir: $D  fails=$fails"; exit $fails

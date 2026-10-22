@@ -19,3 +19,8 @@
 - Evidence run /home/box/oa-repull/evidence-20261022-145048 (input re-downloaded, 7.5 KB, not part of the pull); log committed under evidence/.
 - baselines/attempt1-hist.sha256 hashed from /workspace/oa/pull/hist (1898 files).
 - Dry test extended (T9 content sha, T10 baseline mismatch); dry-20261022-145353 fails=0.
+
+## 2026-10-22 15:05 IST: T11 (content-sha re-hash path), T12 + memory guard
+- repull.sh mem_guard (MEMINFO, MEM_MIN_MB=2048, MEM_SLEEP=60): logs MemAvailable at every batch start; below min it pauses/re-checks, never exits or skips.
+- dry_test T11a/T11b/T12 appended; T0-T10 not edited. Written by cursor-agent composer-2.5 (exit 0, ~3.3 min). No hand fixes.
+- T11a documents that an in-place manifest edit is refused first by the append-only guard (exit 5); T11b also rewrites .prefix to reach the content-sha re-hash.
