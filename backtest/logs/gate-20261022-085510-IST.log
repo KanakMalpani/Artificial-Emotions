@@ -1,0 +1,16 @@
+# gate 20261022-085510 IST (Asia/Kolkata); HEAD ba27cbd + working tree; venv /workspace/ae-venv; ruff ruff 0.15.22
+## backtest tests
+............................................................             [100%]
+60 passed in 3.92s
+## full repo suite
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1279 passed, 1 warning in 11.43s
+## ruff check
+[1;32mAll checks passed![0m
+## ruff format --check
+Would reformat: [1mbacktest/cursor_llm.py[0m
+1 file would be reformatted, 218 files already formatted
+## note: ruff format flags backtest/cursor_llm.py = pinned shim, byte-identical, not reformatted
+## shim sha
+1ea827efb925ac251ae93fd082b7257143056521685c4e89b936058ac1c9c999  backtest/cursor_llm.py
