@@ -121,6 +121,7 @@ class BaselineLlmCallCounter:
     """Increments on each baseline ``client.complete`` attempt (not probe calls)."""
 
     n: int = 0
+    retries: int = 0
 
 
 # --- Logging (§7.2: every INFRA-FAIL / retry logged with a timestamp) ---
@@ -613,10 +614,17 @@ def call_with_retries(
         try:
             if attempts_out is not None:
                 attempts_out[:] = [n]
+            raw = client.complete(prompt, role=role)
             if baseline_call_counter is not None:
                 baseline_call_counter.n += 1
-            return client.complete(prompt, role=role)
+                if n > 1:
+                    baseline_call_counter.retries += 1
+            return raw
         except Exception as exc:
+            if baseline_call_counter is not None:
+                baseline_call_counter.n += 1
+                if n > 1:
+                    baseline_call_counter.retries += 1
             last = exc
             log(f"attempt failed {label} attempt={n}: {type(exc).__name__}: {exc}")
     if attempts_out is not None:
@@ -1038,6 +1046,7 @@ def run_manifest_payload(
     ended: dt.datetime,
     probe_calls: list[dict[str, Any]] | None = None,
     baseline_llm_calls: int = 0,
+    baseline_retries: int = 0,
 ) -> dict[str, Any]:
     return {
         "repo_source_commit": repo_head(repo_root),
@@ -1052,6 +1061,7 @@ def run_manifest_payload(
         "probe_result_path": str(probe_written) if probe_written is not None else None,
         "probe_calls": list(probe_calls or ()),
         "baseline_llm_calls": baseline_llm_calls,
+        "baseline_retries": baseline_retries,
         "started_utc": started.isoformat(),
         "ended_utc": ended.isoformat(),
         "status": status,
@@ -1327,6 +1337,7 @@ def main(argv: list[str] | None = None) -> int:
                 ended=dt.datetime.now(dt.UTC),
                 probe_calls=probe_calls,
                 baseline_llm_calls=baseline_call_counter.n,
+                baseline_retries=baseline_call_counter.retries,
             ),
         )
         return 3
@@ -1346,6 +1357,7 @@ def main(argv: list[str] | None = None) -> int:
                 ended=dt.datetime.now(dt.UTC),
                 probe_calls=probe_calls,
                 baseline_llm_calls=baseline_call_counter.n,
+                baseline_retries=baseline_call_counter.retries,
             ),
         )
         return 4
@@ -1366,6 +1378,7 @@ def main(argv: list[str] | None = None) -> int:
             ended=ended,
             probe_calls=probe_calls,
             baseline_llm_calls=baseline_call_counter.n,
+            baseline_retries=baseline_call_counter.retries,
         ),
     )
     log(f"done verdict={result['verdict']}")

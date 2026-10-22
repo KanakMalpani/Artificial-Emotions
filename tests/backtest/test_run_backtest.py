@@ -1188,3 +1188,138 @@ def test_call_with_retries_counts_baseline_attempts_not_probes(tmp_path):
         )
     assert counter.n == 0
     assert len(probe_stub.calls) == 4
+
+
+def test_baseline_call_counter_retries_on_failed_attempts():
+    counter = rb.BaselineLlmCallCounter()
+    attempts = {"n": 0}
+
+    class Flaky:
+        def complete(self, prompt, role="default", temperature=None):
+            attempts["n"] += 1
+            if attempts["n"] == 1:
+                raise InfraError("down")
+            return "ok"
+
+    rb.call_with_retries(
+        Flaky(),
+        "p",
+        rb.LLM_SYSTEM,
+        lambda _m: None,
+        lambda _s: None,
+        "llm seed=101",
+        baseline_call_counter=counter,
+    )
+    assert counter.n == 2
+    assert counter.retries == 1
+
+    counter_ok = rb.BaselineLlmCallCounter()
+    stub = _StubLLM(reply="ok")
+    rb.call_with_retries(
+        stub,
+        "p",
+        rb.LLM_SYSTEM,
+        lambda _m: None,
+        lambda _s: None,
+        "llm seed=101",
+        baseline_call_counter=counter_ok,
+    )
+    assert counter_ok.n == 1
+    assert counter_ok.retries == 0
+
+
+def test_manifest_baseline_partial_on_mid_run_abort(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+
+    baseline_ord = {"n": 0}
+
+    def reply(n, prompt, role):
+        if role == rb.PROBE_ROLE:
+            return _probe_then_baseline_reply(n, prompt, role)
+        baseline_ord["n"] += 1
+        if baseline_ord["n"] == 1:
+            raise InfraError("cursor-agent down")
+        return "not a pair\n"
+
+    real_parse = rb.parse_llm_picks
+    parse_calls = {"n": 0}
+
+    def abort_on_second_seed(raw, pairs):
+        parse_calls["n"] += 1
+        if parse_calls["n"] == 2:
+            raise rb.Abort("injected mid-baseline")
+        return real_parse(raw, pairs)
+
+    monkeypatch.setattr(rb, "parse_llm_picks", abort_on_second_seed)
+    stub = _StubLLM(reply=reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 3
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["status"] == "ABORT"
+    assert manifest["baseline_llm_calls"] == 3
+    assert manifest["baseline_retries"] == 1
+    full_baseline = len(rb.DOMAINS) * len(rb.LLM_SEEDS)
+    assert manifest["baseline_llm_calls"] != full_baseline
+    assert manifest["baseline_retries"] != full_baseline
+
+
+def test_manifest_baseline_retries_partial_on_mid_run_infra_fail(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+
+    def failing_reply(n, prompt, role):
+        if role == rb.PROBE_ROLE:
+            return _probe_then_baseline_reply(n, prompt, role)
+        if n >= 4:
+            raise InfraError("cursor-agent down")
+        return "not a pair\n"
+
+    stub = _StubLLM(reply=failing_reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 4
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["status"] == "INFRA-FAIL"
+    assert manifest["baseline_llm_calls"] == 5
+    assert manifest["baseline_retries"] == 3
+
+
+def test_manifest_baseline_retries_zero_with_real_probe_retry(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+
+    def reply(n, prompt, role):
+        if role == rb.PROBE_ROLE:
+            if n == 1:
+                raise InfraError("probe network down")
+            if n == 2:
+                return _NETWORK_BLOCKED_REPLY
+            return _ACCESS_BLOCKED_REPLY
+        return "not a pair\n"
+
+    stub = _StubLLM(reply=reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 0, (tmp_path / "run.log").read_text(encoding="utf-8")
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["baseline_llm_calls"] == len(stub.calls) - 3
+    assert manifest["baseline_retries"] == 0
+    assert manifest["probe_calls"][0]["attempts"] == 2
+    assert len(stub.calls) == 3 + len(rb.DOMAINS) * len(rb.LLM_SEEDS)
