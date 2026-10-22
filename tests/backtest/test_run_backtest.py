@@ -527,7 +527,7 @@ def test_probe_failure_aborts_with_zero_llm_calls(tmp_path, monkeypatch):
         assert log_path == tmp_path / "run.log"
         return stub
 
-    def probe(client, snapshot_dir, out_base, log, sleep):
+    def probe(client, snapshot_dir, out_base, log, sleep, record=None):
         assert client is stub
         raise rb.Abort("probe shows network access")
 
@@ -735,7 +735,7 @@ def test_toy_run_through_main_with_stub_llm_and_probe(tmp_path, monkeypatch):
         seen["log_path"] = log_path
         return stub
 
-    def probe(client, snapshot_dir, out_base, log, sleep):
+    def probe(client, snapshot_dir, out_base, log, sleep, record=None):
         assert client is stub
         return "NETWORK_BLOCKED\nSNAPSHOT_BLOCKED\nCORPUS_BLOCKED\n"
 
@@ -959,3 +959,128 @@ def test_probe_all_checks_pass(tmp_path):
         for line in logs
     )
     assert "probe access_check blocked" in logs
+
+
+def _setup_toy_main_corpus(root: Path, tmp_path: Path) -> Path:
+    out = tmp_path / "out"
+    snap = _hash_fixtures(root, out)
+    corpus = out / "corpus.jsonl.gz"
+    with gzip.open(corpus, "wt", encoding="utf-8") as fh:
+        for doc in _synthetic_corpus():
+            fh.write(json.dumps(doc) + "\n")
+    (out / "part.jsonl.gz").unlink()
+    _write_sha(snap / "out.sha256", [(_sha256(corpus), "corpus.jsonl.gz")])
+    concepts = tmp_path / "concepts"
+    concepts.mkdir()
+    names = [s for spec in rb.DOMAINS.values() for s in spec["seeds"]]
+    names.append("Raynaud's phenomenon")
+    with gzip.open(concepts / "concepts.jsonl.gz", "wt", encoding="utf-8") as fh:
+        for name in names:
+            fh.write(json.dumps({"display_name": name, "level": 1}) + "\n")
+    (tmp_path / "hist").mkdir()
+    return snap
+
+
+def test_manifest_records_probe_calls_and_baseline_llm_excludes_probes(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+
+    def reply(n, prompt, role):
+        if role == rb.PROBE_ROLE:
+            if n == 1:
+                return _NETWORK_BLOCKED_REPLY
+            return _ACCESS_BLOCKED_REPLY
+        return "not a pair\n"
+
+    stub = _StubLLM(reply=reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 0, (tmp_path / "run.log").read_text(encoding="utf-8")
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    assert len(manifest["probe_calls"]) == 2
+    assert manifest["probe_calls"][0]["check"] == "network"
+    assert manifest["probe_calls"][0]["label"] == "probe-network"
+    assert manifest["probe_calls"][1]["check"] == "access"
+    assert manifest["probe_calls"][1]["label"] == "probe-access"
+    for entry in manifest["probe_calls"]:
+        assert entry["seed"] is None
+        assert entry["outcome"] == "pass"
+        assert entry["attempts"] >= 1
+    expected_baseline = len(rb.DOMAINS) * len(rb.LLM_SEEDS)
+    assert manifest["baseline_llm_calls"] == expected_baseline
+    assert len(stub.calls) == 2 + expected_baseline
+
+
+def _probe_then_baseline_reply(n, prompt, role):
+    if role == rb.PROBE_ROLE:
+        if n == 1:
+            return _NETWORK_BLOCKED_REPLY
+        return _ACCESS_BLOCKED_REPLY
+    return "not a pair\n"
+
+
+def test_run_log_probe_attempt_labels_without_seed(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+    stub = _StubLLM(reply=_probe_then_baseline_reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 0
+    log_text = (tmp_path / "run.log").read_text(encoding="utf-8")
+    assert "attempt probe-network" in log_text
+    assert "attempt probe-access" in log_text
+    for line in log_text.splitlines():
+        if "probe-network" in line or "probe-access" in line:
+            assert "seed=" not in line
+
+
+def test_probe_raw_stores_both_agent_replies(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+    stub = _StubLLM(reply=_probe_then_baseline_reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 0
+    body = (tmp_path / "probe_raw.txt").read_text(encoding="utf-8")
+    assert _NETWORK_ERROR_LINE in body
+    assert "SNAPSHOT_BLOCKED" in body
+    assert "CORPUS_BLOCKED" in body
+
+
+def test_manifest_probe_network_abort_zero_baseline_llm_calls(tmp_path, monkeypatch):
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _hash_fixtures(root, tmp_path / "out")
+    _install_shim(root, match=True)
+    stub = _StubLLM(reply="NETWORK_OK\n")
+
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 3
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["status"] == "ABORT"
+    assert manifest["baseline_llm_calls"] == 0
+    assert len(manifest["probe_calls"]) == 1
+    assert manifest["probe_calls"][0] == {
+        "check": "network",
+        "label": "probe-network",
+        "seed": None,
+        "attempts": 1,
+        "outcome": "abort",
+    }

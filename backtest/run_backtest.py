@@ -580,6 +580,7 @@ def call_with_retries(
     log: RunLog | Callable[[str], None],
     sleep: Callable[[float], None],
     label: str,
+    attempts_out: list[int] | None = None,
 ) -> str:
     """Call ``client.complete`` and retry infrastructure failures.
 
@@ -601,10 +602,14 @@ def call_with_retries(
         else:
             log(f"attempt {label} attempt={n}")
         try:
+            if attempts_out is not None:
+                attempts_out[:] = [n]
             return client.complete(prompt, role=role)
         except Exception as exc:
             last = exc
             log(f"attempt failed {label} attempt={n}: {type(exc).__name__}: {exc}")
+    if attempts_out is not None:
+        attempts_out[:] = [4]
     log(f"INFRA-FAIL {label} retries exhausted")
     raise InfraFail(f"{label}: retries exhausted: {last}")
 
@@ -837,12 +842,34 @@ def _stamp_probe(exc: Abort, raw: str) -> None:
     exc.raw = raw  # type: ignore[attr-defined]
 
 
+def _append_probe_call_record(
+    record: list[dict[str, Any]] | None,
+    *,
+    check: str,
+    label: str,
+    attempts: list[int],
+    outcome: str,
+) -> None:
+    if record is None:
+        return
+    record.append(
+        {
+            "check": check,
+            "label": label,
+            "seed": None,
+            "attempts": attempts[0] if attempts else 1,
+            "outcome": outcome,
+        }
+    )
+
+
 def pre_run_probe(
     client: Any,
     snapshot_dir: Path,
     out_base: Path,
     log: RunLog | Callable[[str], None],
     sleep: Callable[[float], None],
+    record: list[dict[str, Any]] | None = None,
 ) -> str:
     """Amendment 2.2: three checks on the same client/sandbox, before any baseline call.
 
@@ -870,11 +897,25 @@ def pre_run_probe(
         raise
     log("probe " + fs_line.removeprefix("# ").replace(": ", " ", 1))
 
+    net_attempts: list[int] = []
     try:
         net_raw = call_with_retries(
-            client, _probe_network_prompt(), PROBE_ROLE, log, sleep, "probe-network"
+            client,
+            _probe_network_prompt(),
+            PROBE_ROLE,
+            log,
+            sleep,
+            "probe-network",
+            attempts_out=net_attempts,
         )
     except InfraFail as exc:
+        _append_probe_call_record(
+            record,
+            check="network",
+            label="probe-network",
+            attempts=net_attempts,
+            outcome="infra-fail",
+        )
         body = _probe_failure_text(client, exc)
         abort = Abort(f"probe cannot be evaluated: {exc}")
         _stamp_probe(abort, _probe_text(fs_line, body))
@@ -882,12 +923,27 @@ def pre_run_probe(
     try:
         error = evaluate_network_probe(net_raw)
     except Abort as exc:
+        _append_probe_call_record(
+            record,
+            check="network",
+            label="probe-network",
+            attempts=net_attempts,
+            outcome="abort",
+        )
         _stamp_probe(exc, _probe_text(fs_line, net_raw))
         raise
+    _append_probe_call_record(
+        record,
+        check="network",
+        label="probe-network",
+        attempts=net_attempts,
+        outcome="pass",
+    )
     net_line = f"# network_check: blocked, error={error}"
     log(f"probe network_check blocked, error={error}")
 
     canaries = _probe_canaries(snapshot_dir, out_base)
+    acc_attempts: list[int] = []
     try:
         acc_raw = call_with_retries(
             client,
@@ -896,8 +952,16 @@ def pre_run_probe(
             log,
             sleep,
             "probe-access",
+            attempts_out=acc_attempts,
         )
     except InfraFail as exc:
+        _append_probe_call_record(
+            record,
+            check="access",
+            label="probe-access",
+            attempts=acc_attempts,
+            outcome="infra-fail",
+        )
         body = _probe_failure_text(client, exc)
         abort = Abort(f"probe cannot be evaluated: {exc}")
         _stamp_probe(abort, _probe_text(fs_line, net_raw, net_line, body))
@@ -905,8 +969,22 @@ def pre_run_probe(
     try:
         evaluate_access_probe(acc_raw, canaries)
     except Abort as exc:
+        _append_probe_call_record(
+            record,
+            check="access",
+            label="probe-access",
+            attempts=acc_attempts,
+            outcome="abort",
+        )
         _stamp_probe(exc, _probe_text(fs_line, net_raw, net_line, acc_raw))
         raise
+    _append_probe_call_record(
+        record,
+        check="access",
+        label="probe-access",
+        attempts=acc_attempts,
+        outcome="pass",
+    )
     acc_line = "# access_check: blocked"
     log("probe access_check blocked")
     return _probe_text(fs_line, net_raw, net_line, acc_raw, acc_line)
@@ -944,6 +1022,8 @@ def run_manifest_payload(
     probe_written: Path | None,
     started: dt.datetime,
     ended: dt.datetime,
+    probe_calls: list[dict[str, Any]] | None = None,
+    baseline_llm_calls: int = 0,
 ) -> dict[str, Any]:
     return {
         "repo_source_commit": repo_head(repo_root),
@@ -956,6 +1036,8 @@ def run_manifest_payload(
         "out_sha256": _sha256_file(out_sha) if out_sha.is_file() else None,
         "freeze_sha256": _sha256_file(freeze_file) if freeze_file.is_file() else None,
         "probe_result_path": str(probe_written) if probe_written is not None else None,
+        "probe_calls": list(probe_calls or ()),
+        "baseline_llm_calls": baseline_llm_calls,
         "started_utc": started.isoformat(),
         "ended_utc": ended.isoformat(),
         "status": status,
@@ -1162,6 +1244,8 @@ def main(argv: list[str] | None = None) -> int:
     out_sha = args.snapshot_sha.parent / "out.sha256"
     probe_written: Path | None = None
     shim_measured: str | None = None
+    probe_calls: list[dict[str, Any]] = []
+    baseline_llm_calls = 0
     try:
         verify_hashes(args.snapshot_sha, args.snapshot_sha.parent, log)
         if not out_sha.is_file():
@@ -1176,7 +1260,12 @@ def main(argv: list[str] | None = None) -> int:
             llm_client = make_llm_client(LLM_MODEL, log_path=args.log)
             try:
                 raw_probe = pre_run_probe(
-                    llm_client, args.snapshot_sha.parent, args.out_base, log, _sleep
+                    llm_client,
+                    args.snapshot_sha.parent,
+                    args.out_base,
+                    log,
+                    _sleep,
+                    record=probe_calls,
                 )
             except Abort as exc:
                 saved = getattr(exc, "raw", None)
@@ -1204,6 +1293,8 @@ def main(argv: list[str] | None = None) -> int:
             sleep_fn=_sleep,
             llm_raw_dir=(args.out.parent / "llm_raw") if args.run_llm else None,
         )
+        if llm_client is not None:
+            baseline_llm_calls = len(DOMAINS) * len(LLM_SEEDS)
     except Abort as exc:
         log(f"ABORT {exc}")
         write_run_manifest(
@@ -1218,6 +1309,8 @@ def main(argv: list[str] | None = None) -> int:
                 probe_written=probe_written,
                 started=started,
                 ended=dt.datetime.now(dt.UTC),
+                probe_calls=probe_calls,
+                baseline_llm_calls=baseline_llm_calls,
             ),
         )
         return 3
@@ -1235,6 +1328,8 @@ def main(argv: list[str] | None = None) -> int:
                 probe_written=probe_written,
                 started=started,
                 ended=dt.datetime.now(dt.UTC),
+                probe_calls=probe_calls,
+                baseline_llm_calls=baseline_llm_calls,
             ),
         )
         return 4
@@ -1253,6 +1348,8 @@ def main(argv: list[str] | None = None) -> int:
             probe_written=probe_written,
             started=started,
             ended=ended,
+            probe_calls=probe_calls,
+            baseline_llm_calls=baseline_llm_calls,
         ),
     )
     log(f"done verdict={result['verdict']}")
