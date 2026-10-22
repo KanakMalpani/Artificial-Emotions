@@ -75,7 +75,7 @@ echo x | gzip > "$REPO/fake.jsonl.gz"; git -C "$REPO" add fake.jsonl.gz; echo mo
 "$R" > "$D/t6.out" 2>&1; e=$?; [ $e = 7 ] && ok "T6b staged data refused" || bad "T6b e=$e"
 git -C "$REPO" reset -q fake.jsonl.gz
 # T7 mismatch path
-sed '1s/^./f/' "$OUTSHA" > "$D/out.sha256.alt"
+awk 'NR==1{c=substr($0,1,1); $0=(c=="0"?"1":"0") substr($0,2)}1' "$OUTSHA" > "$D/out.sha256.alt"  # always changes line 1
 OUTSHA=$D/out.sha256.alt OUTSHA_SHA=$(sha "$D/out.sha256.alt") "$R" --compare-only > "$D/t7.out" 2>&1; e=$?
 [ $e = 20 ] && [ "$(wc -l < "$BASE/final/DEVIATION-4.todo")" -ge 1 ] && grep -q "^$(head -1 "$OUTSHA" | awk '{print $2}')" "$BASE/final/DEVIATION-4.todo" && ok "T7 mismatch -> exit 20, DEVIATION-4.todo 1 line" || bad "T7 e=$e"
 # T4 tamper progress manifest (copy kept first)
