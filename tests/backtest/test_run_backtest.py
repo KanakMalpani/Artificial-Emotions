@@ -776,6 +776,7 @@ def test_toy_run_through_main_with_stub_llm_and_probe(tmp_path, monkeypatch):
     )
     assert manifest["started_utc"] <= manifest["ended_utc"]
     assert manifest["started_utc"].endswith("+00:00")
+    assert manifest["status"] == "OK"
 
 
 def test_evaluate_probe_rejects_access_and_unevaluable():
@@ -784,9 +785,9 @@ def test_evaluate_probe_rejects_access_and_unevaluable():
     )
     assert error == "sandbox refused the connect"
     for reply in ("ACCESS_GRANTED\n", "NETWORK_OK\n", "Example Domain\n"):
-        with pytest.raises(rb.Abort, match="^INFRA-FAIL: network reachable"):
+        with pytest.raises(rb.Abort, match="^network reachable"):
             rb.evaluate_network_probe(reply)
-    with pytest.raises(rb.Abort, match="^INFRA-FAIL: network reachable"):
+    with pytest.raises(rb.Abort, match="^network reachable"):
         rb.evaluate_network_probe("NETWORK_BLOCKED\nNETWORK_ERROR: timeout\nExample Domain\n")
     with pytest.raises(rb.Abort, match="NETWORK_ERROR"):
         rb.evaluate_network_probe("NETWORK_BLOCKED\n")
@@ -862,8 +863,10 @@ def test_probe_network_reachable_aborts_before_baseline(tmp_path, monkeypatch, r
     code = rb.main(_main_args(root, tmp_path, "--run-llm"))
     text = (tmp_path / "run.log").read_text(encoding="utf-8")
     assert code == 3
-    assert "ABORT" in text
-    assert "INFRA-FAIL: network reachable" in text
+    assert "ABORT network reachable" in text
+    assert "INFRA-FAIL" not in text
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["status"] == "ABORT"
     assert len(stub.calls) == 1
     assert stub.calls[0]["role"] == rb.PROBE_ROLE
     assert "https://example.com/" in stub.calls[0]["prompt"]

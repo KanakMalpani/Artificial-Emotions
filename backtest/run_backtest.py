@@ -679,14 +679,14 @@ def evaluate_network_probe(raw: str) -> str:
 
     Pass only when the reply contains NETWORK_BLOCKED, a non-empty
     ``NETWORK_ERROR:`` line, and no reachability marker. A reachability marker
-    means the sandbox can reach the network (INFRA-FAIL, still an Abort so the
-    run makes no baseline LLM calls).
+    means the sandbox can reach the network (ABORT: network reachable; no
+    baseline LLM calls).
     """
     if not raw or not raw.strip():
         raise Abort("probe cannot be evaluated: empty reply")
     for token in _NETWORK_REACHABLE:
         if token in raw:
-            raise Abort(f"INFRA-FAIL: network reachable: {token}")
+            raise Abort(f"network reachable: {token}")
     if "NETWORK_BLOCKED" not in raw:
         raise Abort("probe cannot be evaluated: missing NETWORK_BLOCKED")
     error = _network_error_text(raw)
@@ -850,8 +850,8 @@ def pre_run_probe(
        contain a file, and can be read. Failure aborts before any agent call, so
        it cannot be recorded as "no network".
     2. Agent network check: fetch https://example.com/. NETWORK_BLOCKED plus a
-       non-empty NETWORK_ERROR line passes. Reachability is
-       ``INFRA-FAIL: network reachable``.
+       non-empty NETWORK_ERROR line passes. Reachability is ABORT (network
+       reachable).
     3. Agent no-access check: snapshot and future-corpus reads must be blocked.
 
     Isolation must be on. Agent calls use ``call_with_retries``. On failure the
@@ -931,6 +931,35 @@ def repo_head(root: Path) -> str | None:
 def write_run_manifest(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def run_manifest_payload(
+    *,
+    status: str,
+    repo_root: Path,
+    freeze_file: Path,
+    snapshot_sha: Path,
+    out_sha: Path,
+    shim_measured: str | None,
+    probe_written: Path | None,
+    started: dt.datetime,
+    ended: dt.datetime,
+) -> dict[str, Any]:
+    return {
+        "repo_source_commit": repo_head(repo_root),
+        "shim_source_commit": SHIM_SOURCE_COMMIT,
+        "shim_sha256": shim_measured,
+        "llm_model": LLM_MODEL,
+        "llm_seeds": LLM_SEEDS,
+        "temperature_applied": False,
+        "snapshot_sha256": _sha256_file(snapshot_sha) if snapshot_sha.is_file() else None,
+        "out_sha256": _sha256_file(out_sha) if out_sha.is_file() else None,
+        "freeze_sha256": _sha256_file(freeze_file) if freeze_file.is_file() else None,
+        "probe_result_path": str(probe_written) if probe_written is not None else None,
+        "started_utc": started.isoformat(),
+        "ended_utc": ended.isoformat(),
+        "status": status,
+    }
 
 
 def _store_probe(path: Path, raw: str, log: RunLog | Callable[[str], None]) -> None:
@@ -1130,11 +1159,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     log = RunLog(args.log)
     started = dt.datetime.now(dt.UTC)
+    out_sha = args.snapshot_sha.parent / "out.sha256"
     probe_written: Path | None = None
     shim_measured: str | None = None
     try:
         verify_hashes(args.snapshot_sha, args.snapshot_sha.parent, log)
-        out_sha = args.snapshot_sha.parent / "out.sha256"
         if not out_sha.is_file():
             log("INFRA-FAIL missing out.sha256")
             raise InfraFail(f"missing out.sha256: {out_sha}")
@@ -1177,29 +1206,54 @@ def main(argv: list[str] | None = None) -> int:
         )
     except Abort as exc:
         log(f"ABORT {exc}")
+        write_run_manifest(
+            args.manifest,
+            run_manifest_payload(
+                status="ABORT",
+                repo_root=repo_root,
+                freeze_file=freeze_file,
+                snapshot_sha=args.snapshot_sha,
+                out_sha=out_sha,
+                shim_measured=shim_measured,
+                probe_written=probe_written,
+                started=started,
+                ended=dt.datetime.now(dt.UTC),
+            ),
+        )
         return 3
     except InfraFail as exc:
         log(f"INFRA-FAIL {exc}")
+        write_run_manifest(
+            args.manifest,
+            run_manifest_payload(
+                status="INFRA-FAIL",
+                repo_root=repo_root,
+                freeze_file=freeze_file,
+                snapshot_sha=args.snapshot_sha,
+                out_sha=out_sha,
+                shim_measured=shim_measured,
+                probe_written=probe_written,
+                started=started,
+                ended=dt.datetime.now(dt.UTC),
+            ),
+        )
         return 4
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, sort_keys=True), encoding="utf-8")
     ended = dt.datetime.now(dt.UTC)
     write_run_manifest(
         args.manifest,
-        {
-            "repo_source_commit": repo_head(repo_root),
-            "shim_source_commit": SHIM_SOURCE_COMMIT,
-            "shim_sha256": shim_measured,
-            "llm_model": LLM_MODEL,
-            "llm_seeds": LLM_SEEDS,
-            "temperature_applied": False,
-            "snapshot_sha256": _sha256_file(args.snapshot_sha),
-            "out_sha256": _sha256_file(out_sha),
-            "freeze_sha256": _sha256_file(freeze_file),
-            "probe_result_path": str(probe_written) if probe_written is not None else None,
-            "started_utc": started.isoformat(),
-            "ended_utc": ended.isoformat(),
-        },
+        run_manifest_payload(
+            status="OK",
+            repo_root=repo_root,
+            freeze_file=freeze_file,
+            snapshot_sha=args.snapshot_sha,
+            out_sha=out_sha,
+            shim_measured=shim_measured,
+            probe_written=probe_written,
+            started=started,
+            ended=ended,
+        ),
     )
     log(f"done verdict={result['verdict']}")
     return 0
