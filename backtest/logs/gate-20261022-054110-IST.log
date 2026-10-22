@@ -1,0 +1,14 @@
+# gate 20261022-054110 IST (Asia/Kolkata); venv /workspace/ae-venv; HEAD b531ebd + uncommitted run-script files; ruff 0.15.22
+## shim sha
+1ea827efb925ac251ae93fd082b7257143056521685c4e89b936058ac1c9c999  backtest/cursor_llm.py
+## backtest tests
+...................................                                      [100%]
+35 passed in 1.19s
+## full repo suite
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1254 passed, 1 warning in 11.21s
+## ruff check
+[1;32mAll checks passed![0m
+## ruff format --check
+5 files already formatted

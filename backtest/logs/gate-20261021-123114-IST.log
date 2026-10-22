@@ -1,0 +1,5 @@
+# gate 20261021-123114 IST (Asia/Kolkata); venv /workspace/ae-venv; pydantic 2.14.1; ruff 0.15.22
+## backtest tests
+FAILED tests/backtest/test_run_backtest.py::test_section_3_4_matching_keeps_hyphens
+1 failed, 21 passed in 1.83s
+## full repo suite

@@ -1,0 +1,17 @@
+# gate 20261021-122159-IST (Asia/Kolkata); venv /workspace/ae-venv; pydantic 2.14.1; ruff 0.15.22
+## shim active? (expect False)
+False
+## backtest tests (real pydantic)
+....................                                                     [100%]
+20 passed in 0.73s
+## full repo suite
+../ae-venv/lib/python3.13/site-packages/fastapi/testclient.py:1
+  /workspace/ae-venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1239 passed, 1 warning in 10.35s
+## ruff check
+[1;32mAll checks passed![0m
+## ruff format --check
+218 files already formatted
