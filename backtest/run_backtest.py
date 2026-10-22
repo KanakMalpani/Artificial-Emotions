@@ -33,6 +33,7 @@ import sys
 import time
 from collections import Counter, defaultdict
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -113,6 +114,13 @@ class Abort(RuntimeError):
 
 class InfraFail(RuntimeError):
     """PREREG §7.2 INFRA-FAIL: fix and redo without changing parameters."""
+
+
+@dataclass
+class BaselineLlmCallCounter:
+    """Increments on each baseline ``client.complete`` attempt (not probe calls)."""
+
+    n: int = 0
 
 
 # --- Logging (§7.2: every INFRA-FAIL / retry logged with a timestamp) ---
@@ -581,6 +589,7 @@ def call_with_retries(
     sleep: Callable[[float], None],
     label: str,
     attempts_out: list[int] | None = None,
+    baseline_call_counter: BaselineLlmCallCounter | None = None,
 ) -> str:
     """Call ``client.complete`` and retry infrastructure failures.
 
@@ -604,6 +613,8 @@ def call_with_retries(
         try:
             if attempts_out is not None:
                 attempts_out[:] = [n]
+            if baseline_call_counter is not None:
+                baseline_call_counter.n += 1
             return client.complete(prompt, role=role)
         except Exception as exc:
             last = exc
@@ -620,13 +631,16 @@ def llm_baseline_domain(
     pairs: list[Pair],
     log: RunLog | Callable[[str], None],
     sleep: Callable[[float], None],
+    baseline_call_counter: BaselineLlmCallCounter | None = None,
 ) -> dict[int, dict[str, Any]]:
     """Five independent repeats (LLM_SEEDS). The seed is recorded, not sent."""
     user = render_llm_user(domain_name, pairs)
     out: dict[int, dict[str, Any]] = {}
     for seed in LLM_SEEDS:
         label = f"llm domain={domain_name} seed={seed}"
-        raw = call_with_retries(client, user, LLM_SYSTEM, log, sleep, label)
+        raw = call_with_retries(
+            client, user, LLM_SYSTEM, log, sleep, label, baseline_call_counter=baseline_call_counter
+        )
         picks = parse_llm_picks(raw, pairs)
         out[seed] = {
             "pairs": picks,
@@ -1066,6 +1080,7 @@ def run(
     llm_client: Any = None,
     sleep_fn: Callable[[float], None] | None = None,
     llm_raw_dir: Path | None = None,
+    baseline_call_counter: BaselineLlmCallCounter | None = None,
 ) -> dict[str, Any]:
     for spec in DOMAINS.values():
         for s in spec["seeds"]:
@@ -1099,7 +1114,9 @@ def run(
             raise InfraFail(f"{did}: citation-trend output not deterministic")
         rnd = {s: random_top(unk, s) for s in RANDOM_SEEDS}
         if llm_client is not None:
-            llm_picked[did] = llm_baseline_domain(llm_client, spec["name"], unk, log, sleeper)
+            llm_picked[did] = llm_baseline_domain(
+                llm_client, spec["name"], unk, log, sleeper, baseline_call_counter
+            )
         pending_checks[did] = {"engine": eng, "citation_trend": ct, "pool": unk}
         pending_checks[did].update({f"random_{s}": v for s, v in rnd.items()})
         term_set.update(t for p in unk for t in p)
@@ -1245,7 +1262,7 @@ def main(argv: list[str] | None = None) -> int:
     probe_written: Path | None = None
     shim_measured: str | None = None
     probe_calls: list[dict[str, Any]] = []
-    baseline_llm_calls = 0
+    baseline_call_counter = BaselineLlmCallCounter()
     try:
         verify_hashes(args.snapshot_sha, args.snapshot_sha.parent, log)
         if not out_sha.is_file():
@@ -1292,9 +1309,8 @@ def main(argv: list[str] | None = None) -> int:
             llm_client=llm_client,
             sleep_fn=_sleep,
             llm_raw_dir=(args.out.parent / "llm_raw") if args.run_llm else None,
+            baseline_call_counter=baseline_call_counter,
         )
-        if llm_client is not None:
-            baseline_llm_calls = len(DOMAINS) * len(LLM_SEEDS)
     except Abort as exc:
         log(f"ABORT {exc}")
         write_run_manifest(
@@ -1310,7 +1326,7 @@ def main(argv: list[str] | None = None) -> int:
                 started=started,
                 ended=dt.datetime.now(dt.UTC),
                 probe_calls=probe_calls,
-                baseline_llm_calls=baseline_llm_calls,
+                baseline_llm_calls=baseline_call_counter.n,
             ),
         )
         return 3
@@ -1329,7 +1345,7 @@ def main(argv: list[str] | None = None) -> int:
                 started=started,
                 ended=dt.datetime.now(dt.UTC),
                 probe_calls=probe_calls,
-                baseline_llm_calls=baseline_llm_calls,
+                baseline_llm_calls=baseline_call_counter.n,
             ),
         )
         return 4
@@ -1349,7 +1365,7 @@ def main(argv: list[str] | None = None) -> int:
             started=started,
             ended=ended,
             probe_calls=probe_calls,
-            baseline_llm_calls=baseline_llm_calls,
+            baseline_llm_calls=baseline_call_counter.n,
         ),
     )
     log(f"done verdict={result['verdict']}")

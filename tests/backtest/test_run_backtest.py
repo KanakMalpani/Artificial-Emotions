@@ -1084,3 +1084,107 @@ def test_manifest_probe_network_abort_zero_baseline_llm_calls(tmp_path, monkeypa
         "attempts": 1,
         "outcome": "abort",
     }
+
+
+def test_baseline_llm_calls_matches_stub_attempts_minus_probes(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+    stub = _StubLLM(reply=_probe_then_baseline_reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 0, (tmp_path / "run.log").read_text(encoding="utf-8")
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["baseline_llm_calls"] == len(stub.calls) - 2
+
+
+def test_baseline_llm_calls_excludes_held_domain(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+    held_name = rb.DOMAINS["D3"]["name"]
+    real_baseline = rb.llm_baseline_domain
+
+    def skip_held(client, domain_name, pairs, log, sleep, baseline_call_counter=None):
+        if domain_name == held_name:
+            return {}
+        return real_baseline(
+            client, domain_name, pairs, log, sleep, baseline_call_counter=baseline_call_counter
+        )
+
+    monkeypatch.setattr(rb, "llm_baseline_domain", skip_held)
+    stub = _StubLLM(reply=_probe_then_baseline_reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 0, (tmp_path / "run.log").read_text(encoding="utf-8")
+    result = json.loads((tmp_path / "result.json").read_text(encoding="utf-8"))
+    assert result["domains"]["D3"]["comparisons"]["llm"]["status"] == "held / not run"
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    expected = (len(rb.DOMAINS) - 1) * len(rb.LLM_SEEDS)
+    assert manifest["baseline_llm_calls"] == expected
+    assert manifest["baseline_llm_calls"] == len(stub.calls) - 2
+
+
+def test_baseline_llm_calls_partial_on_mid_run_infra_fail(tmp_path, monkeypatch):
+    monkeypatch.setattr(rb, "N_PERM", 30)
+    monkeypatch.setattr(rb, "MIN_UNKNOWNS", 10)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _setup_toy_main_corpus(root, tmp_path)
+    _install_shim(root, match=True)
+
+    def failing_reply(n, prompt, role):
+        if role == rb.PROBE_ROLE:
+            return _probe_then_baseline_reply(n, prompt, role)
+        # First domain, seed 101 (call 3) succeeds; seed 102 (calls 4–7) fails every attempt.
+        if n >= 4:
+            raise InfraError("cursor-agent down")
+        return "not a pair\n"
+
+    stub = _StubLLM(reply=failing_reply)
+    monkeypatch.setattr(rb, "make_llm_client", lambda model=None, log_path=None: stub)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 4
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["status"] == "INFRA-FAIL"
+    assert manifest["baseline_llm_calls"] == 1 + 4
+    assert len(stub.calls) == 2 + 1 + 4
+
+
+def test_call_with_retries_counts_baseline_attempts_not_probes(tmp_path):
+    counter = rb.BaselineLlmCallCounter()
+    stub = _StubLLM(reply="ok")
+    rb.call_with_retries(
+        stub,
+        "p",
+        rb.LLM_SYSTEM,
+        lambda _m: None,
+        lambda _s: None,
+        "llm seed=101",
+        baseline_call_counter=counter,
+    )
+    assert counter.n == 1
+    assert len(stub.calls) == 1
+
+    counter.n = 0
+    probe_stub = _StubLLM(exc=InfraError("down"))
+    with pytest.raises(rb.InfraFail):
+        rb.call_with_retries(
+            probe_stub,
+            "p",
+            rb.PROBE_ROLE,
+            lambda _m: None,
+            lambda _s: None,
+            "probe-network",
+        )
+    assert counter.n == 0
+    assert len(probe_stub.calls) == 4
