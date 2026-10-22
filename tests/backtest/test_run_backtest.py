@@ -1323,3 +1323,151 @@ def test_manifest_baseline_retries_zero_with_real_probe_retry(tmp_path, monkeypa
     assert manifest["baseline_retries"] == 0
     assert manifest["probe_calls"][0]["attempts"] == 2
     assert len(stub.calls) == 3 + len(rb.DOMAINS) * len(rb.LLM_SEEDS)
+
+
+def _guard_sentinel(tmp_path: Path) -> Path:
+    sentinel = tmp_path / "sentinel.txt"
+    sentinel.write_text("keep\n", encoding="utf-8")
+    return sentinel
+
+
+def _assert_guard_created_nothing(tmp_path: Path, sentinel: Path) -> None:
+    assert sentinel.read_text(encoding="utf-8") == "keep\n"
+    assert {p.relative_to(tmp_path) for p in tmp_path.rglob("*")} == {Path("sentinel.txt")}
+
+
+def test_main_refuses_manifest_inside_out_base(tmp_path, capsys):
+    base = tmp_path / "X"
+    sentinel = _guard_sentinel(tmp_path)
+    code = rb.main(
+        [
+            "--confirm",
+            "--repo-root",
+            str(tmp_path / "repo"),
+            "--data-dir",
+            str(tmp_path / "data"),
+            "--out-base",
+            str(base),
+            "--manifest",
+            str(base / "m.json"),
+            "--log",
+            str(tmp_path / "safe" / "run.log"),
+            "--out",
+            str(tmp_path / "safe" / "result.json"),
+            "--probe-out",
+            str(tmp_path / "safe" / "probe.txt"),
+            "--snapshot-sha",
+            str(tmp_path / "safe" / "SNAPSHOT.sha256"),
+        ]
+    )
+    err = capsys.readouterr().err
+    assert code == 2
+    assert "refusing: output path --manifest" in err
+    assert "is inside out base" in err
+    assert str((base / "m.json").resolve()) in err
+    assert str(base.resolve()) in err
+    _assert_guard_created_nothing(tmp_path, sentinel)
+
+
+def test_main_refuses_log_inside_data_dir(tmp_path, capsys):
+    data = tmp_path / "X"
+    sentinel = _guard_sentinel(tmp_path)
+    log_path = data / "nested" / "run.log"
+    code = rb.main(
+        [
+            "--confirm",
+            "--repo-root",
+            str(tmp_path / "repo"),
+            "--data-dir",
+            str(data),
+            "--out-base",
+            str(tmp_path / "out-base"),
+            "--log",
+            str(log_path),
+            "--out",
+            str(tmp_path / "safe" / "result.json"),
+            "--probe-out",
+            str(tmp_path / "safe" / "probe.txt"),
+            "--manifest",
+            str(tmp_path / "safe" / "m.json"),
+            "--snapshot-sha",
+            str(tmp_path / "safe" / "SNAPSHOT.sha256"),
+        ]
+    )
+    err = capsys.readouterr().err
+    assert code == 2
+    assert "refusing: output path --log" in err
+    assert "is inside data dir" in err
+    assert str(log_path.resolve()) in err
+    assert str(data.resolve()) in err
+    _assert_guard_created_nothing(tmp_path, sentinel)
+
+
+def test_main_refuses_when_out_parent_equals_data_dir(tmp_path, capsys):
+    data = tmp_path / "X"
+    sentinel = _guard_sentinel(tmp_path)
+    code = rb.main(
+        [
+            "--confirm",
+            "--repo-root",
+            str(tmp_path / "repo"),
+            "--data-dir",
+            str(data),
+            "--out-base",
+            str(tmp_path / "out-base"),
+            "--out",
+            str(data / "result.json"),
+            "--log",
+            str(tmp_path / "safe" / "run.log"),
+            "--probe-out",
+            str(tmp_path / "safe" / "probe.txt"),
+            "--manifest",
+            str(tmp_path / "safe" / "m.json"),
+            "--snapshot-sha",
+            str(tmp_path / "safe" / "SNAPSHOT.sha256"),
+        ]
+    )
+    err = capsys.readouterr().err
+    assert code == 2
+    assert "refusing: output path" in err
+    assert "is inside data dir" in err
+    assert str(data.resolve()) in err
+    _assert_guard_created_nothing(tmp_path, sentinel)
+
+
+def test_main_outputs_outside_data_and_out_base_pass_guard(tmp_path, capsys):
+    data = tmp_path / "data"
+    out_base = tmp_path / "out-base"
+    code = rb.main(
+        [
+            "--confirm",
+            "--repo-root",
+            str(tmp_path / "repo"),
+            "--data-dir",
+            str(data),
+            "--out-base",
+            str(out_base),
+            "--log",
+            str(tmp_path / "run.log"),
+            "--out",
+            str(tmp_path / "result.json"),
+            "--probe-out",
+            str(tmp_path / "probe_raw.txt"),
+            "--manifest",
+            str(tmp_path / "run_manifest.json"),
+            "--snapshot-sha",
+            str(tmp_path / "safe" / "SNAPSHOT.sha256"),
+        ]
+    )
+    err = capsys.readouterr().err
+    assert "refusing: output path" not in err
+    assert "is inside data dir" not in err
+    assert "is inside out base" not in err
+    assert code == 3
+    assert (tmp_path / "run.log").is_file()
+    assert "ABORT" in (tmp_path / "run.log").read_text(encoding="utf-8")
+    assert not data.exists()
+    assert not out_base.exists()
+    assert not (tmp_path / "result.json").exists()
+    assert not (tmp_path / "probe_raw.txt").exists()
+    assert not (tmp_path / "run_manifest.json").exists()

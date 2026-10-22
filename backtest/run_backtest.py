@@ -1231,6 +1231,31 @@ def _constants() -> dict[str, Any]:
     }
 
 
+def _refuse_output_paths(args: argparse.Namespace) -> str | None:
+    """Return a stderr line when an output path is inside the corpus directories.
+
+    ``P`` is inside ``D`` when both are ``resolve()``d and ``D == P`` or ``D``
+    is in ``P.parents``. This only looks at paths; it does not create or write.
+    """
+    containers = (
+        ("data dir", args.data_dir.resolve()),
+        ("out base", args.out_base.resolve()),
+    )
+    outputs = (
+        ("--log", args.log),
+        ("--out", args.out),
+        ("--probe-out", args.probe_out),
+        ("--manifest", args.manifest),
+        ("llm_raw", args.out.parent / "llm_raw"),
+    )
+    for flag, path in outputs:
+        resolved = path.resolve()
+        for label, root in containers:
+            if resolved == root or root in resolved.parents:
+                return f"refusing: output path {flag} {resolved} is inside {label} {root}"
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--data-dir", type=Path, default=Path("/workspace/oa/pull/out"))
@@ -1255,6 +1280,10 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     if not args.confirm:
         print("refusing to run without --confirm (PREREG §7.4: SNAPSHOT first)", file=sys.stderr)
+        return 2
+    refusal = _refuse_output_paths(args)
+    if refusal is not None:
+        print(refusal, file=sys.stderr)
         return 2
     repo_root = (args.repo_root or Path(__file__).resolve().parents[1]).resolve()
     freeze_file = repo_root / "backtest" / "FREEZE.sha256"
