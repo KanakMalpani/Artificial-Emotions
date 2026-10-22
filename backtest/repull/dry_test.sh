@@ -31,6 +31,16 @@ mkdir -p "$D/scratch"; : > "$D/out.sha256"
 while IFS=$'\t' read -r u s r; do id=$(echo "$u" | sed 's#.*/works/##; s#/#_#; s#updated_date=##')
   "$PYX" "$REAL_F" "$D/s3/${u#s3://openalex/}" "$D/scratch/$id.jsonl.gz" "$D/scratch/$id.json" >/dev/null
   echo "$(sha "$D/scratch/$id.jsonl.gz")  $id.jsonl.gz" >> "$D/out.sha256"; done < "$D/parts.tsv"
+# attempt-1-style baselines for the fakes: raw sha (raw.sha256), counts (pull.log ok lines), hist sha
+: > "$D/bl_raw.sha256"; : > "$D/bl_pull.log"; : > "$D/bl_hist.sha256"
+while IFS=$'\t' read -r u s r; do id=$(echo "$u" | sed 's#.*/works/##; s#/#_#; s#updated_date=##'); f="$D/s3/${u#s3://openalex/}"
+  echo "$(sha "$f")  works/$id" >> "$D/bl_raw.sha256"
+  k=$(zcat "$D/scratch/$id.jsonl.gz" | wc -l)
+  echo "2026-10-21 18:00:00 IST $id ok bytes=$s records=$r kept=$k sha=$(sha "$f")" >> "$D/bl_pull.log"
+  echo "$(sha "$D/scratch/$id.json")  $id.json" >> "$D/bl_hist.sha256"
+  echo "$(zcat "$D/scratch/$id.jsonl.gz" | sha256sum | cut -d' ' -f1)  $id.jsonl.gz" >> "$D/scratch.content.sha256"
+done < "$D/parts.tsv"
+export BL_RAW=$D/bl_raw.sha256 BL_PULLLOG=$D/bl_pull.log BL_AFTER= BL_HIST=$D/bl_hist.sha256
 git clone -q -b backtest/prereg /workspace/Artificial-Emotions "$D/repo"
 export BASE=$D/base REPO=$D/repo PARTS=$D/parts.tsv EXPECT_PARTS=3 BATCH_SIZE=2 COMMIT_EVERY=1 \
        PY=$PYX URL_PREFIX="file://$D/s3/" OUTSHA=$D/out.sha256 OUTSHA_SHA=$(sha "$D/out.sha256") CURL_RATE=1k
@@ -65,6 +75,16 @@ echo junk >> "$BASE/out/2019-06-02_part_0000.gz.jsonl.gz"; d0=$(dl); sleep 1.1; 
   && ls "$BASE"/.quarantine/*2019-06-02*/2019-06-02_part_0000.gz.jsonl.gz >/dev/null && [ "$(head -c $len0 "$BASE/progress/progress.tsv" | sha256sum | cut -d' ' -f1)" = "$h0" ] \
   && [ "$(wc -l < "$BASE/progress/progress.tsv")" = 4 ] && same_content && [ $e = 20 ] && [ "$(cut -f1 "$BASE/final/DEVIATION-4.todo")" = 2019-06-02_part_0000.gz.jsonl.gz ] \
   && ok "T3 corrupted done part: REVERIFY-FAIL, quarantined, re-pulled once, appended (prefix intact), content identical; new gz mtime -> exit 20 listing only that part" || bad "T3 e=$e"
+# T9 content sha: manifest content_sha256 (col 7) == scratch decompressed sha for every part, while file shas differ from scratch
+c_ok=1; f_diff=0
+while read -r cs fn; do id=${fn%.jsonl.gz}; m=$(awk -F'\t' -v i="$id" '$1==i' "$BASE/progress/progress.tsv" | tail -1)
+  [ "$(echo "$m" | cut -f7)" = "$cs" ] || c_ok=0; [ "$(echo "$m" | cut -f6)" != "$(grep " $fn\$" "$D/out.sha256" | cut -d' ' -f1)" ] && f_diff=$((f_diff+1))
+done < "$D/scratch.content.sha256"
+[ $c_ok = 1 ] && [ $f_diff = 3 ] && grep -q "COVERAGE raw=3/3 counts=3/3 hist=3/3" "$BASE/logs/repull.log" && grep -q "baselines OK" "$D/t1b.out" \
+  && ok "T9 content sha matches scratch for 3/3 while file sha differs 3/3 (gzip mtime); baseline coverage 3/3; baselines OK" || bad "T9 c_ok=$c_ok f_diff=$f_diff"
+# T10 baseline mismatch -> exit 21 STOP
+sed '1s/^./X/' "$BL_HIST" > "$D/bl_hist.bad"; BL_HIST=$D/bl_hist.bad "$R" --compare-only > "$D/t10.out" 2>&1; e=$?
+[ $e = 21 ] && grep -q "STOP for QA" "$D/t10.out" && ok "T10 hist baseline mismatch -> exit 21 STOP for QA" || bad "T10 e=$e"
 # T5 guards (before T4 so the manifest is still valid)
 OUTSHA_SHA=0000 "$R" > "$D/t5a.out" 2>&1; e=$?; [ $e = 4 ] && ok "T5a out.sha256 guard" || bad "T5a e=$e"
 FILTER_SHA=0000 "$R" > "$D/t5b.out" 2>&1; e=$?; [ $e = 4 ] && ok "T5b filter guard" || bad "T5b e=$e"

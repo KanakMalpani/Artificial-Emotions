@@ -48,6 +48,9 @@ check_prefix(){
 }
 record_prefix(){ echo "$(stat -c %s "$PROG") $(sha "$PROG")" > "$P/.prefix.tmp" && mv "$P/.prefix.tmp" "$P/.prefix"; }
 
+# part id from s3 url (same rule as pull.sh v7)
+idof(){ echo "$1" | sed 's#.*/works/##; s#/#_#; s#updated_date=##'; }
+
 # ---- compare -----------------------------------------------------------------
 compare(){
   check_outsha compare-start
@@ -60,9 +63,120 @@ compare(){
   mv "$BASE/final/compare.tsv.tmp" "$BASE/final/compare.tsv"
   check_outsha compare-end
   [ "$n" = "$EXPECT_PARTS" ] || { log "COMPARE n=$n != $EXPECT_PARTS"; bad=$((bad+1)); }
+
+  : "${BL_RAW:=$REPO/backtest/snapshot/ae-pull/raw.sha256}"
+  : "${BL_PULLLOG:=$REPO/backtest/snapshot/ae-pull/pull.log}"
+  : "${BL_AFTER:=RESTART after box reboot}"
+  : "${BL_HIST:=$REPO/backtest/repull/baselines/attempt1-hist.sha256}"
+
+  local bl_pull="$BASE/final/.pull-baseline.tsv"
+  pull_log_to_baseline(){
+    awk -v after="$1" -v mode="$2" '
+      BEGIN { past=0 }
+      mode=="after" && index($0, after) { past=1; next }
+      $0 !~ / ok bytes=/ { next }
+      mode=="all" || past {
+        id=$4; bytes=""; records=""; kept=""
+        for (i=5; i<=NF; i++) {
+          if ($i ~ /^bytes=/) bytes=substr($i,7)
+          if ($i ~ /^records=/) records=substr($i,9)
+          if ($i ~ /^kept=/) kept=substr($i,6)
+        }
+        if (id != "" && bytes != "") print id "\t" bytes "\t" records "\t" kept
+      }
+    ' "$BL_PULLLOG"
+  }
+  if [ -n "$BL_AFTER" ] && grep -qF "$BL_AFTER" "$BL_PULLLOG"; then
+    pull_log_to_baseline "$BL_AFTER" after
+  else
+    pull_log_to_baseline "" all
+  fi | awk -F'\t' '{ a[$1]=$0 } END { for (i in a) print a[i] }' > "$bl_pull"
+  if [ ! -s "$bl_pull" ]; then
+    pull_log_to_baseline "" all | awk -F'\t' '{ a[$1]=$0 } END { for (i in a) print a[i] }' > "$bl_pull"
+  fi
+
+  declare -A raw_bl hist_bl pull_bl
+  while read -r hsha path; do
+    [ -z "$hsha" ] && continue
+    case "$path" in works/*) raw_bl["${path#works/}"]=$hsha ;; esac
+  done < "$BL_RAW"
+  while read -r hsha path; do
+    [ -z "$hsha" ] && continue
+    case "$path" in *.json) hist_bl["${path%.json}"]=$hsha ;; esac
+  done < "$BL_HIST"
+  while IFS=$'\t' read -r pid pbytes precords pkept; do
+    [ -n "$pid" ] && pull_bl["$pid"]="$pbytes:$precords:$pkept"
+  done < "$bl_pull"
+
+  local np=0 miss_prog=0 raw_cov=0 cnt_cov=0 hist_cov=0 raw_mm=0 cnt_mm=0 hist_mm=0 integ_mm=0
+  local id url size recs line _id _raw _bytes _recs _kept _osha _csha _hsha _batch _ts
+  local raw_ok counts_ok hist_ok integrity_ok gfile gcont ghist exp pull_exp rest exp2 exp3
+  : > "$BASE/final/baseline.tsv.tmp"
+  : > "$BASE/final/new-out.sha256.tmp"
+  : > "$BASE/final/new-content.sha256.tmp"
+  : > "$BASE/final/DEVIATION-4.baseline.tmp"
+  while IFS=$'\t' read -r url size recs; do
+    id=$(idof "$url"); np=$((np+1))
+    raw_ok=-; counts_ok=-; hist_ok=-; integrity_ok=FAIL
+    line=$(awk -F'\t' -v i="$id" '$1==i' "$PROG" | tail -1)
+    if [ -z "$line" ]; then
+      miss_prog=$((miss_prog+1))
+      printf '%s\tmissing-progress\n' "$id" >> "$BASE/final/DEVIATION-4.baseline.tmp"
+      printf '%s\t%s\t%s\t%s\t%s\n' "$id" "$raw_ok" "$counts_ok" "$hist_ok" "$integrity_ok" >> "$BASE/final/baseline.tsv.tmp"
+      continue
+    fi
+    IFS=$'\t' read -r _id _raw _bytes _recs _kept _osha _csha _hsha _batch _ts <<<"$line"
+    printf '%s  %s\n' "$_osha" "$id.jsonl.gz" >> "$BASE/final/new-out.sha256.tmp"
+    printf '%s  %s\n' "$_csha" "$id.jsonl.gz" >> "$BASE/final/new-content.sha256.tmp"
+    gfile=MISSING; gcont=MISSING; ghist=MISSING
+    [ -f "$BASE/out/$id.jsonl.gz" ] && gfile=$(sha "$BASE/out/$id.jsonl.gz")
+    [ -f "$BASE/out/$id.jsonl.gz" ] && gcont=$(zcat "$BASE/out/$id.jsonl.gz" | sha256sum | cut -d' ' -f1)
+    [ -f "$BASE/hist/$id.json" ] && ghist=$(sha "$BASE/hist/$id.json")
+    if [ "$gfile" = "$_osha" ] && [ "$gcont" = "$_csha" ] && [ "$ghist" = "$_hsha" ]; then
+      integrity_ok=OK
+    else
+      integ_mm=$((integ_mm+1))
+      printf '%s\tintegrity file=%s:%s content=%s:%s hist=%s:%s\n' "$id" "$gfile" "$_osha" "$gcont" "$_csha" "$ghist" "$_hsha" \
+        >> "$BASE/final/DEVIATION-4.baseline.tmp"
+    fi
+    if [ -n "${raw_bl[$id]+x}" ]; then
+      raw_cov=$((raw_cov+1))
+      if [ "$_raw" = "${raw_bl[$id]}" ]; then raw_ok=OK; else raw_ok=FAIL; raw_mm=$((raw_mm+1))
+        printf '%s\traw %s != %s\n' "$id" "$_raw" "${raw_bl[$id]}" >> "$BASE/final/DEVIATION-4.baseline.tmp"
+      fi
+    fi
+    if [ -n "${pull_bl[$id]+x}" ]; then
+      cnt_cov=$((cnt_cov+1))
+      pull_exp="${pull_bl[$id]}"
+      exp="${pull_exp%%:*}"; rest="${pull_exp#*:}"; exp2="${rest%%:*}"; exp3="${rest#*:}"
+      if [ "$_bytes" = "$exp" ] && [ "$_recs" = "$exp2" ] && [ "$_kept" = "$exp3" ]; then counts_ok=OK
+      else counts_ok=FAIL; cnt_mm=$((cnt_mm+1))
+        printf '%s\tcounts %s/%s/%s != %s\n' "$id" "$_bytes" "$_recs" "$_kept" "$pull_exp" >> "$BASE/final/DEVIATION-4.baseline.tmp"
+      fi
+    fi
+    if [ -n "${hist_bl[$id]+x}" ]; then
+      hist_cov=$((hist_cov+1))
+      if [ "$_hsha" = "${hist_bl[$id]}" ]; then hist_ok=OK; else hist_ok=FAIL; hist_mm=$((hist_mm+1))
+        printf '%s\thist %s != %s\n' "$id" "$_hsha" "${hist_bl[$id]}" >> "$BASE/final/DEVIATION-4.baseline.tmp"
+      fi
+    fi
+    printf '%s\t%s\t%s\t%s\t%s\n' "$id" "$raw_ok" "$counts_ok" "$hist_ok" "$integrity_ok" >> "$BASE/final/baseline.tsv.tmp"
+  done < <(cut -f1-3 "$PARTS")
+  mv "$BASE/final/baseline.tsv.tmp" "$BASE/final/baseline.tsv"
+  mv "$BASE/final/new-out.sha256.tmp" "$BASE/final/new-out.sha256"
+  mv "$BASE/final/new-content.sha256.tmp" "$BASE/final/new-content.sha256"
+  rm -f "$bl_pull"
+  log "COVERAGE raw=$raw_cov/$EXPECT_PARTS counts=$cnt_cov/$EXPECT_PARTS hist=$hist_cov/$EXPECT_PARTS"
+  log "BASELINE-MISMATCH raw=$raw_mm counts=$cnt_mm hist=$hist_mm integrity=$integ_mm missing_progress=$miss_prog"
+  if [ "$miss_prog" != 0 ] || [ "$raw_mm" != 0 ] || [ "$cnt_mm" != 0 ] || [ "$hist_mm" != 0 ] || [ "$integ_mm" != 0 ]; then
+    mv "$BASE/final/DEVIATION-4.baseline.tmp" "$BASE/final/DEVIATION-4.todo"
+    log "BASELINE-MISMATCH raw=$raw_mm counts=$cnt_mm hist=$hist_mm integrity=$integ_mm STOP for QA"
+    return 21
+  fi
+  rm -f "$BASE/final/DEVIATION-4.baseline.tmp"
   if [ "$bad" = 0 ]; then log "BYTE-EXACT $n/$EXPECT_PARTS: SNAPSHOT kept"; return 0; fi
   awk -F'\t' '$4!="OK"' "$BASE/final/compare.tsv" > "$BASE/final/DEVIATION-4.todo"
-  log "MISMATCH n=$bad of $n: new SNAPSHOT + DEVIATION-4 required (see final/DEVIATION-4.todo); out.sha256 untouched"
+  log "MISMATCH n=$bad of $n: file sha differs (gzip header mtime, DEVIATION-4); baselines OK; new SNAPSHOT candidate in final/"
   return 20
 }
 if [ "${1:-}" = "--compare-only" ]; then compare; exit $?; fi
@@ -75,14 +189,16 @@ check_filter start; check_outsha start; check_prefix
 "$PY" -c 'import orjson' || die "PY lacks orjson"
 log "START base=$BASE parts=$PARTS batch=$BATCH_SIZE pid=$$"
 
-idof(){ echo "$1" | sed 's#.*/works/##; s#/#_#; s#updated_date=##'; }
 
-# verified(): done only if LAST progress line for id matches size/records and out sha re-hash.
-verified(){ local id=$1 size=$2 recs=$3 line b r osha
+# verified(): LAST progress line for id must match bytes/records and re-hash out (file+content) and hist.
+verified(){ local id=$1 size=$2 recs=$3 line
+  local _id _raw _b _r _k _osha _csha _hsha _batch _ts
   line=$(awk -F'\t' -v i="$id" '$1==i' "$PROG" | tail -1); [ -n "$line" ] || return 1
-  IFS=$'\t' read -r _ _ b r _ osha _ _ <<<"$line"
-  [ "$b" = "$size" ] && [ "$r" = "$recs" ] && [ -f "$BASE/out/$id.jsonl.gz" ] && [ -f "$BASE/hist/$id.json" ] || return 1
-  [ "$(sha "$BASE/out/$id.jsonl.gz")" = "$osha" ] || return 1
+  IFS=$'\t' read -r _id _raw _b _r _k _osha _csha _hsha _batch _ts <<<"$line"
+  [ "$_b" = "$size" ] && [ "$_r" = "$recs" ] && [ -f "$BASE/out/$id.jsonl.gz" ] && [ -f "$BASE/hist/$id.json" ] || return 1
+  [ "$(sha "$BASE/out/$id.jsonl.gz")" = "$_osha" ] || return 1
+  [ "$(zcat "$BASE/out/$id.jsonl.gz" | sha256sum | cut -d' ' -f1)" = "$_csha" ] || return 1
+  [ "$(sha "$BASE/hist/$id.json")" = "$_hsha" ] || return 1
   [ "$("$PY" -c 'import sys,orjson;print(orjson.loads(open(sys.argv[1],"rb").read())["n"])' "$BASE/hist/$id.json")" = "$recs" ]
 }
 quarantine(){ local id=$1 q="$BASE/.quarantine/$(TZ=Asia/Kolkata date +%Y%m%d-%H%M%S)-$id"; mkdir -p "$q"
@@ -106,9 +222,11 @@ work(){ # url size recs batch ; writes pending line only on success
   rm -f raw/$id
   if [ "$n" != "$recs" ]; then log "INFRA-FAIL records got=$n manifest=$recs"; echo "$id records $n $recs" >> progress/pending/$id.infra; exit 0; fi
   o=$(sha256sum out/$id.jsonl.gz | cut -d' ' -f1)
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$id" "$s" "$got" "$n" "$k" "$o" "$b" "$(TZ=Asia/Kolkata date '+%F %T IST')" > progress/pending/$id.tsv.tmp
+  c=$(zcat out/$id.jsonl.gz | sha256sum | cut -d' ' -f1)
+  h=$(sha256sum hist/$id.json | cut -d' ' -f1)
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$id" "$s" "$got" "$n" "$k" "$o" "$c" "$h" "$b" "$(TZ=Asia/Kolkata date '+%F %T IST')" > progress/pending/$id.tsv.tmp
   mv progress/pending/$id.tsv.tmp progress/pending/$id.tsv
-  touch done/$id; log "ok bytes=$got records=$n kept=$k sha=$s out=$o"
+  touch done/$id; log "ok bytes=$got records=$n kept=$k sha=$s out=$o content=$c"
   # dry-test hook: simulate a box restart mid-batch by SIGKILLing the whole worker group
   if [ -n "$SIMULATE_CRASH_AFTER" ] && [ "$(ls progress/pending/*.tsv 2>/dev/null | wc -l)" -ge "$SIMULATE_CRASH_AFTER" ]; then
     touch .simcrash; kill -KILL -- -"$(ps -o pgid= $$ | tr -d ' ')"; fi

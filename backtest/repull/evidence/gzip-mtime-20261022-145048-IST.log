@@ -1,0 +1,28 @@
+# gzip-timestamp evidence, 2026-10-22 14:50:48 IST, dir /home/box/oa-repull/evidence-20261022-145048
+filter_part.py sha256 before: d2b867c834a9019c1daffa2ced920b9a53b0b9dafb8e147ff43a319f00ee93d5
+input: s3://openalex/data/jsonl/works/updated_date=2016-07-22/part_0000.gz bytes=7523 sha256=830914e9de4b5d84094c2feb334daf107aefb3c11f997dec1d00e94b0c551986
+attempt-1 raw.sha256 line: 830914e9de4b5d84094c2feb334daf107aefb3c11f997dec1d00e94b0c551986  works/2016-07-22_part_0000.gz
+run1: 7 2 0
+run2: 7 2 0
+a.jsonl.gz file_sha=58493ab7997d1142869ec794488c3d007ee49bccf1a43e9ace1df3d67fcca9d8 content_sha=e8817919c505b8080a8ae940668827ef18fc9cbc9e260c9924482fdd5c4dfd17 lines=2 hist_sha=68a484c44be9196d7f9e87e23e78272e573fe646b2b343129620ef2266c460bd
+b.jsonl.gz file_sha=5c54ef87092d978be0ee5cf32b39bb731a5d01f2456bca712434db7ad675b888 content_sha=e8817919c505b8080a8ae940668827ef18fc9cbc9e260c9924482fdd5c4dfd17 lines=2 hist_sha=68a484c44be9196d7f9e87e23e78272e573fe646b2b343129620ef2266c460bd
+attempt-1 out.sha256 line: c5fc1a5c468db0bc15687a5d1080c7b9baef8bbd4c0ee1f7ca66dac7554c1827  2016-07-22_part_0000.gz.jsonl.gz
+attempt-1 hist sha: 68a484c44be9196d7f9e87e23e78272e573fe646b2b343129620ef2266c460bd  2016-07-22_part_0000.gz.json
+## cmp -l a.jsonl.gz b.jsonl.gz (1-based offsets; gzip MTIME = bytes 5-8 1-based = offsets 4-7 0-based)
+  5 160 162
+ 11 141 142
+## header a:  1f 8b 08 08 70 d5 d9 6a 00 ff
+## header b:  1f 8b 08 08 72 d5 d9 6a 00 ff
+mtime a=1792660848 b=1792660850
+filter_part.py sha256 after: d2b867c834a9019c1daffa2ced920b9a53b0b9dafb8e147ff43a319f00ee93d5
+
+# part 2, 2026-10-22 14:50:59 IST: same output filename in r1/ and r2/ (as in the real pull), so the gzip FNAME field is equal
+(part 1 used names a/b, so the FNAME byte at offset 10 also differed; that was a test artefact)
+r1: 7 2 0
+r2: 7 2 0
+r1/2016-07-22_part_0000.gz.jsonl.gz file_sha=81cc7567b3f5c6771d1b3ee5a5bbe1b68aa2aefc029989873c2e2c0b0b13d43b content_sha=e8817919c505b8080a8ae940668827ef18fc9cbc9e260c9924482fdd5c4dfd17 lines=2 hist_sha=68a484c44be9196d7f9e87e23e78272e573fe646b2b343129620ef2266c460bd
+r2/2016-07-22_part_0000.gz.jsonl.gz file_sha=f74649967cee0b10322005f79fd76234dc4f39e971aa81c89dc8d19dab8f2b86 content_sha=e8817919c505b8080a8ae940668827ef18fc9cbc9e260c9924482fdd5c4dfd17 lines=2 hist_sha=68a484c44be9196d7f9e87e23e78272e573fe646b2b343129620ef2266c460bd
+## cmp -l r1 r2 (cmp offsets are 1-based; 5..8 == 0-based 4..7 == gzip MTIME)
+  5 173 176
+RESULT: only 0-based offsets 4-7 (gzip MTIME) differ
+filter_part.py sha256 after: d2b867c834a9019c1daffa2ced920b9a53b0b9dafb8e147ff43a319f00ee93d5
