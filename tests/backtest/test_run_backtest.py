@@ -284,7 +284,7 @@ def test_swanson_target_ignores_hyphens():
 
 
 def test_section_3_4_matching_keeps_hyphens():
-    docs = [_doc(1, 2018, ["Omega 3 fatty acid", "A"], seg="future")]
+    docs = [_doc(1, 2018, ["Omega 3 fatty acid", "A"], title="omega 3 study", seg="future")]
     client = rb.LocalCorpusClient(documents=docs)
     assert client.cooccurrence_count("omega-3", "A") == 0
     idx = rb.TermIndex(docs, ["omega-3", "omega 3", "A"])
