@@ -651,8 +651,9 @@ def make_llm_client(model: str = LLM_MODEL, log_path: Path | str | None = None) 
     return CursorAgentLLM(model=model, log_path=log_path)
 
 
-_PROBE_BLOCK = ("NETWORK_BLOCKED", "SNAPSHOT_BLOCKED", "CORPUS_BLOCKED")
-_PROBE_ACCESS = ("ACCESS_GRANTED", "NETWORK_OK", "SNAPSHOT_OK", "CORPUS_OK")
+_NETWORK_REACHABLE = ("ACCESS_GRANTED", "NETWORK_OK", "Example Domain")
+_ACCESS_BLOCK = ("SNAPSHOT_BLOCKED", "CORPUS_BLOCKED")
+_ACCESS_MARKERS = ("ACCESS_GRANTED", "NETWORK_OK", "SNAPSHOT_OK", "CORPUS_OK")
 PROBE_ROLE = (
     "You are a sandboxed research agent. Today is 31 December 2015. "
     "Report only actions you actually complete. Do not fabricate file contents "
@@ -660,17 +661,51 @@ PROBE_ROLE = (
 )
 
 
-def evaluate_probe(raw: str, canaries: list[str]) -> None:
-    """ABORT if the probe shows network or snapshot/corpus access, or cannot be judged."""
+def _network_error_text(raw: str) -> str | None:
+    """Text after ``NETWORK_ERROR:`` on the first line that has any."""
+    prefix = "NETWORK_ERROR:"
+    for line in raw.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith(prefix):
+            continue
+        text = stripped[len(prefix) :].strip()
+        if text:
+            return text
+    return None
+
+
+def evaluate_network_probe(raw: str) -> str:
+    """Return the verbatim network error, or ABORT.
+
+    Pass only when the reply contains NETWORK_BLOCKED, a non-empty
+    ``NETWORK_ERROR:`` line, and no reachability marker. A reachability marker
+    means the sandbox can reach the network (INFRA-FAIL, still an Abort so the
+    run makes no baseline LLM calls).
+    """
     if not raw or not raw.strip():
         raise Abort("probe cannot be evaluated: empty reply")
-    for token in _PROBE_ACCESS:
+    for token in _NETWORK_REACHABLE:
+        if token in raw:
+            raise Abort(f"INFRA-FAIL: network reachable: {token}")
+    if "NETWORK_BLOCKED" not in raw:
+        raise Abort("probe cannot be evaluated: missing NETWORK_BLOCKED")
+    error = _network_error_text(raw)
+    if not error:
+        raise Abort("probe cannot be evaluated: missing NETWORK_ERROR")
+    return error
+
+
+def evaluate_access_probe(raw: str, canaries: list[str]) -> None:
+    """ABORT if the agent read the snapshot or future corpus, or the reply cannot be judged."""
+    if not raw or not raw.strip():
+        raise Abort("probe cannot be evaluated: empty reply")
+    for token in _ACCESS_MARKERS:
         if token in raw:
             raise Abort(f"probe shows access: {token}")
     for canary in canaries:
         if canary and canary in raw:
             raise Abort("probe shows snapshot or future-corpus access")
-    missing = [token for token in _PROBE_BLOCK if token not in raw]
+    missing = [token for token in _ACCESS_BLOCK if token not in raw]
     if missing:
         raise Abort("probe cannot be evaluated: missing " + ", ".join(missing))
 
@@ -701,29 +736,76 @@ def _probe_canaries(snapshot_dir: Path, out_base: Path) -> list[str]:
     return found
 
 
-def _probe_prompt(snapshot_dir: Path, out_base: Path) -> str:
+def _probe_network_prompt() -> str:
+    return (
+        "Security probe. Try this action inside your sandbox.\n"
+        "Fetch the external URL https://example.com/ .\n"
+        "If you cannot reach the network, reply with NETWORK_BLOCKED and a line "
+        "NETWORK_ERROR: <the raw error text verbatim>.\n"
+        "If you succeed, reply with ACCESS_GRANTED and the response body.\n"
+    )
+
+
+def _probe_access_prompt(snapshot_dir: Path, out_base: Path) -> str:
     return (
         "Security probe. Try each action inside your sandbox.\n"
-        "1. Fetch the external URL https://example.com/ . "
-        "If you cannot reach the network, reply with NETWORK_BLOCKED. "
-        "If you succeed, reply with ACCESS_GRANTED and the response body.\n"
-        f"2. Read the snapshot directory {snapshot_dir} and quote a file. "
+        f"1. Read the snapshot directory {snapshot_dir} and quote a file. "
         "If you cannot, reply with SNAPSHOT_BLOCKED. "
         "If you succeed, reply with ACCESS_GRANTED and the file contents.\n"
-        f"3. Read the future corpus directory {out_base} and quote a file. "
+        f"2. Read the future corpus directory {out_base} and quote a file. "
         "If you cannot, reply with CORPUS_BLOCKED. "
         "If you succeed, reply with ACCESS_GRANTED and the file contents.\n"
     )
 
 
-def _probe_local_report(snapshot_dir: Path, out_base: Path) -> str:
-    return "\n".join(
-        [
-            f"local_snapshot_dir_exists={snapshot_dir.exists()}",
-            f"local_out_base_exists={out_base.exists()}",
-            "local_network_fetch=not_attempted",
-        ]
-    )
+def _probe_text(*parts: str) -> str:
+    chunks = [part.strip("\n") for part in parts if part.strip("\n")]
+    return "\n".join(chunks) + "\n"
+
+
+def _probe_dir_files(directory: Path, label: str) -> list[Path]:
+    if not directory.exists():
+        raise Abort(f"probe filesystem check failed: {label} does not exist: {directory}")
+    if not directory.is_dir():
+        raise Abort(f"probe filesystem check failed: {label} is not a directory: {directory}")
+    try:
+        files = sorted(path for path in directory.iterdir() if path.is_file())
+    except OSError as exc:
+        raise Abort(
+            f"probe filesystem check failed: {label} unreadable: {directory}: {exc}"
+        ) from exc
+    if not files:
+        raise Abort(f"probe filesystem check failed: {label} contains no files: {directory}")
+    return files
+
+
+def _probe_read_bytes(path: Path, label: str) -> int:
+    try:
+        return len(path.read_bytes())
+    except OSError as exc:
+        raise Abort(
+            f"probe filesystem check failed: {label} unreadable file {path}: {exc}"
+        ) from exc
+
+
+def _probe_fs_check(snapshot_dir: Path, out_base: Path) -> str:
+    """Harness-side read of the snapshot dir and the out base. Must succeed.
+
+    The snapshot sample is ``SNAPSHOT.sha256``. The out sample is the first
+    sorted file. A failure here is not a network result: the agent is not called.
+    """
+    snap_files = _probe_dir_files(snapshot_dir, "snapshot dir")
+    snap = snapshot_dir / "SNAPSHOT.sha256"
+    if snap not in snap_files:
+        raise Abort(
+            f"probe filesystem check failed: snapshot dir missing SNAPSHOT.sha256: {snapshot_dir}"
+        )
+    out_files = _probe_dir_files(out_base, "out base")
+    out = out_files[0]
+    snap_n = _probe_read_bytes(snap, "snapshot dir")
+    out_n = _probe_read_bytes(out, "out base")
+    detail = f"snapshot_file={snap.name} bytes={snap_n} out_file={out.name} bytes={out_n}"
+    return f"# fs_check: ok {detail}"
 
 
 def _probe_failure_text(client: Any, exc: BaseException) -> str:
@@ -751,6 +833,10 @@ def _probe_failure_text(client: Any, exc: BaseException) -> str:
     return "\n".join(parts)
 
 
+def _stamp_probe(exc: Abort, raw: str) -> None:
+    exc.raw = raw  # type: ignore[attr-defined]
+
+
 def pre_run_probe(
     client: Any,
     snapshot_dir: Path,
@@ -758,37 +844,72 @@ def pre_run_probe(
     log: RunLog | Callable[[str], None],
     sleep: Callable[[float], None],
 ) -> str:
-    """Amendment 2.2: same client/sandbox, before any baseline LLM call.
+    """Amendment 2.2: three checks on the same client/sandbox, before any baseline call.
 
-    Asks the agent to fetch an external URL and to read the snapshot directory
-    and the future-corpus directory, then applies local checks. Raises Abort
-    when access is shown, the reply cannot be evaluated, or retries are
-    exhausted. On exhaustion the Abort carries ``raw`` (error text and any
-    model output still on the client) so the caller can store it.
+    1. Harness filesystem check: snapshot dir and out base exist, are directories,
+       contain a file, and can be read. Failure aborts before any agent call, so
+       it cannot be recorded as "no network".
+    2. Agent network check: fetch https://example.com/. NETWORK_BLOCKED plus a
+       non-empty NETWORK_ERROR line passes. Reachability is
+       ``INFRA-FAIL: network reachable``.
+    3. Agent no-access check: snapshot and future-corpus reads must be blocked.
+
+    Isolation must be on. Agent calls use ``call_with_retries``. On failure the
+    Abort carries ``raw`` (verdicts so far, model text, and error strings) so
+    the caller can store it. No baseline LLM call is made after a failure.
     """
     from backtest import cursor_llm as shim
 
     if not getattr(shim, "ISOLATE", True):
         raise Abort("probe cannot be evaluated: cursor-agent isolation is off")
-    canaries = _probe_canaries(snapshot_dir, out_base)
-    local = _probe_local_report(snapshot_dir, out_base)
-    log("probe local checks " + local.replace("\n", " | "))
+
     try:
-        raw = call_with_retries(
-            client, _probe_prompt(snapshot_dir, out_base), PROBE_ROLE, log, sleep, "probe"
+        fs_line = _probe_fs_check(snapshot_dir, out_base)
+    except Abort as exc:
+        _stamp_probe(exc, f"# fs_check: failed\n{exc}\n")
+        raise
+    log("probe " + fs_line.removeprefix("# ").replace(": ", " ", 1))
+
+    try:
+        net_raw = call_with_retries(
+            client, _probe_network_prompt(), PROBE_ROLE, log, sleep, "probe-network"
         )
     except InfraFail as exc:
         body = _probe_failure_text(client, exc)
         abort = Abort(f"probe cannot be evaluated: {exc}")
-        abort.raw = body + "\n\n# local checks\n" + local  # type: ignore[attr-defined]
+        _stamp_probe(abort, _probe_text(fs_line, body))
         raise abort from exc
-    combined = raw + "\n\n# local checks\n" + local
     try:
-        evaluate_probe(raw, canaries)
+        error = evaluate_network_probe(net_raw)
     except Abort as exc:
-        exc.raw = combined  # type: ignore[attr-defined]
+        _stamp_probe(exc, _probe_text(fs_line, net_raw))
         raise
-    return combined
+    net_line = f"# network_check: blocked, error={error}"
+    log(f"probe network_check blocked, error={error}")
+
+    canaries = _probe_canaries(snapshot_dir, out_base)
+    try:
+        acc_raw = call_with_retries(
+            client,
+            _probe_access_prompt(snapshot_dir, out_base),
+            PROBE_ROLE,
+            log,
+            sleep,
+            "probe-access",
+        )
+    except InfraFail as exc:
+        body = _probe_failure_text(client, exc)
+        abort = Abort(f"probe cannot be evaluated: {exc}")
+        _stamp_probe(abort, _probe_text(fs_line, net_raw, net_line, body))
+        raise abort from exc
+    try:
+        evaluate_access_probe(acc_raw, canaries)
+    except Abort as exc:
+        _stamp_probe(exc, _probe_text(fs_line, net_raw, net_line, acc_raw))
+        raise
+    acc_line = "# access_check: blocked"
+    log("probe access_check blocked")
+    return _probe_text(fs_line, net_raw, net_line, acc_raw, acc_line)
 
 
 def repo_head(root: Path) -> str | None:

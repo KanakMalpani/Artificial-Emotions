@@ -284,7 +284,7 @@ def test_swanson_target_ignores_hyphens():
 
 
 def test_section_3_4_matching_keeps_hyphens():
-    docs = [_doc(1, 2018, ["Omega 3 fatty acid", "A"], title="omega 3 study", seg="future")]
+    docs = [_doc(1, 2018, ["Omega 3 fatty acid", "A"], seg="future")]
     client = rb.LocalCorpusClient(documents=docs)
     assert client.cooccurrence_count("omega-3", "A") == 0
     idx = rb.TermIndex(docs, ["omega-3", "omega 3", "A"])
@@ -566,11 +566,12 @@ def test_probe_failure_writes_raw_file(tmp_path, monkeypatch, reply, exc, needle
     assert raw_path.is_file()
     body = raw_path.read_text(encoding="utf-8")
     assert needle in body
-    assert "local_network_fetch=not_attempted" in body
-    log = (tmp_path / "run.log").read_text(encoding="utf-8")
-    assert "probe stored" in log
-    assert needle in log
-    assert "ABORT" in log
+    assert "# fs_check: ok" in body
+    log_text = (tmp_path / "run.log").read_text(encoding="utf-8")
+    assert "probe stored" in log_text
+    assert "probe fs_check ok" in log_text
+    assert needle in log_text
+    assert "ABORT" in log_text
     assert not (tmp_path / "result.json").exists()
 
 
@@ -778,15 +779,180 @@ def test_toy_run_through_main_with_stub_llm_and_probe(tmp_path, monkeypatch):
 
 
 def test_evaluate_probe_rejects_access_and_unevaluable():
-    ok = "NETWORK_BLOCKED\nSNAPSHOT_BLOCKED\nCORPUS_BLOCKED\n"
-    rb.evaluate_probe(ok, ["CANARY-TEXT-12345678901234567890"])
+    error = rb.evaluate_network_probe(
+        "NETWORK_BLOCKED\nNETWORK_ERROR: sandbox refused the connect\n"
+    )
+    assert error == "sandbox refused the connect"
+    for reply in ("ACCESS_GRANTED\n", "NETWORK_OK\n", "Example Domain\n"):
+        with pytest.raises(rb.Abort, match="^INFRA-FAIL: network reachable"):
+            rb.evaluate_network_probe(reply)
+    with pytest.raises(rb.Abort, match="^INFRA-FAIL: network reachable"):
+        rb.evaluate_network_probe("NETWORK_BLOCKED\nNETWORK_ERROR: timeout\nExample Domain\n")
+    with pytest.raises(rb.Abort, match="NETWORK_ERROR"):
+        rb.evaluate_network_probe("NETWORK_BLOCKED\n")
+    with pytest.raises(rb.Abort, match="NETWORK_ERROR"):
+        rb.evaluate_network_probe("NETWORK_BLOCKED\nNETWORK_ERROR:\n")
+    with pytest.raises(rb.Abort, match="NETWORK_ERROR"):
+        rb.evaluate_network_probe("NETWORK_BLOCKED\nNETWORK_ERROR:   \n")
+    with pytest.raises(rb.Abort, match="evaluated"):
+        rb.evaluate_network_probe("")
+
+    ok = "SNAPSHOT_BLOCKED\nCORPUS_BLOCKED\n"
+    rb.evaluate_access_probe(ok, ["CANARY-TEXT-12345678901234567890"])
     with pytest.raises(rb.Abort, match="access"):
-        rb.evaluate_probe(ok + "ACCESS_GRANTED\n", [])
+        rb.evaluate_access_probe(ok + "ACCESS_GRANTED\n", [])
     with pytest.raises(rb.Abort, match="access"):
-        rb.evaluate_probe(
-            ok + "CANARY-TEXT-12345678901234567890", ["CANARY-TEXT-12345678901234567890"]
+        rb.evaluate_access_probe(
+            ok + "CANARY-TEXT-12345678901234567890",
+            ["CANARY-TEXT-12345678901234567890"],
         )
     with pytest.raises(rb.Abort, match="evaluated"):
-        rb.evaluate_probe("I tried nothing", [])
+        rb.evaluate_access_probe("I tried nothing", [])
     with pytest.raises(rb.Abort, match="evaluated"):
-        rb.evaluate_probe("", [])
+        rb.evaluate_access_probe("", [])
+
+
+_NETWORK_ERROR_LINE = "NETWORK_ERROR: [Errno 101] Network is unreachable"
+_NETWORK_BLOCKED_REPLY = f"NETWORK_BLOCKED\n{_NETWORK_ERROR_LINE}\n"
+_ACCESS_BLOCKED_REPLY = "SNAPSHOT_BLOCKED\nCORPUS_BLOCKED\n"
+
+
+def _probe_tree(tmp_path: Path) -> tuple[Path, Path]:
+    snap = tmp_path / "snapshot"
+    out = tmp_path / "out"
+    snap.mkdir()
+    out.mkdir()
+    (snap / "notes.txt").write_text("not the sample\n", encoding="utf-8")
+    (snap / "SNAPSHOT.sha256").write_text("abc\n", encoding="utf-8")
+    (out / "b.txt").write_text("later\n", encoding="utf-8")
+    (out / "a.txt").write_text("corpus\n", encoding="utf-8")
+    return snap, out
+
+
+def _split_probe_reply(network: str, access: str):
+    def reply(n, prompt, role):
+        assert role == rb.PROBE_ROLE
+        if n == 1:
+            return network
+        return access
+
+    return reply
+
+
+@pytest.mark.parametrize(
+    "reply",
+    [
+        "NETWORK_OK\n",
+        "ACCESS_GRANTED\nExample body\n",
+        f"{_NETWORK_BLOCKED_REPLY}Example Domain\n",
+    ],
+)
+def test_probe_network_reachable_aborts_before_baseline(tmp_path, monkeypatch, reply):
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _hash_fixtures(root, tmp_path / "out")
+    _install_shim(root, match=True)
+    stub = _StubLLM(reply=reply)
+
+    def factory(model=None, log_path=None):
+        return stub
+
+    monkeypatch.setattr(rb, "make_llm_client", factory)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    text = (tmp_path / "run.log").read_text(encoding="utf-8")
+    assert code == 3
+    assert "ABORT" in text
+    assert "INFRA-FAIL: network reachable" in text
+    assert len(stub.calls) == 1
+    assert stub.calls[0]["role"] == rb.PROBE_ROLE
+    assert "https://example.com/" in stub.calls[0]["prompt"]
+    assert not (tmp_path / "result.json").exists()
+
+
+def test_probe_network_blocked_without_error_cannot_be_evaluated(tmp_path):
+    snap, out = _probe_tree(tmp_path)
+    stub = _StubLLM(reply="NETWORK_BLOCKED\nSNAPSHOT_BLOCKED\nCORPUS_BLOCKED\n")
+    with pytest.raises(rb.Abort, match="NETWORK_ERROR"):
+        rb.pre_run_probe(stub, snap, out, lambda _msg: None, lambda _s: None)
+    assert len(stub.calls) == 1
+
+
+def test_probe_stores_raw_network_error(tmp_path, monkeypatch):
+    root = tmp_path / "repo"
+    _freeze_repo(root)
+    _hash_fixtures(root, tmp_path / "out")
+    _install_shim(root, match=True)
+    stub = _StubLLM(reply=_split_probe_reply(_NETWORK_BLOCKED_REPLY, "ACCESS_GRANTED\n"))
+
+    def factory(model=None, log_path=None):
+        return stub
+
+    monkeypatch.setattr(rb, "make_llm_client", factory)
+    monkeypatch.setattr(rb, "_sleep", lambda _seconds: None)
+    code = rb.main(_main_args(root, tmp_path, "--run-llm"))
+    assert code == 3
+    body = (tmp_path / "probe_raw.txt").read_text(encoding="utf-8")
+    assert _NETWORK_ERROR_LINE in body
+    assert "# network_check: blocked, error=[Errno 101] Network is unreachable" in body
+    assert len(stub.calls) == 2
+    assert all(call["role"] == rb.PROBE_ROLE for call in stub.calls)
+    assert not (tmp_path / "result.json").exists()
+
+
+@pytest.mark.parametrize("kind", ["missing_snapshot", "empty_out", "unreadable"])
+def test_probe_fs_check_aborts_before_agent(tmp_path, monkeypatch, kind):
+    snap, out = _probe_tree(tmp_path)
+    if kind == "missing_snapshot":
+        snap = tmp_path / "missing-snapshot"
+    elif kind == "empty_out":
+        for child in out.iterdir():
+            child.unlink()
+    else:
+
+        def deny(self, *args, **kwargs):
+            raise OSError("permission denied")
+
+        monkeypatch.setattr(Path, "read_bytes", deny)
+    stub = _StubLLM(reply=_NETWORK_BLOCKED_REPLY + _ACCESS_BLOCKED_REPLY)
+    with pytest.raises(rb.Abort, match="probe filesystem check failed"):
+        rb.pre_run_probe(stub, snap, out, lambda _msg: None, lambda _s: None)
+    assert stub.calls == []
+
+
+def test_probe_fs_ok_agent_snapshot_access_aborts(tmp_path):
+    snap, out = _probe_tree(tmp_path)
+    stub = _StubLLM(reply=_split_probe_reply(_NETWORK_BLOCKED_REPLY, "ACCESS_GRANTED\nquoted\n"))
+    logs: list[str] = []
+    with pytest.raises(rb.Abort, match="probe shows access"):
+        rb.pre_run_probe(stub, snap, out, logs.append, lambda _s: None)
+    assert len(stub.calls) == 2
+    assert "https://example.com/" in stub.calls[0]["prompt"]
+    assert str(snap) in stub.calls[1]["prompt"]
+    assert str(out) in stub.calls[1]["prompt"]
+    assert any(line.startswith("probe fs_check ok") for line in logs)
+    assert any(line.startswith("probe network_check blocked, error=") for line in logs)
+
+
+def test_probe_all_checks_pass(tmp_path):
+    snap, out = _probe_tree(tmp_path)
+    stub = _StubLLM(reply=_split_probe_reply(_NETWORK_BLOCKED_REPLY, _ACCESS_BLOCKED_REPLY))
+    logs: list[str] = []
+    raw = rb.pre_run_probe(stub, snap, out, logs.append, lambda _s: None)
+    assert len(stub.calls) == 2
+    assert stub.calls[0]["role"] == rb.PROBE_ROLE
+    assert stub.calls[1]["role"] == rb.PROBE_ROLE
+    assert "https://example.com/" in stub.calls[0]["prompt"]
+    assert "https://example.com/" not in stub.calls[1]["prompt"]
+    assert "# fs_check: ok" in raw
+    assert "SNAPSHOT.sha256" in raw
+    assert "a.txt" in raw
+    assert _NETWORK_ERROR_LINE in raw
+    assert "# network_check: blocked, error=[Errno 101] Network is unreachable" in raw
+    assert "# access_check: blocked" in raw
+    assert any(line.startswith("probe fs_check ok") for line in logs)
+    assert any(
+        line.startswith("probe network_check blocked, error=[Errno 101] Network is unreachable")
+        for line in logs
+    )
+    assert "probe access_check blocked" in logs

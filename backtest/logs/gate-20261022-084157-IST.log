@@ -1,0 +1,20 @@
+# gate 20261022-084157 IST (Asia/Kolkata); HEAD ba46363 + working tree; venv /workspace/ae-venv; ruff ruff 0.15.22
+## backtest tests
+FAILED tests/backtest/test_run_backtest.py::test_section_3_4_matching_keeps_hyphens
+1 failed, 47 passed in 1.19s
+## full repo suite
+FAILED tests/backtest/test_run_backtest.py::test_section_3_4_matching_keeps_hyphens
+1 failed, 1266 passed, 1 warning in 9.65s
+## ruff check
+[1;32mAll checks passed![0m
+## ruff format --check
+Would reformat: [1mbacktest/cursor_llm.py[0m
+1 file would be reformatted, 218 files already formatted
+# E       AssertionError: assert (not set() and set())
+# E        +  where set() = co('omega-3', 'A')
+# E        +    where co = <backtest.run_backtest.TermIndex object at 0x7f7598cc0ad0>.co
+# E        +  and   set() = co('omega 3', 'A')
+# E        +    where co = <backtest.run_backtest.TermIndex object at 0x7f7598cc0ad0>.co
+## note: ruff format flags backtest/cursor_llm.py = pinned shim, byte-identical, not reformatted
+## shim sha
+1ea827efb925ac251ae93fd082b7257143056521685c4e89b936058ac1c9c999  backtest/cursor_llm.py
